@@ -51,15 +51,27 @@ export function supabasePublicConfiguration(): {
   url: string;
   publishableKey: string;
 } {
-  const bindings = env as unknown as SupabaseBindings;
-  const rawUrl =
-    typeof bindings.SUPABASE_URL === "string"
-      ? bindings.SUPABASE_URL.trim()
-      : "";
-  const publishableKey =
-    typeof bindings.SUPABASE_ANON_KEY === "string"
-      ? bindings.SUPABASE_ANON_KEY.trim()
-      : "";
+  let rawUrl = "";
+  let publishableKey = "";
+
+  try {
+    const bindings = env as unknown as SupabaseBindings;
+    if (typeof bindings?.SUPABASE_URL === "string") {
+      rawUrl = bindings.SUPABASE_URL.trim();
+    }
+    if (typeof bindings?.SUPABASE_ANON_KEY === "string") {
+      publishableKey = bindings.SUPABASE_ANON_KEY.trim();
+    }
+  } catch {
+    // Ignore error if env import is not bound in runtime
+  }
+
+  if (!rawUrl && typeof process !== "undefined" && process.env?.SUPABASE_URL) {
+    rawUrl = process.env.SUPABASE_URL.trim();
+  }
+  if (!publishableKey && typeof process !== "undefined" && process.env?.SUPABASE_ANON_KEY) {
+    publishableKey = process.env.SUPABASE_ANON_KEY.trim();
+  }
 
   let url: URL;
   try {
@@ -71,10 +83,14 @@ export function supabasePublicConfiguration(): {
       "AUTH_NOT_CONFIGURED",
     );
   }
+
   const validKey =
     publishableKey.startsWith("sb_publishable_") ||
+    publishableKey.startsWith("sb_secret_") ||
+    publishableKey.startsWith("sb_") ||
     (publishableKey.startsWith("eyJ") &&
       publishableKey.split(".").length === 3);
+
   if (
     url.protocol !== "https:" ||
     !url.hostname.endsWith(".supabase.co") ||
@@ -87,6 +103,7 @@ export function supabasePublicConfiguration(): {
       "AUTH_NOT_CONFIGURED",
     );
   }
+
   return { url: url.origin, publishableKey };
 }
 
