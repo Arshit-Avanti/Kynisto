@@ -21,12 +21,12 @@ export function syncSupabaseAccessCookie(session: Session | null): boolean {
   if (typeof document === "undefined") return false;
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
   if (!session?.access_token) {
-    document.cookie = `${SUPABASE_ACCESS_COOKIE}=; Path=/; Max-Age=0; SameSite=Strict${secure}`;
+    document.cookie = `${SUPABASE_ACCESS_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax${secure}`;
     return true;
   }
   const now = Math.floor(Date.now() / 1000);
   const maxAge = Math.max(1, (session.expires_at ?? now + 3600) - now);
-  document.cookie = `${SUPABASE_ACCESS_COOKIE}=${encodeURIComponent(session.access_token)}; Path=/; Max-Age=${maxAge}; SameSite=Strict${secure}`;
+  document.cookie = `${SUPABASE_ACCESS_COOKIE}=${encodeURIComponent(session.access_token)}; Path=/; Max-Age=${maxAge}; SameSite=Lax${secure}`;
   return document.cookie
     .split(";")
     .some((cookie) => cookie.trim().startsWith(`${SUPABASE_ACCESS_COOKIE}=`));

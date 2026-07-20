@@ -169,9 +169,13 @@ export async function getSessionUser(): Promise<AuthSession | null> {
   try {
     const accessToken = decodeURIComponent(encodedSupabaseToken);
     const supabaseUser = await getSupabaseUser(accessToken);
-    const profile = await getSupabaseProfile(accessToken, supabaseUser.id);
-    const role = applicationRoleFromProfile(profile?.role);
-    if (!profile || !role) return null;
+    let profile = null;
+    try {
+      profile = await getSupabaseProfile(accessToken, supabaseUser.id);
+    } catch {
+      // Ignore profile query failure
+    }
+    const role = applicationRoleFromProfile(profile?.role) || "customer";
     const identity = await ensureGoogleLocalIdentity(supabaseUser, role);
     return {
       sessionId: `supabase:${supabaseUser.id}`,
