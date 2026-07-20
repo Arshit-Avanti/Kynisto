@@ -18,6 +18,17 @@ function storageRemove(key: string): void {
   }
 }
 
+function extractHashToken(hash: string): string | null {
+  if (!hash || !hash.includes("access_token")) return null;
+  try {
+    const raw = hash.startsWith("#") ? hash.slice(1) : hash;
+    const params = new URLSearchParams(raw);
+    return params.get("access_token");
+  } catch {
+    return null;
+  }
+}
+
 function getFriendlyErrorMessage(error: unknown): string {
   let message = "";
   if (error instanceof Error) {
@@ -73,11 +84,12 @@ export function SupabaseAuthManager() {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const initialUrl = new URL(window.location.href);
+    const hashAccessToken = extractHashToken(initialUrl.hash);
     const hasOAuthResult =
+      Boolean(hashAccessToken) ||
       initialUrl.searchParams.has("code") ||
       initialUrl.searchParams.has("error") ||
       initialUrl.searchParams.has("error_description") ||
-      initialUrl.hash.includes("access_token") ||
       initialUrl.hash.includes("error");
 
     if (hasOAuthResult) {
@@ -89,6 +101,12 @@ export function SupabaseAuthManager() {
 
     async function initAuth() {
       try {
+        // Fast path: If URL hash directly contains access_token, process immediately!
+        if (hashAccessToken) {
+          await processAccessToken(hashAccessToken);
+          return;
+        }
+
         const supabase = await getSupabaseBrowserClient();
         if (!mounted) return;
 
@@ -106,15 +124,15 @@ export function SupabaseAuthManager() {
         if (sessionError) throw sessionError;
         if (!mounted) return;
 
-        if (session) {
+        if (session?.access_token) {
           syncSupabaseAccessCookie(session);
           if (hasOAuthResult) {
-            await handleGoogleLoginSuccess(session);
+            await processAccessToken(session.access_token);
             return;
           }
         }
 
-        // Listen for auth events (e.g. PKCE token exchange completing)
+        // Listen for auth events
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
           console.log("auth state change:", event);
           if (!mounted) return;
@@ -124,12 +142,12 @@ export function SupabaseAuthManager() {
             return;
           }
 
-          if (currentSession && (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED")) {
+          if (currentSession?.access_token && (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED")) {
             if (timeoutId) clearTimeout(timeoutId);
             syncSupabaseAccessCookie(currentSession);
 
             if (hasOAuthResult) {
-              await handleGoogleLoginSuccess(currentSession);
+              await processAccessToken(currentSession.access_token);
             }
           }
         });
@@ -143,7 +161,7 @@ export function SupabaseAuthManager() {
               setActive(false);
               setLoading(false);
             }
-          }, 3000);
+          }, 4000);
         }
       } catch (err) {
         if (mounted) {
@@ -156,17 +174,15 @@ export function SupabaseAuthManager() {
       }
     }
 
-    async function handleGoogleLoginSuccess(session: Session) {
+    async function processAccessToken(token: string) {
       if (completionStarted.current) return;
       completionStarted.current = true;
 
       try {
-        syncSupabaseAccessCookie(session);
-
-        // Call D1 session creation API to establish a server-side session cookie
+        // Create official D1 server session cookie
         const res = await apiFetch<{ redirectTo: string }>("/api/auth/google/session", {
           method: "POST",
-          json: { accessToken: session.access_token },
+          json: { accessToken: token },
         });
 
         storageRemove(PENDING_KEY);
