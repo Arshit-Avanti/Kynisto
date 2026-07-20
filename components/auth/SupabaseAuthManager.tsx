@@ -6,6 +6,7 @@ import {
   getSupabaseBrowserClient,
   syncSupabaseAccessCookie,
 } from "@/lib/supabase-browser";
+import { apiFetch } from "@/lib/client-api";
 
 const PENDING_KEY = "kynisto-google-auth-pending";
 
@@ -79,7 +80,6 @@ export function SupabaseAuthManager() {
       initialUrl.hash.includes("access_token") ||
       initialUrl.hash.includes("error");
 
-    // ONLY show the loading overlay if URL actually contains OAuth redirect parameters
     if (hasOAuthResult) {
       setActive(true);
       setLoading(true);
@@ -160,28 +160,14 @@ export function SupabaseAuthManager() {
       if (completionStarted.current) return;
       completionStarted.current = true;
 
-      console.log("session detected:", session.user.id);
-
       try {
-        const supabase = await getSupabaseBrowserClient();
+        syncSupabaseAccessCookie(session);
 
-        let destination = "/onboarding";
-
-        try {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", session.user.id)
-            .maybeSingle();
-
-          if (profile?.role === "customer") {
-            destination = "/account";
-          } else if (profile?.role === "shop_owner" || profile?.role === "store_owner") {
-            destination = "/owner";
-          }
-        } catch (pErr) {
-          console.warn("Profiles query bypassed:", pErr);
-        }
+        // Call D1 session creation API to establish a server-side session cookie
+        const res = await apiFetch<{ redirectTo: string }>("/api/auth/google/session", {
+          method: "POST",
+          json: { accessToken: session.access_token },
+        });
 
         storageRemove(PENDING_KEY);
 
@@ -195,7 +181,7 @@ export function SupabaseAuthManager() {
           window.history.replaceState({}, "", cleanUrl.toString());
         }
 
-        window.location.replace(destination);
+        window.location.replace(res.redirectTo || "/account");
       } catch (completionError) {
         console.error("Post-login routing failed:", completionError);
         completionStarted.current = false;
