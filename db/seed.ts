@@ -3,7 +3,7 @@ import { ensureDatabaseReady } from "@/db/bootstrap";
 import { hashPassword } from "@/lib/crypto";
 import { slugify } from "@/lib/validation";
 
-const SEED_VERSION = "v7-chat-healthcare-queue";
+const SEED_VERSION = "v8-admin-arshit1029-pass";
 const DEFAULT_LATITUDE = 28.7381;
 const DEFAULT_LONGITUDE = 77.2669;
 const DEMO_STORE_IDS = Array.from(
@@ -122,6 +122,7 @@ async function seedDatabase(): Promise<void> {
   if (marker?.value === SEED_VERSION || marker?.value?.endsWith(`-${SEED_VERSION}`)) return;
 
   const now = Math.floor(Date.now() / 1000);
+  const adminPassword = await hashPassword("Arshit1029");
   const existingAdmin = await db
     .prepare("SELECT id FROM users WHERE email = ? LIMIT 1")
     .bind("nxt.arshit@gmail.com")
@@ -130,7 +131,6 @@ async function seedDatabase(): Promise<void> {
   const authorityStatements: D1PreparedStatement[] = [];
 
   if (!existingAdmin) {
-    const adminPassword = await hashPassword("Arshit");
     authorityStatements.push(
       db.prepare(
         `INSERT INTO users
@@ -151,19 +151,23 @@ async function seedDatabase(): Promise<void> {
   } else {
     authorityStatements.push(
       db.prepare(
-        "UPDATE users SET role = 'admin', status = 'active', updated_at = ? WHERE id = ?",
-      ).bind(now, adminId),
+        "UPDATE users SET role = 'admin', status = 'active', password_hash = ?, password_salt = ?, password_iterations = ?, updated_at = ? WHERE id = ?",
+      ).bind(
+        adminPassword.hash,
+        adminPassword.salt,
+        adminPassword.iterations,
+        now,
+        adminId,
+      ),
     );
   }
 
-  // The bootstrap identity is immutable: later seeds never reset its password
-  // or duplicate the account, but they do repair its protected authority.
   authorityStatements.push(
     db.prepare(
       `INSERT INTO user_security
-       (user_id, must_change_password, is_super_admin, failed_login_count, updated_at)
-       VALUES (?, 1, 1, 0, ?)
-       ON CONFLICT(user_id) DO UPDATE SET is_super_admin = 1, updated_at = excluded.updated_at`,
+       (user_id, must_change_password, is_super_admin, failed_login_count, locked_until, updated_at)
+       VALUES (?, 0, 1, 0, NULL, ?)
+       ON CONFLICT(user_id) DO UPDATE SET must_change_password = 0, is_super_admin = 1, failed_login_count = 0, locked_until = NULL, updated_at = excluded.updated_at`,
     ).bind(adminId, now),
   );
 

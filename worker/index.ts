@@ -66,13 +66,16 @@ const worker = {
       }, allowedWidths);
     }
 
-    try {
-      const assetResponse = await env.ASSETS.fetch(request);
-      if (assetResponse.status !== 404) {
-        return assetResponse;
+    const method = request.method.toUpperCase();
+    if (method === "GET" || method === "HEAD") {
+      try {
+        const assetResponse = await env.ASSETS.fetch(request);
+        if (assetResponse.status !== 404) {
+          return assetResponse;
+        }
+      } catch {
+        // Ignore asset fetch error and fallback to SSR router
       }
-    } catch {
-      // Ignore asset fetch error and fallback to SSR router
     }
 
     try {

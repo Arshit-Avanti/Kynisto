@@ -132,7 +132,13 @@ export function SupabaseAuthManager() {
                 await handleGoogleLoginSuccess(currentSession);
               }
             } else if (shouldCompleteLogin && event === "INITIAL_SESSION") {
-              throw new Error("Supabase session not found");
+              if (hasOAuthResult) {
+                throw new Error("Supabase session not found");
+              } else {
+                storageRemove(PENDING_KEY);
+                setActive(false);
+                setLoading(false);
+              }
             }
           }
         });
@@ -141,7 +147,13 @@ export function SupabaseAuthManager() {
         
         // If we are supposed to complete login but no session was returned by getSession
         if (shouldCompleteLogin && !session) {
-          throw new Error("Supabase session not found");
+          if (hasOAuthResult) {
+            throw new Error("Supabase session not found");
+          } else {
+            storageRemove(PENDING_KEY);
+            setActive(false);
+            setLoading(false);
+          }
         }
         
       } catch (err) {
