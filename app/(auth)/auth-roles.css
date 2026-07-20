@@ -1,0 +1,57 @@
+.loginRoleChoice {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.loginRoleChoice legend {
+  margin-bottom: 9px;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.loginRoleChoice label {
+  min-height: 70px;
+  padding: 11px;
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  border: 1px solid #dbe4f3;
+  border-radius: 14px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.loginRoleChoice label:hover,
+.loginRoleChoice label.selected {
+  border-color: #2457ff;
+  background: #edf3ff;
+  box-shadow: 0 6px 18px rgba(36, 87, 255, .12);
+}
+
+.loginRoleChoice input {
+  position: absolute;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0;
+}
+
+.loginRoleChoice span { display: flex; flex-direction: column; }
+.loginRoleChoice b { font-size: 10px; }
+.loginRoleChoice small { margin-top: 4px; color: #777f78; font-size: 8px; line-height: 1.35; }
+
+@media (max-width: 480px) {
+  .loginRoleChoice { grid-template-columns: 1fr; }
+  .loginRoleChoice label { min-height: 56px; }
+}
+
+.securityNotice { padding: 14px; display: grid; gap: 4px; border: 1px solid #f0cbbd; border-radius: 13px; background: #fff4ee; color: #713927; }
+.securityNotice b { font-size: 11px; }
+.securityNotice span { font-size: 9px; line-height: 1.5; }
+.deniedCard { display: grid; gap: 12px; }
+.deniedCode { width: max-content; padding: 7px 11px; border-radius: 999px; background: #fbe5df; color: #9b321f; font-size: 11px; font-weight: 850; letter-spacing: .1em; }
+.authLinkButton { display: grid; place-items: center; text-decoration: none; }

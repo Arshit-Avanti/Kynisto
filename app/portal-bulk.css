@@ -1,0 +1,47 @@
+.bulkActionBar {
+  margin: 0 0 14px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  border: 1px solid color-mix(in srgb, var(--p-accent) 28%, var(--p-line));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--p-accent) 7%, var(--p-panel));
+}
+.bulkActionBar b { margin-right: auto; font-size: 9px; }
+.bulkActionBar button, .bulkActionBar select {
+  min-height: 32px;
+  padding: 0 9px;
+  border: 1px solid var(--p-line);
+  border-radius: 8px;
+  background: var(--p-solid);
+  color: var(--p-ink);
+  font-size: 8px;
+  cursor: pointer;
+}
+.bulkActionBar .portalButton { border-color: var(--p-ink); background: var(--p-ink); color: var(--p-bg); }
+.bulkActionBar .dangerButton { border-color: #b84b39; color: #a43c2c; }
+.bulkSelectAll { margin: 0 0 9px; display: flex; align-items: center; gap: 7px; color: var(--p-muted); font-size: 8px; }
+.rowCheckbox { flex: 0 0 auto; margin-top: 7px; accent-color: var(--p-accent); }
+.selectedRow { background: color-mix(in srgb, var(--p-accent) 6%, transparent); }
+.adminQueueConsole { margin-top: 15px; }
+.queueAdminActions { margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 7px; }
+.queueAdminActions button {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--p-line);
+  border-radius: 9px;
+  background: var(--p-solid);
+  color: var(--p-ink);
+  font-size: 8px;
+  cursor: pointer;
+}
+.queueAdminActions button:disabled { cursor: not-allowed; opacity: .45; }
+.adminQueueConsole .workspaceList article { padding: 10px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--p-line); }
+.adminQueueConsole .workspaceList p { margin: 3px 0 0; color: var(--p-muted); font-size: 8px; }
+
+@media (max-width: 700px) {
+  .bulkActionBar > * { flex: 1 1 auto; }
+  .bulkActionBar b { flex-basis: 100%; }
+}

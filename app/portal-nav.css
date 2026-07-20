@@ -1,0 +1,11 @@
+.portalSidebar nav {
+  min-height: 0;
+  display: grid;
+  gap: 3px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding-right: 3px;
+}
+
+.portalSidebarFooter { flex: 0 0 auto; }

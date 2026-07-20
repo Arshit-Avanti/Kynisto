@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Kynisto</title>
+  <rect width="64" height="64" rx="18" fill="#2457ff"/>
+  <path d="M20 15v34" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="8"/>
+  <path d="m25 32 18-17" fill="none" stroke="#30d8f2" stroke-linecap="round" stroke-width="8"/>
+  <path d="m26 33 19 17" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="8"/>
+</svg>

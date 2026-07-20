@@ -1,0 +1,126 @@
+.liveQueueBadge {
+  width: fit-content;
+  margin-top: 12px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #e7efff;
+  color: #146746;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.queueStrip span {
+  color: currentColor;
+  font-size: 7px;
+  line-height: 1.35;
+  opacity: .72;
+}
+.providerActions button,
+.dockActions button,
+.dockJoin button {
+  transition: transform .16s ease, background-color .16s ease, border-color .16s ease, opacity .16s ease;
+}
+.providerActions button:not(:disabled):active,
+.dockActions button:not(:disabled):active,
+.dockJoin button:not(:disabled):active {
+  transform: scale(.98);
+}
+.queueDock {
+  animation: queueDockEnter .24s cubic-bezier(.2,.8,.2,1);
+  contain: layout paint;
+  will-change: transform;
+}
+.queueDock.isBusy { box-shadow: 0 25px 70px rgba(0,0,0,.3), 0 0 0 2px rgba(89,217,243,.18); }
+.queueDock button:disabled { cursor: wait; opacity: .55; }
+.queueDockLoader {
+  min-width: 190px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  color: #c7d4ed;
+  font-size: 9px;
+}
+.queueDockLoader i {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,.25);
+  border-top-color: #59d9f3;
+  border-radius: 50%;
+  animation: queueSpin .7s linear infinite;
+}
+.dockJoin p { display: grid; gap: 3px; }
+.dockJoin p b { color: #fff; font-size: 9px; }
+.dockJoin p span { color: #9fb0d0; font-size: 8px; }
+@keyframes queueDockEnter {
+  from { opacity: 0; transform: translate(-50%, 18px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes queueSpin { to { transform: rotate(360deg); } }
+.dockActions { flex-wrap: wrap; justify-content: flex-end; }
+.dockActions button { cursor: pointer; }
+.queueArrivalReminder {
+  width: min(620px, calc(100% - 24px));
+  padding: 13px 16px;
+  display: grid;
+  gap: 3px;
+  position: fixed;
+  top: 90px;
+  left: 50%;
+  z-index: 80;
+  transform: translateX(-50%);
+  border: 1px solid #e7b44d;
+  border-radius: 14px;
+  background: #fff2c9;
+  color: #5b4209;
+  box-shadow: 0 18px 45px rgba(62, 42, 6, .2);
+}
+.queueArrivalReminder b { font-size: 12px; }
+.queueArrivalReminder span { font-size: 9px; line-height: 1.5; }
+@media (prefers-color-scheme: dark) {
+  .liveQueueBadge { background: #152c5e; color: #68d7aa; }
+  .queueArrivalReminder { border-color: #765f27; background: #342b14; color: #ffe8a4; }
+}
+@media (max-width: 520px) {
+  .healthNav { padding-inline: 14px; }
+  .healthNav nav { gap: 10px; }
+  .healthNav nav a { font-size: 9px; }
+  .healthHero { padding: 36px 14px 42px; }
+  .healthHero h1 { font-size: clamp(38px, 13vw, 50px); }
+  .healthHero > div > p { font-size: 14px; }
+  .healthSearch { padding: 7px; flex-direction: column; }
+  .healthSearch button { min-height: 44px; }
+  .healthTrust { gap: 12px; }
+  .careTypes { grid-template-columns: 1fr 1fr; gap: 7px; }
+  .careTypes button { min-width: 0; min-height: 78px; padding: 10px; }
+  .careTypes small { display: none; }
+  .resultsHeading { gap: 16px; }
+  .resultsHeading h2 { font-size: 29px; }
+  .providerGrid article { padding: 17px; }
+  .providerTop { grid-template-columns: 40px minmax(0, 1fr); }
+  .providerTop > b { grid-column: 2; }
+  .providerActions { grid-template-columns: 1fr; }
+  .healthResults { padding-top: 45px; padding-bottom: 150px; }
+  .queueDock {
+    width: 100%;
+    max-height: 76dvh;
+    bottom: 0;
+    padding: 20px 18px calc(16px + env(safe-area-inset-bottom));
+    grid-template-columns: 1fr 1fr;
+    border-radius: 20px 20px 0 0;
+  }
+  .patientToken, .patientPosition { min-width: 0; }
+  .dockActions { display: grid; grid-template-columns: 1fr 1fr; }
+  .dockActions button { min-height: 42px; }
+  .dockJoin { align-items: stretch; flex-direction: column; }
+  .dockJoin button { min-height: 44px; }
+  .queueArrivalReminder { top: 72px; }
+  .queueDockLoader { min-height: 70px; grid-column: 1 / -1; }
+  .queueStrip { gap: 10px; }
+  .queueStrip > div:first-child { min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .queueDock, .queueDockLoader i { animation: none; }
+  .providerActions button, .dockActions button, .dockJoin button { transition: none; }
+}

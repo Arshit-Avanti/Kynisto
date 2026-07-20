@@ -1,0 +1,251 @@
+:root {
+  --kyn-primary: #2457ff;
+  --kyn-primary-dark: #173bc4;
+  --kyn-navy: #0b1736;
+  --kyn-cyan: #20c7e8;
+  --kyn-success: #149d65;
+  --kyn-bg: #f4f7fc;
+  --kyn-panel: #ffffff;
+  --kyn-line: #dbe4f3;
+  --kyn-muted: #5d6a85;
+  --ink: var(--kyn-navy);
+  --muted: var(--kyn-muted);
+  --cream: var(--kyn-bg);
+  --paper: var(--kyn-panel);
+  --line: var(--kyn-line);
+  --accent: var(--kyn-primary);
+  --accent-dark: var(--kyn-primary-dark);
+  --green: var(--kyn-success);
+  --blue: var(--kyn-primary);
+  --yellow: var(--kyn-cyan);
+}
+
+body {
+  background: var(--kyn-bg);
+}
+
+.kynistoLogo {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--kyn-primary);
+}
+
+.kynistoMark {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  filter: drop-shadow(0 8px 16px rgba(36, 87, 255, .22));
+}
+
+.kynistoWordmark {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+  color: var(--kyn-navy);
+  line-height: 1;
+}
+
+.kynistoWordmark b {
+  font-size: 21px;
+  font-weight: 840;
+  letter-spacing: -.055em;
+}
+
+.kynistoWordmark small {
+  color: var(--kyn-muted);
+  font-size: 7px;
+  font-weight: 720;
+  letter-spacing: .045em;
+  white-space: nowrap;
+}
+
+.brand,
+.authBrand,
+.portalBrand,
+.healthBrand,
+.productBrand,
+.profileBrand {
+  color: inherit;
+}
+
+.brand .kynistoWordmark b,
+.productBrand .kynistoWordmark b,
+.profileBrand .kynistoWordmark b {
+  color: var(--kyn-navy);
+}
+
+.portal {
+  --p-bg: #f3f6fb;
+  --p-panel: rgba(255, 255, 255, .88);
+  --p-solid: #fff;
+  --p-ink: #0b1736;
+  --p-muted: #61708b;
+  --p-line: #dbe4f3;
+  --p-accent: #2457ff;
+}
+
+.portalDark {
+  --p-bg: #071126;
+  --p-panel: rgba(13, 28, 59, .9);
+  --p-solid: #101f3f;
+  --p-ink: #f4f8ff;
+  --p-muted: #9fb0d0;
+  --p-line: #263b67;
+  --p-accent: #59d9f3;
+}
+
+.portalSidebar,
+.authStory {
+  background: linear-gradient(160deg, #07132f 0%, #0b1d4a 62%, #1235a2 100%);
+}
+
+.portalBrand .kynistoWordmark b,
+.authBrand .kynistoWordmark b {
+  color: #fff;
+}
+
+.portalBrand .kynistoMark,
+.authBrand .kynistoMark {
+  color: #2d66ff;
+}
+
+.portalSidebar nav a:hover,
+.portalSidebar nav a.active {
+  background: rgba(74, 124, 255, .18);
+}
+
+.portalSidebar nav a.active::after {
+  background: var(--kyn-cyan);
+}
+
+.portalButton,
+.authSubmit,
+.doneButton,
+.searchSubmit {
+  background: linear-gradient(135deg, var(--kyn-primary), #1743d7);
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(36, 87, 255, .18);
+}
+
+.statCard,
+.portalCard,
+.categoryTile,
+.storeCard,
+.providerGrid article,
+.productGrid article,
+.profileSection,
+.profileAside section {
+  border-color: var(--kyn-line);
+  box-shadow: 0 16px 44px rgba(16, 43, 99, .07);
+}
+
+.theme-royal {
+  --accent: #2457ff;
+  --accent-dark: #173bc4;
+}
+
+.theme-navy {
+  --accent: #102b68;
+  --accent-dark: #071a44;
+}
+
+.theme-cyan {
+  --accent: #089fbe;
+  --accent-dark: #067d96;
+}
+
+.swatch-royal { --swatch: #2457ff; }
+.swatch-navy { --swatch: #102b68; }
+.swatch-cyan { --swatch: #20c7e8; }
+
+.hero {
+  position: relative;
+}
+
+.hero::before {
+  content: "";
+  width: 420px;
+  height: 420px;
+  position: absolute;
+  left: -260px;
+  top: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(32, 199, 232, .18), transparent 68%);
+  pointer-events: none;
+}
+
+.hero h1 em,
+.eyebrow,
+.kicker,
+.categoryLabel {
+  color: var(--kyn-primary);
+}
+
+.hero h1 {
+  color: var(--kyn-navy);
+  font-size: clamp(66px, 8vw, 122px);
+  letter-spacing: -.075em;
+}
+
+.heroTagline {
+  margin: -2px 0 22px;
+  color: var(--kyn-primary);
+  font-size: clamp(19px, 2vw, 28px);
+  font-weight: 760;
+  letter-spacing: -.035em;
+}
+
+.mapScene {
+  background: linear-gradient(145deg, #eaf0ff, #dffaff);
+}
+
+.routeLoading {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  gap: 14px;
+  background: radial-gradient(circle at 50% 45%, #e9f5ff, #f4f7fc 48%, #eef2f9);
+}
+
+.routeLoading .kynistoMark {
+  width: 58px;
+  height: 58px;
+  margin: auto;
+  animation: kynistoFloat 1.2s ease-in-out infinite alternate;
+}
+
+.routeLoading b {
+  color: var(--kyn-navy);
+  font-size: 18px;
+  letter-spacing: -.04em;
+}
+
+.routeLoading small {
+  color: var(--kyn-muted);
+  font-size: 9px;
+  text-align: center;
+}
+
+@keyframes kynistoFloat {
+  to { transform: translateY(-7px); filter: drop-shadow(0 16px 24px rgba(36, 87, 255, .32)); }
+}
+
+@media (max-width: 520px) {
+  .kynistoMark { width: 32px; height: 32px; }
+  .kynistoWordmark b { font-size: 19px; }
+  .kynistoWordmark small { display: none; }
+  .hero h1 {
+    max-width: 100%;
+    font-size: clamp(48px, 16vw, 62px);
+    line-height: .94;
+    overflow-wrap: anywhere;
+  }
+  .heroTagline {
+    max-width: 100%;
+    margin: 5px 0 18px;
+    font-size: clamp(17px, 5.4vw, 21px);
+    line-height: 1.08;
+  }
+}

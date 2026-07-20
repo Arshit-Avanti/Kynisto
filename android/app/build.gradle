@@ -1,0 +1,82 @@
+plugins {
+    id "com.android.application"
+}
+
+def releaseStore = System.getenv("KYNISTO_KEYSTORE_PATH")
+def releaseStorePassword = System.getenv("KYNISTO_KEYSTORE_PASSWORD")
+def releaseAlias = System.getenv("KYNISTO_KEY_ALIAS")
+def releaseKeyPassword = System.getenv("KYNISTO_KEY_PASSWORD")
+def hasReleaseSigning = releaseStore && releaseStorePassword && releaseAlias && releaseKeyPassword
+
+android {
+    namespace "com.kynisto.app"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.kynisto.app"
+        minSdk 24
+        targetSdk 35
+        versionCode Integer.parseInt(System.getenv("KYNISTO_VERSION_CODE") ?: "3")
+        versionName System.getenv("KYNISTO_VERSION_NAME") ?: "1.0.2"
+        buildConfigField "String", "WEB_URL", "\"https://nearnest-local-5715.arshit10-29.chatgpt.site\""
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                storeFile file(releaseStore)
+                storePassword releaseStorePassword
+                keyAlias releaseAlias
+                keyPassword releaseKeyPassword
+                enableV1Signing true
+                enableV2Signing true
+                enableV3Signing true
+                enableV4Signing true
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+            debuggable true
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            debuggable false
+            if (hasReleaseSigning) signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    packaging {
+        resources.excludes += ["META-INF/DEPENDENCIES", "META-INF/LICENSE*", "META-INF/NOTICE*"]
+    }
+    lint {
+        abortOnError true
+        checkReleaseBuilds true
+    }
+}
+
+dependencies {
+    implementation "androidx.core:core:1.15.0"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+}
+
+tasks.configureEach { task ->
+    if ((task.name == "assembleRelease" || task.name == "bundleRelease") && !hasReleaseSigning) {
+        task.doFirst {
+            throw new GradleException("Release signing is required. Set KYNISTO_KEYSTORE_PATH, KYNISTO_KEYSTORE_PASSWORD, KYNISTO_KEY_ALIAS and KYNISTO_KEY_PASSWORD.")
+        }
+    }
+}

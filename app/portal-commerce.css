@@ -1,0 +1,71 @@
+.workspaceList { display: grid; gap: 8px; }
+.workspaceList article { padding: 13px; display: flex; align-items: center; justify-content: space-between; gap: 14px; border: 1px solid var(--p-line); border-radius: 13px; background: color-mix(in srgb, var(--p-solid) 75%, transparent); }
+.workspaceList article.unread { border-left: 3px solid var(--p-accent); }
+.workspaceList article>div:first-child { min-width: 0; display: flex; flex-direction: column; }
+.workspaceList b { font-size: 10px; }
+.workspaceList p { margin: 4px 0 0; color: var(--p-muted); font-size: 8px; line-height: 1.5; }
+.workspaceList small { margin-top: 4px; color: var(--p-muted); font-size: 8px; }
+.workspaceList .tableActions { flex: 0 0 auto; align-items: center; }
+.workspaceList .tableActions input { width: 58px; min-height: 29px; padding: 0 7px; border: 1px solid var(--p-line); border-radius: 8px; background: var(--p-solid); color: var(--p-ink); font-size: 8px; }
+.portalCardHeader a { color: var(--p-accent); font-size: 8px; font-weight: 800; }
+.compactStat { margin-top: 9px !important; font-size: 14px !important; }
+.narrowCard { max-width: 720px; }
+.toggleList { display: grid; gap: 9px; }
+.toggleList label { padding: 13px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border: 1px solid var(--p-line); border-radius: 12px; }
+.toggleList label span { min-width: 0; flex: 1 1 auto; display: grid; gap: 3px; }
+.toggleList b { font-size: 10px; }
+.toggleList small { color: var(--p-muted); font-size: 8px; }
+.toggleList input { box-sizing: border-box; accent-color: var(--p-accent); }
+.toggleList input[type="checkbox"] { flex: 0 0 auto; width: 20px; height: 20px; }
+.toggleList input:not([type="checkbox"]) {
+  width: min(160px, 46%);
+  min-width: 125px;
+  min-height: 40px;
+  padding: 8px 11px;
+  flex: 0 0 auto;
+  border: 1px solid var(--p-line);
+  border-radius: 10px;
+  background: var(--p-solid);
+  color: var(--p-ink);
+  -webkit-text-fill-color: var(--p-ink);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 750;
+  text-align: right;
+}
+.toggleList input:not([type="checkbox"]):focus {
+  border-color: var(--p-accent);
+  outline: 3px solid color-mix(in srgb, var(--p-accent) 14%, transparent);
+}
+.metricStrip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.metricStrip>div { padding: 13px; border: 1px solid var(--p-line); border-radius: 12px; }
+.metricStrip small { display: block; color: var(--p-muted); font-size: 8px; }
+.metricStrip b { display: block; margin-top: 4px; font-size: 18px; }
+.workspaceChart { min-height: 190px; display: flex; align-items: flex-end; gap: 5px; }
+.workspaceChart span { flex: 1; min-width: 5px; max-width: 24px; border-radius: 5px 5px 2px 2px; background: var(--p-accent); }
+.securityGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.securityGrid article { padding: 14px; border: 1px solid var(--p-line); border-radius: 13px; }
+.securityGrid small { color: var(--p-muted); font-size: 8px; }
+.securityGrid strong { display: block; margin-top: 5px; font-size: 23px; }
+.workspaceList article.workspaceWarning { border-color: color-mix(in srgb, #c58b23 55%, var(--p-line)); background: color-mix(in srgb, #c58b23 6%, var(--p-solid)); }
+.workspaceInlineForm { flex: 0 0 auto; display: grid; grid-template-columns: 80px minmax(135px, 1fr) auto; align-items: center; gap: 6px; }
+.workspaceInlineForm input { min-width: 0; min-height: 31px; padding: 0 8px; border: 1px solid var(--p-line); border-radius: 8px; background: var(--p-solid); color: var(--p-ink); font-size: 8px; }
+.workspaceInlineForm button { min-height: 31px; padding: 0 9px; border: 0; border-radius: 8px; background: var(--p-ink); color: var(--p-bg); cursor: pointer; font-size: 8px; font-weight: 750; }
+.workspaceInlineForm button:disabled, .tableActions button:disabled { cursor: wait; opacity: .55; }
+.workspaceOrderAction { flex: 0 0 auto; display: grid; justify-items: end; gap: 7px; }
+.workspaceOrderAction .tableActions { justify-content: flex-end; }
+.workspaceOrderAction .tableActions input { width: 125px; }
+.workspaceMetrics { margin-bottom: 14px; }
+.workspaceRange { align-items: center; justify-content: flex-end; }
+.workspaceRange span { margin-right: auto; color: var(--p-muted); font-size: 8px; font-weight: 750; text-transform: uppercase; letter-spacing: .08em; }
+.workspaceSection { margin-top: 14px; }
+.compactWorkspaceList article { padding-block: 10px; }
+.compactWorkspaceList article>strong { font-size: 14px; }
+.notificationStats { max-width: 260px; grid-template-columns: 1fr; }
+.portalForm .toggleList.full { grid-column: 1 / -1; }
+.tableActions button.dangerText { color: #a43c2c; }
+.reviewPagination { margin-top: 14px; justify-content: flex-end; align-items: center; }
+.reviewPagination span { color: var(--p-muted); font-size: 8px; font-weight: 750; }
+.reviewPagination button:disabled { cursor: not-allowed; opacity: .45; }
+@media(max-width:900px){.workspaceInlineForm{width:100%;grid-template-columns:75px 1fr auto}.workspaceOrderAction{width:100%;justify-items:start}.workspaceOrderAction .tableActions{justify-content:flex-start}}
+@media(max-width:700px){.workspaceList article{align-items:flex-start;flex-direction:column}.metricStrip,.securityGrid{grid-template-columns:1fr}.workspaceList .tableActions{width:100%}.workspaceInlineForm{grid-template-columns:1fr}.workspaceInlineForm input,.workspaceInlineForm button{width:100%}.workspaceOrderAction .tableActions input{width:100%;flex-basis:100%}.toggleList label{display:grid;grid-template-columns:minmax(0,1fr) minmax(125px,42%);gap:12px}.toggleList input:not([type="checkbox"]){width:100%;min-width:0;max-width:none;font-size:16px}.toggleList input[type="checkbox"]{justify-self:end}}
