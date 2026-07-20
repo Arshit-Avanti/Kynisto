@@ -175,13 +175,6 @@ export async function getSupabaseUser(
       "INVALID_GOOGLE_SESSION",
     );
   }
-  if (!isGoogleSupabaseUser(payload)) {
-    throw new HttpError(
-      403,
-      "Customers and Shop Owners must continue with Google.",
-      "GOOGLE_REQUIRED",
-    );
-  }
   return payload;
 }
 
