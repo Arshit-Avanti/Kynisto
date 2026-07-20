@@ -111,10 +111,11 @@ async function requestSupabase<T extends Record<string, unknown>>(
       headers,
       cache: "no-store",
     });
-  } catch {
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err);
     throw new HttpError(
       503,
-      "Google authentication is temporarily unavailable.",
+      `Google authentication service fetch failed (${detail}).`,
       "AUTH_PROVIDER_UNAVAILABLE",
     );
   }
@@ -199,25 +200,10 @@ export async function getSupabaseProfile(
       },
     );
   } catch {
-    throw new HttpError(
-      503,
-      "The Kynisto profile service could not be reached.",
-      "PROFILE_SERVICE_UNAVAILABLE",
-    );
+    return null;
   }
   const payload = await response.json().catch(() => null);
-  if (!response.ok) {
-    const errorPayload =
-      payload && typeof payload === "object" && !Array.isArray(payload)
-        ? (payload as Record<string, unknown>)
-        : {};
-    throw new HttpError(
-      response.status,
-      databaseErrorMessage(errorPayload, "The Supabase profile could not be read."),
-      "PROFILE_READ_FAILED",
-    );
-  }
-  if (!Array.isArray(payload) || payload.length === 0) return null;
+  if (!response.ok || !Array.isArray(payload) || payload.length === 0) return null;
   const profile = payload[0];
   return profile && typeof profile === "object"
     ? (profile as SupabaseProfile)
