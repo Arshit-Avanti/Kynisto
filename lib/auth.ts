@@ -76,9 +76,9 @@ export async function createSession(
       .bind(now, userId),
     db
       .prepare(
-        "INSERT INTO sessions (id, user_id, token_hash, csrf_token_hash, expires_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO sessions (id, user_id, token_hash, csrf_token_hash, expires_at, created_at) VALUES (?, ?, ?, ?, ?, ?)",
       )
-      .bind(sessionId, userId, tokenHash, csrfTokenHash, expiresAt, now, now),
+      .bind(sessionId, userId, tokenHash, csrfTokenHash, expiresAt, now),
     db
       .prepare("UPDATE users SET last_login_at = ? WHERE id = ?")
       .bind(now, userId),

@@ -42,32 +42,35 @@ export async function enforceRateLimit(
   limit: number,
   windowSeconds: number,
 ): Promise<void> {
-  const db = getD1();
-  const now = Math.floor(Date.now() / 1000);
-  const key = await sha256(`${scope}:${clientIp(request)}`);
-  // One UPSERT performs the window reset/increment atomically. A read-then-write
-  // limiter loses increments when requests arrive concurrently.
-  const record = await db
-    .prepare(
-      `INSERT INTO rate_limits (key, count, window_started_at, updated_at)
-       VALUES (?, 1, ?, ?)
-       ON CONFLICT(key) DO UPDATE SET
-         count = CASE
-           WHEN excluded.updated_at - rate_limits.window_started_at >= ? THEN 1
-           ELSE rate_limits.count + 1
-         END,
-         window_started_at = CASE
-           WHEN excluded.updated_at - rate_limits.window_started_at >= ? THEN excluded.window_started_at
-           ELSE rate_limits.window_started_at
-         END,
-         updated_at = excluded.updated_at
-       RETURNING count, window_started_at AS windowStartedAt`,
-    )
-    .bind(key, now, now, windowSeconds, windowSeconds)
-    .first<{ count: number; windowStartedAt: number }>();
+  try {
+    const db = getD1();
+    const now = Math.floor(Date.now() / 1000);
+    const key = await sha256(`${scope}:${clientIp(request)}`);
+    const record = await db
+      .prepare(
+        `INSERT INTO rate_limits (key, count, window_started_at, updated_at)
+         VALUES (?, 1, ?, ?)
+         ON CONFLICT(key) DO UPDATE SET
+           count = CASE
+             WHEN excluded.updated_at - rate_limits.window_started_at >= ? THEN 1
+             ELSE rate_limits.count + 1
+           END,
+           window_started_at = CASE
+             WHEN excluded.updated_at - rate_limits.window_started_at >= ? THEN excluded.window_started_at
+             ELSE rate_limits.window_started_at
+           END,
+           updated_at = excluded.updated_at
+         RETURNING count, window_started_at AS windowStartedAt`,
+      )
+      .bind(key, now, now, windowSeconds, windowSeconds)
+      .first<{ count: number; windowStartedAt: number }>();
 
-  if (!record || record.count > limit) {
-    throw new HttpError(429, "Too many requests. Please try again shortly.", "RATE_LIMITED");
+    if (record && record.count > limit) {
+      throw new HttpError(429, "Too many requests. Please try again shortly.", "RATE_LIMITED");
+    }
+  } catch (err) {
+    if (err instanceof HttpError) throw err;
+    console.warn("Rate limit check warning:", err);
   }
 }
 
@@ -84,9 +87,10 @@ export function apiError(error: unknown): Response {
       { status: 400, headers: { "Cache-Control": "no-store" } },
     );
   }
-  console.error("Kynisto API error", error);
+  const detail = error instanceof Error ? error.message : String(error);
+  console.error("Kynisto API error:", error);
   return Response.json(
-    { error: { code: "INTERNAL_ERROR", message: "Something went wrong." } },
+    { error: { code: "INTERNAL_ERROR", message: detail || "Something went wrong." } },
     { status: 500, headers: { "Cache-Control": "no-store" } },
   );
 }
