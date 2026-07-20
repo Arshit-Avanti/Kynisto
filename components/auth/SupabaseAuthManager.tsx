@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { type Session } from "@supabase/supabase-js";
 import {
   getSupabaseBrowserClient,
@@ -9,14 +8,6 @@ import {
 } from "@/lib/supabase-browser";
 
 const PENDING_KEY = "kynisto-google-auth-pending";
-
-function storageRead(key: string): string | null {
-  try {
-    return window.sessionStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
 
 function storageRemove(key: string): void {
   try {
@@ -87,12 +78,13 @@ export function SupabaseAuthManager() {
       initialUrl.searchParams.has("error_description") ||
       initialUrl.hash.includes("access_token") ||
       initialUrl.hash.includes("error");
-    const pending = storageRead(PENDING_KEY) === "1";
-    const shouldCompleteLogin = hasOAuthResult || pending;
 
-    if (shouldCompleteLogin) {
+    // ONLY show the loading overlay if URL actually contains OAuth redirect parameters
+    if (hasOAuthResult) {
       setActive(true);
       setLoading(true);
+    } else {
+      storageRemove(PENDING_KEY);
     }
 
     async function initAuth() {
@@ -116,7 +108,7 @@ export function SupabaseAuthManager() {
 
         if (session) {
           syncSupabaseAccessCookie(session);
-          if (shouldCompleteLogin) {
+          if (hasOAuthResult) {
             await handleGoogleLoginSuccess(session);
             return;
           }
@@ -134,10 +126,9 @@ export function SupabaseAuthManager() {
 
           if (currentSession && (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED")) {
             if (timeoutId) clearTimeout(timeoutId);
-            const synced = syncSupabaseAccessCookie(currentSession);
-            if (!synced) throw new Error("blocked cookies");
+            syncSupabaseAccessCookie(currentSession);
 
-            if (shouldCompleteLogin) {
+            if (hasOAuthResult) {
               await handleGoogleLoginSuccess(currentSession);
             }
           }
@@ -145,15 +136,14 @@ export function SupabaseAuthManager() {
 
         subscriptionRef.current = subscription;
 
-        if (shouldCompleteLogin && !session) {
-          // Give Supabase PKCE exchange 5 seconds to finish before concluding no session exists
+        if (hasOAuthResult && !session) {
           timeoutId = setTimeout(() => {
             if (mounted && !completionStarted.current) {
               storageRemove(PENDING_KEY);
               setActive(false);
               setLoading(false);
             }
-          }, 5000);
+          }, 3000);
         }
       } catch (err) {
         if (mounted) {
@@ -175,24 +165,22 @@ export function SupabaseAuthManager() {
       try {
         const supabase = await getSupabaseBrowserClient();
 
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", session.user.id)
-          .maybeSingle();
+        let destination = "/onboarding";
 
-        if (profileError) {
-          console.warn("Profile fetch warning:", profileError.message);
-        }
+        try {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", session.user.id)
+            .maybeSingle();
 
-        let destination = "";
-
-        if (profile?.role === "customer") {
-          destination = "/account";
-        } else if (profile?.role === "shop_owner" || profile?.role === "store_owner") {
-          destination = "/owner";
-        } else {
-          destination = "/onboarding";
+          if (profile?.role === "customer") {
+            destination = "/account";
+          } else if (profile?.role === "shop_owner" || profile?.role === "store_owner") {
+            destination = "/owner";
+          }
+        } catch (pErr) {
+          console.warn("Profiles query bypassed:", pErr);
         }
 
         storageRemove(PENDING_KEY);
