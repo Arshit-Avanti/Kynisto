@@ -17,7 +17,10 @@ export function GoogleSignIn() {
     setError("");
     try {
       const supabase = await getSupabaseBrowserClient();
-      const redirectTo = "https://nearnest-local-5715.arshit10-29.chatgpt.site";
+      const redirectTo =
+        typeof window !== "undefined"
+          ? window.location.origin
+          : "https://kynisto.nxt-arshit.workers.dev";
       console.log("login started");
       console.log("redirect URL:", redirectTo);
       try {
