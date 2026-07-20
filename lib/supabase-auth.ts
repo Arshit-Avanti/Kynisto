@@ -109,7 +109,6 @@ async function requestSupabase<T extends Record<string, unknown>>(
     response = await fetch(`${url}${path}`, {
       ...init,
       headers,
-      cache: "no-store",
     });
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err);
@@ -196,7 +195,6 @@ export async function getSupabaseProfile(
           Authorization: `Bearer ${accessToken}`,
           Accept: "application/json",
         },
-        cache: "no-store",
       },
     );
   } catch {
