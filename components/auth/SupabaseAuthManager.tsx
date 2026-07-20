@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import type { Session } from "@supabase/supabase-js";
+import Link from "next/link";
+import { type Session } from "@supabase/supabase-js";
 import {
   getSupabaseBrowserClient,
-  signOutSupabaseBrowser,
   syncSupabaseAccessCookie,
 } from "@/lib/supabase-browser";
 
@@ -23,27 +22,30 @@ function storageRemove(key: string): void {
   try {
     window.sessionStorage.removeItem(key);
   } catch {
-    // Session storage removal fallback
+    // Ignore storage restriction errors
   }
 }
 
 function getFriendlyErrorMessage(error: unknown): string {
-  if (!error) return "profile query failed";
-  
   let message = "";
-  if (error && typeof error === "object") {
-    const record = error as Record<string, unknown>;
-    const details = [record.message, record.details, record.hint, record.code]
-      .filter((value): value is string => typeof value === "string" && Boolean(value.trim()))
-      .join(" · ");
-    message = details;
+  if (error instanceof Error) {
+    message = error.message;
+  } else if (typeof error === "object" && error !== null) {
+    const err = error as Record<string, unknown>;
+    message =
+      typeof err.message === "string"
+        ? err.message
+        : typeof err.error_description === "string"
+          ? err.error_description
+          : typeof err.error === "string"
+            ? err.error
+            : JSON.stringify(error);
+  } else {
+    message = String(error);
   }
-  if (!message) {
-    message = error instanceof Error && error.message ? error.message : String(error);
-  }
-  
+
   const normalized = message.toLowerCase();
-  
+
   if (normalized.includes("oauth redirect failed") || normalized.includes("oauth_redirect_failed")) {
     return "OAuth redirect failed";
   }
@@ -62,7 +64,7 @@ function getFriendlyErrorMessage(error: unknown): string {
   if (normalized.includes("blocked cookies") || normalized.includes("cookie") || normalized.includes("storage") || normalized.includes("securityerror")) {
     return "blocked cookies";
   }
-  
+
   return message;
 }
 
@@ -70,13 +72,14 @@ export function SupabaseAuthManager() {
   const [active, setActive] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  
+
   const completionStarted = useRef(false);
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
-  
+
   useEffect(() => {
     let mounted = true;
-    
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
     const initialUrl = new URL(window.location.href);
     const hasOAuthResult =
       initialUrl.searchParams.has("code") ||
@@ -86,78 +89,72 @@ export function SupabaseAuthManager() {
       initialUrl.hash.includes("error");
     const pending = storageRead(PENDING_KEY) === "1";
     const shouldCompleteLogin = hasOAuthResult || pending;
-    
+
     if (shouldCompleteLogin) {
       setActive(true);
       setLoading(true);
     }
-    
+
     async function initAuth() {
       try {
         const supabase = await getSupabaseBrowserClient();
         if (!mounted) return;
-        
-        // Let Supabase process the URL first. Process URL errors if any
+
         if (initialUrl.searchParams.has("error")) {
           throw new Error(
             `OAuth redirect failed: ${
               initialUrl.searchParams.get("error_description") ||
               initialUrl.searchParams.get("error") ||
               "Google did not return a valid authorization."
-            }`
+            }`,
           );
         }
-        
+
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         if (sessionError) throw sessionError;
         if (!mounted) return;
-        
-        // Listen once for auth events using onAuthStateChange
+
+        if (session) {
+          syncSupabaseAccessCookie(session);
+          if (shouldCompleteLogin) {
+            await handleGoogleLoginSuccess(session);
+            return;
+          }
+        }
+
+        // Listen for auth events (e.g. PKCE token exchange completing)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
           console.log("auth state change:", event);
-          
           if (!mounted) return;
-          
+
           if (event === "SIGNED_OUT") {
             syncSupabaseAccessCookie(null);
             return;
           }
-          
-          if (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
-            if (currentSession) {
-              const synced = syncSupabaseAccessCookie(currentSession);
-              if (!synced) {
-                throw new Error("blocked cookies");
-              }
-              
-              if (shouldCompleteLogin && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
-                await handleGoogleLoginSuccess(currentSession);
-              }
-            } else if (shouldCompleteLogin && event === "INITIAL_SESSION") {
-              if (hasOAuthResult) {
-                throw new Error("Supabase session not found");
-              } else {
-                storageRemove(PENDING_KEY);
-                setActive(false);
-                setLoading(false);
-              }
+
+          if (currentSession && (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED")) {
+            if (timeoutId) clearTimeout(timeoutId);
+            const synced = syncSupabaseAccessCookie(currentSession);
+            if (!synced) throw new Error("blocked cookies");
+
+            if (shouldCompleteLogin) {
+              await handleGoogleLoginSuccess(currentSession);
             }
           }
         });
-        
+
         subscriptionRef.current = subscription;
-        
-        // If we are supposed to complete login but no session was returned by getSession
+
         if (shouldCompleteLogin && !session) {
-          if (hasOAuthResult) {
-            throw new Error("Supabase session not found");
-          } else {
-            storageRemove(PENDING_KEY);
-            setActive(false);
-            setLoading(false);
-          }
+          // Give Supabase PKCE exchange 5 seconds to finish before concluding no session exists
+          timeoutId = setTimeout(() => {
+            if (mounted && !completionStarted.current) {
+              storageRemove(PENDING_KEY);
+              setActive(false);
+              setLoading(false);
+            }
+          }, 5000);
         }
-        
       } catch (err) {
         if (mounted) {
           console.error("Kynisto Google authentication failed:", err);
@@ -168,152 +165,106 @@ export function SupabaseAuthManager() {
         }
       }
     }
-    
+
     async function handleGoogleLoginSuccess(session: Session) {
       if (completionStarted.current) return;
       completionStarted.current = true;
-      
-      console.log("session detected");
-      console.log("authenticated user ID:", session.user.id);
-      
+
+      console.log("session detected:", session.user.id);
+
       try {
         const supabase = await getSupabaseBrowserClient();
-        
-        // Query profile for this user ID only
+
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", session.user.id)
           .maybeSingle();
-          
-        console.log("profile query result:", profile);
-        
+
         if (profileError) {
-          throw new Error(`profile query failed: ${profileError.message || "Unknown database error"}`);
+          console.warn("Profile fetch warning:", profileError.message);
         }
-        
+
         let destination = "";
-        
-        if (!profile) {
-          // Profile doesn't exist, create it with Google metadata
-          const metadata = session.user.user_metadata || {};
-          const email = session.user.email;
-          const fullName = metadata.full_name || metadata.name || "";
-          const avatarUrl = metadata.avatar_url || metadata.picture || "";
-          
-          const { error: createError } = await supabase
-            .from("profiles")
-            .insert({
-              id: session.user.id,
-              email,
-              full_name: fullName,
-              avatar_url: avatarUrl,
-              role: null, // role is unset/null initially
-              onboarding_completed: false,
-              updated_at: new Date().toISOString(),
-            });
-            
-          if (createError) {
-            throw new Error(`profile query failed: ${createError.message || "Failed to create profile row"}`);
-          }
-          
-          destination = "/onboarding";
-        } else if (!profile.role) {
-          destination = "/onboarding";
+
+        if (profile?.role === "customer") {
+          destination = "/account";
+        } else if (profile?.role === "shop_owner" || profile?.role === "store_owner") {
+          destination = "/owner";
         } else {
-          // Profile exists and has a role
-          if (profile.role === "admin") {
-            throw new Error("invalid role");
-          }
-          
-          if (profile.role === "customer") {
-            destination = "/account";
-          } else if (profile.role === "shop_owner" || profile.role === "store_owner") {
-            destination = "/owner";
-          } else {
-            throw new Error("invalid role");
-          }
+          destination = "/onboarding";
         }
-        
-        console.log("final redirect destination:", destination);
+
         storageRemove(PENDING_KEY);
-        
-        // Clean URL parameters before redirecting to prevent redirect loops or token replay errors
-        const cleanUrl = new URL(window.location.href);
-        cleanUrl.searchParams.delete("code");
-        cleanUrl.searchParams.delete("error");
-        cleanUrl.searchParams.delete("error_description");
-        cleanUrl.searchParams.delete("state");
-        window.history.replaceState(null, "", cleanUrl.pathname + cleanUrl.search);
-        
-        window.location.replace(destination);
-      } catch (err) {
-        if (mounted) {
-          console.error("Kynisto Google login completion failed:", err);
-          setError(getFriendlyErrorMessage(err));
-          setLoading(false);
-          setActive(true);
-          storageRemove(PENDING_KEY);
-          completionStarted.current = false;
+
+        // Clean OAuth URL params from address bar
+        if (typeof window !== "undefined" && window.history?.replaceState) {
+          const cleanUrl = new URL(window.location.href);
+          cleanUrl.searchParams.delete("code");
+          cleanUrl.searchParams.delete("error");
+          cleanUrl.searchParams.delete("error_description");
+          cleanUrl.hash = "";
+          window.history.replaceState({}, "", cleanUrl.toString());
         }
+
+        window.location.replace(destination);
+      } catch (completionError) {
+        console.error("Post-login routing failed:", completionError);
+        completionStarted.current = false;
+        setError(getFriendlyErrorMessage(completionError));
+        setLoading(false);
+        setActive(true);
+        storageRemove(PENDING_KEY);
       }
     }
-    
+
     void initAuth();
-    
+
     return () => {
       mounted = false;
-      if (subscriptionRef.current) {
-        subscriptionRef.current.unsubscribe();
-      }
+      if (timeoutId) clearTimeout(timeoutId);
+      subscriptionRef.current?.unsubscribe();
     };
   }, []);
-  
-  async function handleSignOut() {
-    try {
-      setLoading(true);
-      setError("");
-      await signOutSupabaseBrowser();
-      storageRemove(PENDING_KEY);
-      window.location.replace("/login");
-    } catch (err) {
-      console.error("Sign out failed:", err);
-      setError(getFriendlyErrorMessage(err));
-      setLoading(false);
-    }
-  }
-  
+
   if (!active) return null;
+
   return (
-    <div className="authCompletionLayer" role="dialog" aria-modal="true">
-      <section className="authCompletionCard">
-        <span className="authKicker">Google authentication</span>
+    <div className="authOverlay">
+      <div className="authOverlayCard" role="dialog" aria-modal="true">
+        <span className="authKicker">Google Authentication</span>
         <h2>Opening Kynisto</h2>
-        {error ? (
+        {loading ? (
+          <div className="authLoadingState">
+            <span className="authSpinner" aria-hidden="true" />
+            <p>Connecting securely…</p>
+          </div>
+        ) : error ? (
           <>
-            <p className="authError" role="alert">
-              {error}
-            </p>
-            <div className="authCallbackActions">
+            <p className="authErrorMessage">{error}</p>
+            <div className="authOverlayActions">
               <button
                 type="button"
-                onClick={() => window.location.replace("/login")}
+                className="authPrimaryButton"
+                onClick={() => window.location.reload()}
               >
                 Try again
               </button>
-              <Link href="/login">Return to login</Link>
-              <button type="button" onClick={() => void handleSignOut()}>
-                Sign out
+              <button
+                type="button"
+                className="authSecondaryButton"
+                onClick={() => {
+                  storageRemove(PENDING_KEY);
+                  setActive(false);
+                  window.location.replace("/login");
+                }}
+              >
+                Return to login
               </button>
             </div>
           </>
-        ) : loading ? (
-          <div className="authProgress" role="status" aria-live="polite">
-            <span aria-hidden="true" />
-            <p>Securing your Google account…</p>
-          </div>
         ) : null}
-      </section>
+      </div>
     </div>
   );
 }
