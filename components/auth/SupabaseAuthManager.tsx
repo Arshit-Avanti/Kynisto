@@ -81,7 +81,9 @@ export function SupabaseAuthManager() {
     const hasOAuthResult =
       initialUrl.searchParams.has("code") ||
       initialUrl.searchParams.has("error") ||
-      initialUrl.searchParams.has("error_description");
+      initialUrl.searchParams.has("error_description") ||
+      initialUrl.hash.includes("access_token") ||
+      initialUrl.hash.includes("error");
     const pending = storageRead(PENDING_KEY) === "1";
     const shouldCompleteLogin = hasOAuthResult || pending;
     
