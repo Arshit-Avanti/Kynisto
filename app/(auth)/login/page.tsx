@@ -20,7 +20,7 @@ export default async function LoginPage({
           <strong id="android-download-title">Get Kynisto for Android</strong>
           <small>Install the lightweight app and always access the latest Kynisto experience.</small>
         </div>
-        <a href="/downloads/Kynisto-1.0.2-release.apk" download>
+        <a href="/downloads/Kynisto-1.0.0-release.apk" download>
           Download APK
         </a>
       </section>
