@@ -86,12 +86,12 @@ export async function POST(request: Request) {
       throw new HttpError(429, "Account temporarily locked after repeated login attempts.", "ACCOUNT_LOCKED");
     }
 
-    const passwordMatches = password ? await verifyPassword(
-      password,
+    const passwordMatches = await verifyPassword(
+      password || "",
       user?.passwordHash ?? TIMING_HASH,
       user?.passwordSalt ?? TIMING_SALT,
       user?.passwordIterations ?? 100_000,
-    ) : true; // Allow 1-click quick demo login if password empty and user exists
+    );
 
     if (!user || !passwordMatches) {
       throw new HttpError(401, "Email or password is incorrect.", "INVALID_CREDENTIALS");

@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { createSession, dashboardForRole } from "@/lib/auth";
 import { apiError, assertSameOrigin } from "@/lib/security";
 import {
@@ -6,7 +7,7 @@ import {
   getSupabaseUser,
 } from "@/lib/supabase-auth";
 import { ensureGoogleLocalIdentity } from "@/lib/supabase-identity";
-import { safeJson } from "@/lib/validation";
+import { safeJson, ValidationError } from "@/lib/validation";
 
 export async function POST(request: Request) {
   try {
@@ -14,7 +15,7 @@ export async function POST(request: Request) {
     const body = await safeJson(request);
     const accessToken = typeof body.accessToken === "string" ? body.accessToken : "";
     if (!accessToken) {
-      throw new Error("Access token is required.");
+      throw new ValidationError("Access token is required.");
     }
 
     const supabaseUser = await getSupabaseUser(accessToken);
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
     // Create rock-solid D1 session cookie (same as local/admin login)
     await createSession(request, identity.id, true);
 
-    return Response.json({
+    return NextResponse.json({
       user: {
         id: identity.id,
         name: identity.name,

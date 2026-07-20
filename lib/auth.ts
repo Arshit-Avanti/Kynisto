@@ -43,7 +43,7 @@ function cookieOptions(request: Request, maxAge?: number) {
   return {
     httpOnly: true,
     sameSite: "strict" as const,
-    secure: new URL(request.url).protocol === "https:",
+    secure: request.headers.get("x-forwarded-proto") === "https" || new URL(request.url).protocol === "https:",
     path: "/",
     ...(maxAge ? { maxAge } : {}),
   };

@@ -1,10 +1,7 @@
 import { getD1 } from "@/db/runtime";
 import { hashPassword, randomToken } from "@/lib/crypto";
 import { HttpError } from "@/lib/security";
-import {
-  isGoogleSupabaseUser,
-  type SupabaseAuthUser,
-} from "@/lib/supabase-auth";
+import type { SupabaseAuthUser } from "@/lib/supabase-auth";
 import { cleanText } from "@/lib/validation";
 import type { UserRole } from "@/lib/rbac";
 
@@ -12,6 +9,7 @@ export type GoogleRole = Extract<UserRole, "customer" | "store_owner">;
 
 export type GoogleLocalIdentity = {
   userId: string;
+  id: string;
   name: string;
   email: string;
   role: GoogleRole;
@@ -39,13 +37,6 @@ function metadataString(
 }
 
 function googleProfile(user: SupabaseAuthUser): GoogleProfile {
-  if (!isGoogleSupabaseUser(user)) {
-    throw new HttpError(
-      403,
-      "Customers and Shop Owners must continue with Google.",
-      "GOOGLE_REQUIRED",
-    );
-  }
   const email = user.email?.trim().toLowerCase();
   if (!email || !user.id) {
     throw new HttpError(
@@ -101,7 +92,7 @@ async function findGoogleLocalIdentity(
   const db = getD1();
   const byProvider = await db
     .prepare(
-      `SELECT u.id AS userId, u.name, u.email, u.role, u.status,
+      `SELECT u.id AS userId, u.id AS id, u.name, u.email, u.role, u.status,
         u.avatar_url AS avatarUrl, e.provider_user_id AS providerUserId
        FROM external_auth_identities e
        JOIN users u ON u.id = e.user_id
@@ -130,7 +121,7 @@ async function findGoogleLocalIdentity(
 
   const byEmail = await db
     .prepare(
-      `SELECT u.id AS userId, u.name, u.email, u.role, u.status,
+      `SELECT u.id AS userId, u.id AS id, u.name, u.email, u.role, u.status,
         u.avatar_url AS avatarUrl, e.provider_user_id AS providerUserId
        FROM users u
        LEFT JOIN external_auth_identities e
@@ -174,12 +165,11 @@ async function refreshGoogleIdentity(
   const statements: D1PreparedStatement[] = [
     db
       .prepare(
-        "UPDATE users SET name = ?, avatar_url = ?, role = ?, last_login_at = ?, updated_at = ? WHERE id = ?",
+        "UPDATE users SET name = ?, avatar_url = ?, last_login_at = ?, updated_at = ? WHERE id = ?",
       )
       .bind(
         profile.name,
         profile.avatarUrl,
-        role,
         now,
         now,
         identity.userId,
@@ -219,9 +209,10 @@ async function refreshGoogleIdentity(
   await db.batch(statements);
   return {
     userId: identity.userId,
+    id: identity.userId,
     name: profile.name,
     email: profile.email,
-    role,
+    role: identity.role,
     status: identity.status,
     avatarUrl: profile.avatarUrl,
   };
@@ -300,6 +291,7 @@ async function createGoogleIdentity(
   }
   return {
     userId,
+    id: userId,
     name: profile.name,
     email: profile.email,
     role,

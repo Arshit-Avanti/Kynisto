@@ -275,18 +275,21 @@
   object-fit: cover;
 }
 
-.authCompletionLayer {
+.authCompletionLayer,
+.authOverlay {
   position: fixed;
   inset: 0;
   z-index: 10000;
   padding: 20px;
   display: grid;
   place-items: center;
-  background: rgba(5, 18, 44, .7);
+  background: rgba(5, 18, 44, .72);
   backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
-.authCompletionCard {
+.authCompletionCard,
+.authOverlayCard {
   width: min(480px, 100%);
   padding: clamp(24px, 5vw, 42px);
   display: grid;
@@ -298,20 +301,53 @@
   box-shadow: 0 30px 80px rgba(0, 18, 64, .3);
 }
 
-.authCompletionCard h2 {
+.authCompletionCard h2,
+.authOverlayCard h2 {
   margin: 0;
   font-size: clamp(34px, 8vw, 48px);
   letter-spacing: -.055em;
 }
 
-.authCallbackActions {
+.authKicker {
+  color: #2457ff;
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+
+.authLoadingState {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.authSpinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid #cbd8f3;
+  border-top-color: #2457ff;
+  border-radius: 50%;
+  animation: authSpin .7s linear infinite;
+}
+
+.authErrorMessage {
+  color: #d93838;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.authCallbackActions,
+.authOverlayActions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
 .authCallbackActions button,
-.authCallbackActions a {
+.authCallbackActions a,
+.authOverlayActions button,
+.authOverlayActions a {
   min-height: 44px;
   padding: 0 16px;
   display: inline-flex;
@@ -327,10 +363,22 @@
   text-decoration: none;
 }
 
-.authCallbackActions button:first-child {
-  border-color: #2457ff;
-  background: #2457ff;
-  color: #fff;
+.authPrimaryButton {
+  border-color: #2457ff !important;
+  background: #2457ff !important;
+  color: #fff !important;
+}
+
+.authSecondaryButton {
+  border-color: #cfd9ec !important;
+  background: #fff !important;
+  color: #12306b !important;
+}
+
+@keyframes authSpin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 600px) {
@@ -351,7 +399,8 @@
     min-height: 58px;
   }
 
-  .authCallbackActions {
+  .authCallbackActions,
+  .authOverlayActions {
     display: grid;
   }
 }
@@ -362,7 +411,8 @@
     transition: none;
   }
 
-  .googleButtonSpinner {
+  .googleButtonSpinner,
+  .authSpinner {
     animation-duration: 1.8s;
   }
 }

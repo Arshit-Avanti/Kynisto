@@ -220,8 +220,8 @@ export function SupabaseAuthManager() {
   if (!active) return null;
 
   return (
-    <div className="authOverlay">
-      <div className="authOverlayCard" role="dialog" aria-modal="true">
+    <div className="authCompletionLayer authOverlay">
+      <div className="authCompletionCard authOverlayCard" role="dialog" aria-modal="true">
         <span className="authKicker">Google Authentication</span>
         <h2>Opening Kynisto</h2>
         {loading ? (
@@ -232,7 +232,7 @@ export function SupabaseAuthManager() {
         ) : error ? (
           <>
             <p className="authErrorMessage">{error}</p>
-            <div className="authOverlayActions">
+            <div className="authCallbackActions authOverlayActions">
               <button
                 type="button"
                 className="authPrimaryButton"
