@@ -1,6 +1,5 @@
 import { AdminLoginForm } from "@/components/auth/AdminLoginForm";
 import { GoogleSignIn } from "@/components/auth/GoogleSignIn";
-import { redirectAuthenticatedUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +8,6 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ returnTo?: string }>;
 }) {
-  await redirectAuthenticatedUser();
   const { returnTo } = await searchParams;
   return (
     <div className="authCard">
