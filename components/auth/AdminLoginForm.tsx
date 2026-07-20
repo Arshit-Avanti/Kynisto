@@ -52,7 +52,7 @@ export function AdminLoginForm({
   }
 
   return (
-    <details className="adminLoginDisclosure" open>
+    <details className="adminLoginDisclosure">
       <summary>Administrator sign-in</summary>
       <form className="authForm adminLoginForm" onSubmit={submit}>
         <p>Protected access for Kynisto administrators only.</p>
