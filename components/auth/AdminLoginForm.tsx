@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { apiFetch } from "@/lib/client-api";
 
@@ -9,7 +8,6 @@ export function AdminLoginForm({
 }: {
   returnTo?: string;
 }) {
-  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -39,8 +37,9 @@ export function AdminLoginForm({
         !returnTo.startsWith("//")
           ? returnTo
           : result.redirectTo;
-      router.push(safeReturn);
-      router.refresh();
+
+      // Perform a full document navigation so the cookie is 100% attached to the HTTP request
+      window.location.assign(safeReturn);
     } catch (submitError) {
       setError(
         submitError instanceof Error
