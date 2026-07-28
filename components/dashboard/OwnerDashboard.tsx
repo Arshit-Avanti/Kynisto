@@ -13,6 +13,9 @@ import {
   OwnerWorkspacePanel,
 } from "@/components/dashboard/OwnerWorkspacePanel";
 
+import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscriptionDashboard";
+import { FeatureGateNotice } from "@/components/subscription/FeatureGateNotice";
+
 type Store = Record<string, string | number | null | undefined>;
 type Item = Record<string, string | number | null | undefined>;
 type Pagination = { page: number; limit: number; total: number; totalPages: number };
@@ -32,6 +35,7 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
   const [selectedId, setSelectedId] = useState("");
   const [catalog, setCatalog] = useState<Item[]>([]);
   const [media, setMedia] = useState<Item[]>([]);
+  const [subPlan, setSubPlan] = useState<Record<string, any>>({ id: "free", allowQueueManagement: false });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
@@ -39,14 +43,16 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
   const selected = useMemo(() => stores.find((store) => store.id === selectedId) ?? stores[0], [selectedId, stores]);
 
   const loadOverview = useCallback(async () => {
-    const [overview, categoryData] = await Promise.all([
+    const [overview, categoryData, subRes] = await Promise.all([
       apiFetch<{ stores: Store[]; analytics: Item[]; recentReviews: Item[] }>("/api/owner/overview"),
       apiFetch<{ items: Item[] }>("/api/categories?module=all"),
+      apiFetch<{ plan: Record<string, any> }>("/api/subscriptions/me").catch(() => ({ plan: { id: "free", allowQueueManagement: false } })),
     ]);
     setStores(overview.stores);
     setAnalytics(overview.analytics);
     setReviews(overview.recentReviews);
     setCategories(categoryData.items);
+    if (subRes?.plan) setSubPlan(subRes.plan);
     if (!selectedId && overview.stores[0]) setSelectedId(String(overview.stores[0].id));
   }, [selectedId]);
 
@@ -75,9 +81,29 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
 
   if (loading) return <div className="portalSkeleton"><span /><span /><span /><span /></div>;
   if (tab === "chat") return <ChatCenter user={user} />;
-  if (tab === "healthcare" && selected) return <OwnerHealthcarePanel storeId={String(selected.id)} />;
-  const title = tab === "overview" ? "Business overview" : tab.charAt(0).toUpperCase()+tab.slice(1);
-  return <><div className="portalTitleRow"><div><span className="portalEyebrow">Store owner workspace</span><h1>{title}</h1><p>Only businesses assigned to this account are available here.</p></div>{stores.length>1&&<select value={String(selected?.id??"")} onChange={(e)=>setSelectedId(e.target.value)}>{stores.map((store)=><option key={String(store.id)} value={String(store.id)}>{store.name}</option>)}</select>}</div>{error&&<p className="authError" role="alert">{error}</p>}{stores.length===0?<section className="portalCard"><div className="portalCardHeader"><h2>Create your first business listing</h2><small>It will be sent for admin approval</small></div><OwnerStoreEditor categories={categories} onSubmit={(body)=>mutate("/api/owner/stores","POST",body,"Business submitted for approval")} /></section>:<>{tab==="overview"&&<OwnerOverview store={selected} analytics={analytics} reviews={reviews}/>} {tab==="profile"&&selected&&<section className="portalCard"><div className="portalCardHeader"><h2>Edit business profile</h2><Status value={selected.status}/></div><OwnerStoreEditor categories={categories} store={selected} onSubmit={(body)=>mutate("/api/owner/stores","PATCH",{...(body as object),storeId:selected.id},"Business profile updated")} />{selected.status!=="approved"&&<div className="ownerDangerZone"><p><b>Remove listing</b><small>Pending or rejected listings can be deleted by their owner.</small></p><button className="portalButton danger" type="button" onClick={()=>{if(window.confirm("Delete this business listing?"))void mutate("/api/owner/stores","DELETE",{storeId:selected.id},"Business deleted")}}>Delete listing</button></div>}</section>} {tab==="media"&&selected&&<MediaPanel store={selected} items={media} onChanged={async()=>{const result=await apiFetch<{items:Item[]}>(`/api/media?storeId=${selected.id}`);setMedia(result.items);setToast("Media updated")}} onError={setError}/>} {["products","services","offers"].includes(tab)&&selected&&<CatalogPanel resource={tab as "products"|"services"|"offers"} storeId={String(selected.id)} items={catalog} mutate={mutate} onChanged={async(message)=>{const result=await apiFetch<{items:Item[]}>(`/api/owner/catalog?resource=${tab}&storeId=${selected.id}`);setCatalog(result.items);setToast(message)}} onError={setError}/>} {tab==="reviews"&&selected&&<ReviewsPanel items={storeReviews} storeId={String(selected.id)} mutate={mutate} pagination={reviewPagination} onPageChange={setReviewPage}/>} {tab==="analytics"&&<OwnerAnalytics items={analytics}/>} {isOwnerWorkspaceView(tab)&&selected&&<OwnerWorkspacePanel key={tab+"-"+String(selected.id)} view={tab} storeId={String(selected.id)} onToast={setToast} onError={setError}/>}</>}{toast&&<div className="portalToast">✓ {toast}</div>}</>;
+  if (tab === "subscription") return <UserSubscriptionDashboard />;
+  if (tab === "healthcare") {
+    if (subPlan.id === "free" || !subPlan.allowQueueManagement) {
+      return (
+        <FeatureGateNotice
+          featureName="Live Real-Time Queue Management"
+          requiredPlan="STARTER or PRO"
+          priceTag="From ₹299/month"
+          description="Free accounts are limited to basic storefront visibility. Upgrade to STARTER or PRO to enable digital tokens, real-time wait estimation, audio alerts, and QR code queue entry!"
+          benefits={[
+            "Unlimited Daily Queue Tokens",
+            "Real-Time Estimated Wait Time Ring",
+            "Audio Chime Notifications on Token Updates",
+            "QR Code Entry for Walk-in Customers",
+            "Business Dashboard & Reports",
+          ]}
+        />
+      );
+    }
+    if (selected) return <OwnerHealthcarePanel storeId={String(selected.id)} />;
+  }
+  const title = tab === "overview" ? "Business overview" : tab === "subscription" ? "Premium & Plans" : tab.charAt(0).toUpperCase()+tab.slice(1);
+  return <><div className="portalTitleRow"><div><span className="portalEyebrow">Store owner workspace</span><h1>{title}</h1><p>Only businesses assigned to this account are available here.</p></div>{stores.length>1&&<select value={String(selected?.id??"")} onChange={(e)=>setSelectedId(e.target.value)}>{stores.map((store)=><option key={String(store.id)} value={String(store.id)}>{store.name}</option>)}</select>}</div>{error&&<p className="authError" role="alert">{error}</p>}{stores.length===0?(["notifications","settings","support","subscription"].includes(tab)?(tab==="subscription"?<UserSubscriptionDashboard />:<OwnerWorkspacePanel key={tab} view={tab as any} storeId="" onToast={setToast} onError={setError}/>):<section className="portalCard"><div className="portalCardHeader"><h2>Create your first business listing</h2><small>It will be sent for admin approval</small></div><OwnerStoreEditor categories={categories} onSubmit={(body)=>mutate("/api/owner/stores","POST",body,"Business submitted for approval")} /></section>):<>{tab==="overview"&&<OwnerOverview store={selected} analytics={analytics} reviews={reviews}/>} {tab==="profile"&&selected&&<section className="portalCard"><div className="portalCardHeader"><h2>Edit business profile</h2><Status value={selected.status}/></div><OwnerStoreEditor categories={categories} store={selected} onSubmit={(body)=>mutate("/api/owner/stores","PATCH",{...(body as object),storeId:selected.id},"Business profile updated")} />{selected.status!=="approved"&&<div className="ownerDangerZone"><p><b>Remove listing</b><small>Pending or rejected listings can be deleted by their owner.</small></p><button className="portalButton danger" type="button" onClick={()=>{if(window.confirm("Delete this business listing?"))void mutate("/api/owner/stores","DELETE",{storeId:selected.id},"Business deleted")}}>Delete listing</button></div>}</section>} {tab==="media"&&selected&&<MediaPanel store={selected} items={media} onChanged={async()=>{const result=await apiFetch<{items:Item[]}>(`/api/media?storeId=${selected.id}`);setMedia(result.items);setToast("Media updated")}} onError={setError}/>} {["products","services","offers"].includes(tab)&&selected&&<CatalogPanel resource={tab as "products"|"services"|"offers"} storeId={String(selected.id)} items={catalog} mutate={mutate} onChanged={async(message)=>{const result=await apiFetch<{items:Item[]}>(`/api/owner/catalog?resource=${tab}&storeId=${selected.id}`);setCatalog(result.items);setToast(message)}} onError={setError}/>} {tab==="reviews"&&selected&&<ReviewsPanel items={storeReviews} storeId={String(selected.id)} mutate={mutate} pagination={reviewPagination} onPageChange={setReviewPage}/>} {tab==="analytics"&&<OwnerAnalytics items={analytics}/>} {isOwnerWorkspaceView(tab)&&selected&&<OwnerWorkspacePanel key={tab+"-"+String(selected.id)} view={tab} storeId={String(selected.id)} onToast={setToast} onError={setError}/>}</>}{toast&&<div className="portalToast">✓ {toast}</div>}</>;
 }
 
 function OwnerOverview({store,analytics,reviews}:{store:Store|undefined;analytics:Item[];reviews:Item[]}){const totals=Object.fromEntries(analytics.map((item)=>[String(item.eventType),Number(item.total)]));return <><div className="statsGrid"><article className="statCard"><span>◉</span><small>Profile views</small><strong>{Number(store?.viewCount??0).toLocaleString()}</strong></article><article className="statCard"><span>★</span><small>Average rating</small><strong>{Number(store?.rating??0).toFixed(1)}</strong></article><article className="statCard"><span>↗</span><small>Direction taps</small><strong>{totals.direction??0}</strong></article><article className="statCard"><span>☏</span><small>Contact actions</small><strong>{(totals.phone??0)+(totals.whatsapp??0)}</strong></article></div><div className="portalGrid"><section className="portalCard"><div className="portalCardHeader"><h2>{store?.name}</h2><Status value={store?.status}/></div><div className="ownerProfileSummary"><div><small>Address</small><b>{store?.address}</b></div><div><small>Category</small><b>{store?.category}</b></div><div><small>Contact</small><b>{store?.phone??"Not added"}</b></div>{store?.rejectionReason&&<div className="authError"><small>Admin note</small><b>{store.rejectionReason}</b></div>}</div></section><section className="portalCard"><div className="portalCardHeader"><h2>Recent reviews</h2><small>{reviews.length} shown</small></div>{reviews.slice(0,5).map((review)=><div className="reviewLine" key={String(review.id)}><span>★ {review.rating}</span><p><b>{review.reviewerName}</b><small>{review.comment}</small></p></div>)}</section></div></>}

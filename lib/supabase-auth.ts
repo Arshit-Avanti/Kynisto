@@ -207,3 +207,7 @@ export async function getSupabaseProfile(
     ? (profile as SupabaseProfile)
     : null;
 }
+
+export async function verifyGoogleApplicationSession(accessToken: string): Promise<SupabaseAuthUser> {
+  return verifySupabaseAccessToken(accessToken);
+}

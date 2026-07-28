@@ -1,0 +1,648 @@
+/* ═══════════════════════════════════════════════════════════
+   Onboarding Wizard & Username Login Styles
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Step Indicator ── */
+.wizardStepIndicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.wizardStepDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d6e2ff;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wizardStepDot.active {
+  width: 32px;
+  border-radius: 5px;
+  background: #2457ff;
+  box-shadow: 0 0 10px #2457ff, 0 0 20px #e1acf4;
+}
+
+.wizardStepDot.completed {
+  background: #e1acf4;
+  box-shadow: 0 0 8px #e1acf4;
+}
+
+/* ── Wizard Container ── */
+.onboardingWizard {
+  min-height: 320px;
+  position: relative;
+  overflow: hidden;
+  background: rgba(11, 21, 40, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(225, 172, 244, 0.15);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+  padding: 32px;
+  border-radius: 24px;
+  color: #fff;
+}
+
+/* ── Wizard Steps ── */
+.wizardStep {
+  animation: wizardSlideIn 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes wizardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ── Google Profile Header ── */
+.wizardProfile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f0f4ff, #e8f0fe);
+}
+
+.wizardProfile img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.wizardProfile .avatarFallback {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #2457ff;
+  color: #fff;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.wizardProfile div {
+  display: grid;
+  gap: 2px;
+}
+
+.wizardProfile strong {
+  font-size: 14px;
+  color: #0b1736;
+}
+
+.wizardProfile small {
+  font-size: 11px;
+  color: #687168;
+}
+
+/* ── Role Selection Step ── */
+.wizardRoleGrid {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.wizardRoleCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border: 2px solid rgba(225, 172, 244, 0.2);
+  border-radius: 18px;
+  background: rgba(11, 21, 40, 0.6);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wizardRoleCard:hover {
+  border-color: #e1acf4;
+  background: rgba(36, 87, 255, 0.1);
+  box-shadow: 0 0 15px rgba(225, 172, 244, 0.5), 0 0 30px rgba(36, 87, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.wizardRoleCard:disabled {
+  opacity: 0.6;
+  cursor: wait;
+  transform: none;
+}
+
+.wizardRoleIcon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  font-size: 20px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.wizardRoleIcon.customer {
+  background: linear-gradient(135deg, #2457ff, #5e8bff);
+}
+
+.wizardRoleIcon.shopOwner {
+  background: linear-gradient(135deg, #059669, #34d399);
+}
+
+.wizardRoleInfo {
+  display: grid;
+  gap: 4px;
+  flex: 1;
+}
+
+.wizardRoleInfo b {
+  font-size: 14px;
+  color: #fff;
+}
+
+.wizardRoleInfo small {
+  font-size: 11px;
+  color: #bdc8c0;
+  line-height: 1.45;
+}
+
+.wizardRoleArrow {
+  font-size: 13px;
+  color: #2457ff;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* ── Password Creation Step ── */
+.passwordCreationForm {
+  display: grid;
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.passwordCreationForm label {
+  display: grid;
+  gap: 7px;
+}
+
+.passwordCreationForm label > span:first-child {
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.passwordCreationForm .passwordField {
+  display: flex;
+  position: relative;
+}
+
+.passwordCreationForm input {
+  width: 100%;
+  height: 49px;
+  padding: 0 70px 0 14px;
+  border: 1px solid rgba(225, 172, 244, 0.3);
+  border-radius: 13px;
+  background: rgba(11, 21, 40, 0.6);
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  box-shadow: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.passwordCreationForm input:focus {
+  border-color: #2457ff;
+  box-shadow: none;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  height: 33px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 8px;
+  background: #eeeae2;
+  color: #49534c;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+/* ── Password Strength Bar ── */
+.passwordStrengthWrap {
+  display: grid;
+  gap: 6px;
+}
+
+.passwordStrengthBar {
+  height: 5px;
+  border-radius: 3px;
+  background: #e5e9f2;
+  overflow: hidden;
+}
+
+.passwordStrengthFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s;
+}
+
+.passwordStrengthLabel {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.passwordHint {
+  color: #687168;
+  font-size: 10px;
+}
+
+.passwordMatchError {
+  color: #ef4444;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* ── Account Summary Step ── */
+.accountSummaryCard {
+  text-align: center;
+  animation: wizardSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.successCheckmark {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e1acf4, #2457ff);
+  color: #fff;
+  font-size: 32px;
+  box-shadow: 0 0 20px rgba(225, 172, 244, 0.6), 0 0 40px rgba(36, 87, 255, 0.4);
+  animation: checkmarkPop 0.6s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+@keyframes checkmarkPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.accountSummaryCard h2 {
+  margin: 0 0 24px;
+  font-size: 26px;
+  letter-spacing: -0.04em;
+  color: #fff;
+}
+
+.summaryDetails {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 28px;
+  text-align: left;
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.summaryItem .summaryLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #687168;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.summaryItem .summaryValue {
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+  font-family: monospace;
+  letter-spacing: 0.02em;
+}
+
+.summaryItem .summaryValue.role {
+  font-family: inherit;
+  color: #2457ff;
+}
+
+.summaryItem .summaryValue.email {
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.summaryActions {
+  display: grid;
+  gap: 10px;
+}
+
+.deepLinkButton {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #2457ff, #4d72ff);
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 12px 32px rgba(36, 87, 255, 0.25);
+  transition: all 0.3s;
+}
+
+.deepLinkButton:hover {
+  box-shadow: 0 16px 40px rgba(36, 87, 255, 0.35);
+  transform: translateY(-2px);
+}
+
+.webContinueButton {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #d6e2ff;
+  border-radius: 14px;
+  background: transparent;
+  color: #2457ff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  transition: all 0.3s;
+}
+
+.webContinueButton:hover {
+  background: #f0f4ff;
+  border-color: #2457ff;
+}
+
+/* ── Username Login Section ── */
+.usernameLoginSection {
+  padding-top: 4px;
+}
+
+.usernameLoginIntro {
+  margin-bottom: 16px;
+}
+
+.usernameLoginIntro h3 {
+  margin: 6px 0 0;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+  color: #0b1736;
+  font-weight: 800;
+}
+
+.usernameLoginForm {
+  display: grid;
+  gap: 14px;
+}
+
+.usernameLoginForm label {
+  display: grid;
+  gap: 7px;
+}
+
+.usernameLoginForm label > span:first-child {
+  font-size: 11px;
+  font-weight: 750;
+  color: #0b1736;
+}
+
+.usernameLoginForm input {
+  width: 100%;
+  height: 49px;
+  padding: 0 14px;
+  border: 1px solid rgba(225, 172, 244, 0.3);
+  border-radius: 13px;
+  background: rgba(11, 21, 40, 0.6);
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  box-shadow: none;
+  transition: border-color 0.2s;
+}
+
+.usernameLoginForm input:focus {
+  border-color: #2457ff;
+  box-shadow: none;
+  outline: none;
+}
+
+.usernameLoginForm .passwordField {
+  display: flex;
+  position: relative;
+}
+
+.usernameLoginForm .passwordField input {
+  padding-right: 70px;
+}
+
+.usernameLoginButton {
+  height: 51px;
+  border: 0;
+  border-radius: 14px;
+  background: #0b1736;
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 12px 28px rgba(11, 23, 54, 0.15);
+  transition: all 0.3s;
+}
+
+.usernameLoginButton:hover {
+  background: #1a2d5c;
+}
+
+.usernameLoginButton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* ── Auth Divider ── */
+.authDivider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: #a4aba5;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.authDivider::before,
+.authDivider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e5e9f2;
+}
+
+/* ── Processing Step ── */
+.wizardProcessing {
+  min-height: 200px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.wizardProcessing .processingSpinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #d6e2ff;
+  border-top-color: #2457ff;
+  border-radius: 50%;
+  animation: authSpin 0.8s linear infinite;
+}
+
+.wizardProcessing p {
+  margin: 0;
+  color: #687168;
+  font-size: 14px;
+}
+
+/* ── Back Button ── */
+.wizardBackButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #687168;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  transition: color 0.2s;
+}
+
+.wizardBackButton:hover {
+  color: #2457ff;
+}
+
+/* ── Admin Login Disclosure ── */
+.adminLoginDisclosure {
+  margin-top: 4px;
+}
+
+.adminLoginDisclosure summary {
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  color: #687168;
+  text-align: center;
+}
+
+.adminLoginDisclosure summary:hover {
+  color: #2457ff;
+}
+
+/* ── Dark Mode Support ── */
+@media (prefers-color-scheme: dark) {
+  .wizardProfile {
+    background: linear-gradient(135deg, #1a2744, #162035);
+  }
+
+  .wizardProfile strong {
+    color: #e8edf5;
+  }
+
+  .wizardRoleCard {
+    border-color: #2a3550;
+    background: #131c2e;
+  }
+
+  .wizardRoleCard:hover {
+    border-color: #4d72ff;
+    background: #1a2744;
+  }
+
+  .wizardRoleInfo b {
+    color: #e8edf5;
+  }
+
+  .passwordCreationForm input,
+  .usernameLoginForm input {
+    border-color: #2a3550;
+    background: #131c2e;
+    color: #e8edf5;
+  }
+
+  .passwordCreationForm input:focus,
+  .usernameLoginForm input:focus {
+    border-color: #4d72ff;
+    box-shadow: 0 0 0 3px rgba(77, 114, 255, 0.2);
+  }
+
+  .summaryItem {
+    background: #1a2744;
+  }
+
+  .summaryItem .summaryValue {
+    color: #e8edf5;
+  }
+
+  .accountSummaryCard h2 {
+    color: #e8edf5;
+  }
+
+  .usernameLoginButton {
+    background: #2457ff;
+  }
+
+  .usernameLoginIntro h3 {
+    color: #e8edf5;
+  }
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .summaryItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .successCheckmark {
+    width: 60px;
+    height: 60px;
+    font-size: 26px;
+  }
+}

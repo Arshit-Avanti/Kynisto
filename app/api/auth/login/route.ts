@@ -19,6 +19,11 @@ export async function POST(request: Request) {
     const rememberMe = booleanInput(body.rememberMe);
     const expectedRole = (body.expectedRole || "customer") as UserRole;
 
+    // Non-admin users must use Google OAuth (GOOGLE_REQUIRED), but administrator path intentionally remains
+    if (expectedRole !== "admin" && process.env.STRICT_GOOGLE_AUTH === "true") {
+      throw new HttpError(403, "Please sign in using Google Auth.", "GOOGLE_REQUIRED");
+    }
+
     const db = getD1();
     const now = Math.floor(Date.now() / 1000);
     let user = await db
@@ -50,7 +55,7 @@ export async function POST(request: Request) {
       }>();
 
     // Auto-create demo customer/store_owner account if user is logging in with quick demo option
-    if (!user && (expectedRole === "customer" || expectedRole === "store_owner" || expectedRole === "shop_owner" as unknown)) {
+    if (!user && expectedRole !== "admin" && (expectedRole === "customer" || expectedRole === "store_owner" || expectedRole === "shop_owner" as unknown)) {
       const targetRole: UserRole = expectedRole === ("shop_owner" as unknown) ? "store_owner" : expectedRole;
       const newId = `user-${targetRole}-${crypto.randomUUID().slice(0, 8)}`;
       const pwd = await hashPassword(password || "Demo1234");

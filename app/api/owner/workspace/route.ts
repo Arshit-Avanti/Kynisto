@@ -523,8 +523,13 @@ async function supportView(userId: string, storeId: string, url: URL) {
   const db = getD1();
   const { page, limit, offset } = pageInput(url);
   const status = supportStatusInput(url.searchParams.get("status"));
-  const clause = status ? " AND t.status = ?" : "";
-  const bindings: unknown[] = status ? [userId, storeId, status] : [userId, storeId];
+  const storeClause = storeId ? " AND (t.store_id = ? OR t.store_id IS NULL OR t.store_id = '')" : "";
+  const statusClause = status ? " AND t.status = ?" : "";
+
+  const bindings: unknown[] = [userId];
+  if (storeId) bindings.push(storeId);
+  if (status) bindings.push(status);
+
   const [items, total] = await Promise.all([
     db
       .prepare(
@@ -532,14 +537,14 @@ async function supportView(userId: string, storeId: string, url: URL) {
           t.resolution, t.order_id AS orderId, o.order_number AS orderNumber,
           t.created_at AS createdAt, t.updated_at AS updatedAt
          FROM support_tickets t LEFT JOIN orders o ON o.id = t.order_id
-         WHERE t.user_id = ? AND t.store_id = ?${clause}
+         WHERE t.user_id = ?${storeClause}${statusClause}
          ORDER BY t.created_at DESC LIMIT ? OFFSET ?`,
       )
       .bind(...bindings, limit, offset)
       .all(),
     db
       .prepare(
-        `SELECT COUNT(*) AS total FROM support_tickets t WHERE t.user_id = ? AND t.store_id = ?${clause}`,
+        `SELECT COUNT(*) AS total FROM support_tickets t WHERE t.user_id = ?${storeClause}${statusClause}`,
       )
       .bind(...bindings)
       .first<{ total: number }>(),
@@ -555,8 +560,12 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const view = viewInput(url.searchParams.get("view"));
     const session = await requireApiPermission(request, VIEW_PERMISSIONS[view]);
-    const storeId = cleanText(url.searchParams.get("storeId"), "Store", { max: 80 });
-    await requireOwnedStore(session.user.id, storeId);
+    const storeId = cleanText(url.searchParams.get("storeId"), "Store", { max: 80, required: false }) || "";
+    if (storeId) {
+      await requireOwnedStore(session.user.id, storeId);
+    } else if (view !== "notifications" && view !== "support" && view !== "settings") {
+      throw new HttpError(400, "Store ID is required for this view.", "MISSING_STORE_ID");
+    }
 
     let payload: Record<string, unknown>;
     if (view === "inventory") payload = await inventoryView(storeId, url);
@@ -1125,8 +1134,12 @@ export async function POST(request: Request) {
     const body = await safeJson(request);
     const action = actionInput(body.action, ["create_coupon", "create_support_ticket"]);
     const session = await requireApiPermission(request, ACTION_PERMISSIONS[action], { csrf: true });
-    const storeId = cleanText(body.storeId, "Store", { max: 80 });
-    await requireOwnedStore(session.user.id, storeId);
+    const storeId = cleanText(body.storeId, "Store", { max: 80, required: false }) || "";
+    if (storeId) {
+      await requireOwnedStore(session.user.id, storeId);
+    } else if (action !== "create_support_ticket") {
+      throw new HttpError(400, "Store ID is required for this action.", "MISSING_STORE_ID");
+    }
     if (action === "create_coupon") {
       return await createCoupon(request, session.user.id, storeId, body);
     }
@@ -1147,8 +1160,12 @@ export async function PATCH(request: Request) {
       "mark_notification_read",
     ]);
     const session = await requireApiPermission(request, ACTION_PERMISSIONS[action], { csrf: true });
-    const storeId = cleanText(body.storeId, "Store", { max: 80 });
-    await requireOwnedStore(session.user.id, storeId);
+    const storeId = cleanText(body.storeId, "Store", { max: 80, required: false }) || "";
+    if (storeId) {
+      await requireOwnedStore(session.user.id, storeId);
+    } else if (action !== "mark_notification_read" && action !== "update_settings") {
+      throw new HttpError(400, "Store ID is required for this action.", "MISSING_STORE_ID");
+    }
     if (action === "adjust_inventory") {
       return await adjustInventory(request, session.user.id, storeId, body);
     }
@@ -1159,6 +1176,7 @@ export async function PATCH(request: Request) {
       return await updateCoupon(request, session.user.id, storeId, body);
     }
     if (action === "update_settings") {
+      if (!storeId) return noStoreJson({ ok: true });
       return await updateSettings(request, session.user.id, storeId, body);
     }
     return await markNotificationRead(request, session.user.id, storeId, body);

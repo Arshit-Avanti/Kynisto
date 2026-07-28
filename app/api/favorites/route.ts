@@ -1,6 +1,7 @@
 import { getD1 } from "@/db/runtime";
 import { requireApiPermission } from "@/lib/auth";
 import { apiError, HttpError, noStoreJson } from "@/lib/security";
+import { getCustomerActivePlan } from "@/lib/subscriptions";
 import { cleanText, safeJson } from "@/lib/validation";
 
 export async function GET(request: Request) {
@@ -36,6 +37,30 @@ export async function POST(request: Request) {
       .bind(storeId)
       .first();
     if (!exists) throw new HttpError(404, "Store not found.", "STORE_NOT_FOUND");
+
+    const plan = await getCustomerActivePlan(session.user.id);
+    if (plan.id === "free") {
+      const existingFav = await getD1()
+        .prepare("SELECT id FROM favorites WHERE user_id = ? AND store_id = ?")
+        .bind(session.user.id, storeId)
+        .first();
+
+      if (!existingFav) {
+        const countResult = await getD1()
+          .prepare("SELECT COUNT(*) AS total FROM favorites WHERE user_id = ?")
+          .bind(session.user.id)
+          .first<{ total: number }>();
+        const total = countResult?.total ?? 0;
+        if (total >= 10) {
+          throw new HttpError(
+            403,
+            "Free plan limit of 10 saved shops reached. Upgrade to Premium for unlimited saved places.",
+            "FAVORITES_LIMIT_REACHED"
+          );
+        }
+      }
+    }
+
     await getD1()
       .prepare("INSERT OR IGNORE INTO favorites (id, user_id, store_id, created_at) VALUES (?, ?, ?, ?)")
       .bind(crypto.randomUUID(), session.user.id, storeId, Math.floor(Date.now() / 1000))

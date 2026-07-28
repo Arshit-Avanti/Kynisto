@@ -7,6 +7,8 @@ import { apiFetch } from "@/lib/client-api";
 import type { SessionUser } from "@/lib/auth";
 import { ChatCenter } from "@/components/dashboard/ChatCenter";
 
+import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscriptionDashboard";
+
 type Item = Record<string, unknown>;
 type Payload = Record<string, unknown>;
 
@@ -96,7 +98,8 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
 
   if (loading) return <div className="portalSkeleton"><span /><span /><span /><span /></div>;
   if (tab === "chat") return <ChatCenter user={user} />;
-  const titles: Record<string, string> = { overview: "My Kynisto", profile: "Profile", addresses: "Saved addresses", favorites: "Favourite shops", wishlist: "Product wishlist", cart: "Shopping cart", orders: "Orders & tracking", reviews: "My reviews", notifications: "Notifications", settings: "Settings", support: "Support & complaints" };
+  if (tab === "subscription") return <UserSubscriptionDashboard />;
+  const titles: Record<string, string> = { overview: "My Kynisto", subscription: "Premium & Plans", profile: "Profile", addresses: "Saved addresses", favorites: "Favourite shops", wishlist: "Product wishlist", cart: "Shopping cart", orders: "Orders & tracking", reviews: "My reviews", notifications: "Notifications", settings: "Settings", support: "Support & complaints" };
   const items = (data.items as Item[] | undefined) ?? [];
 
   return <>

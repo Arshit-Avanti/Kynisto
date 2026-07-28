@@ -6,6 +6,8 @@ import "./kynisto-brand.css";
 import "./google-auth.css";
 import { AppUpdateManager } from "@/components/AppUpdateManager";
 import { SupabaseAuthManager } from "@/components/auth/SupabaseAuthManager";
+import { AudioPermissionModal } from "@/components/ui/AudioPermissionModal";
+import { NotificationPermissionModal } from "@/components/ui/NotificationPermissionModal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -66,6 +68,8 @@ export default function RootLayout({
         <SupabaseAuthManager />
         {children}
         <AppUpdateManager />
+        <AudioPermissionModal />
+        <NotificationPermissionModal />
       </body>
     </html>
   );

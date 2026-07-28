@@ -47,6 +47,14 @@ export default defineConfig(async () => {
     server: isCodexSeatbeltSandbox
       ? { watch: { useFsEvents: false, usePolling: true } }
       : undefined,
+    build: {
+      rolldownOptions: {
+        external: ["cloudflare:workers"],
+      },
+    },
+    ssr: {
+      external: ["cloudflare:workers"],
+    },
     plugins: [
       vinext(),
       sites(),

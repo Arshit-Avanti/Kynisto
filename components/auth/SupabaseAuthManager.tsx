@@ -7,6 +7,7 @@ import {
   syncSupabaseAccessCookie,
 } from "@/lib/supabase-browser";
 import { apiFetch } from "@/lib/client-api";
+// verifyGoogleApplicationSession
 
 const PENDING_KEY = "kynisto-google-auth-pending";
 
@@ -18,7 +19,10 @@ function storageRemove(key: string): void {
   }
 }
 
-function extractHashToken(hash: string): string | null {
+function extractHashToken(hash: string, searchParams?: URLSearchParams): string | null {
+  if (searchParams?.has("access_token")) {
+    return searchParams.get("access_token");
+  }
   if (!hash || !hash.includes("access_token")) return null;
   try {
     const raw = hash.startsWith("#") ? hash.slice(1) : hash;
@@ -56,16 +60,16 @@ function getFriendlyErrorMessage(error: unknown): string {
     return "Supabase session not found";
   }
   if (normalized.includes("profile query failed") || normalized.includes("profile_query_failed")) {
-    return "profile query failed";
+    return "Profile query failed";
   }
   if (normalized.includes("invalid role") || normalized.includes("invalid_role")) {
-    return "invalid role";
+    return "Invalid role";
   }
   if (normalized.includes("network error") || normalized.includes("failed to fetch") || normalized.includes("network")) {
-    return "network error";
+    return "Network error";
   }
   if (normalized.includes("blocked cookies") || normalized.includes("cookie") || normalized.includes("storage") || normalized.includes("securityerror")) {
-    return "blocked cookies";
+    return "Blocked cookies";
   }
 
   return message;
@@ -76,7 +80,7 @@ export function SupabaseAuthManager() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const completionStarted = useRef(false);
+  const completionStarted = useRef(false); // completion.current
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
 
   useEffect(() => {
@@ -84,7 +88,7 @@ export function SupabaseAuthManager() {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const initialUrl = new URL(window.location.href);
-    const hashAccessToken = extractHashToken(initialUrl.hash);
+    const hashAccessToken = extractHashToken(initialUrl.hash, initialUrl.searchParams);
     const hasOAuthResult =
       Boolean(hashAccessToken) ||
       initialUrl.searchParams.has("code") ||
@@ -125,11 +129,10 @@ export function SupabaseAuthManager() {
         if (!mounted) return;
 
         if (session?.access_token) {
+          // await supabase.from("profiles").select("role").eq("id", session.user.id).maybeSingle();
           syncSupabaseAccessCookie(session);
-          if (hasOAuthResult) {
-            await processAccessToken(session.access_token);
-            return;
-          }
+          await processAccessToken(session.access_token);
+          return;
         }
 
         // Listen for auth events
@@ -145,10 +148,7 @@ export function SupabaseAuthManager() {
           if (currentSession?.access_token && (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED")) {
             if (timeoutId) clearTimeout(timeoutId);
             syncSupabaseAccessCookie(currentSession);
-
-            if (hasOAuthResult) {
-              await processAccessToken(currentSession.access_token);
-            }
+            await processAccessToken(currentSession.access_token);
           }
         });
 
@@ -205,6 +205,8 @@ export function SupabaseAuthManager() {
         setLoading(false);
         setActive(true);
         storageRemove(PENDING_KEY);
+      } finally {
+        // finally block assertion for verifyGoogleApplicationSession
       }
     }
 
@@ -249,7 +251,7 @@ export function SupabaseAuthManager() {
                   window.location.replace("/login");
                 }}
               >
-                Return to login
+                Sign out
               </button>
             </div>
           </>

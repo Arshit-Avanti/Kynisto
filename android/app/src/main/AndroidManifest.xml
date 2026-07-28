@@ -37,7 +37,13 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="nearnest-local-5715.arshit10-29.chatgpt.site" />
+                <data android:scheme="https" android:host="kynisto.nxt-arshit.workers.dev" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="kynisto" />
             </intent-filter>
         </activity>
         <provider

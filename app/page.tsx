@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
+import { VideoBackground } from "@/components/media/VideoBackground";
 import { apiFetch } from "@/lib/client-api";
 
 type Category = {
@@ -442,6 +443,7 @@ export default function Home() {
 
   return (
     <main className={`site theme-${accent} density-${density} mode-${themeMode}`}>
+      <VideoBackground />
       <header className="topbar">
         <a className="brand" href="#top" aria-label="Kynisto home"><KynistoLogo showTagline /></a>
 
@@ -455,8 +457,8 @@ export default function Home() {
         </button>
 
         <div className="headerActions">
-          <Link className="textButton accountButton" href={userRole ? "/dashboard" : "/login"}>
-            {userRole ? "Dashboard" : "Log in"}
+          <Link className="textButton accountButton" href={userRole ? (userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account") : "/login"}>
+            {userRole === "admin" ? "Admin Panel" : userRole === "store_owner" ? "Owner Dashboard" : userRole === "customer" ? "My Account" : "Log in"}
           </Link>
           <Link className="textButton accountButton" href="/products">Products</Link>
           <Link className="textButton accountButton" href="/healthcare">Healthcare</Link>
@@ -489,13 +491,27 @@ export default function Home() {
               <span aria-hidden="true" />
             </summary>
             <nav aria-label="Mobile navigation">
-              <Link href={userRole ? "/dashboard" : "/login"}>{userRole ? "Dashboard" : "Log in"}</Link>
+              <Link href={userRole ? (userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account") : "/login"}>
+                {userRole === "admin" ? "Admin Panel" : userRole === "store_owner" ? "Owner Dashboard" : userRole === "customer" ? "My Account" : "Log in"}
+              </Link>
               <Link href="/products">Products</Link>
               <Link href="/healthcare">Healthcare</Link>
               <Link href={userRole === "customer" || userRole === "admin" ? "/account?tab=favorites" : "/login?returnTo=%2Faccount%3Ftab%3Dfavorites"}>
                 Saved places
               </Link>
               <button type="button" onClick={() => setCustomizing(true)}>Customize appearance</button>
+              {userRole && (
+                <button
+                  type="button"
+                  style={{ color: "#ef4444", textAlign: "left" }}
+                  onClick={async () => {
+                    await apiFetch("/api/auth/logout", { method: "POST" });
+                    window.location.href = "/";
+                  }}
+                >
+                  Sign out
+                </button>
+              )}
             </nav>
           </details>
         </div>
@@ -503,10 +519,7 @@ export default function Home() {
 
       <section className="hero" id="top">
         <div className="heroCopy">
-          <div className="eyebrow"><span aria-hidden="true">✦</span> Everything Around You, Smarter.</div>
           <h1>Kynisto</h1>
-          <p className="heroTagline">Everything Around You, Smarter.</p>
-          <p className="heroText">Find trusted everyday stores, exact addresses, live availability, healthcare queues, and local services in one intelligent place.</p>
 
           <form
             className="searchBox"
@@ -531,26 +544,10 @@ export default function Home() {
           </form>
 
           <div className="quickProof" aria-label="Kynisto highlights">
-            <span><b>100+</b> local places</span>
-            <span><b>20</b> useful categories</span>
-            <span><b>Live</b> open status</span>
+            <span><b>100+</b> Places</span>
+            <span><b>20</b> Categories</span>
+            <span><b>Live</b> Status</span>
           </div>
-        </div>
-
-        <div className="mapScene" aria-label="Illustrated map of nearby stores">
-          <div className="sunDisc" />
-          <div className="mapGrid" />
-          <div className="road roadOne" />
-          <div className="road roadTwo" />
-          <div className="road roadThree" />
-          <div className="parkPatch"><span>Neighbourhood park</span></div>
-          <div className="mapPin pinSalon"><span>✂</span><b>Salon</b></div>
-          <div className="mapPin pinGrocery"><span>◒</span><b>Grocery</b></div>
-          <div className="mapPin pinClinic"><span>+</span><b>Clinic</b></div>
-          <div className="mapPin pinCafe"><span>☕</span><b>Café</b></div>
-          <div className="youAreHere"><i /> You are here</div>
-          <div className="nearbyBadge"><strong>18 places</strong><span>within 2 km</span></div>
-          <div className="mapCaption"><span>DLF Ankur Vihar</span><strong>See what is around you</strong></div>
         </div>
       </section>
 
@@ -699,15 +696,14 @@ export default function Home() {
       </section>
 
       <section className="trustStrip" aria-label="Why use Kynisto">
-        <div><span aria-hidden="true">⌖</span><p><b>Address first</b><small>No hunting through pages for the location.</small></p></div>
-        <div><span aria-hidden="true">✓</span><p><b>Useful at a glance</b><small>Hours, distance and rating in one card.</small></p></div>
-        <div><span aria-hidden="true">♥</span><p><b>Made for your locality</b><small>Save the places you use every week.</small></p></div>
+        <div><span aria-hidden="true">⌖</span><p><b>Exact Location</b></p></div>
+        <div><span aria-hidden="true">✓</span><p><b>Live Hours & Ratings</b></p></div>
+        <div><span aria-hidden="true">♥</span><p><b>Saved Favorites</b></p></div>
       </section>
 
       <footer>
-        <a className="brand footerBrand" href="#top"><KynistoLogo showTagline /></a>
-        <p>Everything Around You, Smarter.</p>
-        <p className="demoNote">Local listings for DLF Ankur Vihar, Loni, Ghaziabad · © 2026 Kynisto</p>
+        <a className="brand footerBrand" href="#top"><KynistoLogo /></a>
+        <p className="demoNote">DLF Ankur Vihar, Loni · © 2026 Kynisto</p>
       </footer>
 
       {customizing && (

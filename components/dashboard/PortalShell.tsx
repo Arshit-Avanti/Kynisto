@@ -11,6 +11,7 @@ import type { SessionUser, UserRole } from "@/lib/auth";
 const navByRole: Record<UserRole, { label: string; icon: string; tab?: string; badge?: "chat" }[]> = {
   admin: [
     { label: "Dashboard", icon: "◫", tab: "overview" },
+    { label: "Premium & Plans", icon: "👑", tab: "subscriptions" },
     { label: "Users", icon: "◎", tab: "users" },
     { label: "Shop owners", icon: "♙", tab: "owners" },
     { label: "Customers", icon: "◉", tab: "customers" },
@@ -33,6 +34,7 @@ const navByRole: Record<UserRole, { label: string; icon: string; tab?: string; b
   ],
   store_owner: [
     { label: "Overview", icon: "◫", tab: "overview" },
+    { label: "Premium & Plans", icon: "👑", tab: "subscription" },
     { label: "Profile & categories", icon: "⌂", tab: "profile" },
     { label: "Media", icon: "▧", tab: "media" },
     { label: "Products", icon: "◇", tab: "products" },
@@ -53,6 +55,7 @@ const navByRole: Record<UserRole, { label: string; icon: string; tab?: string; b
   ],
   customer: [
     { label: "My account", icon: "◎", tab: "overview" },
+    { label: "Premium & Plans", icon: "👑", tab: "subscription" },
     { label: "Profile", icon: "◉", tab: "profile" },
     { label: "Addresses", icon: "⌖", tab: "addresses" },
     { label: "Saved places", icon: "♥", tab: "favorites" },

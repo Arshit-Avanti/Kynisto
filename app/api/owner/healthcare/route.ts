@@ -4,12 +4,17 @@ import { isQueueEligibleHealthcareType, requireHealthcareStore } from "@/lib/hea
 import { healthcareQueueDashboard, isQueueOperation, operateHealthcareQueue } from "@/lib/healthcare-queue-management";
 import { requireOwnedStore, writeAudit } from "@/lib/ownership";
 import { apiError, HttpError, noStoreJson } from "@/lib/security";
+import { getOwnerActivePlan } from "@/lib/subscriptions";
 import { booleanInput, cleanText, numberInput, safeJson } from "@/lib/validation";
 
 async function ownerContext(ownerId: string, storeId: string) {
   await requireOwnedStore(ownerId, storeId);
   const provider = await requireHealthcareStore(storeId);
   if (!provider.providerType) throw new HttpError(409, "Ask an admin to add Live Queue to this healthcare business first.", "HEALTHCARE_SETUP_REQUIRED");
+  const plan = await getOwnerActivePlan(ownerId);
+  if (plan.allowQueueManagement === false || plan.id === "free") {
+    throw new HttpError(403, "Live Queue Management requires a STARTER or PRO subscription.", "SUBSCRIPTION_REQUIRED");
+  }
   return provider;
 }
 

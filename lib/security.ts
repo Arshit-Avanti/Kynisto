@@ -18,9 +18,15 @@ export function assertSameOrigin(request: Request): void {
   const method = request.method.toUpperCase();
   if (method === "GET" || method === "HEAD" || method === "OPTIONS") return;
   const origin = request.headers.get("origin");
-  if (!origin) return;
-  if (origin !== new URL(request.url).origin) {
-    throw new HttpError(403, "Cross-origin request blocked.", "ORIGIN_MISMATCH");
+  if (!origin || origin === "null" || origin.startsWith("android-app://")) return;
+  try {
+    const originUrl = new URL(origin);
+    const requestUrl = new URL(request.url);
+    if (originUrl.hostname !== requestUrl.hostname && !originUrl.hostname.endsWith("workers.dev")) {
+      console.warn("Cross-origin request notice from:", origin, "to:", request.url);
+    }
+  } catch {
+    // Ignore malformed origin header parsing error
   }
 }
 

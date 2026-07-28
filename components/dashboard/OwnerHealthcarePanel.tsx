@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { apiFetch } from "@/lib/client-api";
+import { OwnerHealthcareQRCard } from "./OwnerHealthcareQRCard";
 
 type Item = Record<string, string | number | null | undefined>;
 type Data = { profile?: Item; entries?: Item[]; analytics?: Item[]; history?: Item[]; events?: Item[] };
@@ -114,6 +115,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
         <div className="queueHistory"><h3>Daily history</h3>{(data.history ?? []).slice(0, 7).map((day) => <div key={String(day.serviceDate)}><span>{day.serviceDate}</span><b>{day.completed}/{day.total} completed</b><small>{day.skipped} skipped</small></div>)}</div>
       </section>
     </div>
+    <OwnerHealthcareQRCard />
     {toast && <div className="portalToast" role="status">✓ {toast}</div>}
   </>;
 }

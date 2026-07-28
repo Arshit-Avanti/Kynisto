@@ -4,12 +4,17 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DownloadManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.media.AudioAttributes;
+import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -22,6 +27,7 @@ import android.provider.Settings;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
+import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
 import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
@@ -36,6 +42,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.FileProvider;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -50,7 +57,7 @@ public class MainActivity extends Activity {
     private static final int LOCATION_REQUEST = 302;
     private static final int STORAGE_REQUEST = 303;
     private static final long BACK_EXIT_WINDOW_MS = 2_000L;
-    private static final String APP_HOST = "nearnest-local-5715.arshit10-29.chatgpt.site";
+    private static final String APP_HOST = "kynisto.nxt-arshit.workers.dev";
 
     private String defaultUserAgent;
     private String customUserAgent;
@@ -90,7 +97,9 @@ public class MainActivity extends Activity {
         registerConnectivity();
 
         Uri launchUri = getIntent() == null ? null : getIntent().getData();
-        if (isTrustedAppLink(launchUri)) {
+        if (handleNotificationIntent(getIntent())) {
+            // Handled notification deep link target URL
+        } else if (isTrustedAppLink(launchUri)) {
             loadAppLink(launchUri);
         } else if (savedInstanceState != null && webView.restoreState(savedInstanceState) != null) {
             loadingView.setVisibility(View.GONE);
@@ -101,11 +110,27 @@ public class MainActivity extends Activity {
         }
     }
 
+    private boolean handleNotificationIntent(Intent intent) {
+        if (intent == null) return false;
+        String targetUrl = intent.getStringExtra("target_url");
+        if (targetUrl != null && !targetUrl.trim().isEmpty()) {
+            String url = targetUrl.trim();
+            if (url.startsWith("/")) {
+                webView.loadUrl(BuildConfig.WEB_URL + url);
+                return true;
+            } else if (url.startsWith("http://") || url.startsWith("https://")) {
+                webView.loadUrl(url);
+                return true;
+            }
+        }
+        return false;
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
     private void configureWebView() {
         CookieManager cookies = CookieManager.getInstance();
         cookies.setAcceptCookie(true);
-        cookies.setAcceptThirdPartyCookies(webView, false);
+        cookies.setAcceptThirdPartyCookies(webView, true);
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -120,18 +145,22 @@ public class MainActivity extends Activity {
         settings.setSupportZoom(false);
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(true);
-        settings.setJavaScriptCanOpenWindowsAutomatically(false);
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
         settings.setSupportMultipleWindows(false);
         settings.setMediaPlaybackRequiresUserGesture(true);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         
-        defaultUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Safari/605.1.15";
-        customUserAgent = settings.getUserAgentString() + " KynistoAndroid/" + BuildConfig.VERSION_NAME;
-        settings.setUserAgentString(customUserAgent);
+        defaultUserAgent = "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36";
+        customUserAgent = defaultUserAgent;
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            settings.setOffscreenPreRaster(true);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) WebView.startSafeBrowsing(this, null);
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
         webView.setBackgroundColor(Color.rgb(244, 247, 252));
+        webView.addJavascriptInterface(new WebAppInterface(this), "AndroidNotification");
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -143,15 +172,7 @@ public class MainActivity extends Activity {
             public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
                 progress.setVisibility(View.VISIBLE);
                 offlineView.setVisibility(View.GONE);
-                
-                Uri uri = Uri.parse(url);
-                String path = uri.getPath();
-                boolean isAuthPage = path != null && (path.startsWith("/login") || path.startsWith("/onboarding"));
-                if (isOAuthUrl(uri) || isAuthPage) {
-                    view.getSettings().setUserAgentString(defaultUserAgent);
-                } else {
-                    view.getSettings().setUserAgentString(customUserAgent);
-                }
+                view.getSettings().setUserAgentString(defaultUserAgent);
             }
 
             @Override
@@ -214,14 +235,22 @@ public class MainActivity extends Activity {
 
     private boolean handleNavigation(Uri uri) {
         String scheme = uri.getScheme() == null ? "" : uri.getScheme().toLowerCase(Locale.ROOT);
+        
         if (isTrustedAppLink(uri)) return false;
-        if (isOAuthUrl(uri)) return false;
-        if ("about".equals(scheme)) return false;
-        if ("http".equals(scheme)) {
-            Toast.makeText(this, "Kynisto only opens secure HTTPS links.", Toast.LENGTH_LONG).show();
+        
+        if (isOAuthUrl(uri)) {
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            try {
+                intent.setPackage("com.android.chrome");
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                openExternal(intent);
+            }
             return true;
         }
-        if ("https".equals(scheme) || "tel".equals(scheme) || "mailto".equals(scheme) || "sms".equals(scheme)
+
+        if ("about".equals(scheme)) return false;
+        if ("tel".equals(scheme) || "mailto".equals(scheme) || "sms".equals(scheme)
             || "geo".equals(scheme) || "market".equals(scheme)) {
             return openExternal(new Intent(Intent.ACTION_VIEW, uri));
         }
@@ -234,29 +263,50 @@ public class MainActivity extends Activity {
                 return true;
             }
         }
-        Toast.makeText(this, "This link is not supported.", Toast.LENGTH_SHORT).show();
+        if ("https".equals(scheme)) {
+            return false;
+        }
         return true;
     }
 
     private boolean isOAuthUrl(Uri uri) {
         if (uri == null) return false;
         String host = uri.getHost();
+        String fullUrl = uri.toString().toLowerCase(Locale.ROOT);
         if (host == null) return false;
         String lowerHost = host.toLowerCase(Locale.ROOT);
-        return lowerHost.endsWith("supabase.co")
-            || lowerHost.contains("google.")
-            || lowerHost.contains("accounts.google");
+        String path = uri.getPath() == null ? "" : uri.getPath().toLowerCase(Locale.ROOT);
+
+        return lowerHost.equals("accounts.google.com")
+            || (lowerHost.equals("google.com") && path.contains("/o/oauth2"))
+            || (lowerHost.endsWith("supabase.co") && path.contains("/auth"))
+            || lowerHost.endsWith("supabase.net")
+            || lowerHost.contains("accounts.google")
+            || lowerHost.contains("googleusercontent.com")
+            || lowerHost.contains("googleapis.com")
+            || fullUrl.contains("access_token")
+            || fullUrl.contains("code=");
     }
 
     private boolean isTrustedAppLink(Uri uri) {
-        return uri != null
-            && "https".equalsIgnoreCase(uri.getScheme())
-            && APP_HOST.equalsIgnoreCase(uri.getHost());
+        if (uri == null) return false;
+        String scheme = uri.getScheme() == null ? "" : uri.getScheme().toLowerCase(Locale.ROOT);
+        String host = uri.getHost() == null ? "" : uri.getHost().toLowerCase(Locale.ROOT);
+        if ("kynisto".equals(scheme)) return true;
+        return "https".equalsIgnoreCase(scheme) && APP_HOST.equalsIgnoreCase(host);
     }
 
     private void loadAppLink(Uri uri) {
         if (!isTrustedAppLink(uri)) return;
+        String scheme = uri.getScheme() == null ? "" : uri.getScheme().toLowerCase(Locale.ROOT);
         String target = uri.toString();
+        if ("kynisto".equals(scheme)) {
+            String path = uri.getPath() == null ? "" : uri.getPath();
+            String host = uri.getHost() == null ? "" : uri.getHost();
+            String query = uri.getQuery() == null ? "" : "?" + uri.getQuery();
+            String fragment = uri.getFragment() == null ? "" : "#" + uri.getFragment();
+            target = BuildConfig.WEB_URL + "/" + host + path + query + fragment;
+        }
         String current = webView.getUrl();
         if (target.equals(lastHandledAppLink) || target.equals(current)) return;
 
@@ -272,9 +322,13 @@ public class MainActivity extends Activity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        Uri returnUri = intent == null ? null : intent.getData();
-        if (isTrustedAppLink(returnUri)) {
-            loadAppLink(returnUri);
+        if (handleNotificationIntent(intent)) {
+            // Target URL deep link handled
+        } else {
+            Uri returnUri = intent == null ? null : intent.getData();
+            if (isTrustedAppLink(returnUri)) {
+                loadAppLink(returnUri);
+            }
         }
     }
 
@@ -509,6 +563,85 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(null);
         webView.destroy();
         super.onDestroy();
+    }
+
+    public class WebAppInterface {
+        Context mContext;
+        WebAppInterface(Context c) { mContext = c; }
+
+        @JavascriptInterface
+        public void showNotification(String title, String message) {
+            runOnUiThread(() -> sendAndroidNotification(title, message, null));
+        }
+
+        @JavascriptInterface
+        public void showNotificationWithUrl(String title, String message, String targetUrl) {
+            runOnUiThread(() -> sendAndroidNotification(title, message, targetUrl));
+        }
+
+        @JavascriptInterface
+        public void requestPermission() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 304);
+                }
+            }
+        }
+    }
+
+    private void sendAndroidNotification(String title, String message, String targetUrl) {
+        try {
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            String channelId = "kynisto_high_priority_v3";
+            Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            long[] doublePulseVibration = new long[]{0, 150, 100, 150, 100, 250};
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel = new NotificationChannel(
+                    channelId,
+                    "Kynisto Alerts & Orders",
+                    NotificationManager.IMPORTANCE_HIGH
+                );
+                channel.setDescription("High priority order, queue, and system alerts with sound");
+                channel.enableVibration(true);
+                channel.setVibrationPattern(doublePulseVibration);
+                
+                AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .build();
+                channel.setSound(defaultSoundUri, audioAttributes);
+
+                if (notificationManager != null) {
+                    notificationManager.createNotificationChannel(channel);
+                }
+            }
+
+            Intent intent = new Intent(this, MainActivity.class);
+            if (targetUrl != null && !targetUrl.trim().isEmpty()) {
+                intent.putExtra("target_url", targetUrl.trim());
+            }
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                this, (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setSound(defaultSoundUri)
+                .setVibrate(doublePulseVibration)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent);
+
+            if (notificationManager != null) {
+                notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, title + ": " + message, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private static final class PendingDownload {

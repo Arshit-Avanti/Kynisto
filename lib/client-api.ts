@@ -43,6 +43,16 @@ export function uploadFormData<T = unknown>(
   });
 }
 
+export async function safeJsonParse<T = unknown>(response: Response): Promise<T | null> {
+  try {
+    const text = await response.text();
+    if (!text || !text.trim()) return null;
+    return JSON.parse(text) as T;
+  } catch {
+    return null;
+  }
+}
+
 export async function apiFetch<T = unknown>(
   path: string,
   options: RequestInit & { json?: unknown } = {},
@@ -60,13 +70,13 @@ export async function apiFetch<T = unknown>(
     credentials: "same-origin",
     body: options.json !== undefined ? JSON.stringify(options.json) : options.body,
   });
-  const data = (await response.json().catch(() => null)) as
+  const data = (await safeJsonParse(response)) as
     | T
     | { error?: { message?: string }; message?: string }
     | null;
   if (!response.ok) {
     const errorData = data as { error?: { message?: string }; message?: string } | null;
-    throw new Error(errorData?.error?.message ?? errorData?.message ?? "Request failed.");
+    throw new Error(errorData?.error?.message ?? errorData?.message ?? `Request failed with status ${response.status}.`);
   }
   return data as T;
 }

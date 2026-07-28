@@ -14,6 +14,8 @@ import {
   StoreManagementTable as StoresTableV2,
   UserManagementTable as UsersTableV2,
 } from "@/components/dashboard/AdminTables";
+import { AdminSubscriptionsPanel } from "@/components/dashboard/AdminSubscriptionsPanel";
+import { AdminNotificationPanel } from "@/components/dashboard/AdminNotificationPanel";
 
 type Item = Record<string, string | number | null | undefined>;
 type Data = Record<string, unknown>;
@@ -27,40 +29,36 @@ export function AdminDashboard({ user }: { user: SessionUser }) {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") ?? "overview";
   const [data, setData] = useState<Data>({});
+  const [categories, setCategories] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [toast, setToast] = useState("");
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
-  const [toast, setToast] = useState("");
   const [showCreate, setShowCreate] = useState(false);
-  const [editingStore, setEditingStore] = useState<Record<string, unknown> | null>(null);
-  const [categories, setCategories] = useState<Item[]>([]);
+  const [editingStore, setEditingStore] = useState<Item | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      if (tab === "overview" || tab === "analytics") {
-        setData(await apiFetch<Data>("/api/admin/overview"));
-      } else if (["users", "owners", "customers"].includes(tab)) {
-        const role = tab === "owners" ? "store_owner" : tab === "customers" ? "customer" : "";
-        setData(await apiFetch<Data>(`/api/admin/users?q=${encodeURIComponent(query)}&status=${status}&role=${role}`));
-      } else if (tab === "stores") {
-        const [stores, categoryData] = await Promise.all([
-          apiFetch<Data>(`/api/admin/stores?q=${encodeURIComponent(query)}&status=${status}`),
-          apiFetch<{ items: Item[] }>("/api/categories?module=all"),
-        ]);
-        setData(stores);
-        setCategories(categoryData.items);
-      } else if (tab === "categories") {
-        setData(await apiFetch<Data>("/api/admin/categories"));
-      } else if (tab === "reviews") {
-        setData(await apiFetch<Data>(`/api/admin/reviews?q=${encodeURIComponent(query)}&status=${status}`));
-      } else if (tab === "reports") {
-        setData(await apiFetch<Data>(`/api/admin/reports?status=${status}`));
+      if (ADMIN_WORKSPACE_TABS.has(tab)) {
+        setLoading(false);
+        return;
       }
+      const search = new URLSearchParams();
+      if (query) search.set("query", query);
+      if (status) search.set("status", status);
+      const queryParams = search.toString();
+      const endpoint = tab === "overview" || tab === "analytics" ? "/api/admin/overview" : `/api/admin/${tab}${queryParams ? `?${queryParams}` : ""}`;
+      const [response, categoryData] = await Promise.all([
+        apiFetch<Data>(endpoint),
+        apiFetch<{ items: Item[] }>("/api/categories?module=all"),
+      ]);
+      setData(response);
+      setCategories(categoryData.items);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Unable to load dashboard.");
+      setError(loadError instanceof Error ? loadError.message : "Unable to load admin dataset.");
     } finally {
       setLoading(false);
     }
@@ -85,7 +83,7 @@ export function AdminDashboard({ user }: { user: SessionUser }) {
   if (loading) return <div className="portalSkeleton"><span /><span /><span /><span /></div>;
 
   const items = (data.items as Item[] | undefined) ?? [];
-  const title = tab === "overview" ? "Platform overview" : tab.charAt(0).toUpperCase() + tab.slice(1);
+  const title = tab === "overview" ? "Platform overview" : tab === "subscriptions" ? "Premium & Plans Control" : tab.charAt(0).toUpperCase() + tab.slice(1);
 
   return (
     <>
@@ -96,7 +94,9 @@ export function AdminDashboard({ user }: { user: SessionUser }) {
       {tab === "analytics" && <Analytics data={data} />}
       {tab === "chat" && <ChatCenter user={user} />}
       {tab === "healthcare" && <AdminHealthcarePanel />}
-      {tab !== "overview" && tab !== "analytics" && tab !== "chat" && tab !== "healthcare" && !ADMIN_WORKSPACE_TABS.has(tab) && (
+      {(tab === "subscriptions" || tab === "subscription") && <AdminSubscriptionsPanel />}
+      {tab === "notifications" && <AdminNotificationPanel />}
+      {tab !== "overview" && tab !== "analytics" && tab !== "chat" && tab !== "healthcare" && tab !== "subscriptions" && tab !== "subscription" && tab !== "notifications" && !ADMIN_WORKSPACE_TABS.has(tab) && (
         <>
           <form className="portalToolbar" onSubmit={(event) => { event.preventDefault(); void load(); }}>
             {tab !== "categories" && <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Search ${tab}…`} />}

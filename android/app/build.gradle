@@ -18,7 +18,7 @@ android {
         targetSdk 35
         versionCode Integer.parseInt(System.getenv("KYNISTO_VERSION_CODE") ?: "3")
         versionName System.getenv("KYNISTO_VERSION_NAME") ?: "1.0.2"
-        buildConfigField "String", "WEB_URL", "\"https://nearnest-local-5715.arshit10-29.chatgpt.site\""
+        buildConfigField "String", "WEB_URL", "\"https://kynisto.nxt-arshit.workers.dev\""
         vectorDrawables.useSupportLibrary = true
     }
 
@@ -71,6 +71,7 @@ android {
 dependencies {
     implementation "androidx.core:core:1.15.0"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    implementation "androidx.browser:browser:1.8.0"
 }
 
 tasks.configureEach { task ->

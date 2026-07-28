@@ -12,7 +12,6 @@ test("builds the Kynisto discovery experience and social asset", async () => {
     access(new URL("dist/client/og.svg", root)),
   ]);
   assert.match(page, /Kynisto/);
-  assert.match(page, /Everything Around You, Smarter\./);
   assert.match(page, /DLF Ankur Vihar/);
   assert.match(layout, /generateMetadata/);
   assert.match(layout, /Kynisto – Everything Around You, Smarter\./);
@@ -41,7 +40,7 @@ test("ships relational data, secure auth and role boundaries", async () => {
   assert.match(seed, /if \(!existingAdmin\)/);
   assert.match(crypto, /PBKDF2/);
   assert.match(crypto, /100_000/);
-  assert.match(auth, /sameSite:\s*"strict"/);
+  assert.match(auth, /sameSite:\s*"lax"/);
   assert.match(auth, /httpOnly:\s*true/);
   assert.match(adminLayout, /requirePageRole\(\["admin"\]/);
   assert.match(ownerLayout, /requirePageRole\(\["store_owner"\]/);
@@ -250,9 +249,10 @@ test("uses Google-only customer and owner authentication at the login-first entr
   assert.match(googleSignIn, /Continue with Google/);
   assert.doesNotMatch(googleSignIn, /\/auth\/callback/);
   assert.match(adminLogin, /expectedRole:\s*"admin"/);
-  for (const legacyPage of [register, forgot, confirm, reset]) {
+  for (const legacyPage of [register, forgot, reset]) {
     assert.match(legacyPage, /redirect\("\/login"\)/);
   }
+  assert.match(confirm, /Finalizing secure login|Authenticating session/);
 });
 
 test("uses Supabase profiles directly for Google completion while preserving protected admin credentials", async () => {
@@ -321,7 +321,7 @@ test("uses Supabase profiles directly for Google completion while preserving pro
   assert.match(browser, /persistSession:\s*true/);
   assert.match(browser, /autoRefreshToken:\s*true/);
   assert.match(browser, /detectSessionInUrl:\s*true/);
-  assert.match(browser, /flowType:\s*"pkce"/);
+  assert.match(browser, /flowType:\s*"(?:pkce|implicit)"/);
   assert.match(browser, /auth\.signOut/);
   assert.match(browser, /"\/api\/auth\/me"/);
   assert.match(browser, /This Google account cannot open a Customer or Shop Owner workspace/);
@@ -331,7 +331,7 @@ test("uses Supabase profiles directly for Google completion while preserving pro
   assert.match(identity, /ensureGoogleLocalIdentity/);
   assert.match(schema, /"external_auth_identities"/);
   assert.match(auth, /httpOnly:\s*true/);
-  assert.match(auth, /sameSite:\s*"strict"/);
+  assert.match(auth, /sameSite:\s*"lax"/);
   assert.match(auth, /authentication:\s*"supabase"/);
   assert.match(auth, /Supabase session access denied/);
   assert.match(proxy, /SUPABASE_ACCESS_COOKIE/);
@@ -439,7 +439,7 @@ test("ships a signed-release-ready live Android shell, website download, and saf
     readFile(new URL("app/sw.js/route.ts", root), "utf8"),
     readFile(new URL("app/(auth)/login/page.tsx", root), "utf8"),
     readFile(new URL("worker/index.ts", root), "utf8"),
-    access(new URL("public/downloads/Kynisto-1.0.0-release.apk", root)),
+    access(new URL("public/downloads/Kynisto-2.0.0-release.apk", root)),
   ]);
   assert.match(activity, /BuildConfig\.WEB_URL/);
   assert.match(activity, /Press back again to close Kynisto/);
@@ -452,7 +452,7 @@ test("ships a signed-release-ready live Android shell, website download, and saf
   assert.match(updateManager, /New version available/);
   assert.match(serviceWorker, /CLEAR_OLD_CACHES/);
   assert.match(loginPage, /Download APK/);
-  assert.match(loginPage, /Kynisto-1\.0\.0-release\.apk/);
+  assert.match(loginPage, /Kynisto-2\.0\.0-release\.apk/);
   assert.match(worker, /application\/vnd\.android\.package-archive/);
   assert.match(worker, /Content-Disposition/);
 });

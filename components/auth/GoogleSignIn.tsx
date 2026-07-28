@@ -1,11 +1,14 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { apiFetch } from "@/lib/client-api";
 
 const PENDING_KEY = "kynisto-google-auth-pending";
 
 export function GoogleSignIn() {
+  const router = useRouter();
   const starting = useRef(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -19,8 +22,8 @@ export function GoogleSignIn() {
       const supabase = await getSupabaseBrowserClient();
       const redirectTo =
         typeof window !== "undefined"
-          ? window.location.origin
-          : "https://kynisto.nxt-arshit.workers.dev";
+          ? `${window.location.origin}/auth/confirm`
+          : "https://kynisto.nxt-arshit.workers.dev/auth/confirm";
       try {
         window.sessionStorage.setItem(PENDING_KEY, "1");
       } catch {
@@ -42,7 +45,6 @@ export function GoogleSignIn() {
         // Ignore storage restriction errors
       }
       starting.current = false;
-      setBusy(false);
       setError(
         oauthError instanceof Error
           ? `OAuth redirect failed: ${oauthError.message}`
@@ -73,9 +75,9 @@ export function GoogleSignIn() {
         <span>{busy ? "Connecting securely…" : "Continue with Google"}</span>
         {busy && <i className="googleButtonSpinner" aria-hidden="true" />}
       </button>
-      <small className="googleSecurityNote">
-        Google verifies your identity. Kynisto securely determines your saved
-        role and permissions.
+
+      <small className="googleSecurityNote" style={{ marginTop: "1rem", display: "block" }}>
+        Google verifies your identity. Kynisto securely determines your saved role and permissions.
       </small>
     </section>
   );

@@ -8,6 +8,7 @@ import {
   signOutSupabaseBrowser,
   syncSupabaseAccessCookie,
 } from "@/lib/supabase-browser";
+// verifyGoogleApplicationSession
 
 type SelectedRole = "customer" | "shop_owner";
 

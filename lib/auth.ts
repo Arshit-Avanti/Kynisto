@@ -39,13 +39,13 @@ export type AuthSession = {
 
 const DAY = 86_400;
 
-function cookieOptions(request: Request, maxAge?: number) {
+function cookieOptions(request: Request, maxAge: number = 30 * DAY) {
   return {
     httpOnly: true,
     sameSite: "lax" as const,
     secure: request.headers.get("x-forwarded-proto") === "https" || new URL(request.url).protocol === "https:",
     path: "/",
-    ...(maxAge ? { maxAge } : {}),
+    maxAge,
   };
 }
 
