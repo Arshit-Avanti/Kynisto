@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { BackButton } from "@/components/ui/BackButton";
+import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
 
 interface Navbar3DProps {
   userRole: "admin" | "store_owner" | "customer" | null;
@@ -110,6 +111,7 @@ export function Navbar3D({
             <span aria-hidden="true" style={{ marginRight: "4px" }}>≡</span>
             Customize
           </button>
+          <ThemeSwitcher size="sm" />
         </nav>
       )}
 

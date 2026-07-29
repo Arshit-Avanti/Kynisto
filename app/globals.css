@@ -98,6 +98,51 @@ input:focus-visible {
   color-scheme: dark;
 }
 
+/* ⚡ 1. Cyberpunk Neon Dark Theme */
+.theme-cyberpunk,
+[data-theme="cyberpunk"] {
+  --ink: #F0F6FF;
+  --muted: #A7B5D0;
+  --cream: #070A14;
+  --paper: #0E1326;
+  --line: #1F294D;
+  --accent: #00F0FF;
+  --accent-dark: #00B3FF;
+  --green: #00FF9D;
+  --yellow: #FF007F;
+  color-scheme: dark;
+}
+
+/* 👑 2. Royal Sapphire Dark Theme */
+.theme-royal,
+[data-theme="royal"] {
+  --ink: #F4F8FF;
+  --muted: #93A4C7;
+  --cream: #0A0F24;
+  --paper: #121A3A;
+  --line: #233261;
+  --accent: #3B82F6;
+  --accent-dark: #1D4ED8;
+  --green: #10B981;
+  --yellow: #F59E0B;
+  color-scheme: dark;
+}
+
+/* 🌑 3. Minimalist Obsidian OLED Theme */
+.theme-obsidian,
+[data-theme="obsidian"] {
+  --ink: #FFFFFF;
+  --muted: #94A3B8;
+  --cream: #000000;
+  --paper: #0D0D0D;
+  --line: #262626;
+  --accent: #E2E8F0;
+  --accent-dark: #CBD5E1;
+  --green: #22C55E;
+  --yellow: #EAB308;
+  color-scheme: dark;
+}
+
 .mode-dark .mapScene,
 .mode-dark .categoryTile,
 .mode-dark .storeCard,
