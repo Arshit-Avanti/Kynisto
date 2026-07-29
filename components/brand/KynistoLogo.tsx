@@ -13,11 +13,9 @@ export function KynistoLogo({ className = "", showTagline = false, variant = "de
     : "kynistoWordmark";
   return (
     <span className={`kynistoLogo ${className}`.trim()} aria-label="Kynisto">
-      <svg className="kynistoMark" viewBox="0 0 64 64" aria-hidden="true">
-        <rect width="64" height="64" rx="18" fill="currentColor" />
-        <path d="M20 15v34" fill="none" stroke="white" strokeLinecap="round" strokeWidth="8" />
-        <path d="m25 32 18-17" fill="none" stroke="#30d8f2" strokeLinecap="round" strokeWidth="8" />
-        <path d="m26 33 19 17" fill="none" stroke="white" strokeLinecap="round" strokeWidth="8" />
+      <svg className="kynistoMark" viewBox="0 0 40 40" aria-hidden="true" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="8" fill="#2563eb" />
+        <path d="M14 10v20M14 20l12-10M16 20l10 10" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       <span className={wordmarkClass}>
         <b>Kynisto</b>

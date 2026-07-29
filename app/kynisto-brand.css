@@ -1,13 +1,13 @@
 :root {
-  --kyn-primary: #2457ff;
-  --kyn-primary-dark: #173bc4;
-  --kyn-navy: #0b1736;
+  --kyn-primary: var(--primary);
+  --kyn-primary-dark: var(--primary-hover);
+  --kyn-navy: var(--text-primary);
   --kyn-cyan: #20c7e8;
   --kyn-success: #149d65;
-  --kyn-bg: #f4f7fc;
-  --kyn-panel: #ffffff;
-  --kyn-line: #dbe4f3;
-  --kyn-muted: #5d6a85;
+  --kyn-bg: var(--bg-page);
+  --kyn-panel: var(--bg-card);
+  --kyn-line: var(--border);
+  --kyn-muted: var(--text-muted);
   --ink: var(--kyn-navy);
   --muted: var(--kyn-muted);
   --cream: var(--kyn-bg);
@@ -21,7 +21,7 @@
 }
 
 body {
-  font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.5;
   background: var(--kyn-bg);
 }
@@ -151,27 +151,43 @@ body {
 
 .portalButton,
 .authSubmit,
+button,
 .doneButton,
 .searchSubmit {
-  background: linear-gradient(135deg, var(--kyn-primary), #1743d7);
-  color: #fff;
-  box-shadow: 0 12px 28px rgba(36, 87, 255, .18);
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   font-size: 0.875rem;
   font-weight: 600;
   padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.portalButton:hover,
+.authSubmit:hover,
+button:hover,
+.doneButton:hover,
+.searchSubmit:hover {
+  background: var(--primary-hover);
 }
 
 .statCard,
 .portalCard,
+.authCard,
+.dashCard,
 .categoryTile,
 .storeCard,
 .providerGrid article,
 .productGrid article,
 .profileSection,
 .profileAside section {
-  border-color: var(--kyn-line);
-  box-shadow: 0 16px 44px rgba(16, 43, 99, .07);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .theme-royal {

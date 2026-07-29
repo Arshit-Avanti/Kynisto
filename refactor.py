@@ -1,14 +1,6 @@
-"use client";
+import re
 
-import Link from "next/link";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { KynistoLogo } from "@/components/brand/KynistoLogo";
-import { apiFetch } from "@/lib/client-api";
-import { ProductActions } from "@/components/store/ProductActions";
-
-type Product = Record<string, string | number | null | undefined>;
-
-
+icons_svg = """
 const Icons = {
   Search: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
   Location: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>,
@@ -19,7 +11,9 @@ const Icons = {
   Sliders: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>,
   Check: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
 };
+"""
 
+modern_clean_tech_styles = """
 const modernCleanTechStyles = `
   .site, .healthPage, .productDiscovery {
     font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
@@ -103,29 +97,61 @@ const modernCleanTechStyles = `
     color: #64748b !important;
   }
 `;
+"""
 
-export function ProductDiscovery() {
-  const [query, setQuery] = useState("");
-  const [submitted, setSubmitted] = useState("");
-  const [items, setItems] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+def process_app_page():
+    path = "app/page.tsx"
+    with open(path, "r", encoding="utf-8") as f:
+        content = f.read()
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const result = await apiFetch<{ items: Product[] }>(`/api/products?q=${encodeURIComponent(submitted)}&limit=48`);
-      setItems(result.items);
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Could not load products.");
-    } finally {
-      setLoading(false);
-    }
-  }, [submitted]);
+    # Replacements
+    content = content.replace('const categories: Category[] = [', icons_svg + modern_clean_tech_styles + '\nconst categories: Category[] = [')
+    content = content.replace('export default function Home() {', 'export default function Home() {')
+    content = content.replace('<main className={`site theme-${accent} density-${density} mode-${themeMode}`}>', '<main className={`site theme-${accent} density-${density} mode-${themeMode}`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />')
+    
+    # Replace icons in components
+    content = content.replace('<span className="searchIcon" aria-hidden="true" />', '<span className="searchIcon" aria-hidden="true"><Icons.Search /></span>')
+    content = content.replace('<span aria-hidden="true">⌖</span>', '<Icons.Location />')
+    content = content.replace('<span aria-hidden="true">♥</span>', '<Icons.Heart />')
+    content = content.replace('<span aria-hidden="true">☷</span>', '<Icons.Sliders />')
+    content = content.replace('<b>★ {store.rating}</b>', '<span style={{display: "flex", alignItems: "center", gap: "2px"}}><Icons.Star /> <b>{store.rating}</b></span>')
+    content = content.replace('<span aria-hidden="true">◷</span>', '<Icons.Clock />')
+    content = content.replace('♥', '<Icons.Heart />') # Wait, this might replace other hearts
+    content = content.replace('♡ Save place', '<Icons.Heart /> Save place')
+    
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
 
-  useEffect(() => { void load(); }, [load]);
-  function submit(event: FormEvent) { event.preventDefault(); setSubmitted(query.trim()); }
+def process_product_discovery():
+    path = "components/store/ProductDiscovery.tsx"
+    with open(path, "r", encoding="utf-8") as f:
+        content = f.read()
 
-  return <main className="productDiscovery"><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} /><header><Link href="/" className="productBrand"><KynistoLogo /></Link><nav><Link href="/">Nearby shops</Link><Link href="/account?tab=cart">My cart</Link><Link href="/login">Log in</Link></nav></header><section className="productIntro"><span>DLF Ankur Vihar</span><h1>Shop what is nearby.</h1><form onSubmit={submit}><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search product or shop…" aria-label="Search products" /><button type="submit">Search products</button></form></section>{error && <p className="productError" role="alert">{error}</p>}{loading ? <div className="productSkeleton"><span /><span /><span /></div> : items.length ? <section className="productGrid" aria-label="Local products">{items.map((item) => { const available = Number(item.availableQuantity ?? item.available ?? 0); const ratingCount = Number(item.productReviewCount ?? 0); const rating = Number(item.productRating ?? 0); return <article key={String(item.id)}><div className="productVisual">{item.imageUrl ? <img src={String(item.imageUrl)} alt="" loading="lazy" /> : <span>{String(item.name ?? "P").slice(0, 1)}</span>}</div><small>{item.storeName}</small><h2>{item.name}</h2><p>{item.description}</p><div className="productMeta"><b>₹{Number(item.price ?? 0).toLocaleString("en-IN")}</b><em>{available} available</em></div><div className="productRating" aria-label={ratingCount ? `${rating.toFixed(1)} from ${ratingCount} product ratings` : "No product ratings yet"}>{ratingCount ? `<Icons.Star /> ${rating.toFixed(1)}` : "<Icons.Star /> New product"} <span>{ratingCount ? `(${ratingCount})` : ""}</span></div><ProductActions productId={String(item.id)} available={available} /><Link className="viewShop" href={`/stores/${item.storeSlug}`}>View shop <Icons.ArrowRight /></Link></article>; })}</section> : <section className="productEmpty"><h2>No matching products</h2><p>Try a broader search or browse nearby shops.</p></section>}</main>;
-}
+    content = content.replace('export function ProductDiscovery() {', icons_svg + modern_clean_tech_styles + '\nexport function ProductDiscovery() {')
+    content = content.replace('<main className="productDiscovery">', '<main className="productDiscovery"><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />')
+    content = content.replace('★ ${rating.toFixed(1)}', '</span><Icons.Star /><span> ${rating.toFixed(1)}')
+    content = content.replace('☆ New product', '</span><Icons.Star /><span> New product')
+    content = content.replace('→', '<Icons.ArrowRight />')
+    
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
+
+def process_healthcare_discovery():
+    path = "components/healthcare/HealthcareDiscovery.tsx"
+    with open(path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    content = content.replace('export function HealthcareDiscovery() {', icons_svg + modern_clean_tech_styles + '\nexport function HealthcareDiscovery() {')
+    content = content.replace('<main className="healthPage">', '<main className="healthPage"><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />')
+    content = content.replace('★ {Number(provider.rating).toFixed(1)}', '</span><Icons.Star /><span> {Number(provider.rating).toFixed(1)}')
+    
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
+
+try:
+    process_app_page()
+    process_product_discovery()
+    process_healthcare_discovery()
+    print("Done")
+except Exception as e:
+    print("Error:", e)

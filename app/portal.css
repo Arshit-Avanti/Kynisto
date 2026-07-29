@@ -1,11 +1,11 @@
 .portal {
-  --p-bg: #050A18;
-  --p-panel: #0A122A;
-  --p-solid: #0F1B3E;
-  --p-ink: #FFFFFF;
-  --p-muted: #8E9DBA;
-  --p-line: rgba(0, 240, 255, 0.15);
-  --p-accent: #00F0FF;
+  --p-bg: var(--bg-page);
+  --p-panel: var(--bg-card);
+  --p-solid: #ffffff;
+  --p-ink: var(--text-primary);
+  --p-muted: var(--text-muted);
+  --p-line: var(--border);
+  --p-accent: var(--primary);
   min-height: 100vh;
   display: grid;
   grid-template-columns: 245px 1fr;
@@ -15,13 +15,13 @@
 }
 
 .portalDark {
-  --p-bg: #050A18;
-  --p-panel: #0A122A;
-  --p-solid: #0F1B3E;
-  --p-ink: #FFFFFF;
-  --p-muted: #8E9DBA;
-  --p-line: rgba(0, 240, 255, 0.15);
-  --p-accent: #00F0FF;
+  --p-bg: #0f172a;
+  --p-panel: #1e293b;
+  --p-solid: #1e293b;
+  --p-ink: #f8fafc;
+  --p-muted: #94a3b8;
+  --p-line: #334155;
+  --p-accent: var(--primary);
 }
 
 .portalSidebar {
