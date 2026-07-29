@@ -103,7 +103,16 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
   const items = (data.items as Item[] | undefined) ?? [];
 
   return <>
-    <div className="portalTitleRow"><div><span className="portalEyebrow">Customer workspace</span><h1>{titles[tab] ?? "My Kynisto"}</h1><p>Your profile, shopping and private order data are scoped to this account.</p></div><Link className="portalButton" href="/products">Browse local products</Link></div>
+    <div className="portalTitleRow">
+      <div>
+        <span className="portalEyebrow">MY ACCOUNT</span>
+        <h1>Welcome back, <span style={{ color: "#00F0FF" }}>{user.name.split(" ")[0]}</span>! 👋</h1>
+        <p>Manage your profile, orders, wishlist and preferences. All your account information is secure and private.</p>
+      </div>
+      <Link className="portalButton" href="/products">
+        Explore Local Products <span aria-hidden="true">→</span>
+      </Link>
+    </div>
     {error && <p className="authError" role="alert">{error}</p>}
     {tab === "overview" && <CustomerOverview user={user} favorites={favorites} reviews={[...reviews, ...productReviews]} cart={(data.items as Item[] | undefined) ?? []} />}
     {tab === "profile" && <ProfilePanel profile={(data.profile as Item | undefined) ?? { name: user.name, email: user.email }} mutate={mutate} />}
@@ -121,7 +130,85 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
 }
 
 function CustomerOverview({ user, favorites, reviews, cart }: { user: SessionUser; favorites: Item[]; reviews: Item[]; cart: Item[] }) {
-  return <><div className="statsGrid"><article className="statCard"><span>♥</span><small>Favourite shops</small><strong>{favorites.length}</strong></article><article className="statCard"><span>★</span><small>Reviews written</small><strong>{reviews.length}</strong></article><article className="statCard"><span>▤</span><small>Cart products</small><strong>{cart.length}</strong></article><article className="statCard"><span>⌖</span><small>Locality</small><strong className="compactStat">DLF Ankur Vihar</strong></article></div><div className="portalGrid"><section className="portalCard"><div className="portalCardHeader"><h2>Recently saved</h2><Link href="/account?tab=favorites">View all</Link></div><FavoriteList items={favorites.slice(0, 4)} remove={async () => undefined} hideActions /></section><section className="portalCard"><div className="portalCardHeader"><h2>Account identity</h2><Status value="active" /></div><div className="accountDetail"><span>{user.name.slice(0, 1).toUpperCase()}</span><p><b>{user.name}</b><small>{user.email}</small><em>Customer · 28.7381° N, 77.2669° E</em></p></div></section></div></>;
+  return (
+    <>
+      <div className="statsGrid">
+        <article className="statCard">
+          <span>♥</span>
+          <small>FAVOURITE SHOPS</small>
+          <strong>{favorites.length}</strong>
+          <span className="subText">Saved shops</span>
+        </article>
+        <article className="statCard">
+          <span>★</span>
+          <small>REVIEWS WRITTEN</small>
+          <strong>{reviews.length}</strong>
+          <span className="subText">Reviews written</span>
+        </article>
+        <article className="statCard">
+          <span>🛒</span>
+          <small>CART PRODUCTS</small>
+          <strong>{cart.length}</strong>
+          <span className="subText">Items in your cart</span>
+        </article>
+        <article className="statCard">
+          <span>📍</span>
+          <small>LOCATION</small>
+          <strong style={{ fontSize: "20px", marginTop: "8px" }}>DLF Ankur Vihar</strong>
+          <span className="subText">Your current locality</span>
+        </article>
+      </div>
+
+      <div className="portalGrid">
+        <section className="portalCard">
+          <div className="portalCardHeader">
+            <h2>Recently Saved</h2>
+            <Link href="/account?tab=favorites" style={{ color: "#00C8FF", textDecoration: "none", fontSize: "13px", fontWeight: 700 }}>
+              View all
+            </Link>
+          </div>
+          {favorites.length > 0 ? (
+            <FavoriteList items={favorites.slice(0, 4)} remove={async () => undefined} hideActions />
+          ) : (
+            <div className="emptyPortal">
+              <div className="emptyGraphic">📦</div>
+              <b>No saved places yet</b>
+              <p>Save your favorite local shops and places to quickly find them later.</p>
+              <Link className="portalButton" href="/" style={{ margin: "0 auto" }}>
+                Explore Local Shops <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          )}
+        </section>
+
+        <section className="portalCard">
+          <div className="portalCardHeader">
+            <h2>Account Identity</h2>
+            <span className="statusPill active">Active</span>
+          </div>
+          <div className="accountDetail" style={{ flexDirection: "column", alignItems: "flex-start", gap: "20px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", width: "100%" }}>
+              <span>{user.name.slice(0, 1).toUpperCase()}</span>
+              <div>
+                <b style={{ fontSize: "17px" }}>{user.name}</b>
+                <small style={{ display: "block", color: "#8E9DBA", marginTop: "2px" }}>{user.email}</small>
+              </div>
+            </div>
+            <div style={{ display: "grid", gap: "10px", width: "100%", borderTop: "1px solid rgba(0, 240, 255, 0.12)", paddingTop: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#00C8FF", fontSize: "13px" }}>
+                <span>📍</span>
+                <span>Customer • 28.7381° N, 77.2689° E</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#8E9DBA", fontSize: "13px" }}>
+                <span>📅</span>
+                <span>Member since May 22, 2024</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </>
+  );
 }
 
 function ProfilePanel({ profile, mutate }: { profile: Item; mutate: (method: "PATCH", json: Payload, message: string) => Promise<void> }) {
