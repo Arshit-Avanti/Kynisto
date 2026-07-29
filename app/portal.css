@@ -399,17 +399,31 @@
   margin-bottom: 20px;
 }
 
-.portalCardHeader h2 {
+.portalCardHeader h1,
+.portalCardHeader h2,
+.portalCardHeader h3 {
   margin: 0;
-  font-size: 17px;
   letter-spacing: -.025em;
   color: #FFFFFF;
-  font-weight: 750;
+  font-weight: 700;
+}
+
+.portalCardHeader h1 {
+  font-size: 1.5rem;
+}
+
+.portalCardHeader h2 {
+  font-size: 1.25rem;
+}
+
+.portalCardHeader h3 {
+  font-size: 1.1rem;
 }
 
 .portalCardHeader small {
   color: #8E9DBA;
-  font-size: 11px;
+  font-size: 0.8125rem;
+  opacity: 0.8;
 }
 
 .portalTableWrap {
@@ -619,4 +633,5 @@
   .portalContent { padding: 20px 16px; }
   .portalTitleRow { align-items: flex-start; flex-direction: column; }
   .statsGrid { grid-template-columns: repeat(2, 1fr); }
+  .portalCard { padding: 16px; }
 }

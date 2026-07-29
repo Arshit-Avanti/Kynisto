@@ -143,6 +143,24 @@ input:focus-visible {
   color-scheme: dark;
 }
 
+.dark-theme {
+  --portal-bg: #0b1120;
+  --portal-card-bg: #1e293b;
+  --portal-text: #f8fafc;
+  --portal-border: #334155;
+  --portal-muted: #94a3b8;
+  --portal-input: #0f172a;
+}
+
+.light-theme {
+  --portal-bg: #f8fafc;
+  --portal-card-bg: #ffffff;
+  --portal-text: #0f172a;
+  --portal-border: #e2e8f0;
+  --portal-muted: #64748b;
+  --portal-input: #f1f5f9;
+}
+
 .mode-dark .mapScene,
 .mode-dark .categoryTile,
 .mode-dark .storeCard,

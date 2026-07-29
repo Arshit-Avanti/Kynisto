@@ -21,6 +21,8 @@
 }
 
 body {
+  font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+  line-height: 1.5;
   background: var(--kyn-bg);
 }
 
@@ -154,6 +156,10 @@ body {
   background: linear-gradient(135deg, var(--kyn-primary), #1743d7);
   color: #fff;
   box-shadow: 0 12px 28px rgba(36, 87, 255, .18);
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
 }
 
 .statCard,

@@ -90,7 +90,7 @@ export function PortalShell({
   const nav = useMemo(() => navByRole[activeWorkspaceRole], [activeWorkspaceRole]);
 
   useEffect(() => {
-    setDark(window.localStorage.getItem("kynisto-portal-theme") === "dark");
+    setDark(window.localStorage.getItem("kynisto_theme") !== "light");
   }, []);
 
   useEffect(() => {
@@ -105,7 +105,7 @@ export function PortalShell({
 
   function toggleTheme() {
     setDark((current) => {
-      window.localStorage.setItem("kynisto-portal-theme", current ? "light" : "dark");
+      window.localStorage.setItem("kynisto_theme", current ? "light" : "dark");
       return !current;
     });
   }
@@ -121,7 +121,7 @@ export function PortalShell({
   }
 
   return (
-    <div className={`portal ${dark ? "portalDark" : ""}`}>
+    <div className={`portal portalShell ${dark ? "dark-theme" : "light-theme"}`}>
       <aside className={`portalSidebar ${open ? "isOpen" : ""}`} style={{ overflowY: "auto" }}>
         <Link className="portalBrand" href="/"><KynistoLogo /></Link>
         <div className="portalRole"><small>Workspace</small><strong>{activeWorkspaceRole === "admin" ? (user.isSuperAdmin ? "Super Administration" : "Administration") : activeWorkspaceRole === "store_owner" ? `${user.role === "admin" ? "Admin · " : ""}Shop owner` : `${user.role === "admin" ? "Admin · " : ""}Customer account`}</strong></div>
@@ -147,7 +147,7 @@ export function PortalShell({
         <header className="portalHeader">
           <button className="mobileMenu" type="button" aria-label="Open navigation" onClick={() => setOpen(true)}>☰</button>
           <div><small>DLF Ankur Vihar · Kynisto</small><strong>{nav.find((item) => item.tab === active)?.label ?? "Dashboard"}</strong></div>
-          <div className="portalHeaderActions"><button type="button" onClick={toggleTheme} aria-label="Toggle dark mode">{dark ? "☀" : "◐"}</button><span className="userAvatar">{user.avatarUrl ? <img src={user.avatarUrl} alt="" referrerPolicy="no-referrer" /> : user.name.slice(0, 1).toUpperCase()}</span><span className="userMeta"><b>{user.name}</b><small>{user.email}</small></span></div>
+          <div className="portalHeaderActions"><button type="button" onClick={toggleTheme} aria-label="Toggle dark mode">{dark ? "☀️" : "🌙"}</button><span className="userAvatar">{user.avatarUrl ? <img src={user.avatarUrl} alt="" referrerPolicy="no-referrer" /> : user.name.slice(0, 1).toUpperCase()}</span><span className="userMeta"><b>{user.name}</b><small>{user.email}</small></span></div>
         </header>
         <div className="portalContent">{children}</div>
       </section>
