@@ -12,8 +12,13 @@ import { safeJson, ValidationError } from "@/lib/validation";
 export async function POST(request: Request) {
   try {
     assertSameOrigin(request);
-    const body = await safeJson(request);
-    const accessToken = typeof body.accessToken === "string" ? body.accessToken : "";
+    const body = (await safeJson(request)) as Record<string, unknown>;
+    const accessToken =
+      typeof body.accessToken === "string"
+        ? body.accessToken
+        : typeof body.access_token === "string"
+        ? body.access_token
+        : "";
     if (!accessToken) {
       throw new ValidationError("Access token is required.");
     }

@@ -141,7 +141,7 @@ export async function patientQueueState(storeId: string, userId?: string) {
   const db = getD1();
   const settings = await db
     .prepare(
-      `SELECT q.status, q.consultation_minutes AS consultationMinutes, s.name AS storeName,
+      `SELECT q.status, q.service_date AS serviceDate, q.consultation_minutes AS consultationMinutes, s.name AS storeName,
         COALESCE((SELECT token_number FROM healthcare_queue_entries current
           WHERE current.store_id = q.store_id AND current.service_date = q.service_date AND current.status = 'called' LIMIT 1), 0) AS currentTokenNumber,
         q.next_token_number AS nextTokenNumber,

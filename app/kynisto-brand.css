@@ -63,6 +63,31 @@ body {
   white-space: nowrap;
 }
 
+/* Dark variant — navy wordmark for light backgrounds */
+.kynistoWordmarkDark b {
+  color: #0b1736 !important;
+  -webkit-text-fill-color: #0b1736 !important;
+  text-shadow: none !important;
+}
+
+.kynistoWordmarkDark small {
+  color: #2563eb;
+}
+
+/* Gradient variant — blue gradient for premium surfaces */
+.kynistoWordmarkGradient b {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  color: #1d4ed8 !important;
+  text-shadow: none !important;
+}
+
+.kynistoWordmarkGradient small {
+  color: #2563eb;
+}
+
 .brand,
 .authBrand,
 .portalBrand,

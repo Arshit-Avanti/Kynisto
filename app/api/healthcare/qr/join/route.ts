@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { resolveHealthcareQueueByCode, recordQrEvent } from "@/lib/healthcare-qr";
-import { activeHealthcareQueueForUser, patientQueueState } from "@/lib/healthcare";
+import { activeHealthcareQueueForUser, patientQueueState, indiaServiceDate } from "@/lib/healthcare";
 import { apiError, HttpError, noStoreJson } from "@/lib/security";
 import { getD1 } from "@/db/runtime";
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await getSessionUser(request);
+    const session = await getSessionUser();
+    const user = session?.user;
     if (!user) {
       throw new HttpError(401, "Authentication required to join queue.", "UNAUTHORIZED");
     }
@@ -40,9 +41,9 @@ export async function POST(request: NextRequest) {
 
     const db = getD1();
     const now = Math.floor(Date.now() / 1000);
-    const today = queueState.serviceDate as string;
+    const today = ((queueState as any)?.serviceDate as string | undefined) || indiaServiceDate();
 
-    const tokenNumber = Number(queueState.nextTokenNumber ?? 1);
+    const tokenNumber = Number((queueState as any)?.nextTokenNumber ?? 1);
     const entryId = crypto.randomUUID();
     const activeKey = `customer:${user.id}`;
     const expiresAt = now + 3 * 60 * 60; // 3 hours TTL
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
     await db.batch([
       db.prepare(`INSERT INTO healthcare_queue_entries (id, store_id, service_date, token_number, user_id, patient_name, patient_phone, is_emergency, arrival_status, status, active_key, joined_at, expires_at, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, 0, 'on_the_way', 'waiting', ?, ?, ?, ?, ?)`)
-        .bind(entryId, record.storeId, today, tokenNumber, user.id, user.name || "Patient", user.phone || "", activeKey, now, expiresAt, now, now),
+        .bind(entryId, record.storeId, today, tokenNumber, user.id, user.name ?? "Patient", (user as any).phone ?? null, activeKey, now, expiresAt, now, now),
       db.prepare("UPDATE healthcare_queue_settings SET next_token_number = next_token_number + 1, updated_at = ? WHERE store_id = ?")
         .bind(now, record.storeId),
       db.prepare(`INSERT INTO healthcare_queue_events (id, store_id, entry_id, actor_id, event_type, metadata, created_at)

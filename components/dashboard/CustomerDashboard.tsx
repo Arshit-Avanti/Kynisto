@@ -33,6 +33,11 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
+  const [activeQueue, setActiveQueue] = useState<{
+    storeId: string; storeName: string; tokenNumber: number;
+    status: string; queueCode: string | null;
+    queueState: { position: number; estimatedWaitMinutes: number; waitingCount: number } | null;
+  } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -69,6 +74,29 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
 
   useEffect(() => { void load(); }, [load]);
   useEffect(() => { if (!toast) return; const timer = window.setTimeout(() => setToast(""), 2400); return () => clearTimeout(timer); }, [toast]);
+
+  // Fetch active queue on mount and poll every 30s
+  const fetchActiveQueue = useCallback(async () => {
+    try {
+      const res = await apiFetch<{ activeQueue: typeof activeQueue }>("/api/healthcare/queue/active");
+      setActiveQueue(res.activeQueue ?? null);
+    } catch { /* silent */ }
+  }, []);
+  useEffect(() => { void fetchActiveQueue(); }, [fetchActiveQueue]);
+  useEffect(() => {
+    const timer = setInterval(() => { void fetchActiveQueue(); }, 30_000);
+    return () => clearInterval(timer);
+  }, [fetchActiveQueue]);
+
+  async function handleLeaveQueue() {
+    if (!activeQueue?.storeId) return;
+    if (!window.confirm("Leave the queue? You will lose your spot.")) return;
+    try {
+      await apiFetch("/api/healthcare/queue", { method: "POST", json: { action: "leave", storeId: activeQueue.storeId } });
+      setActiveQueue(null);
+      setToast("You have left the queue.");
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not leave queue."); }
+  }
 
   async function mutate(method: "POST" | "PATCH" | "DELETE", json: Payload, message: string) {
     setError("");
@@ -114,6 +142,23 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
       </Link>
     </div>
     {error && <p className="authError" role="alert">{error}</p>}
+    {activeQueue && (
+      <div className="activeQueueBanner">
+        <div className="activeQueueIcon">🎟️</div>
+        <div className="activeQueueInfo">
+          <strong>You&apos;re in a queue at {activeQueue.storeName}</strong>
+          <span>Token #{activeQueue.tokenNumber}{activeQueue.queueState ? ` · ${Math.max(0, (activeQueue.queueState.position ?? 1) - 1)} ahead · ~${activeQueue.queueState.estimatedWaitMinutes ?? 0} min wait` : ""}</span>
+        </div>
+        <div className="activeQueueActions">
+          {activeQueue.queueCode ? (
+            <Link href={`/q/${activeQueue.queueCode}`} className="activeQueueBtn">View Queue</Link>
+          ) : (
+            <Link href="/healthcare" className="activeQueueBtn">View Queue</Link>
+          )}
+          <button type="button" onClick={() => void handleLeaveQueue()} className="activeQueueLeave">Leave</button>
+        </div>
+      </div>
+    )}
     {tab === "overview" && <CustomerOverview user={user} favorites={favorites} reviews={[...reviews, ...productReviews]} cart={(data.items as Item[] | undefined) ?? []} />}
     {tab === "profile" && <ProfilePanel profile={(data.profile as Item | undefined) ?? { name: user.name, email: user.email }} mutate={mutate} />}
     {tab === "addresses" && <AddressesPanel items={items} mutate={mutate} />}

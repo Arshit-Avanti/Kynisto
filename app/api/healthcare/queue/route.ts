@@ -85,6 +85,7 @@ export async function POST(request: Request) {
 
     if (action === "update_arrival") {
       const arrivalStatus = body.arrivalStatus;
+      const lateMinutes = typeof body.lateMinutes === "number" ? Math.min(120, Math.max(5, Math.round(body.lateMinutes))) : null;
       if (!["waiting", "leaving_now", "running_late"].includes(String(arrivalStatus))) throw new HttpError(400, "Choose a valid arrival update.", "INVALID_ARRIVAL_STATUS");
       const entry = await db.prepare("SELECT id, token_number AS tokenNumber FROM healthcare_queue_entries WHERE store_id = ? AND user_id = ? AND active_key IS NOT NULL AND status IN ('waiting','called') LIMIT 1")
         .bind(storeId, session.user.id).first<{ id: string; tokenNumber: number }>();
@@ -92,10 +93,13 @@ export async function POST(request: Request) {
       const statements: D1PreparedStatement[] = [
         db.prepare("UPDATE healthcare_queue_entries SET arrival_status = ?, updated_at = ? WHERE id = ? AND user_id = ?").bind(arrivalStatus, now, entry.id, session.user.id),
         db.prepare("INSERT INTO healthcare_queue_events (id, store_id, entry_id, actor_id, event_type, metadata, created_at) VALUES (?, ?, ?, ?, 'arrival_updated', ?, ?)")
-          .bind(crypto.randomUUID(), storeId, entry.id, session.user.id, JSON.stringify({ arrivalStatus, tokenNumber: entry.tokenNumber }), now),
+          .bind(crypto.randomUUID(), storeId, entry.id, session.user.id, JSON.stringify({ arrivalStatus, lateMinutes, tokenNumber: entry.tokenNumber }), now),
       ];
+      const notifMessage = arrivalStatus === "running_late" && lateMinutes
+        ? `Token ${entry.tokenNumber}: Running ${lateMinutes} minutes late.`
+        : `Token ${entry.tokenNumber}: ${String(arrivalStatus).replaceAll("_", " ")}.`;
       if (provider.ownerId) statements.push(db.prepare("INSERT INTO notifications (id, user_id, audience, type, title, message, link, created_at) VALUES (?, ?, 'user', 'queue', 'Patient arrival update', ?, '/owner?tab=healthcare', ?)")
-        .bind(crypto.randomUUID(), provider.ownerId, `Token ${entry.tokenNumber}: ${String(arrivalStatus).replaceAll("_", " ")}.`, now));
+        .bind(crypto.randomUUID(), provider.ownerId, notifMessage, now));
       await db.batch(statements);
       return noStoreJson({ state: await patientQueueState(storeId, session.user.id) });
     }

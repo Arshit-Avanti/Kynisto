@@ -31,28 +31,39 @@ export default function ConfirmPage() {
     setStatusText("Authenticating session with Kynisto…");
     setIsLoading(true);
 
+    let savedReturnTo = "";
+    try {
+      savedReturnTo = window.sessionStorage.getItem("kynisto_auth_returnto") || "";
+      if (savedReturnTo) window.sessionStorage.removeItem("kynisto_auth_returnto");
+    } catch {
+      // Ignore storage restrictions
+    }
+
+    const getTargetUrl = (role?: string) => {
+      if (savedReturnTo) return savedReturnTo;
+      return role === "admin" ? "/admin" : role === "store_owner" ? "/owner" : "/account";
+    };
+
     if (accessToken) {
       apiFetch<{ user: { role: string } | null }>("/api/auth/google/session", {
         method: "POST",
         json: { access_token: accessToken },
       })
         .then((res) => {
-          const role = res?.user?.role;
-          const target = role === "admin" ? "/admin" : role === "store_owner" ? "/owner" : "/account";
+          const target = getTargetUrl(res?.user?.role);
           window.location.replace(target);
         })
         .catch(() => {
-          window.location.replace("/account");
+          window.location.replace(savedReturnTo || "/account");
         });
     } else {
       apiFetch<{ user: { role: string } | null }>("/api/auth/me")
         .then((res) => {
-          const role = res?.user?.role;
-          const target = role === "admin" ? "/admin" : role === "store_owner" ? "/owner" : "/account";
+          const target = getTargetUrl(res?.user?.role);
           window.location.replace(target);
         })
         .catch(() => {
-          window.location.replace("/account");
+          window.location.replace(savedReturnTo || "/account");
         });
     }
   };

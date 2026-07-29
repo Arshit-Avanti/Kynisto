@@ -1,8 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { requireApiPermission } from "@/lib/auth";
-import { requireOwnedStore } from "@/lib/ownership";
 import { getOrCreatePermanentQueueId, getQrAnalytics } from "@/lib/healthcare-qr";
-import { apiError, noStoreJson, cleanText } from "@/lib/security";
+import { apiError, noStoreJson } from "@/lib/security";
 import { getD1 } from "@/db/runtime";
 
 export async function GET(request: NextRequest) {
@@ -16,7 +15,7 @@ export async function GET(request: NextRequest) {
       .first<{ id: string; name: string; slug: string }>();
 
     if (!store) {
-      return noStoreJson({ ok: false, message: "No store found for this owner." }, 404);
+      return noStoreJson({ ok: false, message: "No store found for this owner." }, { status: 404 });
     }
 
     const qrRecord = await getOrCreatePermanentQueueId(store.id, session.user.id);
@@ -44,7 +43,7 @@ export async function POST(request: NextRequest) {
       .first<{ id: string; name: string; slug: string }>();
 
     if (!store) {
-      return noStoreJson({ ok: false, message: "No store found for this owner." }, 404);
+      return noStoreJson({ ok: false, message: "No store found for this owner." }, { status: 404 });
     }
     
     const newStatus = body.status === "disabled" ? "disabled" : "active";

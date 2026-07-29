@@ -13,7 +13,7 @@ export default async function LoginPage({
   const { returnTo } = await searchParams;
   return (
     <div className="authCard">
-      <GoogleSignIn />
+      <GoogleSignIn returnTo={returnTo} />
       <div className="authDivider"><span>or</span></div>
       <AdminLoginForm returnTo={returnTo} />
       <section className="androidDownload" aria-labelledby="android-download-title">

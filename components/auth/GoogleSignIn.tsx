@@ -5,10 +5,14 @@ import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { apiFetch } from "@/lib/client-api";
 
-const PENDING_KEY = "kynisto-google-auth-pending";
+import { useSearchParams } from "next/navigation";
 
-export function GoogleSignIn() {
-  const router = useRouter();
+const PENDING_KEY = "kynisto-google-auth-pending";
+const RETURNTO_KEY = "kynisto_auth_returnto";
+
+export function GoogleSignIn({ returnTo: propReturnTo }: { returnTo?: string } = {}) {
+  const searchParams = useSearchParams();
+  const returnTo = propReturnTo || searchParams.get("returnTo") || "";
   const starting = useRef(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -26,6 +30,9 @@ export function GoogleSignIn() {
           : "https://kynisto.nxt-arshit.workers.dev/auth/confirm";
       try {
         window.sessionStorage.setItem(PENDING_KEY, "1");
+        if (returnTo) {
+          window.sessionStorage.setItem(RETURNTO_KEY, returnTo);
+        }
       } catch {
         // Ignore storage restriction errors
       }

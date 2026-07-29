@@ -104,6 +104,7 @@ export async function resolveHealthcareQueueByCode(queueCode: string, userId?: s
   const record = await db
     .prepare(`SELECT q.id, q.store_id AS storeId, q.owner_id AS ownerId, q.queue_code AS queueCode, q.status AS qrStatus,
         s.name AS storeName, s.slug AS storeSlug, s.address, s.area, s.city, s.phone,
+        s.logo_url AS logoUrl, s.banner_url AS bannerUrl,
         c.name AS categoryName,
         hp.provider_type AS providerType, hp.accepting_patients AS acceptingPatients,
         hp.verification_status AS verificationStatus, hp.queue_activation_status AS queueActivationStatus
@@ -125,6 +126,8 @@ export async function resolveHealthcareQueueByCode(queueCode: string, userId?: s
       area: string;
       city: string;
       phone: string;
+      logoUrl: string | null;
+      bannerUrl: string | null;
       categoryName: string;
       providerType: string | null;
       acceptingPatients: number | null;

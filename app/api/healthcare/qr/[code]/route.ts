@@ -6,7 +6,8 @@ import { apiError, noStoreJson } from "@/lib/security";
 export async function GET(request: NextRequest, { params }: { params: Promise<{ code: string }> }) {
   try {
     const { code } = await params;
-    const user = await getSessionUser(request);
+    const session = await getSessionUser();
+    const user = session?.user ?? null;
     const platform = request.headers.get("x-kynisto-platform") === "android-app" ? "app" : "web";
     
     const data = await resolveHealthcareQueueByCode(code, user?.id);
