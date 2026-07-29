@@ -47,10 +47,10 @@ export function Navbar3D({
         alignItems: "center",
         justifyContent: "space-between",
         padding: "14px 28px",
-        background: "rgba(10, 15, 30, 0.94)",
+        background: "rgba(20, 10, 12, 0.95)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
-        borderBottom: "1px solid rgba(255, 255, 255, 0.15)",
+        borderBottom: "1px solid rgba(255, 87, 34, 0.25)",
         boxShadow: "0 8px 32px rgba(0, 0, 0, 0.6)",
       }}
     >
@@ -58,7 +58,7 @@ export function Navbar3D({
         <BackButton
           fallback="/"
           label="Back"
-          style={{ fontSize: "12px", padding: "6px 12px", borderRadius: "10px" }}
+          style={{ fontSize: "12px", padding: "6px 12px", borderRadius: "10px", background: "rgba(255,255,255,0.1)", color: "#ffffff", border: "1px solid rgba(255,255,255,0.2)" }}
         />
         <Link href="/" aria-label="Kynisto Home" style={{ textDecoration: "none", display: "flex" }}>
           <KynistoLogo showTagline />
@@ -71,17 +71,17 @@ export function Navbar3D({
             display: "flex",
             alignItems: "center",
             gap: "8px",
-            background: "rgba(255, 255, 255, 0.08)",
-            border: "1px solid rgba(255, 255, 255, 0.18)",
+            background: "rgba(255, 87, 34, 0.12)",
+            border: "1px solid rgba(255, 87, 34, 0.35)",
             borderRadius: "12px",
             padding: "6px 12px",
             cursor: "pointer",
             textAlign: "left"
           }}
         >
-          <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#00F0FF", boxShadow: "0 0 10px #00F0FF", display: "inline-block" }} aria-hidden="true" />
+          <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#FF5722", boxShadow: "0 0 10px #FF5722", display: "inline-block" }} aria-hidden="true" />
           <span style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontSize: "10px", color: "#00F0FF", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>Locality</span>
+            <span style={{ fontSize: "10px", color: "#FF8A00", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>Locality</span>
             <span style={{ fontSize: "13px", color: "#FFFFFF", fontWeight: 700, textShadow: "0 1px 6px rgba(0,0,0,0.8)" }}>{locationLabel}</span>
           </span>
           <span aria-hidden="true" style={{ fontSize: "10px", color: "#FFFFFF" }}>⌄</span>
@@ -89,10 +89,10 @@ export function Navbar3D({
       </div>
 
       {!isMobile && (
-        <nav aria-label="Main Navigation" style={{ display: "flex", alignItems: "center", gap: "28px", fontSize: "14px", fontWeight: 600, color: "#FFFFFF" }}>
-          <Link href="/products" style={{ color: "#FFFFFF", textDecoration: "none", transition: "all 0.15s", textShadow: "0 1px 6px rgba(0,0,0,0.9)" }}>Products</Link>
-          <Link href="/healthcare" style={{ color: "#FFFFFF", textDecoration: "none", transition: "all 0.15s", textShadow: "0 1px 6px rgba(0,0,0,0.9)" }}>Healthcare</Link>
-          <Link href="/pricing" style={{ color: "#22C55E", textDecoration: "none", transition: "all 0.15s", textShadow: "0 1px 6px rgba(0,0,0,0.9)", fontWeight: 700 }}>Pricing & Plans</Link>
+        <nav aria-label="Main Navigation" style={{ display: "flex", alignItems: "center", gap: "28px", fontSize: "14px", fontWeight: 700, color: "#FFFFFF" }}>
+          <Link href="/products" style={{ color: "#FFFFFF", textDecoration: "none", transition: "all 0.15s" }}>Products</Link>
+          <Link href="/healthcare" style={{ color: "#FFFFFF", textDecoration: "none", transition: "all 0.15s" }}>Healthcare</Link>
+          <Link href="/pricing" style={{ color: "#FF7A00", textDecoration: "none", transition: "all 0.15s", fontWeight: 700 }}>Pricing & Plans</Link>
           <button
             type="button"
             onClick={() => {
@@ -102,12 +102,12 @@ export function Navbar3D({
               }
               document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
             }}
-            style={{ color: "#FFFFFF", textDecoration: "none", transition: "all 0.15s", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 600, padding: 0, textShadow: "0 1px 6px rgba(0,0,0,0.9)" }}
+            style={{ color: "#FFFFFF", textDecoration: "none", transition: "all 0.15s", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 700, padding: 0 }}
           >
-            <span aria-hidden="true" style={{ color: "#FF4D4D", marginRight: "4px" }}>♥</span>
-            Saved <b style={{ background: "rgba(37, 99, 235, 0.4)", color: "#60A5FA", border: "1px solid rgba(96, 165, 250, 0.3)", padding: "2px 8px", borderRadius: "10px", fontSize: "12px", marginLeft: "4px" }}>{savedCount}</b>
+            <span aria-hidden="true" style={{ color: "#FF5722", marginRight: "4px" }}>♥</span>
+            Saved <b style={{ background: "rgba(255, 87, 34, 0.25)", color: "#FF8A00", border: "1px solid rgba(255, 138, 0, 0.4)", padding: "2px 8px", borderRadius: "10px", fontSize: "12px", marginLeft: "4px" }}>{savedCount}</b>
           </button>
-          <button type="button" onClick={onOpenCustomize} style={{ color: "#FFFFFF", textDecoration: "none", transition: "all 0.15s", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 600, padding: 0, textShadow: "0 1px 6px rgba(0,0,0,0.9)" }}>
+          <button type="button" onClick={onOpenCustomize} style={{ color: "#FFFFFF", textDecoration: "none", transition: "all 0.15s", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 700, padding: 0 }}>
             <span aria-hidden="true" style={{ marginRight: "4px" }}>≡</span>
             Customize
           </button>
@@ -120,7 +120,7 @@ export function Navbar3D({
           <Link
             href={userRole ? "/dashboard" : "/login"}
             style={{
-              background: "#2563EB",
+              background: "linear-gradient(135deg, #FF5722 0%, #E53935 100%)",
               color: "white",
               padding: "10px 22px",
               borderRadius: "12px",
@@ -128,7 +128,7 @@ export function Navbar3D({
               fontWeight: 700,
               fontSize: "14px",
               cursor: "pointer",
-              boxShadow: "0 4px 16px rgba(37, 99, 235, 0.4)",
+              boxShadow: "0 4px 16px rgba(255, 87, 34, 0.4)",
               textDecoration: "none",
               display: "inline-block",
             }}

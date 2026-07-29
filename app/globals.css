@@ -4,8 +4,8 @@
 :root {
   --bg-page: #f8fafc;
   --bg-card: #ffffff;
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
+  --primary: #FF5722;
+  --primary-hover: #E64A19;
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
@@ -19,21 +19,24 @@
   --line: var(--border);
   --accent: var(--primary);
   --accent-dark: var(--primary-hover);
-  --green: #149d65;
-  --blue: var(--primary);
-  --yellow: #20c7e8;
+  --green: #10b981;
+  --blue: #3b82f6;
+  --yellow: #f59e0b;
 
-  --bg-space: #0b0f17;
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-hover: rgba(255, 255, 255, 0.06);
-  --glow-blue: #3b82f6;
-  --glow-violet: #8b5cf6;
+  --bg-space: #140A0C;
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 87, 34, 0.18);
+  --glass-hover: rgba(255, 255, 255, 0.08);
+  --glow-orange: #FF5722;
+  --glow-red: #EF4444;
+  --glow-amber: #F59E0B;
+  --glow-blue: #FF5722;
+  --glow-violet: #EF4444;
   --glow-emerald: #10b981;
 }
 
 @keyframes rotateRadar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); } 50% { box-shadow: 0 0 30px rgba(139, 92, 246, 0.7); } }
+@keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 15px rgba(255, 87, 34, 0.4); } 50% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.7); } }
 @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 @keyframes floatCard { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 
@@ -56,7 +59,10 @@ body {
   max-width: 100%;
   margin: 0;
   overflow-x: clip;
-  background: #0B0F17;
+  background: #140A0C;
+  background-image: radial-gradient(circle at 15% 25%, rgba(255, 87, 34, 0.2), transparent 45%),
+                    radial-gradient(circle at 85% 75%, rgba(239, 68, 68, 0.2), transparent 45%),
+                    radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.1), transparent 60%);
   color: #F8FAFC;
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
@@ -74,29 +80,63 @@ a {
 button:focus-visible,
 a:focus-visible,
 input:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline: 3px solid rgba(255, 87, 34, 0.5);
   outline-offset: 3px;
 }
 
+/* Default Input Styling */
 input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
-  border: 1px solid var(--glass-border);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius);
-  background: var(--glass-bg);
-  color: #F8FAFC;
-  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF !important;
+  padding: 0.65rem 0.85rem;
   transition: all 0.3s ease;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   outline: none;
 }
 
+input:not([type="checkbox"]):not([type="radio"])::placeholder,
+textarea::placeholder {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
 input:not([type="checkbox"]):not([type="radio"]):focus,
 select:focus,
 textarea:focus {
-  border-color: var(--glow-blue);
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+  border-color: #FF5722 !important;
+  box-shadow: 0 0 15px rgba(255, 87, 34, 0.5) !important;
+}
+
+/* STRICT FIX FOR INPUTS INSIDE LIGHT / WHITE CARDS & AUTH FORMS */
+.authCard input:not([type="checkbox"]):not([type="radio"]),
+.adminLoginForm input:not([type="checkbox"]):not([type="radio"]),
+.authForm input:not([type="checkbox"]):not([type="radio"]),
+.portalCard input:not([type="checkbox"]):not([type="radio"]),
+.dashCard input:not([type="checkbox"]):not([type="radio"]) {
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  border: 1px solid #CBD5E1 !important;
+}
+
+.authCard input:not([type="checkbox"]):not([type="radio"])::placeholder,
+.adminLoginForm input:not([type="checkbox"]):not([type="radio"])::placeholder,
+.authForm input:not([type="checkbox"]):not([type="radio"])::placeholder,
+.portalCard input:not([type="checkbox"]):not([type="radio"])::placeholder,
+.dashCard input:not([type="checkbox"]):not([type="radio"])::placeholder {
+  color: #64748B !important;
+}
+
+.authCard input:not([type="checkbox"]):not([type="radio"]):focus,
+.adminLoginForm input:not([type="checkbox"]):not([type="radio"]):focus,
+.authForm input:not([type="checkbox"]):not([type="radio"]):focus,
+.portalCard input:not([type="checkbox"]):not([type="radio"]):focus,
+.dashCard input:not([type="checkbox"]):not([type="radio"]):focus {
+  border-color: #FF5722 !important;
+  box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.25) !important;
 }
 
 .srOnly {

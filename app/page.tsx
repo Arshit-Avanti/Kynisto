@@ -46,15 +46,16 @@ const Icons = {
 const modernCleanTechStyles = `
   .site, .healthPage, .productDiscovery {
     font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
-    background-color: #0B0F17 !important;
-    background-image: radial-gradient(circle at 15% 50%, rgba(37, 99, 235, 0.15), transparent 25%),
-                      radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15), transparent 25%) !important;
+    background-color: #140A0C !important;
+    background-image: radial-gradient(circle at 15% 30%, rgba(255, 87, 34, 0.22), transparent 45%),
+                      radial-gradient(circle at 85% 70%, rgba(239, 68, 68, 0.22), transparent 45%),
+                      radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.12), transparent 60%) !important;
     color: #f8fafc !important;
   }
   .searchBox, .healthSearch, .productIntro form, .locationPill, .categoryTile, .storeCard, .advancedFilters input, .providerGrid article {
     border-radius: 12px !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 87, 34, 0.2) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
@@ -65,36 +66,36 @@ const modernCleanTechStyles = `
     color: #f8fafc !important;
   }
   .searchBox input::placeholder, .productIntro form input::placeholder {
-    color: rgba(255,255,255,0.5) !important;
+    color: rgba(255,255,255,0.7) !important;
   }
   .searchBox:focus-within, .healthSearch:focus-within, .productIntro form:focus-within, .advancedFilters input:focus {
-    border-color: rgba(59, 130, 246, 0.5) !important;
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3) !important;
+    border-color: #FF5722 !important;
+    box-shadow: 0 0 18px rgba(255, 87, 34, 0.45) !important;
     outline: none !important;
   }
   .locationPill:hover, .categoryTile:hover {
-    border-color: rgba(255,255,255,0.2) !important;
+    border-color: rgba(255, 87, 34, 0.4) !important;
     background: rgba(255, 255, 255, 0.08) !important;
   }
   .categoryTile {
     transition: all 0.3s ease, transform 0.2s ease !important;
   }
   .categoryTile[aria-pressed="true"], .careTypes button.active {
-    background: rgba(59, 130, 246, 0.2) !important;
+    background: rgba(255, 87, 34, 0.25) !important;
     color: #fff !important;
-    border-color: rgba(59, 130, 246, 0.5) !important;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4) !important;
+    border-color: #FF5722 !important;
+    box-shadow: 0 0 20px rgba(255, 87, 34, 0.45) !important;
     transform: translateY(-2px) !important;
   }
   .categoryTile[aria-pressed="true"] svg, .careTypes button.active svg {
-    stroke: #60a5fa !important;
+    stroke: #FF7A00 !important;
   }
   .storeCard {
     overflow: hidden !important;
   }
   .storeCard:hover, .providerGrid article:hover {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.2) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 87, 34, 0.3) !important;
+    border-color: #FF5722 !important;
     transform: translateY(-6px) !important;
   }
   .storeVisual, .providerTop, .productVisual {
