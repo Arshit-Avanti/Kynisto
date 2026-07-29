@@ -54,19 +54,31 @@ const modernCleanTechStyles = `
   }
   .searchBox, .healthSearch, .productIntro form, .locationPill, .categoryTile, .storeCard, .advancedFilters input, .providerGrid article {
     border-radius: 12px !important;
-    border: 1px solid rgba(255, 87, 34, 0.2) !important;
-    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 87, 34, 0.25) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-    color: #f8fafc !important;
+    color: #ffffff !important;
+  }
+  .categoryTile strong, .categoryTile b, .categoryTile span, .storeCard h3, .storeCard b, .storeCard p, .providerGrid h3 {
+    color: #ffffff !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8) !important;
+  }
+  .categoryTile small {
+    color: #FF8A00 !important;
+    font-weight: 700 !important;
+  }
+  .sectionHeading h2, .sectionHeading h3, .hero h1, .hero p, h2, h3 {
+    color: #ffffff !important;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.9) !important;
   }
   .searchBox input, .healthSearch input, .productIntro form input, .advancedFilters input {
     background: transparent !important;
-    color: #f8fafc !important;
+    color: #ffffff !important;
   }
   .searchBox input::placeholder, .productIntro form input::placeholder {
-    color: rgba(255,255,255,0.7) !important;
+    color: rgba(255,255,255,0.75) !important;
   }
   .searchBox:focus-within, .healthSearch:focus-within, .productIntro form:focus-within, .advancedFilters input:focus {
     border-color: #FF5722 !important;
@@ -74,14 +86,14 @@ const modernCleanTechStyles = `
     outline: none !important;
   }
   .locationPill:hover, .categoryTile:hover {
-    border-color: rgba(255, 87, 34, 0.4) !important;
-    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 87, 34, 0.5) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
   }
   .categoryTile {
     transition: all 0.3s ease, transform 0.2s ease !important;
   }
   .categoryTile[aria-pressed="true"], .careTypes button.active {
-    background: rgba(255, 87, 34, 0.25) !important;
+    background: rgba(255, 87, 34, 0.3) !important;
     color: #fff !important;
     border-color: #FF5722 !important;
     box-shadow: 0 0 20px rgba(255, 87, 34, 0.45) !important;

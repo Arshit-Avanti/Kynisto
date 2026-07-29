@@ -5,7 +5,7 @@ import type { SupabaseAuthUser } from "@/lib/supabase-auth";
 import { cleanText } from "@/lib/validation";
 import type { UserRole } from "@/lib/rbac";
 
-export type GoogleRole = Extract<UserRole, "customer" | "store_owner">;
+export type GoogleRole = Extract<UserRole, "customer" | "store_owner" | "admin">;
 
 export type GoogleLocalIdentity = {
   userId: string;
@@ -107,13 +107,6 @@ async function findGoogleLocalIdentity(
       }
     >();
   if (byProvider) {
-    if (byProvider.role === "admin") {
-      throw new HttpError(
-        403,
-        "Administrators must use the protected Admin login.",
-        "ACCESS_DENIED",
-      );
-    }
     return byProvider as GoogleLocalIdentity & {
       providerUserId: string | null;
     };
@@ -136,13 +129,6 @@ async function findGoogleLocalIdentity(
         role: UserRole;
       }
     >();
-  if (byEmail?.role === "admin") {
-    throw new HttpError(
-      403,
-      "Administrators must use the protected Admin login.",
-      "ACCESS_DENIED",
-    );
-  }
   return byEmail
     ? (byEmail as GoogleLocalIdentity & { providerUserId: string | null })
     : null;

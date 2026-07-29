@@ -198,7 +198,7 @@ export function HealthcareDiscovery() {
       <section className="healthHero relative overflow-hidden rounded-3xl p-8 md:p-12 mb-10 border border-orange-500/20 bg-gradient-to-br from-slate-900/90 via-[#1c0c0f]/80 to-slate-900/90 backdrop-blur-xl shadow-2xl">
         <div className="max-w-3xl relative z-10">
           <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-500/15 border border-orange-500/30 text-xs font-extrabold text-orange-400 uppercase tracking-widest mb-4">
-            <Activity size={14} /> Verified Healthcare Network · DLF Ankur Vihar
+            <Activity size={14} /> Verified Healthcare Network
           </span>
           <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-tight mb-4">
             Local care, <em className="not-italic text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">without the waiting-room guesswork.</em>
