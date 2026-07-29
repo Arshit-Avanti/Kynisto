@@ -75,48 +75,46 @@ export function StoreActions({ store }: { store: StoreActionData }) {
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not publish your review."); }
   }
 
-  const actionStyle = (bg: string, color: string): React.CSSProperties => ({
+  const actionStyle = (isPrimary?: boolean, isDanger?: boolean): React.CSSProperties => ({
     display: "inline-flex",
     alignItems: "center",
     gap: "6px",
-    backgroundColor: bg,
-    color: color,
     padding: "8px 14px",
     borderRadius: "8px",
     fontSize: "14px",
     fontWeight: 600,
     textDecoration: "none",
-    border: `1px solid ${bg === '#f8fafc' ? '#e2e8f0' : bg}`,
     cursor: "pointer",
-    transition: "all 0.2s ease"
+    color: isDanger ? "#f87171" : (isPrimary ? "#60a5fa" : "#f8fafc"),
+    borderColor: isDanger ? "rgba(248,113,113,0.3)" : (isPrimary ? "rgba(96,165,250,0.4)" : "rgba(255,255,255,0.1)")
   });
 
   return <>
     <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "16px" }}>
-      <a style={actionStyle("#2563eb", "#ffffff")} href={store.mapsUrl} target="_blank" rel="noreferrer" onClick={() => void track("direction")}>
+      <a className="glass-button shimmer" style={actionStyle(true)} href={store.mapsUrl} target="_blank" rel="noreferrer" onClick={() => void track("direction")}>
         <MapPinIcon /> Directions
       </a>
-      {store.phone && <a style={actionStyle("#f8fafc", "#0f172a")} href={`tel:${store.phone}`} onClick={() => void track("phone")}><PhoneIcon /> Call</a>}
-      {store.whatsapp && <a style={actionStyle("#f8fafc", "#0f172a")} href={`https://wa.me/${store.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" onClick={() => void track("whatsapp")}><WhatsAppIcon /> WhatsApp</a>}
-      <button style={actionStyle(saved ? "#fee2e2" : "#f8fafc", saved ? "#ef4444" : "#0f172a")} type="button" aria-pressed={saved} onClick={() => void toggleFavorite()}>
+      {store.phone && <a className="glass-button shimmer" style={actionStyle()} href={`tel:${store.phone}`} onClick={() => void track("phone")}><PhoneIcon /> Call</a>}
+      {store.whatsapp && <a className="glass-button shimmer" style={actionStyle()} href={`https://wa.me/${store.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" onClick={() => void track("whatsapp")}><WhatsAppIcon /> WhatsApp</a>}
+      <button className="glass-button shimmer" style={actionStyle(false, saved)} type="button" aria-pressed={saved} onClick={() => void toggleFavorite()}>
         <HeartIcon filled={saved} /> {saved ? "Saved" : "Save"}
       </button>
-      <button style={actionStyle("#f8fafc", "#0f172a")} type="button" onClick={() => void share()}>
+      <button className="glass-button shimmer" style={actionStyle()} type="button" onClick={() => void share()}>
         <ShareIcon /> Share
       </button>
-      <button style={{ ...actionStyle("#f8fafc", store.hasOwner ? "#0f172a" : "#94a3b8"), opacity: store.hasOwner ? 1 : 0.6 }} type="button" disabled={!store.hasOwner} onClick={() => void startChat()}>
+      <button className="glass-button shimmer" style={{ ...actionStyle(), opacity: store.hasOwner ? 1 : 0.6 }} type="button" disabled={!store.hasOwner} onClick={() => void startChat()}>
         <ChatIcon /> {store.hasOwner ? "Message" : "Chat unavailable"}
       </button>
-      {store.categoryModule === "healthcare" && store.queueEnabled && <Link style={actionStyle("#f8fafc", "#0f172a")} href={`/healthcare?provider=${encodeURIComponent(store.id)}`}><QueueIcon /> Join Queue</Link>}
-      <button style={actionStyle("#f8fafc", "#0f172a")} type="button" onClick={() => setReviewing((value) => !value)}>
+      {store.categoryModule === "healthcare" && store.queueEnabled && <Link className="glass-button shimmer" style={actionStyle()} href={`/healthcare?provider=${encodeURIComponent(store.id)}`}><QueueIcon /> Join Queue</Link>}
+      <button className="glass-button shimmer" style={actionStyle()} type="button" onClick={() => setReviewing((value) => !value)}>
         <EditIcon /> Review
       </button>
     </div>
-    {message && <p style={{ marginTop: "12px", fontSize: "14px", color: "#0f172a", backgroundColor: "#f1f5f9", padding: "12px", borderRadius: "8px" }} role="status">{message}</p>}
-    {reviewing && <form className="quickReview" onSubmit={submitReview} style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "12px", padding: "16px", borderRadius: "12px", border: "1px solid #e2e8f0", backgroundColor: "#f8fafc" }}>
+    {message && <p className="glass-section" style={{ marginTop: "12px", fontSize: "14px", color: "#f8fafc", padding: "12px", borderRadius: "8px" }} role="status">{message}</p>}
+    {reviewing && <form className="glass-section" onSubmit={submitReview} style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "12px", padding: "16px", borderRadius: "12px" }}>
       <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-        <label style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "14px", fontWeight: 500, color: "#475569", flex: 1 }}>Rating
-          <select name="rating" defaultValue="5" style={{ padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1" }}>
+        <label style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "14px", fontWeight: 500, color: "#cbd5e1", flex: 1 }}>Rating
+          <select name="rating" defaultValue="5" style={{ padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.2)", color: "#f8fafc" }}>
             <option value="5">5 — Excellent</option>
             <option value="4">4 — Good</option>
             <option value="3">3 — Average</option>
@@ -124,16 +122,17 @@ export function StoreActions({ store }: { store: StoreActionData }) {
             <option value="1">1 — Very poor</option>
           </select>
         </label>
-        <label style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "14px", fontWeight: 500, color: "#475569", flex: 2 }}>Short title
-          <input name="title" maxLength={100} placeholder="What stood out?" style={{ padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1" }} />
+        <label style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "14px", fontWeight: 500, color: "#cbd5e1", flex: 2 }}>Short title
+          <input name="title" maxLength={100} placeholder="What stood out?" style={{ padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.2)", color: "#f8fafc" }} />
         </label>
       </div>
-      <label style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "14px", fontWeight: 500, color: "#475569" }}>Review
-        <textarea name="comment" minLength={10} maxLength={1500} placeholder="Share useful details for nearby customers" required style={{ padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1", minHeight: "80px" }} />
+      <label style={{ display: "flex", flexDirection: "column", gap: "4px", fontSize: "14px", fontWeight: 500, color: "#cbd5e1" }}>Review
+        <textarea name="comment" minLength={10} maxLength={1500} placeholder="Share useful details for nearby customers" required style={{ padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.2)", color: "#f8fafc", minHeight: "80px" }} />
       </label>
-      <button type="submit" style={{ ...actionStyle("#2563eb", "#ffffff"), justifyContent: "center" }}>Publish review</button>
-      {!canUseCustomerFeatures && <small style={{ color: "#64748b", fontSize: "12px" }}>You’ll be asked to <Link href={`/login?returnTo=/stores/${store.slug}#reviews`} style={{ color: "#2563eb", textDecoration: "underline" }}>log in as a customer</Link>.</small>}
+      <button type="submit" className="glass-button shimmer" style={{ ...actionStyle(true), justifyContent: "center", width: "100%" }}>Publish review</button>
+      {!canUseCustomerFeatures && <small style={{ color: "#94a3b8", fontSize: "12px" }}>You’ll be asked to <Link href={`/login?returnTo=/stores/${store.slug}#reviews`} style={{ color: "#60a5fa", textDecoration: "underline" }}>log in as a customer</Link>.</small>}
     </form>}
   </>;
 }
+
 

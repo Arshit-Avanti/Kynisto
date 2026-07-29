@@ -9,8 +9,8 @@
   min-height: 100vh;
   display: grid;
   grid-template-columns: 245px 1fr;
-  background: var(--p-bg);
-  color: var(--p-ink);
+  background: #0B0F17;
+  color: #F8FAFC;
   transition: background 0.2s, color 0.2s;
 }
 
@@ -31,7 +31,9 @@
   flex-direction: column;
   position: sticky;
   top: 0;
-  background: #060C1F;
+  background: rgba(11, 15, 23, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid rgba(0, 240, 255, 0.1);
   color: #fff;
   z-index: 30;
@@ -282,10 +284,10 @@
 .portalButton {
   min-height: 42px;
   padding: 0 18px;
-  border: 0;
+  border: 1px solid var(--glass-border);
   border-radius: 12px;
-  background: #00F0FF;
-  color: #050A18;
+  background: var(--glass-bg);
+  color: #F8FAFC;
   cursor: pointer;
   font-size: 13px;
   font-weight: 750;
@@ -293,14 +295,16 @@
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  box-shadow: 0 4px 16px rgba(0, 240, 255, 0.3);
-  transition: all 0.18s ease;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.3s ease;
 }
 
 .portalButton:hover {
-  background: #33F3FF;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(0, 240, 255, 0.45);
+  background: var(--glass-hover);
+  transform: translateY(-2px);
+  border-color: var(--glow-blue);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
 }
 
 .portalButton.secondary {
@@ -329,13 +333,21 @@
 
 .statCard,
 .portalCard {
-  border: 1px solid rgba(0, 240, 255, 0.16);
+  border: 1px solid var(--glass-border);
   border-radius: 20px;
-  background: #081026;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(14px);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.statCard:hover,
+.portalCard:hover {
+  transform: translateY(-2px);
+  border-color: var(--glow-blue);
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.15);
 }
 
 .statCard {

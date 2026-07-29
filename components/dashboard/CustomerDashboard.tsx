@@ -145,7 +145,9 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
     
     {activeQueue && (
       <div style={{
-        background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)",
+        background: "rgba(30, 27, 75, 0.4)",
+        backdropFilter: "blur(20px)",
+        border: "1px solid rgba(99, 102, 241, 0.3)",
         color: "#ffffff",
         padding: "1.5rem 2rem",
         borderRadius: "20px",
@@ -155,15 +157,21 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
         flexWrap: "wrap",
         gap: "1.5rem",
         marginBottom: "2rem",
-        boxShadow: "0 10px 25px -5px rgba(30,27,75,0.3)"
+        boxShadow: "0 0 30px rgba(99, 102, 241, 0.15), inset 0 0 20px rgba(99, 102, 241, 0.05)"
       }}>
+        <style>{`
+          @keyframes pulseTicket {
+            0%, 100% { filter: drop-shadow(0 0 5px rgba(129, 140, 248, 0.5)); transform: scale(1); }
+            50% { filter: drop-shadow(0 0 15px rgba(129, 140, 248, 0.9)); transform: scale(1.05); }
+          }
+        `}</style>
         <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
-          <div style={{ background: "rgba(255,255,255,0.1)", padding: "1rem", borderRadius: "16px", backdropFilter: "blur(4px)" }}>
-            <Ticket size={32} color="#818cf8" />
+          <div style={{ background: "rgba(99, 102, 241, 0.1)", padding: "1rem", borderRadius: "16px", border: "1px solid rgba(129, 140, 248, 0.3)" }}>
+            <Ticket size={32} color="#a5b4fc" style={{ animation: "pulseTicket 2s infinite" }} />
           </div>
           <div>
-            <strong style={{ fontSize: "1.2rem", display: "block", marginBottom: "0.25rem" }}>You&apos;re in a queue at {activeQueue.storeName}</strong>
-            <span style={{ color: "#a5b4fc", fontSize: "0.95rem" }}>
+            <strong style={{ fontSize: "1.2rem", display: "block", marginBottom: "0.25rem", textShadow: "0 0 10px rgba(255,255,255,0.3)" }}>You&apos;re in a queue at {activeQueue.storeName}</strong>
+            <span style={{ color: "#c7d2fe", fontSize: "0.95rem", textShadow: "0 0 5px rgba(199, 210, 254, 0.5)" }}>
               Token #{activeQueue.tokenNumber}
               {activeQueue.queueState ? ` · ${Math.max(0, (activeQueue.queueState.position ?? 1) - 1)} ahead · ~${activeQueue.queueState.estimatedWaitMinutes ?? 0} min wait` : ""}
             </span>
@@ -171,11 +179,11 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
         </div>
         <div style={{ display: "flex", gap: "1rem" }}>
           {activeQueue.queueCode ? (
-            <Link href={`/q/${activeQueue.queueCode}`} style={{ background: "#4f46e5", color: "#fff", padding: "0.75rem 1.5rem", borderRadius: "12px", fontWeight: 700, textDecoration: "none" }}>View Queue</Link>
+            <Link href={`/q/${activeQueue.queueCode}`} style={{ background: "rgba(79, 70, 229, 0.8)", backdropFilter: "blur(4px)", border: "1px solid rgba(129, 140, 248, 0.5)", color: "#fff", padding: "0.75rem 1.5rem", borderRadius: "12px", fontWeight: 700, textDecoration: "none", boxShadow: "0 0 15px rgba(79, 70, 229, 0.4)" }}>View Queue</Link>
           ) : (
-            <Link href="/healthcare" style={{ background: "#4f46e5", color: "#fff", padding: "0.75rem 1.5rem", borderRadius: "12px", fontWeight: 700, textDecoration: "none" }}>View Queue</Link>
+            <Link href="/healthcare" style={{ background: "rgba(79, 70, 229, 0.8)", backdropFilter: "blur(4px)", border: "1px solid rgba(129, 140, 248, 0.5)", color: "#fff", padding: "0.75rem 1.5rem", borderRadius: "12px", fontWeight: 700, textDecoration: "none", boxShadow: "0 0 15px rgba(79, 70, 229, 0.4)" }}>View Queue</Link>
           )}
-          <button type="button" onClick={() => void handleLeaveQueue()} style={{ background: "transparent", color: "#fca5a5", border: "1px solid rgba(252,165,165,0.3)", padding: "0.75rem 1.5rem", borderRadius: "12px", fontWeight: 700, cursor: "pointer" }}>Leave</button>
+          <button type="button" onClick={() => void handleLeaveQueue()} style={{ background: "rgba(248, 113, 113, 0.1)", backdropFilter: "blur(4px)", color: "#fca5a5", border: "1px solid rgba(248, 113, 113, 0.3)", padding: "0.75rem 1.5rem", borderRadius: "12px", fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}>Leave</button>
         </div>
       </div>
     )}
@@ -200,29 +208,29 @@ function CustomerOverview({ user, favorites, reviews, cart }: { user: SessionUse
   return (
     <>
       <div className="statsGrid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
-        <article className="statCard" style={{ background: "linear-gradient(135deg, #fdf2f8 0%, #fbcfe8 100%)", border: "1px solid #f9a8d4", padding: "1.5rem", borderRadius: "16px", display: "flex", flexDirection: "column" }}>
-          <Heart size={24} color="#db2777" style={{ marginBottom: "0.75rem" }} />
-          <small style={{ color: "#9d174d", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>FAVOURITE SHOPS</small>
-          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "#831843", lineHeight: 1, marginTop: "0.5rem" }}>{favorites.length}</strong>
-          <span className="subText" style={{ color: "#be185d", fontSize: "0.85rem", marginTop: "0.25rem" }}>Saved shops</span>
+        <article className="statCard" style={{ background: "rgba(131, 24, 67, 0.1)", backdropFilter: "blur(12px)", border: "1px solid rgba(219, 39, 119, 0.3)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", boxShadow: "0 10px 30px -10px rgba(219, 39, 119, 0.3), inset 0 0 20px rgba(219, 39, 119, 0.05)", transform: "translateZ(0)" }}>
+          <Heart size={28} color="#f472b6" style={{ marginBottom: "0.75rem", filter: "drop-shadow(0 0 8px rgba(244, 114, 182, 0.8))" }} />
+          <small style={{ color: "#fbcfe8", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>FAVOURITE SHOPS</small>
+          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "#fff", lineHeight: 1, marginTop: "0.5rem", textShadow: "0 0 15px rgba(255,255,255,0.5)" }}>{favorites.length}</strong>
+          <span className="subText" style={{ color: "#f9a8d4", fontSize: "0.85rem", marginTop: "0.25rem" }}>Saved shops</span>
         </article>
-        <article className="statCard" style={{ background: "linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)", border: "1px solid #fde68a", padding: "1.5rem", borderRadius: "16px", display: "flex", flexDirection: "column" }}>
-          <Star size={24} color="#d97706" style={{ marginBottom: "0.75rem" }} />
-          <small style={{ color: "#b45309", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>REVIEWS WRITTEN</small>
-          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "#78350f", lineHeight: 1, marginTop: "0.5rem" }}>{reviews.length}</strong>
-          <span className="subText" style={{ color: "#d97706", fontSize: "0.85rem", marginTop: "0.25rem" }}>Reviews written</span>
+        <article className="statCard" style={{ background: "rgba(120, 53, 15, 0.1)", backdropFilter: "blur(12px)", border: "1px solid rgba(217, 119, 6, 0.3)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", boxShadow: "0 10px 30px -10px rgba(217, 119, 6, 0.3), inset 0 0 20px rgba(217, 119, 6, 0.05)", transform: "translateZ(0)" }}>
+          <Star size={28} color="#fbbf24" style={{ marginBottom: "0.75rem", filter: "drop-shadow(0 0 8px rgba(251, 191, 36, 0.8))" }} />
+          <small style={{ color: "#fde68a", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>REVIEWS WRITTEN</small>
+          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "#fff", lineHeight: 1, marginTop: "0.5rem", textShadow: "0 0 15px rgba(255,255,255,0.5)" }}>{reviews.length}</strong>
+          <span className="subText" style={{ color: "#fcd34d", fontSize: "0.85rem", marginTop: "0.25rem" }}>Reviews written</span>
         </article>
-        <article className="statCard" style={{ background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)", border: "1px solid #bfdbfe", padding: "1.5rem", borderRadius: "16px", display: "flex", flexDirection: "column" }}>
-          <ShoppingCart size={24} color="#2563eb" style={{ marginBottom: "0.75rem" }} />
-          <small style={{ color: "#1d4ed8", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>CART PRODUCTS</small>
-          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "#1e3a8a", lineHeight: 1, marginTop: "0.5rem" }}>{cart.length}</strong>
-          <span className="subText" style={{ color: "#2563eb", fontSize: "0.85rem", marginTop: "0.25rem" }}>Items in your cart</span>
+        <article className="statCard" style={{ background: "rgba(30, 58, 138, 0.1)", backdropFilter: "blur(12px)", border: "1px solid rgba(37, 99, 235, 0.3)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", boxShadow: "0 10px 30px -10px rgba(37, 99, 235, 0.3), inset 0 0 20px rgba(37, 99, 235, 0.05)", transform: "translateZ(0)" }}>
+          <ShoppingCart size={28} color="#60a5fa" style={{ marginBottom: "0.75rem", filter: "drop-shadow(0 0 8px rgba(96, 165, 250, 0.8))" }} />
+          <small style={{ color: "#bfdbfe", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>CART PRODUCTS</small>
+          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "#fff", lineHeight: 1, marginTop: "0.5rem", textShadow: "0 0 15px rgba(255,255,255,0.5)" }}>{cart.length}</strong>
+          <span className="subText" style={{ color: "#93c5fd", fontSize: "0.85rem", marginTop: "0.25rem" }}>Items in your cart</span>
         </article>
-        <article className="statCard" style={{ background: "linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%)", border: "1px solid #99f6e4", padding: "1.5rem", borderRadius: "16px", display: "flex", flexDirection: "column" }}>
-          <MapPin size={24} color="#0d9488" style={{ marginBottom: "0.75rem" }} />
-          <small style={{ color: "#0f766e", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>LOCATION</small>
-          <strong style={{ fontSize: "1.5rem", fontWeight: 800, color: "#115e59", lineHeight: 1.2, marginTop: "0.5rem" }}>DLF Ankur Vihar</strong>
-          <span className="subText" style={{ color: "#0d9488", fontSize: "0.85rem", marginTop: "0.25rem" }}>Your current locality</span>
+        <article className="statCard" style={{ background: "rgba(17, 94, 89, 0.1)", backdropFilter: "blur(12px)", border: "1px solid rgba(13, 148, 136, 0.3)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", boxShadow: "0 10px 30px -10px rgba(13, 148, 136, 0.3), inset 0 0 20px rgba(13, 148, 136, 0.05)", transform: "translateZ(0)" }}>
+          <MapPin size={28} color="#2dd4bf" style={{ marginBottom: "0.75rem", filter: "drop-shadow(0 0 8px rgba(45, 212, 191, 0.8))" }} />
+          <small style={{ color: "#99f6e4", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>LOCATION</small>
+          <strong style={{ fontSize: "1.5rem", fontWeight: 800, color: "#fff", lineHeight: 1.2, marginTop: "0.5rem", textShadow: "0 0 10px rgba(255,255,255,0.3)" }}>DLF Ankur Vihar</strong>
+          <span className="subText" style={{ color: "#5eead4", fontSize: "0.85rem", marginTop: "0.25rem" }}>Your current locality</span>
         </article>
       </div>
 

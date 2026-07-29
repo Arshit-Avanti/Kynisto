@@ -160,43 +160,44 @@ export function PortalShell({
   }
 
   return (
-    <div className={`portal portalShell ${dark ? "dark-theme" : "light-theme"}`}>
-      <aside className={`portalSidebar ${open ? "isOpen" : ""}`} style={{ overflowY: "auto" }}>
-        <Link className="portalBrand" href="/"><KynistoLogo /></Link>
-        <div className="portalRole"><small>Workspace</small><strong>{activeWorkspaceRole === "admin" ? (user.isSuperAdmin ? "Super Administration" : "Administration") : activeWorkspaceRole === "store_owner" ? `${user.role === "admin" ? "Admin · " : ""}Shop owner` : `${user.role === "admin" ? "Admin · " : ""}Customer account`}</strong></div>
-        <nav>
+    <div className={`portal portalShell ${dark ? "dark-theme" : "light-theme"}`} style={{ background: dark ? "linear-gradient(135deg, #020617 0%, #0f172a 100%)" : "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)" }}>
+      <aside className={`portalSidebar ${open ? "isOpen" : ""}`} style={{ overflowY: "auto", background: dark ? "rgba(15, 23, 42, 0.6)" : "rgba(255, 255, 255, 0.6)", backdropFilter: "blur(20px)", borderRight: dark ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid rgba(0, 0, 0, 0.05)", boxShadow: "0 0 30px rgba(0,0,0,0.1)" }}>
+        <Link className="portalBrand" href="/" style={{ filter: dark ? "drop-shadow(0 0 10px rgba(255,255,255,0.2))" : "none" }}><KynistoLogo /></Link>
+        <div className="portalRole" style={{ background: dark ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.03)", borderRadius: "12px", margin: "0 1rem" }}><small style={{ color: dark ? "#94a3b8" : "#64748b" }}>Workspace</small><strong style={{ color: dark ? "#e2e8f0" : "#0f172a", textShadow: dark ? "0 0 10px rgba(255,255,255,0.2)" : "none" }}>{activeWorkspaceRole === "admin" ? (user.isSuperAdmin ? "Super Administration" : "Administration") : activeWorkspaceRole === "store_owner" ? `${user.role === "admin" ? "Admin · " : ""}Shop owner` : `${user.role === "admin" ? "Admin · " : ""}Customer account`}</strong></div>
+        <nav style={{ padding: "0 1rem" }}>
           {nav.map((item) => {
             const Icon = item.icon;
+            const isActive = active === item.tab;
             return (
-              <Link key={item.tab} href={`${pathname}?tab=${item.tab}`} className={active === item.tab ? "active" : ""} onClick={() => setOpen(false)}>
-                <span aria-hidden="true" className="mr-2"><Icon size={18} /></span>{item.label}{item.badge === "chat" && chatUnread > 0 && <i className="navBadge">{chatUnread > 99 ? "99+" : chatUnread}</i>}
+              <Link key={item.tab} href={`${pathname}?tab=${item.tab}`} className={isActive ? "active" : ""} onClick={() => setOpen(false)} style={isActive ? { background: dark ? "rgba(59, 130, 246, 0.15)" : "rgba(59, 130, 246, 0.1)", color: dark ? "#60a5fa" : "#2563eb", borderRadius: "12px", border: dark ? "1px solid rgba(59, 130, 246, 0.3)" : "1px solid rgba(59, 130, 246, 0.2)", boxShadow: dark ? "0 0 15px rgba(59, 130, 246, 0.2), inset 0 0 10px rgba(59, 130, 246, 0.1)" : "none", textShadow: dark ? "0 0 8px rgba(96, 165, 250, 0.5)" : "none" } : { color: dark ? "#cbd5e1" : "#475569" }}>
+                <span aria-hidden="true" className="mr-2"><Icon size={18} style={{ filter: isActive && dark ? "drop-shadow(0 0 5px rgba(96, 165, 250, 0.8))" : "none" }} /></span>{item.label}{item.badge === "chat" && chatUnread > 0 && <i className="navBadge" style={{ background: "#ef4444", boxShadow: "0 0 10px #ef4444" }}>{chatUnread > 99 ? "99+" : chatUnread}</i>}
               </Link>
             );
           })}
         </nav>
-        <div className="portalSidebarFooter">
+        <div className="portalSidebarFooter" style={{ borderTop: dark ? "1px solid rgba(255,255,255,0.05)" : "1px solid rgba(0,0,0,0.05)", background: dark ? "rgba(15, 23, 42, 0.4)" : "rgba(255,255,255,0.4)" }}>
           {user.role === "admin" && <>
-            <Link href="/admin"><span className="mr-2"><LayoutDashboard size={18} /></span> Admin workspace</Link>
-            <Link href="/owner"><span className="mr-2"><Store size={18} /></span> Shop owner tools</Link>
-            <Link href="/account"><span className="mr-2"><User size={18} /></span> Customer tools</Link>
+            <Link href="/admin" style={{ color: dark ? "#cbd5e1" : "#475569" }}><span className="mr-2"><LayoutDashboard size={18} /></span> Admin workspace</Link>
+            <Link href="/owner" style={{ color: dark ? "#cbd5e1" : "#475569" }}><span className="mr-2"><Store size={18} /></span> Shop owner tools</Link>
+            <Link href="/account" style={{ color: dark ? "#cbd5e1" : "#475569" }}><span className="mr-2"><User size={18} /></span> Customer tools</Link>
           </>}
-          <Link href="/"><span className="mr-2"><ChevronLeft size={18} /></span> Public site</Link>
-          <button type="button" onClick={logout}><span className="mr-2"><LogOut size={18} /></span> Log out</button>
+          <Link href="/" style={{ color: dark ? "#cbd5e1" : "#475569" }}><span className="mr-2"><ChevronLeft size={18} /></span> Public site</Link>
+          <button type="button" onClick={logout} style={{ color: dark ? "#fca5a5" : "#ef4444" }}><span className="mr-2"><LogOut size={18} /></span> Log out</button>
         </div>
       </aside>
-      {open && <button className="portalBackdrop" type="button" aria-label="Close navigation" onClick={() => setOpen(false)} />}
+      {open && <button className="portalBackdrop" type="button" aria-label="Close navigation" onClick={() => setOpen(false)} style={{ backdropFilter: "blur(4px)" }} />}
       <section className="portalMain">
-        <header className="portalHeader">
-          <button className="mobileMenu" type="button" aria-label="Open navigation" onClick={() => setOpen(true)}><Menu size={24} /></button>
-          <div><small>DLF Ankur Vihar · Kynisto</small><strong>{nav.find((item) => item.tab === active)?.label ?? "Dashboard"}</strong></div>
+        <header className="portalHeader" style={{ background: dark ? "rgba(15, 23, 42, 0.6)" : "rgba(255, 255, 255, 0.6)", backdropFilter: "blur(20px)", borderBottom: dark ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid rgba(0, 0, 0, 0.05)", boxShadow: "0 4px 30px rgba(0,0,0,0.05)" }}>
+          <button className="mobileMenu" type="button" aria-label="Open navigation" onClick={() => setOpen(true)} style={{ color: dark ? "#f8fafc" : "#0f172a" }}><Menu size={24} /></button>
+          <div><small style={{ color: dark ? "#94a3b8" : "#64748b" }}>DLF Ankur Vihar · Kynisto</small><strong style={{ color: dark ? "#f8fafc" : "#0f172a" }}>{nav.find((item) => item.tab === active)?.label ?? "Dashboard"}</strong></div>
           <div className="portalHeaderActions">
-            <button type="button" onClick={toggleTheme} aria-label="Toggle dark mode">
-              {dark ? <Sun size={20} /> : <Moon size={20} />}
+            <button type="button" onClick={toggleTheme} aria-label="Toggle dark mode" style={{ background: dark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", color: dark ? "#fbbf24" : "#475569", borderRadius: "50%", padding: "0.5rem", border: dark ? "1px solid rgba(251, 191, 36, 0.3)" : "none", boxShadow: dark ? "0 0 15px rgba(251, 191, 36, 0.2)" : "none" }}>
+              {dark ? <Sun size={20} style={{ filter: "drop-shadow(0 0 5px rgba(251, 191, 36, 0.8))" }} /> : <Moon size={20} />}
             </button>
-            <span className="userAvatar">
-              {user.avatarUrl ? <img src={user.avatarUrl} alt="" referrerPolicy="no-referrer" /> : <User size={20} />}
+            <span className="userAvatar" style={{ border: dark ? "2px solid rgba(255,255,255,0.2)" : "2px solid rgba(0,0,0,0.1)", boxShadow: dark ? "0 0 10px rgba(255,255,255,0.1)" : "none" }}>
+              {user.avatarUrl ? <img src={user.avatarUrl} alt="" referrerPolicy="no-referrer" /> : <User size={20} color={dark ? "#fff" : "#0f172a"} />}
             </span>
-            <span className="userMeta"><b>{user.name}</b><small>{user.email}</small></span>
+            <span className="userMeta"><b style={{ color: dark ? "#f8fafc" : "#0f172a" }}>{user.name}</b><small style={{ color: dark ? "#94a3b8" : "#64748b" }}>{user.email}</small></span>
           </div>
         </header>
         <div className="portalContent">{children}</div>

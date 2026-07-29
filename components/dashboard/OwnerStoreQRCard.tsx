@@ -185,77 +185,79 @@ export function OwnerStoreQRCard({ store }: OwnerStoreQRCardProps) {
         <div style={{
           position: "fixed",
           inset: 0,
-          background: "rgba(15, 23, 42, 0.8)",
+          background: "rgba(15, 23, 42, 0.6)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           zIndex: 99999,
           padding: "1rem",
-          backdropFilter: "blur(8px)"
+          backdropFilter: "blur(12px)"
         }}>
           <div style={{
-            background: "#ffffff",
+            background: "rgba(255, 255, 255, 0.8)",
             padding: "3rem 2.5rem",
-            borderRadius: "24px",
+            borderRadius: "32px",
             maxWidth: "480px",
             width: "100%",
             textAlign: "center",
-            border: "8px solid #2563eb",
-            boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)"
+            border: "1px solid rgba(255, 255, 255, 0.5)",
+            boxShadow: "0 25px 50px -12px rgba(0,0,0,0.3), inset 0 0 30px rgba(255,255,255,0.8)",
+            backdropFilter: "blur(20px)"
           }}>
             {store.logoUrl ? (
               <img 
                 src={String(store.logoUrl)} 
                 alt={store.name} 
-                style={{ width: "80px", height: "80px", borderRadius: "20px", objectFit: "cover", margin: "0 auto 1rem auto", border: "4px solid #f1f5f9" }} 
+                style={{ width: "90px", height: "90px", borderRadius: "24px", objectFit: "cover", margin: "0 auto 1.5rem auto", border: "4px solid rgba(255,255,255,0.8)", boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }} 
               />
             ) : (
-              <div style={{ width: "80px", height: "80px", borderRadius: "20px", background: "linear-gradient(135deg, #3b82f6, #8b5cf6)", color: "#ffffff", fontSize: "2rem", fontWeight: 900, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem auto", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}>
+              <div style={{ width: "90px", height: "90px", borderRadius: "24px", background: "linear-gradient(135deg, #3b82f6, #8b5cf6)", color: "#ffffff", fontSize: "2.5rem", fontWeight: 900, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.5rem auto", border: "4px solid rgba(255,255,255,0.8)", boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}>
                 {store.name.charAt(0)}
               </div>
             )}
 
-            <h2 style={{ fontSize: "2rem", fontWeight: 900, color: "#0f172a", margin: 0, lineHeight: 1.1 }}>
+            <h2 style={{ fontSize: "2.2rem", fontWeight: 900, color: "#0f172a", margin: 0, lineHeight: 1.1, textShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
               {store.name}
             </h2>
-            <p style={{ color: "#3b82f6", fontWeight: 800, marginTop: "0.5rem", textTransform: "uppercase", fontSize: "0.9rem", letterSpacing: "0.05em" }}>
-              Scan to view Business Profile, Catalog &amp; Directions
+            <p style={{ color: "#3b82f6", fontWeight: 800, marginTop: "0.75rem", textTransform: "uppercase", fontSize: "0.95rem", letterSpacing: "0.1em" }}>
+              Scan for Profile, Catalog & Directions
             </p>
 
             <div style={{
-              margin: "2rem auto",
-              width: "240px",
-              height: "240px",
-              background: "#ffffff",
-              padding: "1rem",
-              borderRadius: "20px",
-              border: "2px solid #e2e8f0",
-              boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)"
+              margin: "2.5rem auto",
+              width: "260px",
+              height: "260px",
+              background: "rgba(255,255,255,0.9)",
+              padding: "1.25rem",
+              borderRadius: "24px",
+              border: "1px solid rgba(255,255,255,1)",
+              boxShadow: "0 15px 35px -5px rgba(0,0,0,0.15), inset 0 0 20px rgba(0,0,0,0.05)"
             }}>
-              <img src={qrImageApi} alt="Printable Shop QR" width="204" height="204" style={{ display: "block", width: "100%", height: "100%" }} />
+              <img src={qrImageApi} alt="Printable Shop QR" width="220" height="220" style={{ display: "block", width: "100%", height: "100%" }} />
             </div>
 
             {store.address && (
-              <p style={{ fontSize: "1rem", color: "#475569", margin: "0.5rem 0", fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem" }}>
-                <MapPin size={18} /> {store.address}{store.city ? `, ${store.city}` : ""}
+              <p style={{ fontSize: "1.1rem", color: "#334155", margin: "0.5rem 0", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+                <MapPin size={20} color="#3b82f6" /> {store.address}{store.city ? `, ${store.city}` : ""}
               </p>
             )}
 
-            <small style={{ color: "#94a3b8", display: "block", marginTop: "1.5rem", fontSize: "0.85rem", fontWeight: 600 }}>
-              Powered by Kynisto Local Discovery
+            <small style={{ color: "#64748b", display: "block", marginTop: "2rem", fontSize: "0.9rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Powered by Kynisto
             </small>
 
-            <div style={{ display: "flex", gap: "1rem", marginTop: "2rem" }}>
+            <div style={{ display: "flex", gap: "1rem", marginTop: "2.5rem" }}>
               <button
                 type="button"
                 onClick={() => window.print()}
                 style={{
                   flex: 1,
-                  background: "#2563eb",
+                  background: "rgba(37, 99, 235, 0.9)",
+                  backdropFilter: "blur(4px)",
                   color: "#ffffff",
-                  border: "none",
-                  padding: "1rem",
-                  borderRadius: "14px",
+                  border: "1px solid rgba(59, 130, 246, 0.5)",
+                  padding: "1.1rem",
+                  borderRadius: "16px",
                   fontWeight: 800,
                   fontSize: "1.05rem",
                   cursor: "pointer",
@@ -263,10 +265,11 @@ export function OwnerStoreQRCard({ store }: OwnerStoreQRCardProps) {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "0.5rem",
-                  transition: "background 0.2s"
+                  transition: "all 0.2s",
+                  boxShadow: "0 10px 20px rgba(37, 99, 235, 0.2)"
                 }}
-                onMouseOver={(e) => e.currentTarget.style.background = "#1d4ed8"}
-                onMouseOut={(e) => e.currentTarget.style.background = "#2563eb"}
+                onMouseOver={(e) => { e.currentTarget.style.background = "rgba(29, 78, 216, 1)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                onMouseOut={(e) => { e.currentTarget.style.background = "rgba(37, 99, 235, 0.9)"; e.currentTarget.style.transform = "none"; }}
               >
                 <Printer size={20} /> Print Now
               </button>
@@ -275,18 +278,19 @@ export function OwnerStoreQRCard({ store }: OwnerStoreQRCardProps) {
                 onClick={() => setShowPrintModal(false)}
                 style={{
                   flex: 1,
-                  background: "#f1f5f9",
+                  background: "rgba(255, 255, 255, 0.5)",
+                  backdropFilter: "blur(4px)",
                   color: "#334155",
-                  border: "2px solid #e2e8f0",
-                  padding: "1rem",
-                  borderRadius: "14px",
+                  border: "1px solid rgba(226, 232, 240, 0.8)",
+                  padding: "1.1rem",
+                  borderRadius: "16px",
                   fontWeight: 700,
                   fontSize: "1.05rem",
                   cursor: "pointer",
                   transition: "all 0.2s"
                 }}
-                onMouseOver={(e) => { e.currentTarget.style.background = "#e2e8f0"; e.currentTarget.style.borderColor = "#cbd5e1"; }}
-                onMouseOut={(e) => { e.currentTarget.style.background = "#f1f5f9"; e.currentTarget.style.borderColor = "#e2e8f0"; }}
+                onMouseOver={(e) => { e.currentTarget.style.background = "rgba(255, 255, 255, 0.8)"; }}
+                onMouseOut={(e) => { e.currentTarget.style.background = "rgba(255, 255, 255, 0.5)"; }}
               >
                 Close
               </button>

@@ -23,84 +23,141 @@ const Icons = {
 const modernCleanTechStyles = `
   .site, .healthPage, .productDiscovery {
     font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    background-color: #0B0F17 !important;
+    background-image: radial-gradient(circle at 15% 50%, rgba(37, 99, 235, 0.15), transparent 25%),
+                      radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15), transparent 25%) !important;
+    color: #f8fafc !important;
   }
   .searchBox, .healthSearch, .productIntro form, .locationPill, .categoryTile, .storeCard, .advancedFilters input, .providerGrid article {
-    border-radius: 8px !important;
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
-    background: #ffffff !important;
-    transition: all 0.2s ease !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    color: #f8fafc !important;
+  }
+  .searchBox input, .healthSearch input, .productIntro form input, .advancedFilters input {
+    background: transparent !important;
+    color: #f8fafc !important;
+  }
+  .searchBox input::placeholder, .productIntro form input::placeholder {
+    color: rgba(255,255,255,0.5) !important;
   }
   .searchBox:focus-within, .healthSearch:focus-within, .productIntro form:focus-within, .advancedFilters input:focus {
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 2px rgba(37,99,235,0.2) !important;
+    border-color: rgba(59, 130, 246, 0.5) !important;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3) !important;
     outline: none !important;
   }
   .locationPill:hover, .categoryTile:hover {
-    border-color: #2563eb !important;
+    border-color: rgba(255,255,255,0.2) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+  }
+  .categoryTile {
+    transition: all 0.3s ease, transform 0.2s ease !important;
   }
   .categoryTile[aria-pressed="true"], .careTypes button.active {
-    background: #2563eb !important;
-    color: white !important;
-    border-color: #2563eb !important;
-  }
-  .categoryTile[aria-pressed="true"] svg, .careTypes button.active svg {
-    stroke: white !important;
-  }
-  .storeCard:hover, .providerGrid article:hover {
-    box-shadow: 0 6px 16px rgba(0,0,0,0.06) !important;
-    border-color: #2563eb !important;
+    background: rgba(59, 130, 246, 0.2) !important;
+    color: #fff !important;
+    border-color: rgba(59, 130, 246, 0.5) !important;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4) !important;
     transform: translateY(-2px) !important;
   }
-  .storeVisual, .providerTop {
+  .categoryTile[aria-pressed="true"] svg, .careTypes button.active svg {
+    stroke: #60a5fa !important;
+  }
+  .storeCard {
+    overflow: hidden !important;
+  }
+  .storeCard:hover, .providerGrid article:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-6px) !important;
+  }
+  .storeVisual, .providerTop, .productVisual {
     position: relative !important;
-    background: #f8fafc !important;
-    border-bottom: 1px solid #e2e8f0 !important;
+    background: rgba(0, 0, 0, 0.2) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    overflow: hidden !important;
+  }
+  .storeVisual img, .productVisual img {
+    transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  }
+  .storeCard:hover .storeVisual img, .storeCard:hover .productVisual img, article:hover .productVisual img {
+    transform: scale(1.05) !important;
   }
   .statusBadge, .liveQueueBadge {
     border-radius: 4px !important;
     font-size: 0.75rem !important;
     font-weight: 600 !important;
+    backdrop-filter: blur(8px) !important;
   }
   .statusBadge.isOpen {
-    background: #dcfce7 !important;
-    color: #166534 !important;
-    border: 1px solid #bbf7d0 !important;
+    background: rgba(34, 197, 94, 0.2) !important;
+    color: #86efac !important;
+    border: 1px solid rgba(34, 197, 94, 0.3) !important;
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.2) !important;
   }
   .statusBadge.isClosed {
-    background: #f1f5f9 !important;
-    color: #475569 !important;
-    border: 1px solid #e2e8f0 !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #94a3b8 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
   }
   .distanceBadge {
     border-radius: 4px !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #334155 !important;
-    background: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #cbd5e1 !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(4px) !important;
   }
   .categoryLabel {
     font-size: 0.75rem !important;
     text-transform: uppercase !important;
     letter-spacing: 0.05em !important;
-    color: #2563eb !important;
-    background: #eff6ff !important;
+    color: #93c5fd !important;
+    background: rgba(59, 130, 246, 0.15) !important;
     padding: 4px 8px !important;
     border-radius: 4px !important;
     font-weight: 700 !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.2) !important;
   }
   .detailsButton, .cardActions a, .providerActions a, .providerActions button {
-    background: #2563eb !important;
+    background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
     color: white !important;
     border-radius: 6px !important;
     border: none !important;
     font-weight: 500 !important;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4) !important;
+    transition: all 0.3s ease !important;
   }
   .detailsButton:hover, .cardActions a:hover, .providerActions a:hover, .providerActions button:hover {
-    background: #1d4ed8 !important;
+    background: linear-gradient(135deg, #1d4ed8, #2563eb) !important;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6) !important;
+    transform: translateY(-1px) !important;
   }
   .storeGlyph {
     font-size: 2rem !important;
-    color: #64748b !important;
+    color: #94a3b8 !important;
+  }
+  .rating, .productRating {
+    color: #fef08a !important;
+    text-shadow: 0 0 8px rgba(253, 224, 71, 0.4) !important;
+  }
+  .productDiscovery article, .productGrid article {
+    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    color: #f8fafc !important;
+    overflow: hidden !important;
+  }
+  .productGrid article:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-6px) !important;
   }
 `;
 

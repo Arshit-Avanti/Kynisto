@@ -22,7 +22,21 @@
   --green: #149d65;
   --blue: var(--primary);
   --yellow: #20c7e8;
+
+  --bg-space: #0b0f17;
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-hover: rgba(255, 255, 255, 0.06);
+  --glow-blue: #3b82f6;
+  --glow-violet: #8b5cf6;
+  --glow-emerald: #10b981;
 }
+
+@keyframes rotateRadar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); } 50% { box-shadow: 0 0 30px rgba(139, 92, 246, 0.7); } }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes floatCard { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
 
 * {
   box-sizing: border-box;
@@ -42,8 +56,8 @@ body {
   max-width: 100%;
   margin: 0;
   overflow-x: clip;
-  background: var(--bg-page);
-  color: var(--text-primary);
+  background: #0B0F17;
+  color: #F8FAFC;
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
@@ -67,20 +81,22 @@ input:focus-visible {
 input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius);
-  background: var(--bg-card);
-  color: var(--text-primary);
+  background: var(--glass-bg);
+  color: #F8FAFC;
   padding: 0.5rem 0.75rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   outline: none;
 }
 
 input:not([type="checkbox"]):not([type="radio"]):focus,
 select:focus,
 textarea:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: var(--glow-blue);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
 }
 
 .srOnly {

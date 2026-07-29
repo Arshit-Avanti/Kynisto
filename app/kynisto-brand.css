@@ -23,7 +23,7 @@
 body {
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.5;
-  background: var(--kyn-bg);
+  background: #0B0F17;
 }
 
 .kynistoLogo {
@@ -154,16 +154,17 @@ body {
 button,
 .doneButton,
 .searchSubmit {
-  background: var(--primary);
+  background: var(--glass-bg);
   color: #ffffff;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   font-size: 0.875rem;
   font-weight: 600;
   padding: 0.5rem 1rem;
   border-radius: var(--radius);
-  border: none;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
+  transition: all 0.3s ease;
 }
 
 .portalButton:hover,
@@ -171,7 +172,10 @@ button,
 button:hover,
 .doneButton:hover,
 .searchSubmit:hover {
-  background: var(--primary-hover);
+  background: var(--glass-hover);
+  border-color: var(--glow-blue);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
 }
 
 .statCard,
@@ -184,10 +188,27 @@ button:hover,
 .productGrid article,
 .profileSection,
 .profileAside section {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.3s ease;
+}
+
+.statCard:hover,
+.portalCard:hover,
+.authCard:hover,
+.dashCard:hover,
+.categoryTile:hover,
+.storeCard:hover,
+.providerGrid article:hover,
+.productGrid article:hover,
+.profileSection:hover,
+.profileAside section:hover {
+  border-color: var(--glow-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.15);
 }
 
 .theme-royal {

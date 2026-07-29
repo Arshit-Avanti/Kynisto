@@ -420,40 +420,38 @@ export default function HealthcareQueueQRPage() {
                     </div>
                   )}
 
-                  <div style={{ position: "relative", overflow: "hidden", background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)", color: "#ffffff", padding: "2.5rem 2rem", borderRadius: "24px", textAlign: "center", marginBottom: "1.5rem", boxShadow: "0 20px 25px -5px rgba(30,27,75,0.4), 0 8px 10px -6px rgba(30,27,75,0.1)" }}>
-                    {/* Decorative elements */}
-                    <div style={{ position: "absolute", top: "-20px", right: "-20px", width: "100px", height: "100px", background: "rgba(255,255,255,0.05)", borderRadius: "50%" }} />
-                    <div style={{ position: "absolute", bottom: "-40px", left: "-20px", width: "120px", height: "120px", background: "rgba(255,255,255,0.05)", borderRadius: "50%" }} />
+                  <div style={{ position: "relative", overflow: "hidden", background: "rgba(15, 23, 42, 0.7)", backdropFilter: "blur(20px)", color: "#ffffff", padding: "3rem 2rem", borderRadius: "24px", textAlign: "center", marginBottom: "1.5rem", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 0 40px rgba(59, 130, 246, 0.2), inset 0 0 20px rgba(255,255,255,0.05)" }}>
+                    <div style={{ position: "absolute", top: "50%", left: "50%", width: "300px", height: "300px", transform: "translate(-50%, -50%)", background: "conic-gradient(from 0deg, transparent 70%, rgba(59,130,246,0.8) 100%)", borderRadius: "50%", animation: "rotateRadar 8s linear infinite", opacity: 0.3, pointerEvents: "none" }} />
+                    <div style={{ position: "absolute", top: "50%", left: "50%", width: "290px", height: "290px", transform: "translate(-50%, -50%)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: "50%", pointerEvents: "none" }} />
 
-                    <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.1)", padding: "0.5rem 1rem", borderRadius: "full", fontSize: "0.85rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1.5rem" }}>
-                      <Ticket size={16} /> Your Queue Ticket
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.05)", padding: "0.5rem 1rem", borderRadius: "full", fontSize: "0.85rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1.5rem", position: "relative", zIndex: 1, border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 0 10px rgba(255,255,255,0.1)" }}>
+                      <Ticket size={16} style={{ color: "#3b82f6" }} /> Your Queue Ticket
                     </div>
                     
-                    <div style={{ fontSize: "4.5rem", fontWeight: 900, lineHeight: 1, textShadow: "0 4px 10px rgba(0,0,0,0.3)", marginBottom: "1rem" }}>
+                    <div style={{ fontSize: "5rem", fontWeight: 900, lineHeight: 1, color: "#fff", textShadow: "0 0 20px #3b82f6, 0 0 40px #3b82f6", marginBottom: "1rem", animation: "pulseGlow 2s infinite", position: "relative", zIndex: 1 }}>
                       #{userEntry.tokenNumber}
                     </div>
 
                     {!isCalled && (
                       <>
-                        {/* Circular Progress Indicator for Wait */}
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1.5rem", marginTop: "2rem" }}>
+                        <div style={{ position: "relative", zIndex: 1, background: "rgba(0,0,0,0.3)", padding: "1.5rem", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "center", gap: "1.5rem", marginTop: "2rem", backdropFilter: "blur(10px)" }}>
                           <div style={{ position: "relative", width: "90px", height: "90px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <svg width="90" height="90" viewBox="0 0 100 100" style={{ transform: "rotate(-90deg)", position: "absolute" }}>
                               <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
-                              <circle cx="50" cy="50" r="45" fill="none" stroke="#60a5fa" strokeWidth="8" strokeDasharray={dashArray} strokeDashoffset={dashOffset} strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s ease" }} />
+                              <circle cx="50" cy="50" r="45" fill="none" stroke="#3b82f6" strokeWidth="8" strokeDasharray={dashArray} strokeDashoffset={dashOffset} strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s ease", filter: "drop-shadow(0 0 5px #3b82f6)" }} />
                             </svg>
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textShadow: "0 0 10px rgba(255,255,255,0.5)" }}>
                               <span style={{ fontSize: "1.5rem", fontWeight: 800 }}>{peopleAhead}</span>
                               <span style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.8 }}>ahead</span>
                             </div>
                           </div>
                           
                           <div style={{ textAlign: "left" }}>
-                            <div style={{ fontSize: "1rem", fontWeight: 600, opacity: 0.9, marginBottom: "0.25rem" }}>
+                            <div style={{ fontSize: "1rem", fontWeight: 600, opacity: 0.9, marginBottom: "0.25rem", textShadow: "0 0 10px rgba(255,255,255,0.3)" }}>
                               {peopleAhead === 0 ? "You're next!" : `${peopleAhead} people ahead of you`}
                             </div>
                             {userEntry.estimatedWaitMinutes > 0 && (
-                              <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "1.1rem", fontWeight: 700, color: "#93c5fd" }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "1.1rem", fontWeight: 700, color: "#60a5fa", textShadow: "0 0 10px rgba(96,165,250,0.5)" }}>
                                 <Clock size={18} /> ~{userEntry.estimatedWaitMinutes} min wait
                               </div>
                             )}
@@ -476,21 +474,21 @@ export default function HealthcareQueueQRPage() {
                         type="button"
                         disabled={actionBusy}
                         onClick={() => setShowLateModal(true)}
-                        style={{ padding: "1rem", background: "#fff7ed", border: "2px solid #fed7aa", borderRadius: "16px", fontWeight: 700, color: "#9a3412", cursor: "pointer", fontSize: "1rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", transition: "all 0.2s" }}
-                        onMouseOver={(e) => { e.currentTarget.style.background = "#ffedd5"; e.currentTarget.style.borderColor = "#fdba74"; }}
-                        onMouseOut={(e) => { e.currentTarget.style.background = "#fff7ed"; e.currentTarget.style.borderColor = "#fed7aa"; }}
+                        style={{ padding: "1rem", background: "rgba(255, 237, 213, 0.1)", backdropFilter: "blur(8px)", border: "1px solid rgba(253, 186, 116, 0.3)", borderRadius: "16px", fontWeight: 700, color: "#fdba74", cursor: "pointer", fontSize: "1rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", transition: "all 0.3s ease", boxShadow: "0 0 15px rgba(253, 186, 116, 0.1)" }}
+                        onMouseOver={(e) => { e.currentTarget.style.background = "rgba(255, 237, 213, 0.2)"; e.currentTarget.style.borderColor = "rgba(253, 186, 116, 0.6)"; e.currentTarget.style.boxShadow = "0 0 25px rgba(253, 186, 116, 0.3)"; }}
+                        onMouseOut={(e) => { e.currentTarget.style.background = "rgba(255, 237, 213, 0.1)"; e.currentTarget.style.borderColor = "rgba(253, 186, 116, 0.3)"; e.currentTarget.style.boxShadow = "0 0 15px rgba(253, 186, 116, 0.1)"; }}
                       >
-                        <Clock size={24} /> I{"'"}m Running Late
+                        <Clock size={24} style={{ filter: "drop-shadow(0 0 8px rgba(253, 186, 116, 0.5))" }} /> I{"'"}m Running Late
                       </button>
                       <button
                         type="button"
                         disabled={actionBusy}
                         onClick={() => void handleNotComing()}
-                        style={{ padding: "1rem", background: "#fef2f2", border: "2px solid #fecaca", borderRadius: "16px", fontWeight: 700, color: "#b91c1c", cursor: "pointer", fontSize: "1rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", transition: "all 0.2s" }}
-                        onMouseOver={(e) => { e.currentTarget.style.background = "#fee2e2"; e.currentTarget.style.borderColor = "#fca5a5"; }}
-                        onMouseOut={(e) => { e.currentTarget.style.background = "#fef2f2"; e.currentTarget.style.borderColor = "#fecaca"; }}
+                        style={{ padding: "1rem", background: "rgba(254, 226, 226, 0.1)", backdropFilter: "blur(8px)", border: "1px solid rgba(252, 165, 165, 0.3)", borderRadius: "16px", fontWeight: 700, color: "#fca5a5", cursor: "pointer", fontSize: "1rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", transition: "all 0.3s ease", boxShadow: "0 0 15px rgba(252, 165, 165, 0.1)" }}
+                        onMouseOver={(e) => { e.currentTarget.style.background = "rgba(254, 226, 226, 0.2)"; e.currentTarget.style.borderColor = "rgba(252, 165, 165, 0.6)"; e.currentTarget.style.boxShadow = "0 0 25px rgba(252, 165, 165, 0.3)"; }}
+                        onMouseOut={(e) => { e.currentTarget.style.background = "rgba(254, 226, 226, 0.1)"; e.currentTarget.style.borderColor = "rgba(252, 165, 165, 0.3)"; e.currentTarget.style.boxShadow = "0 0 15px rgba(252, 165, 165, 0.1)"; }}
                       >
-                        <XCircle size={24} /> I{"'"}m Not Coming
+                        <XCircle size={24} style={{ filter: "drop-shadow(0 0 8px rgba(252, 165, 165, 0.5))" }} /> I{"'"}m Not Coming
                       </button>
                     </div>
                   )}
@@ -563,6 +561,14 @@ export default function HealthcareQueueQRPage() {
         @keyframes pulse {
           0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
           50% { box-shadow: 0 0 0 15px rgba(34,197,94,0); }
+        }
+        @keyframes rotateRadar {
+          0% { transform: translate(-50%, -50%) rotate(0deg); }
+          100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        @keyframes pulseGlow {
+          0%, 100% { text-shadow: 0 0 20px #3b82f6, 0 0 40px #3b82f6; opacity: 1; }
+          50% { text-shadow: 0 0 10px #3b82f6, 0 0 20px #3b82f6; opacity: 0.8; }
         }
       `}</style>
     </div>
