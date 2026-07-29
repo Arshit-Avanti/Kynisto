@@ -49,9 +49,9 @@ export async function POST(request: NextRequest) {
     const expiresAt = now + 3 * 60 * 60; // 3 hours TTL
 
     await db.batch([
-      db.prepare(`INSERT INTO healthcare_queue_entries (id, store_id, service_date, token_number, user_id, patient_name, patient_phone, is_emergency, arrival_status, status, active_key, joined_at, expires_at, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 0, 'on_the_way', 'waiting', ?, ?, ?, ?, ?)`)
-        .bind(entryId, record.storeId, today, tokenNumber, user.id, user.name ?? "Patient", (user as any).phone ?? null, activeKey, now, expiresAt, now, now),
+      db.prepare(`INSERT INTO healthcare_queue_entries (id, store_id, service_date, token_number, user_id, patient_name, contact_details, is_emergency, arrival_status, status, active_key, joined_at, expires_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 0, 'on_the_way', 'waiting', ?, ?, ?, ?)`)
+        .bind(entryId, record.storeId, today, tokenNumber, user.id, user.name ?? "Patient", (user as any).phone ?? null, activeKey, now, expiresAt, now),
       db.prepare("UPDATE healthcare_queue_settings SET next_token_number = next_token_number + 1, updated_at = ? WHERE store_id = ?")
         .bind(now, record.storeId),
       db.prepare(`INSERT INTO healthcare_queue_events (id, store_id, entry_id, actor_id, event_type, metadata, created_at)
