@@ -98,6 +98,117 @@
 .portalForm label.full, .portalForm .full { grid-column: 1 / -1; }
 .portalForm input, .portalForm select, .portalForm textarea { width: 100%; padding: 0.625rem 0.875rem; font-size: 0.9375rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 0.5rem; color: #F8FAFC; outline: none; backdrop-filter: blur(16px); transition: all 0.3s ease; }
 .portalForm input:focus, .portalForm select:focus, .portalForm textarea:focus { border-color: var(--glow-blue); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+
+/* STRICT LIGHT THEME CONTRAST OVERRIDES — FIXES WHITE-ON-WHITE TEXT IN LIGHT MODE & CYAN/NAVY THEMES */
+.portalShell.light-theme,
+.portal.light-theme,
+.light-theme {
+  background: #F8FAFC !important;
+  color: #0F172A !important;
+  --portal-bg: #F8FAFC !important;
+  --portal-card-bg: #FFFFFF !important;
+  --portal-text: #0F172A !important;
+  --portal-border: #E2E8F0 !important;
+  --portal-muted: #64748B !important;
+  --portal-input: #FFFFFF !important;
+}
+
+.light-theme .portalMain,
+.light-theme .portalContent {
+  background: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+.light-theme .portalSidebar {
+  background: #FFFFFF !important;
+  border-right: 1px solid #E2E8F0 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+}
+
+.light-theme .portalHeader {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+  color: #0F172A !important;
+}
+
+.light-theme .portalTitleRow h1,
+.light-theme .portalTitleRow p,
+.light-theme .portalEyebrow,
+.light-theme h1,
+.light-theme h2,
+.light-theme h3,
+.light-theme h4,
+.light-theme h5,
+.light-theme h6 {
+  color: #0F172A !important;
+  text-shadow: none !important;
+  -webkit-text-fill-color: #0F172A !important;
+}
+
+.light-theme .kynistoWordmark b {
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+  text-shadow: none !important;
+}
+
+.light-theme .kynistoWordmark small {
+  color: #FF5722 !important;
+}
+
+.light-theme .statCard {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
+}
+
+.light-theme .statCard strong,
+.light-theme .statCard b {
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+  text-shadow: none !important;
+}
+
+.light-theme .statCard small {
+  color: #64748B !important;
+}
+
+.light-theme .portalCard {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #0F172A !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
+}
+
+.light-theme .portalCardHeader h2,
+.light-theme .portalCardHeader small {
+  color: #0F172A !important;
+}
+
+.light-theme .portalTable,
+.light-theme table {
+  color: #0F172A !important;
+}
+
+.light-theme th {
+  background: #F8FAFC !important;
+  color: #475569 !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+}
+
+.light-theme td {
+  color: #0F172A !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+}
+
+.light-theme .portalSidebar nav a {
+  color: #475569 !important;
+}
+
+.light-theme .portalSidebar nav a.active {
+  background: rgba(255, 87, 34, 0.1) !important;
+  color: #FF5722 !important;
+  border-color: rgba(255, 87, 34, 0.3) !important;
+}
 .portalForm .dayChecks { display: flex; flex-direction: row; flex-wrap: wrap; gap: 1rem; align-items: center; border: 1px solid var(--portal-border, #334155); padding: 1rem; border-radius: 0.5rem; margin: 0; }
 .portalForm .dayChecks legend { width: 100%; font-size: 0.875rem; font-weight: 600; color: var(--portal-muted, #94a3b8); margin-bottom: 0.25rem; }
 .portalForm .dayChecks label { flex-direction: row; align-items: center; gap: 0.375rem; font-weight: 500; margin: 0; }

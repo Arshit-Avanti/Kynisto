@@ -187,25 +187,25 @@ function OwnerOverview({ store, analytics, reviews }: { store: Store | undefined
   return (
     <>
       <div className="statsGrid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
-        <article className="statCard" style={{ background: "rgba(30, 58, 138, 0.1)", backdropFilter: "blur(12px)", border: "1px solid rgba(59, 130, 246, 0.3)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden", boxShadow: "0 10px 30px -10px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(59, 130, 246, 0.05)", transform: "translateZ(0)" }}>
-          <Eye size={28} color="#60a5fa" style={{ marginBottom: "0.75rem", filter: "drop-shadow(0 0 8px rgba(96, 165, 250, 0.8))" }} />
-          <small style={{ color: "#93c5fd", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Profile views</small>
-          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "#fff", lineHeight: 1, marginTop: "0.5rem", textShadow: "0 0 15px rgba(255,255,255,0.5)" }}>{Number(store?.viewCount ?? 0).toLocaleString()}</strong>
+        <article className="statCard" style={{ background: "rgba(30, 58, 138, 0.08)", backdropFilter: "blur(12px)", border: "1px solid rgba(59, 130, 246, 0.3)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden", transform: "translateZ(0)" }}>
+          <Eye size={28} color="#3b82f6" style={{ marginBottom: "0.75rem" }} />
+          <small style={{ color: "var(--p-muted, #475569)", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Profile views</small>
+          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "var(--p-ink, #0f172a)", lineHeight: 1, marginTop: "0.5rem" }}>{Number(store?.viewCount ?? 0).toLocaleString()}</strong>
         </article>
-        <article className="statCard" style={{ background: "rgba(113, 63, 18, 0.1)", backdropFilter: "blur(12px)", border: "1px solid rgba(234, 179, 8, 0.3)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden", boxShadow: "0 10px 30px -10px rgba(234, 179, 8, 0.3), inset 0 0 20px rgba(234, 179, 8, 0.05)", transform: "translateZ(0)" }}>
-          <Star size={28} color="#fcd34d" style={{ marginBottom: "0.75rem", filter: "drop-shadow(0 0 8px rgba(252, 211, 77, 0.8))" }} />
-          <small style={{ color: "#fde047", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Average rating</small>
-          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "#fff", lineHeight: 1, marginTop: "0.5rem", textShadow: "0 0 15px rgba(255,255,255,0.5)" }}>{Number(store?.rating ?? 0).toFixed(1)}</strong>
+        <article className="statCard" style={{ background: "rgba(113, 63, 18, 0.08)", backdropFilter: "blur(12px)", border: "1px solid rgba(234, 179, 8, 0.3)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden", transform: "translateZ(0)" }}>
+          <Star size={28} color="#eab308" style={{ marginBottom: "0.75rem" }} />
+          <small style={{ color: "var(--p-muted, #475569)", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Average rating</small>
+          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "var(--p-ink, #0f172a)", lineHeight: 1, marginTop: "0.5rem" }}>{Number(store?.rating ?? 0).toFixed(1)}</strong>
         </article>
-        <article className="statCard" style={{ background: "rgba(20, 83, 45, 0.1)", backdropFilter: "blur(12px)", border: "1px solid rgba(34, 197, 94, 0.3)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden", boxShadow: "0 10px 30px -10px rgba(34, 197, 94, 0.3), inset 0 0 20px rgba(34, 197, 94, 0.05)", transform: "translateZ(0)" }}>
-          <Navigation size={28} color="#4ade80" style={{ marginBottom: "0.75rem", filter: "drop-shadow(0 0 8px rgba(74, 222, 128, 0.8))" }} />
-          <small style={{ color: "#86efac", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Direction taps</small>
-          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "#fff", lineHeight: 1, marginTop: "0.5rem", textShadow: "0 0 15px rgba(255,255,255,0.5)" }}>{totals.direction ?? 0}</strong>
+        <article className="statCard" style={{ background: "rgba(20, 83, 45, 0.08)", backdropFilter: "blur(12px)", border: "1px solid rgba(34, 197, 94, 0.3)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden", transform: "translateZ(0)" }}>
+          <Navigation size={28} color="#22c55e" style={{ marginBottom: "0.75rem" }} />
+          <small style={{ color: "var(--p-muted, #475569)", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Direction taps</small>
+          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "var(--p-ink, #0f172a)", lineHeight: 1, marginTop: "0.5rem" }}>{totals.direction ?? 0}</strong>
         </article>
-        <article className="statCard" style={{ background: "rgba(76, 29, 149, 0.1)", backdropFilter: "blur(12px)", border: "1px solid rgba(139, 92, 246, 0.3)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden", boxShadow: "0 10px 30px -10px rgba(139, 92, 246, 0.3), inset 0 0 20px rgba(139, 92, 246, 0.05)", transform: "translateZ(0)" }}>
-          <Phone size={28} color="#a78bfa" style={{ marginBottom: "0.75rem", filter: "drop-shadow(0 0 8px rgba(167, 139, 250, 0.8))" }} />
-          <small style={{ color: "#c4b5fd", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Contact actions</small>
-          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "#fff", lineHeight: 1, marginTop: "0.5rem", textShadow: "0 0 15px rgba(255,255,255,0.5)" }}>{(totals.phone ?? 0) + (totals.whatsapp ?? 0)}</strong>
+        <article className="statCard" style={{ background: "rgba(76, 29, 149, 0.08)", backdropFilter: "blur(12px)", border: "1px solid rgba(139, 92, 246, 0.3)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden", transform: "translateZ(0)" }}>
+          <Phone size={28} color="#8b5cf6" style={{ marginBottom: "0.75rem" }} />
+          <small style={{ color: "var(--p-muted, #475569)", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Contact actions</small>
+          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "var(--p-ink, #0f172a)", lineHeight: 1, marginTop: "0.5rem" }}>{(totals.phone ?? 0) + (totals.whatsapp ?? 0)}</strong>
         </article>
       </div>
 
