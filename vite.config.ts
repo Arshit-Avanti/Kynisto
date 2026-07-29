@@ -23,7 +23,7 @@ const localBindingConfig = {
         },
       ]
     : [],
-  r2_buckets: r2
+  r2_buckets: process.env.ENABLE_R2 === "true" && r2
     ? [
         {
           binding: r2,
