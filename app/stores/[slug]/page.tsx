@@ -86,7 +86,12 @@ export default async function StoreProfilePage({ params }: RouteProps) {
 
       <section className="profileHero">
         <div className="profileHeroArt" style={store.bannerUrl ? { backgroundImage: `linear-gradient(110deg,rgba(16,25,19,.68),rgba(16,25,19,.12)),url(${store.bannerUrl})` } : undefined}>
-          <span>{store.icon}</span><small>{store.category}</small>
+          {store.logoUrl ? (
+            <img src={store.logoUrl} alt={store.name} style={{ width: "64px", height: "64px", borderRadius: "50%", objectFit: "cover", border: "3px solid #ffffff", boxShadow: "0 4px 10px rgba(0,0,0,0.15)", background: "#ffffff" }} />
+          ) : (
+            <span>{store.icon}</span>
+          )}
+          <small>{store.category}</small>
         </div>
         <div className="profileHeroCopy">
           <div className="profileBadgeRow"><span>{store.category}</span>{store.subcategory && <span>{store.subcategory}</span>}<em className={store.open ? "open" : "closed"}>{store.open ? "Open now" : "Closed"}</em>{store.queueEnabled && <em className={store.queueStatus === "open" ? "open" : "closed"}>Live Queue {store.queueStatus ?? "closed"}</em>}</div>

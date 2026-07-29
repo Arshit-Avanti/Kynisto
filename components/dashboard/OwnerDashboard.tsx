@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
@@ -12,6 +12,7 @@ import {
   isOwnerWorkspaceView,
   OwnerWorkspacePanel,
 } from "@/components/dashboard/OwnerWorkspacePanel";
+import { OwnerStoreQRCard } from "@/components/dashboard/OwnerStoreQRCard";
 
 import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscriptionDashboard";
 import { FeatureGateNotice } from "@/components/subscription/FeatureGateNotice";
@@ -103,11 +104,126 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
     if (selected) return <OwnerHealthcarePanel storeId={String(selected.id)} />;
   }
   const title = tab === "overview" ? "Business overview" : tab === "subscription" ? "Premium & Plans" : tab.charAt(0).toUpperCase()+tab.slice(1);
-  return <><div className="portalTitleRow"><div><span className="portalEyebrow">Store owner workspace</span><h1>{title}</h1><p>Only businesses assigned to this account are available here.</p></div>{stores.length>1&&<select value={String(selected?.id??"")} onChange={(e)=>setSelectedId(e.target.value)}>{stores.map((store)=><option key={String(store.id)} value={String(store.id)}>{store.name}</option>)}</select>}</div>{error&&<p className="authError" role="alert">{error}</p>}{stores.length===0?(["notifications","settings","support","subscription"].includes(tab)?(tab==="subscription"?<UserSubscriptionDashboard />:<OwnerWorkspacePanel key={tab} view={tab as any} storeId="" onToast={setToast} onError={setError}/>):<section className="portalCard"><div className="portalCardHeader"><h2>Create your first business listing</h2><small>It will be sent for admin approval</small></div><OwnerStoreEditor categories={categories} onSubmit={(body,photoFile)=>mutate("/api/owner/stores","POST",body,"Business submitted for approval",photoFile)} /></section>):<>{tab==="overview"&&<OwnerOverview store={selected} analytics={analytics} reviews={reviews}/>} {tab==="profile"&&selected&&<section className="portalCard"><div className="portalCardHeader"><h2>Edit business profile</h2><Status value={selected.status}/></div><OwnerStoreEditor categories={categories} store={selected} onSubmit={(body,photoFile)=>mutate("/api/owner/stores","PATCH",{...(body as object),storeId:selected.id},"Business profile updated",photoFile)} />{selected.status!=="approved"&&<div className="ownerDangerZone"><p><b>Remove listing</b><small>Pending or rejected listings can be deleted by their owner.</small></p><button className="portalButton danger" type="button" onClick={()=>{if(window.confirm("Delete this business listing?"))void mutate("/api/owner/stores","DELETE",{storeId:selected.id},"Business deleted")}}>Delete listing</button></div>}</section>} {tab==="media"&&selected&&<MediaPanel store={selected} items={media} onChanged={async()=>{const result=await apiFetch<{items:Item[]}>(`/api/media?storeId=${selected.id}`);setMedia(result.items);setToast("Media updated")}} onError={setError}/>} {["products","services","offers"].includes(tab)&&selected&&<CatalogPanel resource={tab as "products"|"services"|"offers"} storeId={String(selected.id)} items={catalog} mutate={mutate} onChanged={async(message)=>{const result=await apiFetch<{items:Item[]}>(`/api/owner/catalog?resource=${tab}&storeId=${selected.id}`);setCatalog(result.items);setToast(message)}} onError={setError}/>} {tab==="reviews"&&selected&&<ReviewsPanel items={storeReviews} storeId={String(selected.id)} mutate={mutate} pagination={reviewPagination} onPageChange={setReviewPage}/>} {tab==="analytics"&&<OwnerAnalytics items={analytics}/>} {isOwnerWorkspaceView(tab)&&selected&&<OwnerWorkspacePanel key={tab+"-"+String(selected.id)} view={tab} storeId={String(selected.id)} onToast={setToast} onError={setError}/>}</>}{toast&&<div className="portalToast">âœ“ {toast}</div>}</>;
+  return (
+    <>
+      <div className="portalTitleRow">
+        <div>
+          <span className="portalEyebrow">Store owner workspace</span>
+          <h1>{title}</h1>
+          <p>Only businesses assigned to this account are available here.</p>
+        </div>
+        {stores.length > 1 && (
+          <select value={String(selected?.id ?? "")} onChange={(e) => setSelectedId(e.target.value)}>
+            {stores.map((store) => (
+              <option key={String(store.id)} value={String(store.id)}>{store.name}</option>
+            ))}
+          </select>
+        )}
+      </div>
 
+      {error && <p className="authError" role="alert">{error}</p>}
+
+      {stores.length === 0 ? (
+        ["notifications", "settings", "support", "subscription"].includes(tab) ? (
+          tab === "subscription" ? <UserSubscriptionDashboard /> : <OwnerWorkspacePanel key={tab} view={tab as any} storeId="" onToast={setToast} onError={setError} />
+        ) : (
+          <section className="portalCard">
+            <div className="portalCardHeader">
+              <h2>Create your first business listing</h2>
+              <small>It will be sent for admin approval</small>
+            </div>
+            <OwnerStoreEditor categories={categories} onSubmit={(body, photoFile) => mutate("/api/owner/stores", "POST", body, "Business submitted for approval", photoFile)} />
+          </section>
+        )
+      ) : (
+        <>
+          {tab === "overview" && <OwnerOverview store={selected} analytics={analytics} reviews={reviews} />}
+          {tab === "profile" && selected && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+              <OwnerStoreQRCard
+                store={{
+                  id: String(selected.id),
+                  name: String(selected.name ?? ""),
+                  slug: String(selected.slug ?? ""),
+                  address: String(selected.address ?? ""),
+                  city: String(selected.city ?? ""),
+                  category: String(selected.category ?? ""),
+                  logoUrl: selected.logoUrl ? String(selected.logoUrl) : null,
+                  viewCount: Number(selected.viewCount ?? 0)
+                }}
+              />
+              <section className="portalCard">
+                <div className="portalCardHeader">
+                  <h2>Edit business profile</h2>
+                  <Status value={selected.status} />
+                </div>
+                <OwnerStoreEditor categories={categories} store={selected} onSubmit={(body, photoFile) => mutate("/api/owner/stores", "PATCH", { ...(body as object), storeId: selected.id }, "Business profile updated", photoFile)} />
+                {selected.status !== "approved" && (
+                  <div className="ownerDangerZone">
+                    <p><b>Remove listing</b><small>Pending or rejected listings can be deleted by their owner.</small></p>
+                    <button className="portalButton danger" type="button" onClick={() => { if (window.confirm("Delete this business listing?")) void mutate("/api/owner/stores", "DELETE", { storeId: selected.id }, "Business deleted"); }}>Delete listing</button>
+                  </div>
+                )}
+              </section>
+            </div>
+          )}
+          {tab === "media" && selected && <MediaPanel store={selected} items={media} onChanged={async () => { const result = await apiFetch<{ items: Item[] }>(`/api/media?storeId=${selected.id}`); setMedia(result.items); setToast("Media updated"); }} onError={setError} />}
+          {["products", "services", "offers"].includes(tab) && selected && <CatalogPanel resource={tab as "products" | "services" | "offers"} storeId={String(selected.id)} items={catalog} mutate={mutate} onChanged={async (message) => { const result = await apiFetch<{ items: Item[] }>(`/api/owner/catalog?resource=${tab}&storeId=${selected.id}`); setCatalog(result.items); setToast(message); }} onError={setError} />}
+          {tab === "reviews" && selected && <ReviewsPanel items={storeReviews} storeId={String(selected.id)} mutate={mutate} pagination={reviewPagination} onPageChange={setReviewPage} />}
+          {tab === "analytics" && <OwnerAnalytics items={analytics} />}
+          {isOwnerWorkspaceView(tab) && selected && <OwnerWorkspacePanel key={tab + "-" + String(selected.id)} view={tab} storeId={String(selected.id)} onToast={setToast} onError={setError} />}
+        </>
+      )}
+
+      {toast && <div className="portalToast">✓ {toast}</div>}
+    </>
+  );
 }
 
-function OwnerOverview({store,analytics,reviews}:{store:Store|undefined;analytics:Item[];reviews:Item[]}){const totals=Object.fromEntries(analytics.map((item)=>[String(item.eventType),Number(item.total)]));return <><div className="statsGrid"><article className="statCard"><span>â—‰</span><small>Profile views</small><strong>{Number(store?.viewCount??0).toLocaleString()}</strong></article><article className="statCard"><span>â˜…</span><small>Average rating</small><strong>{Number(store?.rating??0).toFixed(1)}</strong></article><article className="statCard"><span>â†—</span><small>Direction taps</small><strong>{totals.direction??0}</strong></article><article className="statCard"><span>â˜</span><small>Contact actions</small><strong>{(totals.phone??0)+(totals.whatsapp??0)}</strong></article></div><div className="portalGrid"><section className="portalCard"><div className="portalCardHeader"><h2>{store?.name}</h2><Status value={store?.status}/></div><div className="ownerProfileSummary"><div><small>Address</small><b>{store?.address}</b></div><div><small>Category</small><b>{store?.category}</b></div><div><small>Contact</small><b>{store?.phone??"Not added"}</b></div>{store?.rejectionReason&&<div className="authError"><small>Admin note</small><b>{store.rejectionReason}</b></div>}</div></section><section className="portalCard"><div className="portalCardHeader"><h2>Recent reviews</h2><small>{reviews.length} shown</small></div>{reviews.slice(0,5).map((review)=><div className="reviewLine" key={String(review.id)}><span>â˜… {review.rating}</span><p><b>{review.reviewerName}</b><small>{review.comment}</small></p></div>)}</section></div></>}
+function OwnerOverview({ store, analytics, reviews }: { store: Store | undefined; analytics: Item[]; reviews: Item[] }) {
+  const totals = Object.fromEntries(analytics.map((item) => [String(item.eventType), Number(item.total)]));
+  return (
+    <>
+      <div className="statsGrid">
+        <article className="statCard"><span>◉</span><small>Profile views</small><strong>{Number(store?.viewCount ?? 0).toLocaleString()}</strong></article>
+        <article className="statCard"><span>★</span><small>Average rating</small><strong>{Number(store?.rating ?? 0).toFixed(1)}</strong></article>
+        <article className="statCard"><span>↗</span><small>Direction taps</small><strong>{totals.direction ?? 0}</strong></article>
+        <article className="statCard"><span>☎</span><small>Contact actions</small><strong>{(totals.phone ?? 0) + (totals.whatsapp ?? 0)}</strong></article>
+      </div>
+
+      {store && (
+        <OwnerStoreQRCard 
+          store={{
+            id: String(store.id),
+            name: String(store.name ?? ""),
+            slug: String(store.slug ?? ""),
+            address: String(store.address ?? ""),
+            city: String(store.city ?? ""),
+            category: String(store.category ?? ""),
+            logoUrl: store.logoUrl ? String(store.logoUrl) : null,
+            viewCount: Number(store.viewCount ?? 0)
+          }} 
+        />
+      )}
+
+      <div className="portalGrid" style={{ marginTop: "1.5rem" }}>
+        <section className="portalCard">
+          <div className="portalCardHeader"><h2>{store?.name}</h2><Status value={store?.status} /></div>
+          <div className="ownerProfileSummary">
+            <div><small>Address</small><b>{store?.address}</b></div>
+            <div><small>Category</small><b>{store?.category}</b></div>
+            <div><small>Contact</small><b>{store?.phone ?? "Not added"}</b></div>
+            {store?.rejectionReason && <div className="authError"><small>Admin note</small><b>{store.rejectionReason}</b></div>}
+          </div>
+        </section>
+        <section className="portalCard">
+          <div className="portalCardHeader"><h2>Recent reviews</h2><small>{reviews.length} shown</small></div>
+          {reviews.slice(0, 5).map((review) => <div className="reviewLine" key={String(review.id)}><span>★ {review.rating}</span><p><b>{review.reviewerName}</b><small>{review.comment}</small></p></div>)}
+        </section>
+      </div>
+    </>
+  );
+}
 
 function MediaPanel({store,items,onChanged,onError}:{store:Store;items:Item[];onChanged:()=>Promise<void>;onError:(v:string)=>void}){async function upload(event:FormEvent<HTMLFormElement>){event.preventDefault();const form=new FormData(event.currentTarget);form.set("storeId",String(store.id));try{await apiFetch("/api/media",{method:"POST",body:form});event.currentTarget.reset();await onChanged()}catch(e){onError(e instanceof Error?e.message:"Upload failed")}}return <div className="portalGrid"><section className="portalCard"><div className="portalCardHeader"><h2>Upload brand media</h2><small>JPEG, PNG, WebP or AVIF Â· max 8 MB</small></div><form className="portalForm" onSubmit={upload}><label>Image type<select name="kind"><option value="logo">Logo</option><option value="banner">Banner</option><option value="gallery">Gallery image</option></select></label><label>Image<input name="file" type="file" accept="image/jpeg,image/png,image/webp,image/avif" required /></label><label className="full">Alt text<input name="altText" placeholder="Describe the image for accessibility" /></label><div className="formActions"><button className="portalButton" type="submit">Upload image</button></div></form></section><section className="portalCard"><div className="portalCardHeader"><h2>Media library</h2><small>{items.length} images</small></div><div className="mediaGrid">{items.map((item)=><article key={String(item.id)}><img src={String(item.url)} alt={String(item.altText??"")} loading="lazy"/><small>{item.kind}</small><button onClick={async()=>{await apiFetch("/api/media",{method:"DELETE",json:{imageId:item.id,storeId:store.id}});await onChanged()}}>Delete</button></article>)}</div></section></div>}
 
