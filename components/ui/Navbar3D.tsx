@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
+import { BackButton } from "@/components/ui/BackButton";
 
 interface Navbar3DProps {
   userRole: "admin" | "store_owner" | "customer" | null;
@@ -53,6 +54,11 @@ export function Navbar3D({
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+        <BackButton
+          fallback="/"
+          label="Back"
+          style={{ fontSize: "12px", padding: "6px 12px", borderRadius: "10px" }}
+        />
         <Link href="/" aria-label="Kynisto Home" style={{ textDecoration: "none", display: "flex" }}>
           <KynistoLogo showTagline />
         </Link>

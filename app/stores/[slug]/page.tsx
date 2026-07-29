@@ -5,6 +5,7 @@ import { getStoreBySlug } from "@/lib/store-data";
 import { StoreActions } from "@/components/store/StoreActions";
 import { ProductActions } from "@/components/store/ProductActions";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
+import { BackButton } from "@/components/ui/BackButton";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +62,22 @@ export default async function StoreProfilePage({ params }: RouteProps) {
       <header className="profileNav">
         <Link className="profileBrand" href="/"><KynistoLogo /></Link>
         <nav aria-label="Business profile navigation">
+          <BackButton
+            fallback="/"
+            label="Back"
+            style={{
+              color: "#4c5c53",
+              background: "#eef3fb",
+              border: "1px solid #e1ddd2",
+              borderRadius: "10px",
+              fontSize: "12px",
+              fontWeight: 650,
+              padding: "10px 13px",
+              textShadow: "none",
+              backdropFilter: "none",
+              WebkitBackdropFilter: "none",
+            }}
+          />
           <Link href="/">Explore nearby</Link>
           <Link href="/healthcare">Healthcare</Link>
           <Link href="/dashboard">Dashboard</Link>
