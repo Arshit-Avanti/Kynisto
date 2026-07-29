@@ -98,7 +98,8 @@ export default function AuthConfirmChoice({ hash, accessToken }: AuthConfirmChoi
         
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           <a 
-            href="/Kynisto.apk"
+            href="/downloads/Kynisto-2.0.0-release.apk"
+            download="Kynisto-2.0.0-release.apk"
             style={{
               display: "flex",
               alignItems: "center",

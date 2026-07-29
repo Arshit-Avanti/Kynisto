@@ -38,8 +38,16 @@ export function AdminLoginForm({
           ? returnTo
           : result.redirectTo;
 
-      // Perform a full document navigation so the cookie is 100% attached to the HTTP request
-      window.location.assign(safeReturn);
+      if (safeReturn) {
+        try {
+          window.sessionStorage.setItem("kynisto_auth_returnto", safeReturn);
+        } catch {
+          // Ignore storage restrictions
+        }
+      }
+
+      // Perform navigation to /auth/confirm choice screen
+      window.location.assign("/auth/confirm");
     } catch (submitError) {
       setError(
         submitError instanceof Error
