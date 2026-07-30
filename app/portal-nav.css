@@ -9,3 +9,45 @@
 }
 
 .portalSidebarFooter { flex: 0 0 auto; }
+
+/* Stylish navigation for admin panel, products, healthcare */
+.portalSidebar nav a,
+.portalSidebarFooter a,
+.portalSidebarFooter button {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+.portalSidebar nav a:hover {
+  letter-spacing: 0.03em !important;
+  transform: translateX(3px) !important;
+}
+
+.portalSidebar nav a.active {
+  font-weight: 800 !important;
+  letter-spacing: 0.02em !important;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.12), rgba(0, 240, 255, 0.04)) !important;
+  border-left: 3px solid #00F0FF !important;
+  box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.05) !important;
+}
+
+.light-theme .portalSidebar nav a.active {
+  background: linear-gradient(135deg, rgba(255, 87, 34, 0.12), rgba(255, 87, 34, 0.04)) !important;
+  border-left: 3px solid #FF5722 !important;
+  box-shadow: inset 0 0 20px rgba(255, 87, 34, 0.05) !important;
+}
+
+.portalSidebar nav a span {
+  font-size: 15px !important;
+  transition: transform 0.2s ease !important;
+}
+
+.portalSidebar nav a:hover span {
+  transform: scale(1.15) !important;
+}
+
+.portalSidebar nav a.active span {
+  transform: scale(1.1) !important;
+}
