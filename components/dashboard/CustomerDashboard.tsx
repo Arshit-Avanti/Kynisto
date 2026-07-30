@@ -7,7 +7,8 @@ import { apiFetch } from "@/lib/client-api";
 import type { SessionUser } from "@/lib/auth";
 import { ChatCenter } from "@/components/dashboard/ChatCenter";
 import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscriptionDashboard";
-import { Heart, MessageSquare, ShoppingCart, MapPin, Package, Calendar, Ticket, CheckCircle2, ArrowRight, Store, Star } from "lucide-react";
+import KynistoWalletView from "@/components/wallet/KynistoWalletView";
+import { Heart, MessageSquare, ShoppingCart, MapPin, Package, Calendar, Ticket, CheckCircle2, ArrowRight, Store, Star, Wallet } from "lucide-react";
 
 type Item = Record<string, unknown>;
 type Payload = Record<string, unknown>;

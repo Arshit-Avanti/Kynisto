@@ -91,11 +91,13 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { label: "Live Queue", icon: Users, tab: "healthcare" },
     { label: "Notifications", icon: Bell, tab: "notifications" },
     { label: "Settings", icon: Settings, tab: "settings" },
+    { label: "Membership Plans", icon: Shield, tab: "memberships" },
     { label: "Support", icon: HelpCircle, tab: "support" },
     { label: "Messages", icon: MessageSquare, tab: "chat", badge: "chat" },
   ],
   customer: [
     { label: "My account", icon: User, tab: "overview" },
+    { label: "Wallet & Points", icon: Wallet, tab: "wallet" },
     { label: "Premium & Plans", icon: Crown, tab: "subscription" },
     { label: "Profile", icon: UserCheck, tab: "profile" },
     { label: "Addresses", icon: MapPin, tab: "addresses" },

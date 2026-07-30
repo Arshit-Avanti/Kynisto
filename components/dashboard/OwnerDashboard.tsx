@@ -106,6 +106,9 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
     }
     if (selected) return <OwnerHealthcarePanel storeId={String(selected.id)} />;
   }
+  if (tab === "memberships" && selected) {
+    return <OwnerMembershipEditor storeId={String(selected.id)} />;
+  }
   const title = tab === "overview" ? "Business overview" : tab === "subscription" ? "Premium & Plans" : tab.charAt(0).toUpperCase()+tab.slice(1);
   return (
     <>
