@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getStoreBySlug } from "@/lib/store-data";
 import { StoreActions } from "@/components/store/StoreActions";
 import { ProductActions } from "@/components/store/ProductActions";
+import { StoreMembershipStorefront } from "@/components/store/StoreMembershipStorefront";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { BackButton } from "@/components/ui/BackButton";
 
@@ -214,6 +215,7 @@ export default async function StoreProfilePage({ params }: RouteProps) {
 
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)", gap: "24px", alignItems: "start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            <StoreMembershipStorefront storeId={store.id} storeName={store.name} />
             {(store.services.length > 0 || store.products.length > 0) && (
               <section className="glass-section" style={{ padding: "24px", borderRadius: "16px" }}>
                 <div style={{ marginBottom: "20px" }}>

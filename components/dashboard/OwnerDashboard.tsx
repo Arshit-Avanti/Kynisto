@@ -13,6 +13,7 @@ import {
   OwnerWorkspacePanel,
 } from "@/components/dashboard/OwnerWorkspacePanel";
 import { OwnerStoreQRCard } from "@/components/dashboard/OwnerStoreQRCard";
+import { OwnerMembershipEditor } from "@/components/dashboard/OwnerMembershipEditor";
 
 import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscriptionDashboard";
 import { FeatureGateNotice } from "@/components/subscription/FeatureGateNotice";
@@ -171,6 +172,7 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
           )}
           {tab === "media" && selected && <MediaPanel store={selected} items={media} onChanged={async () => { const result = await apiFetch<{ items: Item[] }>(`/api/media?storeId=${selected.id}`); setMedia(result.items); setToast("Media updated"); }} onError={setError} />}
           {["products", "services", "offers"].includes(tab) && selected && <CatalogPanel resource={tab as "products" | "services" | "offers"} storeId={String(selected.id)} items={catalog} mutate={mutate} onChanged={async (message) => { const result = await apiFetch<{ items: Item[] }>(`/api/owner/catalog?resource=${tab}&storeId=${selected.id}`); setCatalog(result.items); setToast(message); }} onError={setError} />}
+          {tab === "memberships" && selected && <OwnerMembershipEditor storeId={String(selected.id)} />}
           {tab === "reviews" && selected && <ReviewsPanel items={storeReviews} storeId={String(selected.id)} mutate={mutate} pagination={reviewPagination} onPageChange={setReviewPage} />}
           {tab === "analytics" && <OwnerAnalytics items={analytics} />}
           {isOwnerWorkspaceView(tab) && selected && <OwnerWorkspacePanel key={tab + "-" + String(selected.id)} view={tab} storeId={String(selected.id)} onToast={setToast} onError={setError} />}

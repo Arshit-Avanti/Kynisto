@@ -1054,6 +1054,88 @@ export const healthcareQueueReports = sqliteTable(
   (table) => [index("healthcare_queue_reports_status_date_idx").on(table.status, table.createdAt)],
 );
 
+export const kynistoWallets = sqliteTable("kynisto_wallets", {
+  userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  kynistoPoints: integer("kynisto_points").notNull().default(0),
+  updatedAt: integer("updated_at").notNull().default(sql`(unixepoch())`),
+});
+
+export const kynistoPointTransactions = sqliteTable("kynisto_point_transactions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  amount: integer("amount").notNull(),
+  type: text("type").notNull(),
+  description: text("description").notNull(),
+  createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+}, (table) => [index("kynisto_point_tx_user_date_idx").on(table.userId, table.createdAt)]);
+
+export const kynistoPointRedemptions = sqliteTable("kynisto_point_redemptions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  pointsSpent: integer("points_spent").notNull().default(1000),
+  rewardType: text("reward_type").notNull(),
+  rewardTitle: text("reward_title").notNull(),
+  rewardCode: text("reward_code").notNull(),
+  metadata: text("metadata", { mode: "json" }).$type<Record<string, unknown>>(),
+  createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+}, (table) => [index("kynisto_point_redemptions_user_idx").on(table.userId, table.createdAt)]);
+
+export const storeLoyaltyPoints = sqliteTable("store_loyalty_points", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  storeId: text("store_id").notNull().references(() => stores.id, { onDelete: "cascade" }),
+  points: integer("points").notNull().default(0),
+  lastVisitedAt: integer("last_visited_at").notNull().default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at").notNull().default(sql`(unixepoch())`),
+}, (table) => [
+  uniqueIndex("store_loyalty_user_store_unique").on(table.userId, table.storeId),
+  index("store_loyalty_user_idx").on(table.userId),
+]);
+
+export const storeLoyaltyTransactions = sqliteTable("store_loyalty_transactions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  storeId: text("store_id").notNull().references(() => stores.id, { onDelete: "cascade" }),
+  amount: integer("amount").notNull(),
+  type: text("type").notNull(),
+  description: text("description").notNull(),
+  createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+}, (table) => [index("store_loyalty_tx_user_store_idx").on(table.userId, table.storeId, table.createdAt)]);
+
+export const storeMembershipPlans = sqliteTable("store_membership_plans", {
+  id: text("id").primaryKey(),
+  storeId: text("store_id").notNull().references(() => stores.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  price: integer("price").notNull(),
+  durationDays: integer("duration_days").notNull().default(30),
+  description: text("description").notNull(),
+  benefits: text("benefits", { mode: "json" }).$type<string[]>().notNull(),
+  badgeColor: text("badge_color").notNull().default("#FF5722"),
+  planIcon: text("plan_icon").notNull().default("star"),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  maxMembers: integer("max_members"),
+  termsAndConditions: text("terms_and_conditions"),
+  ...timestamps,
+}, (table) => [index("store_membership_plans_store_active_idx").on(table.storeId, table.isActive)]);
+
+export const customerMemberships = sqliteTable("customer_memberships", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  storeId: text("store_id").notNull().references(() => stores.id, { onDelete: "cascade" }),
+  planId: text("plan_id").notNull().references(() => storeMembershipPlans.id, { onDelete: "cascade" }),
+  pricePaid: integer("price_paid").notNull(),
+  commissionAmount: integer("commission_amount").notNull().default(50),
+  storeEarnings: integer("store_earnings").notNull(),
+  includesKynistoPremium: integer("includes_kynisto_premium", { mode: "boolean" }).notNull().default(true),
+  status: text("status", { enum: ["active", "expired", "cancelled"] }).notNull().default("active"),
+  startedAt: integer("started_at").notNull().default(sql`(unixepoch())`),
+  expiresAt: integer("expires_at").notNull(),
+  createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+}, (table) => [
+  index("customer_memberships_user_status_idx").on(table.userId, table.status),
+  index("customer_memberships_store_idx").on(table.storeId),
+]);
+
 export const rateLimits = sqliteTable("rate_limits", {
   key: text("key").primaryKey(),
   count: integer("count").notNull().default(0),
@@ -1067,7 +1149,7 @@ export const systemSettings = sqliteTable("system_settings", {
   updatedAt: integer("updated_at").notNull().default(sql`(unixepoch())`),
 });
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   sessions: many(sessions),
   externalAuthIdentities: many(externalAuthIdentities),
   stores: many(stores),
@@ -1080,6 +1162,12 @@ export const usersRelations = relations(users, ({ many }) => ({
   productReviews: many(productReviews),
   notifications: many(notifications),
   supportTickets: many(supportTickets),
+  kynistoWallet: one(kynistoWallets, { fields: [users.id], references: [kynistoWallets.userId] }),
+  kynistoPointTransactions: many(kynistoPointTransactions),
+  kynistoPointRedemptions: many(kynistoPointRedemptions),
+  storeLoyaltyPoints: many(storeLoyaltyPoints),
+  storeLoyaltyTransactions: many(storeLoyaltyTransactions),
+  customerMemberships: many(customerMemberships),
 }));
 
 export const storesRelations = relations(stores, ({ one, many }) => ({
@@ -1099,6 +1187,10 @@ export const storesRelations = relations(stores, ({ one, many }) => ({
   analytics: many(analyticsEvents),
   orders: many(orders),
   coupons: many(coupons),
+  loyaltyPoints: many(storeLoyaltyPoints),
+  loyaltyTransactions: many(storeLoyaltyTransactions),
+  membershipPlans: many(storeMembershipPlans),
+  customerMemberships: many(customerMemberships),
 }));
 
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
@@ -1161,4 +1253,37 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
   coupon: one(coupons, { fields: [orders.couponId], references: [coupons.id] }),
   items: many(orderItems),
   history: many(orderStatusHistory),
+}));
+
+export const kynistoWalletsRelations = relations(kynistoWallets, ({ one }) => ({
+  user: one(users, { fields: [kynistoWallets.userId], references: [users.id] }),
+}));
+
+export const kynistoPointTransactionsRelations = relations(kynistoPointTransactions, ({ one }) => ({
+  user: one(users, { fields: [kynistoPointTransactions.userId], references: [users.id] }),
+}));
+
+export const kynistoPointRedemptionsRelations = relations(kynistoPointRedemptions, ({ one }) => ({
+  user: one(users, { fields: [kynistoPointRedemptions.userId], references: [users.id] }),
+}));
+
+export const storeLoyaltyPointsRelations = relations(storeLoyaltyPoints, ({ one }) => ({
+  user: one(users, { fields: [storeLoyaltyPoints.userId], references: [users.id] }),
+  store: one(stores, { fields: [storeLoyaltyPoints.storeId], references: [stores.id] }),
+}));
+
+export const storeLoyaltyTransactionsRelations = relations(storeLoyaltyTransactions, ({ one }) => ({
+  user: one(users, { fields: [storeLoyaltyTransactions.userId], references: [users.id] }),
+  store: one(stores, { fields: [storeLoyaltyTransactions.storeId], references: [stores.id] }),
+}));
+
+export const storeMembershipPlansRelations = relations(storeMembershipPlans, ({ one, many }) => ({
+  store: one(stores, { fields: [storeMembershipPlans.storeId], references: [stores.id] }),
+  memberships: many(customerMemberships),
+}));
+
+export const customerMembershipsRelations = relations(customerMemberships, ({ one }) => ({
+  user: one(users, { fields: [customerMemberships.userId], references: [users.id] }),
+  store: one(stores, { fields: [customerMemberships.storeId], references: [stores.id] }),
+  plan: one(storeMembershipPlans, { fields: [customerMemberships.planId], references: [storeMembershipPlans.id] }),
 }));

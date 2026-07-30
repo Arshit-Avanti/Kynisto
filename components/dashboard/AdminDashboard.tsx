@@ -16,6 +16,7 @@ import {
 } from "@/components/dashboard/AdminTables";
 import { AdminSubscriptionsPanel } from "@/components/dashboard/AdminSubscriptionsPanel";
 import { AdminNotificationPanel } from "@/components/dashboard/AdminNotificationPanel";
+import { AdminWalletPanel } from "@/components/dashboard/AdminWalletPanel";
 
 type Item = Record<string, string | number | null | undefined>;
 type Data = Record<string, unknown>;
@@ -96,7 +97,8 @@ export function AdminDashboard({ user }: { user: SessionUser }) {
       {tab === "healthcare" && <AdminHealthcarePanel />}
       {(tab === "subscriptions" || tab === "subscription") && <AdminSubscriptionsPanel />}
       {tab === "notifications" && <AdminNotificationPanel />}
-      {tab !== "overview" && tab !== "analytics" && tab !== "chat" && tab !== "healthcare" && tab !== "subscriptions" && tab !== "subscription" && tab !== "notifications" && !ADMIN_WORKSPACE_TABS.has(tab) && (
+      {tab === "wallet" && <AdminWalletPanel />}
+      {tab !== "overview" && tab !== "analytics" && tab !== "chat" && tab !== "healthcare" && tab !== "subscriptions" && tab !== "subscription" && tab !== "notifications" && tab !== "wallet" && !ADMIN_WORKSPACE_TABS.has(tab) && (
         <>
           <form className="portalToolbar" onSubmit={(event) => { event.preventDefault(); void load(); }}>
             {tab !== "categories" && <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Search ${tab}…`} />}

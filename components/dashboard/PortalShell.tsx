@@ -37,7 +37,8 @@ import {
   LogOut,
   Menu,
   ChevronLeft,
-  Briefcase
+  Briefcase,
+  Wallet
 } from "lucide-react";
 
 type NavItem = {
@@ -67,6 +68,7 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { label: "Promotions", icon: Percent, tab: "coupons" },
     { label: "Support", icon: HelpCircle, tab: "support" },
     { label: "Chat center", icon: MessageSquare, tab: "chat", badge: "chat" },
+    { label: "Wallet & Rewards", icon: Wallet, tab: "wallet" },
     { label: "Settings", icon: Settings, tab: "settings" },
     { label: "Activity logs", icon: List, tab: "audit" },
     { label: "Security", icon: Shield, tab: "security" },
