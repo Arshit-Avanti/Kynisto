@@ -83,9 +83,9 @@ export function ChatMediaComposer({
 
   return <div className="chatMediaComposer">
     <div className="chatMediaButtons">
-      <label htmlFor={galleryId} aria-disabled={disabled}>＋ Media<input id={galleryId} type="file" disabled={disabled} accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm,video/quicktime" onChange={choose} /></label>
-      <label htmlFor={cameraImageId} aria-disabled={disabled}>Camera<input id={cameraImageId} type="file" disabled={disabled} accept="image/*" capture="environment" onChange={choose} /></label>
-      <label htmlFor={cameraVideoId} aria-disabled={disabled}>Record<input id={cameraVideoId} type="file" disabled={disabled} accept="video/*" capture="environment" onChange={choose} /></label>
+      <label htmlFor={galleryId} aria-disabled={disabled}>🎬 Media<input id={galleryId} type="file" disabled={disabled} accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm,video/quicktime" onChange={choose} /></label>
+      <label htmlFor={cameraImageId} aria-disabled={disabled}>📷 Camera<input id={cameraImageId} type="file" disabled={disabled} accept="image/*" capture="environment" onChange={choose} /></label>
+      <label htmlFor={cameraVideoId} aria-disabled={disabled}>🎥 Record<input id={cameraVideoId} type="file" disabled={disabled} accept="video/*" capture="environment" onChange={choose} /></label>
     </div>
     {media && <div className="chatMediaPreview">
       {media.mediaType === "image" ? <img src={media.previewUrl} alt="Selected upload preview" /> : <video src={media.previewUrl} controls preload="metadata" />}
