@@ -218,41 +218,6 @@ const modernCleanTechStyles = `
     border-color: rgba(255, 255, 255, 0.2) !important;
     transform: translateY(-6px) !important;
   }
-  .heroBrandCenter {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 12px;
-  }
-  .heroBrandCenter .kynistoLogo {
-    transform: scale(1.15);
-  }
-  .heroBrandCenter .kynistoLogo b {
-    font-family: 'Georgia', 'Times New Roman', serif !important;
-    font-size: 26px !important;
-    font-weight: 700 !important;
-    background: linear-gradient(135deg, #ffffff 0%, #f0e6d3 100%) !important;
-    -webkit-background-clip: text !important;
-    background-clip: text !important;
-    letter-spacing: 0.02em !important;
-  }
-  .heroTitleClassical {
-    text-align: center !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-  }
-  .emptyState button {
-    background: #FF5722 !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4) !important;
-  }
-  .emptyState button:hover {
-    background: #E64A19 !important;
-    box-shadow: 0 6px 20px rgba(255, 87, 34, 0.6) !important;
-    transform: translateY(-2px) !important;
-  }
-  .searchSubmit:hover {
-    box-shadow: 0 4px 15px rgba(255, 87, 34, 0.5) !important;
-  }
 `;
 
 const categories: Category[] = [
@@ -743,10 +708,7 @@ export default function Home() {
 
       <section className="hero" id="top">
         <div className="heroCopy">
-          <div className="heroBrandCenter">
-            <KynistoLogo showTagline />
-          </div>
-          <h1 className="heroTitleClassical">Kynisto</h1>
+          <h1>Kynisto</h1>
 
           <form
             className="searchBox"

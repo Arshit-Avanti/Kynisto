@@ -319,10 +319,7 @@
   -webkit-text-fill-color: #f8fafc !important;
 }
 
-.light-theme .portalButton.primary,
-.light-theme button.portalButton,
-.light-theme .portalButton,
-.portalShell.light-theme .portalButton {
+.portalToolbar button.portalButton {
   background: linear-gradient(135deg, #FF5722 0%, #E53935 100%) !important;
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
@@ -330,7 +327,7 @@
   font-weight: 700 !important;
   padding: 8px 16px !important;
   border-radius: 8px !important;
-  box-shadow: 0 4px 15px rgba(255, 87, 34, 0.35) !important;
+  cursor: pointer !important;
 }
 
 /* LIGHT THEME OVERRIDES (.light-theme / .portalShell.light-theme) */
