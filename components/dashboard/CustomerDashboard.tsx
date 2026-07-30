@@ -190,6 +190,7 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
     )}
 
     {tab === "overview" && <CustomerOverview user={user} favorites={favorites} reviews={[...reviews, ...productReviews]} cart={(data.items as Item[] | undefined) ?? []} />}
+    {tab === "wallet" && <KynistoWalletView />}
     {tab === "profile" && <ProfilePanel profile={(data.profile as Item | undefined) ?? { name: user.name, email: user.email }} mutate={mutate} />}
     {tab === "addresses" && <AddressesPanel items={items} mutate={mutate} />}
     {tab === "favorites" && <section className="portalCard"><FavoriteList items={favorites} remove={removeFavorite} /></section>}
