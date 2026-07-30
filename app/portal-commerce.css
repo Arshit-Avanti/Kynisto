@@ -214,3 +214,176 @@
 .portalForm .dayChecks label { flex-direction: row; align-items: center; gap: 0.375rem; font-weight: 500; margin: 0; }
 .portalForm .dayChecks input[type="checkbox"] { width: auto; margin: 0; }
 .portalForm .formActions { grid-column: 1 / -1; margin-top: 1rem; }
+
+/* ==========================================================================
+   ADMIN CONTROL CENTRE CONTRAST & THEME ADAPTIVE STYLES
+   ========================================================================== */
+
+/* DARK THEME (DEFAULT / .portalDark) */
+.adminSelect {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  border: 1px solid #475569 !important;
+  border-radius: 8px !important;
+  padding: 6px 10px !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  outline: none !important;
+  cursor: pointer !important;
+}
+
+.adminSelect option {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  font-weight: 600 !important;
+}
+
+.adminUserName {
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+}
+
+.adminUserEmail {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+  font-size: 11px !important;
+}
+
+.adminChatBtn {
+  background-color: #334155 !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  border: 1px solid #475569 !important;
+  padding: 6px 12px !important;
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+}
+
+.adminSaveBtn {
+  background: linear-gradient(135deg, #FF5722 0%, #E53935 100%) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border: none !important;
+  padding: 6px 14px !important;
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+}
+
+.adminDeleteBtn {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border: none !important;
+  padding: 6px 12px !important;
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+}
+
+.portalToolbar {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  align-items: center !important;
+  margin-bottom: 20px !important;
+}
+
+.portalToolbar input,
+.portalToolbar select {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  border: 1px solid #475569 !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+}
+
+.portalToolbar input::placeholder {
+  color: #94a3b8 !important;
+}
+
+.portalToolbar select option {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
+
+.portalToolbar button.portalButton {
+  background: linear-gradient(135deg, #FF5722 0%, #E53935 100%) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border: none !important;
+  font-weight: 700 !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+}
+
+/* LIGHT THEME OVERRIDES (.light-theme / .portalShell.light-theme) */
+.light-theme .adminSelect,
+.portalShell.light-theme .adminSelect {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.light-theme .adminSelect option,
+.portalShell.light-theme .adminSelect option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+.light-theme .adminUserName,
+.portalShell.light-theme .adminUserName {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+.light-theme .adminUserEmail,
+.portalShell.light-theme .adminUserEmail {
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
+}
+
+.light-theme .adminChatBtn,
+.portalShell.light-theme .adminChatBtn {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  border: 1px solid #94a3b8 !important;
+}
+
+.light-theme .portalToolbar input,
+.light-theme .portalToolbar select,
+.portalShell.light-theme .portalToolbar input,
+.portalShell.light-theme .portalToolbar select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.light-theme .portalToolbar input::placeholder,
+.portalShell.light-theme .portalToolbar input::placeholder {
+  color: #64748b !important;
+}
+
+.light-theme .portalToolbar select option,
+.portalShell.light-theme .portalToolbar select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
