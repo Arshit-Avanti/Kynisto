@@ -65,6 +65,29 @@ const modernCleanTechStyles = `
     color: #ffffff !important;
     text-shadow: 0 1px 4px rgba(0,0,0,0.8) !important;
   }
+  .topbar a, .topbar button, .headerActions a, .headerActions button, .textButton, .accountButton, .savedButton {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    transition: all 0.2s ease !important;
+  }
+  .topbar a:hover, .topbar button:hover, .headerActions a:hover, .headerActions button:hover, .textButton:hover {
+    color: #FF5722 !important;
+    -webkit-text-fill-color: #FF5722 !important;
+    text-shadow: 0 0 12px rgba(255, 87, 34, 0.6) !important;
+  }
+  .savedButton b {
+    background: rgba(255, 87, 34, 0.25) !important;
+    color: #FF8A00 !important;
+    -webkit-text-fill-color: #FF8A00 !important;
+    border: 1px solid rgba(255, 138, 0, 0.4) !important;
+    padding: 2px 8px !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+    margin-left: 4px !important;
+  }
   .categoryTile small {
     color: #FF8A00 !important;
     font-weight: 700 !important;

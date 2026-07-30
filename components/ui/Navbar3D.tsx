@@ -90,9 +90,9 @@ export function Navbar3D({
 
       {!isMobile && (
         <nav aria-label="Main Navigation" style={{ display: "flex", alignItems: "center", gap: "28px", fontSize: "14px", fontWeight: 700, color: "#FFFFFF" }}>
-          <Link href="/products" style={{ color: "#FFFFFF", textDecoration: "none", transition: "all 0.15s" }}>Products</Link>
-          <Link href="/healthcare" style={{ color: "#FFFFFF", textDecoration: "none", transition: "all 0.15s" }}>Healthcare</Link>
-          <Link href="/pricing" style={{ color: "#FF7A00", textDecoration: "none", transition: "all 0.15s", fontWeight: 700 }}>Pricing & Plans</Link>
+          <Link href="/products" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF", textDecoration: "none", transition: "all 0.15s" }}>Products</Link>
+          <Link href="/healthcare" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF", textDecoration: "none", transition: "all 0.15s" }}>Healthcare</Link>
+          <Link href="/pricing" style={{ color: "#FF7A00", WebkitTextFillColor: "#FF7A00", textDecoration: "none", transition: "all 0.15s", fontWeight: 700 }}>Pricing & Plans</Link>
           <button
             type="button"
             onClick={() => {
@@ -102,12 +102,12 @@ export function Navbar3D({
               }
               document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
             }}
-            style={{ color: "#FFFFFF", textDecoration: "none", transition: "all 0.15s", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 700, padding: 0 }}
+            style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF", textDecoration: "none", transition: "all 0.15s", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 700, padding: 0 }}
           >
             <span aria-hidden="true" style={{ color: "#FF5722", marginRight: "4px" }}>♥</span>
-            Saved <b style={{ background: "rgba(255, 87, 34, 0.25)", color: "#FF8A00", border: "1px solid rgba(255, 138, 0, 0.4)", padding: "2px 8px", borderRadius: "10px", fontSize: "12px", marginLeft: "4px" }}>{savedCount}</b>
+            Saved <b style={{ background: "rgba(255, 87, 34, 0.25)", color: "#FF8A00", WebkitTextFillColor: "#FF8A00", border: "1px solid rgba(255, 138, 0, 0.4)", padding: "2px 8px", borderRadius: "10px", fontSize: "12px", marginLeft: "4px" }}>{savedCount}</b>
           </button>
-          <button type="button" onClick={onOpenCustomize} style={{ color: "#FFFFFF", textDecoration: "none", transition: "all 0.15s", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 700, padding: 0 }}>
+          <button type="button" onClick={onOpenCustomize} style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF", textDecoration: "none", transition: "all 0.15s", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 700, padding: 0 }}>
             <span aria-hidden="true" style={{ marginRight: "4px" }}>≡</span>
             Customize
           </button>
