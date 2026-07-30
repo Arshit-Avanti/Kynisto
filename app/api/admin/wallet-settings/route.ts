@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 export async function GET(request: Request) {
   try {
     const session = await requireApiSession(request);
-    if (session.user.role !== "admin") {
+    if (session.user.role !== "admin" && !session.user.isSuperAdmin) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
     }
 
@@ -22,7 +22,11 @@ export async function GET(request: Request) {
       fixedCommissionAmount: 50,
       minimumPlanPrice: 80,
       bundleToggleEnabled: true,
-      rewardCatalog: "",
+      rewardCatalog: "Kynisto Premium 1-Month Extension, ₹200 Store Voucher, Exclusive Pass, Priority Queue Upgrade",
+      coupons: [
+        { code: "KYNISTO100", discount: 100, limit: 50, used: 12, active: true },
+        { code: "WELCOME50", discount: 50, limit: 100, used: 34, active: true }
+      ]
     };
 
     let settings = defaults;
@@ -43,22 +47,24 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const session = await requireApiSession(request);
-    if (session.user.role !== "admin") {
+    if (session.user.role !== "admin" && !session.user.isSuperAdmin) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
     }
 
     const settings = await request.json();
     const db = getDb();
+    const now = Math.floor(Date.now() / 1000);
 
     await db
       .insert(systemSettings)
       .values({
         key: "wallet_settings",
         value: JSON.stringify(settings),
+        updatedAt: now,
       })
       .onConflictDoUpdate({
         target: systemSettings.key,
-        set: { value: JSON.stringify(settings) },
+        set: { value: JSON.stringify(settings), updatedAt: now },
       });
 
     return NextResponse.json({ success: true, settings });

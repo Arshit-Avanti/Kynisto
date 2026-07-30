@@ -106,10 +106,6 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
     }
     if (selected) return <OwnerHealthcarePanel storeId={String(selected.id)} />;
   }
-  if (tab === "memberships") {
-    if (!selected) return <section className="portalCard"><div className="emptyPortal"><div><b>No business found</b><p>Create or select a business to manage your membership plans.</p></div></div></section>;
-    return <OwnerMembershipEditor storeId={String(selected.id)} />;
-  }
   const title = tab === "overview" ? "Business overview" : tab === "subscription" ? "Premium & Plans" : tab.charAt(0).toUpperCase()+tab.slice(1);
   return (
     <>

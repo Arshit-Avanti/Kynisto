@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireApiSession } from "@/lib/auth";
 import { getDb } from "@/db";
 import { stores, storeMembershipPlans } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 
 export async function GET(req: Request) {
   try {
@@ -10,25 +10,43 @@ export async function GET(req: Request) {
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const url = new URL(req.url);
-    const storeId = url.searchParams.get("storeId");
-    if (!storeId) return NextResponse.json({ error: "storeId required" }, { status: 400 });
-
+    let storeId = url.searchParams.get("storeId");
     const db = getDb();
+
+    // If storeId is missing, resolve the owner's first store automatically
+    if (!storeId) {
+      const ownerStore = await db.query.stores.findFirst({
+        where: eq(stores.ownerId, session.user.id),
+      });
+      if (ownerStore) {
+        storeId = ownerStore.id;
+      }
+    }
+
+    if (!storeId) {
+      return NextResponse.json({ plans: [] });
+    }
+
     const store = await db.query.stores.findFirst({
-      where: and(eq(stores.id, storeId), eq(stores.ownerId, session.user.id)),
+      where: eq(stores.id, storeId),
     });
-    if (!store && session.user.role !== "admin") {
+
+    if (!store) {
+      return NextResponse.json({ plans: [] });
+    }
+
+    if (store.ownerId !== session.user.id && session.user.role !== "admin") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const plans = await db.query.storeMembershipPlans.findMany({
       where: eq(storeMembershipPlans.storeId, storeId),
-      orderBy: (plans, { desc }) => [desc(plans.createdAt)],
+      orderBy: [desc(storeMembershipPlans.createdAt)],
     });
 
-    return NextResponse.json({ plans });
+    return NextResponse.json({ plans, storeId });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to load membership plans" }, { status: 500 });
   }
 }
 
@@ -38,13 +56,23 @@ export async function POST(req: Request) {
     if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
-    const { storeId, name, price, durationDays, description, badgeColor, planIcon, isActive, maxMembers, termsAndConditions, benefits, commissionAcknowledged } = body;
+    let { storeId, name, price, durationDays, description, badgeColor, planIcon, isActive, maxMembers, termsAndConditions, benefits, commissionAcknowledged } = body;
 
-    if (!storeId || !name || price === undefined || !durationDays) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    const db = getDb();
+
+    if (!storeId) {
+      const ownerStore = await db.query.stores.findFirst({
+        where: eq(stores.ownerId, session.user.id),
+      });
+      if (ownerStore) storeId = ownerStore.id;
     }
 
-    if (price < 80) {
+    if (!storeId || !name || price === undefined || !durationDays) {
+      return NextResponse.json({ error: "Missing required fields: storeId, name, price, or duration" }, { status: 400 });
+    }
+
+    const numPrice = Number(price);
+    if (isNaN(numPrice) || numPrice < 80) {
       return NextResponse.json({ error: "Minimum membership price is ₹80." }, { status: 400 });
     }
     
@@ -52,32 +80,42 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Commission policy not acknowledged." }, { status: 400 });
     }
 
-    const db = getDb();
     const store = await db.query.stores.findFirst({
-      where: and(eq(stores.id, storeId), eq(stores.ownerId, session.user.id)),
+      where: eq(stores.id, storeId),
     });
     
-    if (!store && session.user.role !== "admin") {
+    if (!store) {
+      return NextResponse.json({ error: "Store not found" }, { status: 404 });
+    }
+
+    if (store.ownerId !== session.user.id && session.user.role !== "admin") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    await db.insert(storeMembershipPlans).values({
-      id: crypto.randomUUID(),
-      storeId,
-      name,
-      price,
-      durationDays,
-      description: description || "",
-      badgeColor: badgeColor || "#FF5722",
-      planIcon: planIcon || "star",
-      isActive: isActive ?? true,
-      maxMembers: maxMembers || null,
-      termsAndConditions: termsAndConditions || null,
-      benefits: benefits || [],
-    });
+    const planId = `plan_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const now = Math.floor(Date.now() / 1000);
 
-    return NextResponse.json({ success: true });
+    const newPlan = {
+      id: planId,
+      storeId,
+      name: String(name).trim(),
+      price: numPrice,
+      durationDays: Number(durationDays) || 30,
+      description: String(description || "").trim(),
+      benefits: Array.isArray(benefits) ? benefits : [String(description || "Exclusive membership perks")],
+      badgeColor: String(badgeColor || "#FF5722"),
+      planIcon: String(planIcon || "star"),
+      isActive: isActive !== false,
+      maxMembers: maxMembers ? Number(maxMembers) : null,
+      termsAndConditions: termsAndConditions ? String(termsAndConditions) : null,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await db.insert(storeMembershipPlans).values(newPlan);
+
+    return NextResponse.json({ success: true, plan: newPlan });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to create membership plan" }, { status: 500 });
   }
 }
