@@ -51,7 +51,7 @@ export function CategoryManagementTable({ items, mutate }: { items: AdminItem[];
   return <SelectableTable items={items} itemLabel="category" onDelete={(ids) => mutate("/api/admin/categories", "DELETE", { action: "bulk_delete", categoryIds: ids }, `${ids.length} categories deleted`)} headers={["Category", "Parent", "Stores", "Status", "Actions"]} render={(item) => <>
     <td><b>{String(item.icon ?? "")} {String(item.name)}</b><small>{String(item.slug)}</small></td>
     <td>{String(item.parentName ?? "Top level")}</td><td>{String(item.storeCount ?? 0)}</td><td><Status value={item.status} /></td>
-    <td><div className="tableActions">
+    <td><div className="tableActions" style={{ display: "flex", gap: "6px", alignItems: "center" }}>
       <button onClick={() => { const name = window.prompt("Category name", String(item.name)); if (name) void mutate("/api/admin/categories", "PATCH", { ...item, name }, "Category updated"); }}>Edit</button>
       <button onClick={() => void mutate("/api/admin/categories", "PATCH", { ...item, status: item.status === "active" ? "hidden" : "active" }, "Category updated")}>{item.status === "active" ? "Hide" : "Show"}</button>
       <button onClick={() => { if (window.confirm("Delete this unused category?")) void mutate("/api/admin/categories", "DELETE", { id: item.id }, "Category deleted"); }}>Delete</button>
