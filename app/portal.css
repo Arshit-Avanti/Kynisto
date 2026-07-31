@@ -656,9 +656,9 @@
 .adminSettingLabel,
 .adminAuditAction,
 .adminSecurityAction {
-  font-size: 14px !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.01em;
+  font-size: 14.5px !important;
+  font-weight: 750 !important;
+  letter-spacing: -0.01em !important;
   color: #0f172a !important;
   -webkit-text-fill-color: #0f172a !important;
 }
@@ -666,6 +666,9 @@
 .dark-theme .adminSettingLabel,
 .dark-theme .adminAuditAction,
 .dark-theme .adminSecurityAction,
+.portalDark .adminSettingLabel,
+.portalDark .adminAuditAction,
+.portalDark .adminSecurityAction,
 .portalShell.dark-theme .adminSettingLabel,
 .portalShell.dark-theme .adminAuditAction,
 .portalShell.dark-theme .adminSecurityAction {
@@ -687,17 +690,20 @@
 .adminSettingKey,
 .adminAuditDate,
 .adminSecurityDate {
-  display: block;
+  display: block !important;
   font-size: 12px !important;
-  font-weight: 500 !important;
-  color: #64748b !important;
-  -webkit-text-fill-color: #64748b !important;
-  margin-top: 3px;
+  font-weight: 550 !important;
+  color: #475569 !important;
+  -webkit-text-fill-color: #475569 !important;
+  margin-top: 3px !important;
 }
 
 .dark-theme .adminSettingKey,
 .dark-theme .adminAuditDate,
 .dark-theme .adminSecurityDate,
+.portalDark .adminSettingKey,
+.portalDark .adminAuditDate,
+.portalDark .adminSecurityDate,
 .portalShell.dark-theme .adminSettingKey,
 .portalShell.dark-theme .adminAuditDate,
 .portalShell.dark-theme .adminSecurityDate {
@@ -710,24 +716,26 @@
 .light-theme .adminSecurityDate,
 .portalShell.light-theme .adminSettingKey,
 .portalShell.light-theme .adminAuditDate,
-.portalShell.light-theme .adminAuditDate {
-  color: #64748b !important;
-  -webkit-text-fill-color: #64748b !important;
+.portalShell.light-theme .adminSecurityDate {
+  color: #475569 !important;
+  -webkit-text-fill-color: #475569 !important;
 }
 
 /* Audit & Security Event Details */
 .adminAuditDetails,
 .adminSecurityDetails {
   font-size: 13px !important;
-  font-weight: 500 !important;
-  color: #334155 !important;
-  -webkit-text-fill-color: #334155 !important;
+  font-weight: 600 !important;
+  color: #1e293b !important;
+  -webkit-text-fill-color: #1e293b !important;
   margin: 4px 0 0 !important;
   line-height: 1.5 !important;
 }
 
 .dark-theme .adminAuditDetails,
 .dark-theme .adminSecurityDetails,
+.portalDark .adminAuditDetails,
+.portalDark .adminSecurityDetails,
 .portalShell.dark-theme .adminAuditDetails,
 .portalShell.dark-theme .adminSecurityDetails {
   color: #cbd5e1 !important;
@@ -738,8 +746,8 @@
 .light-theme .adminSecurityDetails,
 .portalShell.light-theme .adminAuditDetails,
 .portalShell.light-theme .adminSecurityDetails {
-  color: #334155 !important;
-  -webkit-text-fill-color: #334155 !important;
+  color: #1e293b !important;
+  -webkit-text-fill-color: #1e293b !important;
 }
 
 /* Unified Article Rows */
@@ -748,20 +756,23 @@
 .adminSecurityRow {
   padding: 14px 18px !important;
   border-radius: 12px !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 10px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
   gap: 16px !important;
   transition: all 0.2s ease !important;
   background-color: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
+  border: 1px solid #cbd5e1 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 }
 
 .dark-theme .adminSettingRow,
 .dark-theme .adminAuditRow,
 .dark-theme .adminSecurityRow,
+.portalDark .adminSettingRow,
+.portalDark .adminAuditRow,
+.portalDark .adminSecurityRow,
 .portalShell.dark-theme .adminSettingRow,
 .portalShell.dark-theme .adminAuditRow,
 .portalShell.dark-theme .adminSecurityRow {
@@ -777,7 +788,7 @@
 .portalShell.light-theme .adminAuditRow,
 .portalShell.light-theme .adminSecurityRow {
   background-color: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
+  border: 1px solid #cbd5e1 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 }
 
@@ -800,13 +811,13 @@
 .adminFormSelect,
 .adminSaveBtn {
   box-sizing: border-box !important;
-  height: 40px !important;
-  min-height: 40px !important;
-  max-height: 40px !important;
-  line-height: 40px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  line-height: 42px !important;
   padding: 0 14px !important;
-  border-radius: 8px !important;
-  font-size: 13px !important;
+  border-radius: 10px !important;
+  font-size: 13.5px !important;
   font-weight: 600 !important;
   vertical-align: middle !important;
   margin: 0 !important;
@@ -816,15 +827,17 @@
 .adminFormInput {
   min-width: 220px !important;
   flex: 1 !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+  outline: none !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03) !important;
 }
 
 .adminFormSelect {
   min-width: 140px !important;
   cursor: pointer !important;
-}
-
-.adminFormInput,
-.adminFormSelect {
   background-color: #ffffff !important;
   color: #0f172a !important;
   -webkit-text-fill-color: #0f172a !important;
@@ -834,6 +847,8 @@
 
 .dark-theme .adminFormInput,
 .dark-theme .adminFormSelect,
+.portalDark .adminFormInput,
+.portalDark .adminFormSelect,
 .portalShell.dark-theme .adminFormInput,
 .portalShell.dark-theme .adminFormSelect {
   background-color: #0f172a !important;
@@ -865,6 +880,9 @@
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
   cursor: pointer !important;
+  font-weight: 750 !important;
+  padding: 0 20px !important;
+  border-radius: 10px !important;
   box-shadow: 0 2px 8px rgba(255, 87, 34, 0.3) !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -874,7 +892,7 @@
 
 .adminSaveBtn:hover {
   transform: translateY(-1px) !important;
-  box-shadow: 0 4px 12px rgba(255, 87, 34, 0.45) !important;
+  box-shadow: 0 4px 14px rgba(255, 87, 34, 0.45) !important;
   opacity: 0.95 !important;
 }
 
