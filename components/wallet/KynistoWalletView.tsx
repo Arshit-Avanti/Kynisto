@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Gift, Wallet, Award, Download, Clock, Store, Crown, Loader2, CheckCircle2 } from 'lucide-react';
+import { apiFetch } from '@/lib/client-api';
 
 interface KynistoPointsHistory {
   id: string;
@@ -23,10 +24,13 @@ interface LoyaltyPoint {
 
 interface Membership {
   id: string;
+  storeId: string;
   storeName: string;
   type: string;
   validUntil: string;
   isKynistoPremium: boolean;
+  pricePaid?: number;
+  benefits?: string[];
   invoiceUrl: string;
 }
 
@@ -43,9 +47,15 @@ interface WalletData {
   };
 }
 
+const defaultWalletData: WalletData = {
+  kynistoPoints: { total: 0, progress: 0, history: [] },
+  loyaltyPoints: [],
+  memberships: { active: [], expired: [] },
+};
+
 export default function KynistoWalletView() {
   const [activeTab, setActiveTab] = useState<'kynisto' | 'loyalty' | 'memberships'>('kynisto');
-  const [walletData, setWalletData] = useState<WalletData | null>(null);
+  const [walletData, setWalletData] = useState<WalletData>(defaultWalletData);
   const [loading, setLoading] = useState(true);
   const [redeeming, setRedeeming] = useState(false);
   const [redeemResult, setRedeemResult] = useState<{reward?: string; coupon?: string; error?: string} | null>(null);
@@ -56,13 +66,20 @@ export default function KynistoWalletView() {
 
   const fetchWalletData = async () => {
     try {
-      const res = await fetch('/api/wallet');
-      if (res.ok) {
-        const data = await res.json();
-        setWalletData(data);
+      const data = await apiFetch<WalletData>('/api/wallet');
+      if (data && typeof data === 'object') {
+        setWalletData({
+          kynistoPoints: data.kynistoPoints || defaultWalletData.kynistoPoints,
+          loyaltyPoints: Array.isArray(data.loyaltyPoints) ? data.loyaltyPoints : [],
+          memberships: {
+            active: Array.isArray(data.memberships?.active) ? data.memberships.active : [],
+            expired: Array.isArray(data.memberships?.expired) ? data.memberships.expired : [],
+          },
+        });
       }
     } catch (error) {
       console.error('Failed to fetch wallet data', error);
+      // Keep default empty wallet structure instead of error screen
     } finally {
       setLoading(false);
     }
@@ -73,28 +90,15 @@ export default function KynistoWalletView() {
     setRedeeming(true);
     setRedeemResult(null);
     try {
-      const res = await fetch('/api/wallet/redeem-points', { method: 'POST' });
-      const data = await res.json();
-      if (data.success) {
+      const data = await apiFetch<any>('/api/wallet/redeem-points', { method: 'POST' });
+      if (data && data.success) {
         setRedeemResult({ reward: data.reward });
-        // Optimistic update
-        setWalletData((prev) => prev ? {
-          ...prev,
-          kynistoPoints: {
-            ...prev.kynistoPoints,
-            total: prev.kynistoPoints.total - 1000,
-            progress: (prev.kynistoPoints.progress - 1000 + 1000) % 1000, // naive adjustment
-            history: [
-              { id: Date.now().toString(), date: new Date().toISOString().split('T')[0], description: `Redeemed for ${data.reward}`, points: -1000, type: 'redeemed' },
-              ...prev.kynistoPoints.history
-            ]
-          }
-        } : prev);
+        await fetchWalletData();
       } else {
-        setRedeemResult({ error: data.error || 'Failed to redeem' });
+        setRedeemResult({ error: data?.error || 'Failed to redeem' });
       }
     } catch (error) {
-      setRedeemResult({ error: 'An error occurred' });
+      setRedeemResult({ error: error instanceof Error ? error.message : 'An error occurred' });
     } finally {
       setRedeeming(false);
     }
@@ -104,29 +108,18 @@ export default function KynistoWalletView() {
     setRedeeming(true);
     setRedeemResult(null);
     try {
-      const res = await fetch('/api/wallet/redeem-loyalty', {
+      const data = await apiFetch<any>('/api/wallet/redeem-loyalty', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ storeId }),
+        json: { storeId },
       });
-      const data = await res.json();
-      if (data.success) {
+      if (data && data.success) {
         setRedeemResult({ coupon: data.couponCode });
-        // Optimistic update for loyalty
-        setWalletData((prev) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            loyaltyPoints: prev.loyaltyPoints.map(p => 
-              p.storeId === storeId ? { ...p, points: p.points - 1000, progress: (p.progress - 1000 + 1000) % 1000, canRedeemDiscount: (p.points - 1000) >= 1000 } : p
-            )
-          };
-        });
+        await fetchWalletData();
       } else {
-        setRedeemResult({ error: data.error || 'Failed to redeem' });
+        setRedeemResult({ error: data?.error || 'Failed to redeem' });
       }
     } catch (error) {
-      setRedeemResult({ error: 'An error occurred' });
+      setRedeemResult({ error: error instanceof Error ? error.message : 'An error occurred' });
     } finally {
       setRedeeming(false);
     }
@@ -138,10 +131,6 @@ export default function KynistoWalletView() {
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
-  }
-
-  if (!walletData) {
-    return <div className="text-center p-8 text-red-500">Failed to load wallet</div>;
   }
 
   const { kynistoPoints, loyaltyPoints, memberships } = walletData;

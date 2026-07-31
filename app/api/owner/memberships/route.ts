@@ -11,6 +11,8 @@ export async function GET(req: Request) {
 
     const url = new URL(req.url);
     let storeId = url.searchParams.get("storeId");
+    if (storeId === "undefined" || storeId === "null") storeId = null;
+
     const db = getDb();
 
     // If storeId is missing, resolve the owner's first store automatically
@@ -59,6 +61,8 @@ export async function POST(req: Request) {
     let { storeId, name, price, durationDays, description, badgeColor, planIcon, isActive, maxMembers, termsAndConditions, benefits, commissionAcknowledged } = body;
 
     const db = getDb();
+
+    if (storeId === "undefined" || storeId === "null") storeId = null;
 
     if (!storeId) {
       const ownerStore = await db.query.stores.findFirst({
