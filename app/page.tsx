@@ -92,9 +92,18 @@ const modernCleanTechStyles = `
     color: #FF8A00 !important;
     font-weight: 700 !important;
   }
-  .sectionHeading h2, .sectionHeading h3, .hero h1, .hero p, h2, h3 {
+  .sectionHeading h2, .sectionHeading h3, .hero p, h2, h3 {
     color: #ffffff !important;
     text-shadow: 0 2px 10px rgba(0,0,0,0.9) !important;
+  }
+  .hero h1 {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    text-shadow: none !important;
+    filter: none !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif !important;
+    font-weight: 850 !important;
+    letter-spacing: -0.06em !important;
   }
   .searchBox input, .healthSearch input, .productIntro form input, .advancedFilters input {
     background: transparent !important;
@@ -746,16 +755,18 @@ export default function Home() {
         <div style={{ position: "absolute", top: "10%", width: "500px", height: "220px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,87,34,0.25) 0%, rgba(120,119,198,0.2) 50%, transparent 75%)", filter: "blur(70px)", pointerEvents: "none", zIndex: 0 }} />
 
         <div className="heroCopy" style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "950px", position: "relative", zIndex: 1 }}>
-          {/* Crystal Clear Bright White & Glowing Hero Title: Kynisto */}
+          {/* Crystal Clear Pure White Hero Title: Kynisto */}
           <h1 style={{ 
-            fontSize: "clamp(4rem, 12vw, 8rem)", 
-            fontWeight: 900, 
-            letterSpacing: "-0.03em", 
+            fontSize: "clamp(4.2rem, 13vw, 8.5rem)", 
+            fontWeight: 850, 
+            letterSpacing: "-0.06em", 
             lineHeight: 1, 
             margin: "0 0 32px 0", 
             color: "#FFFFFF",
-            textShadow: "0 0 30px rgba(255, 87, 34, 0.7), 0 0 60px rgba(255, 138, 0, 0.4), 0 4px 20px rgba(0, 0, 0, 0.9)",
-            fontFamily: "'Inter', 'Outfit', -apple-system, sans-serif"
+            WebkitTextFillColor: "#FFFFFF",
+            textShadow: "none",
+            filter: "none",
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif"
           }}>
             Kynisto
           </h1>
