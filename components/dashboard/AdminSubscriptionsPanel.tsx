@@ -266,13 +266,13 @@ export function AdminSubscriptionsPanel() {
       )}
 
       {/* NEW SECTION: SUBSCRIPTION MESSAGES & PENDING PAYMENTS FROM USERS (FOR ADMIN DASHBOARD ONLY) */}
-      <div style={{ marginBottom: "36px", background: "rgba(15,23,42,0.96)", border: "2px solid #F59E0B", borderRadius: "20px", padding: "24px", boxShadow: "0 10px 30px rgba(245,158,11,0.15)" }}>
+      <div style={{ marginBottom: "36px", background: "var(--p-surface, rgba(15,23,42,0.96))", border: "2px solid #F59E0B", borderRadius: "20px", padding: "24px", boxShadow: "0 10px 30px rgba(245,158,11,0.15)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
           <div>
             <span style={{ background: "#F59E0B", color: "#000000", fontWeight: 900, fontSize: "11px", padding: "4px 10px", borderRadius: "12px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
               🔒 ADMIN DASHBOARD ONLY
             </span>
-            <h3 style={{ fontSize: "20px", fontWeight: 850, color: "#FFFFFF", margin: "8px 0 0" }}>
+            <h3 style={{ fontSize: "20px", fontWeight: 850, color: "var(--p-ink, #FFFFFF)", margin: "8px 0 0" }}>
               📬 Subscription Messages from Users (Pending Payment Verifications)
             </h3>
           </div>
@@ -282,7 +282,7 @@ export function AdminSubscriptionsPanel() {
         </div>
 
         {pendingMessages.filter((m) => m.status === "pending").length === 0 ? (
-          <div style={{ color: "#94A3B8", fontSize: "13px", fontStyle: "italic", textAlign: "center", padding: "20px 0", background: "rgba(255,255,255,0.02)", borderRadius: "12px" }}>
+          <div style={{ color: "var(--p-ink-subtle, #94A3B8)", fontSize: "13px", fontStyle: "italic", textAlign: "center", padding: "20px 0", background: "rgba(128,128,128,0.05)", borderRadius: "12px" }}>
             No pending user payment verification requests. All requests verified!
           </div>
         ) : (
@@ -303,19 +303,19 @@ export function AdminSubscriptionsPanel() {
                 }}
               >
                 <div>
-                  <div style={{ fontSize: "16px", fontWeight: 850, color: "#FFFFFF" }}>
+                  <div style={{ fontSize: "16px", fontWeight: 850, color: "var(--p-ink, #FFFFFF)" }}>
                     {msg.userName}{" "}
                     <span style={{ fontSize: "12px", color: "#60A5FA", fontWeight: 700, textTransform: "capitalize", marginLeft: "6px" }}>
                       ({msg.userRole.replace("_", " ")})
                     </span>
                   </div>
-                  <div style={{ fontSize: "13px", color: "#CBD5E1", marginTop: "4px" }}>
+                  <div style={{ fontSize: "13px", color: "var(--p-ink-subtle, #CBD5E1)", marginTop: "4px" }}>
                     Email: <b>{msg.userEmail}</b> · Payment Time: <b>{msg.paymentTime}</b>
                   </div>
                   <div style={{ fontSize: "13px", color: "#22C55E", fontWeight: 850, marginTop: "6px" }}>
                     Plan Chosen: {msg.planName} ({msg.billingCycle}) · Amount Paid: ₹{msg.amountPaid}
                   </div>
-                  <div style={{ fontSize: "13px", color: "#38BDF8", fontFamily: "monospace", marginTop: "4px" }}>
+                  <div style={{ fontSize: "13px", color: "var(--p-ink-accent, #38BDF8)", fontFamily: "monospace", marginTop: "4px" }}>
                     12-Digit UTR Ref #: <b style={{ background: "rgba(56,189,248,0.15)", padding: "2px 8px", borderRadius: "6px" }}>{msg.utr}</b>
                   </div>
                 </div>
@@ -367,13 +367,13 @@ export function AdminSubscriptionsPanel() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search user, email, UTR, receipt..."
-          style={{ flex: 1, minWidth: "240px", padding: "10px 14px", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.15)", background: "rgba(0,0,0,0.4)", color: "#FFF", fontSize: "14px" }}
+          style={{ flex: 1, minWidth: "240px", padding: "10px 14px", borderRadius: "12px", border: "1px solid var(--p-border, rgba(255,255,255,0.15))", background: "var(--p-surface, rgba(0,0,0,0.4))", color: "var(--p-ink, #FFF)", fontSize: "14px" }}
         />
 
         <select
           value={planFilter}
           onChange={(e) => setPlanFilter(e.target.value)}
-          style={{ padding: "10px 14px", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.15)", background: "#1E293B", color: "#FFF", fontSize: "13px" }}
+          style={{ padding: "10px 14px", borderRadius: "12px", border: "1px solid var(--p-border, rgba(255,255,255,0.15))", background: "var(--p-surface, #1E293B)", color: "var(--p-ink, #FFF)", fontSize: "13px" }}
         >
           <option value="all">All Plans</option>
           {Object.values(ALL_PLANS).map((p) => (
@@ -384,7 +384,7 @@ export function AdminSubscriptionsPanel() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          style={{ padding: "10px 14px", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.15)", background: "#1E293B", color: "#FFF", fontSize: "13px" }}
+          style={{ padding: "10px 14px", borderRadius: "12px", border: "1px solid var(--p-border, rgba(255,255,255,0.15))", background: "var(--p-surface, #1E293B)", color: "var(--p-ink, #FFF)", fontSize: "13px" }}
         >
           <option value="all">All Statuses</option>
           <option value="active">Active</option>
@@ -397,7 +397,7 @@ export function AdminSubscriptionsPanel() {
         <select
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
-          style={{ padding: "10px 14px", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.15)", background: "#1E293B", color: "#FFF", fontSize: "13px" }}
+          style={{ padding: "10px 14px", borderRadius: "12px", border: "1px solid var(--p-border, rgba(255,255,255,0.15))", background: "var(--p-surface, #1E293B)", color: "var(--p-ink, #FFF)", fontSize: "13px" }}
         >
           <option value="all">All Roles</option>
           <option value="customer">Customer</option>
@@ -428,7 +428,7 @@ export function AdminSubscriptionsPanel() {
       {selectedIds.length > 0 && (
         <div
           style={{
-            background: "linear-gradient(135deg, #1E293B 0%, #0F172A 100%)",
+            background: "var(--p-surface-elevated, linear-gradient(135deg, #1E293B 0%, #0F172A 100%))",
             border: "2px solid #3B82F6",
             borderRadius: "16px",
             padding: "14px 20px",
@@ -441,7 +441,7 @@ export function AdminSubscriptionsPanel() {
             boxShadow: "0 10px 30px rgba(59,130,246,0.25)",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#FFF", fontWeight: 800, fontSize: "14px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--p-ink, #FFF)", fontWeight: 800, fontSize: "14px" }}>
             <span style={{ background: "#3B82F6", color: "#FFF", width: "26px", height: "26px", borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "12px" }}>
               {selectedIds.length}
             </span>
@@ -533,9 +533,9 @@ export function AdminSubscriptionsPanel() {
                   <tr
                     key={sub.id}
                     style={{
-                      borderBottom: "1px solid rgba(255,255,255,0.08)",
+                      borderBottom: "1px solid var(--p-border, rgba(255,255,255,0.08))",
                       fontSize: "13px",
-                      background: isSelected ? "rgba(59,130,246,0.12)" : "transparent",
+                      background: isSelected ? "rgba(59,130,246,0.12)" : "var(--p-panel, transparent)",
                       transition: "background 0.2s ease",
                     }}
                   >

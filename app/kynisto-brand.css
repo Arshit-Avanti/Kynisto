@@ -115,7 +115,7 @@ body {
   --p-accent: #FF5722;
 }
 
-.portalDark {
+.dark-theme {
   --p-bg: #140A0C;
   --p-panel: rgba(255, 255, 255, .04);
   --p-solid: #1c0e11;
