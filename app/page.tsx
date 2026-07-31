@@ -743,9 +743,6 @@ export default function Home() {
 
       <section className="hero" id="top">
         <div className="heroCopy">
-          <div className="heroBrandCenter">
-            <KynistoLogo showTagline />
-          </div>
           <h1 className="heroTitleClassical">Kynisto</h1>
 
           <form
