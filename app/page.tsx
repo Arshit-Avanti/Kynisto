@@ -45,20 +45,20 @@ const Icons = {
 
 const modernCleanTechStyles = `
   .site, .healthPage, .productDiscovery {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
-    background-color: #140A0C !important;
-    background-image: radial-gradient(circle at 15% 30%, rgba(255, 87, 34, 0.22), transparent 45%),
-                      radial-gradient(circle at 85% 70%, rgba(239, 68, 68, 0.22), transparent 45%),
-                      radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.12), transparent 60%) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif !important;
+    background-color: #050507 !important;
+    background-image: radial-gradient(circle at 50% 15%, rgba(120, 119, 198, 0.16) 0%, transparent 45%),
+                      radial-gradient(circle at 15% 45%, rgba(255, 87, 34, 0.14) 0%, transparent 40%),
+                      radial-gradient(circle at 85% 75%, rgba(59, 130, 246, 0.12) 0%, transparent 45%) !important;
     color: #f8fafc !important;
   }
   .searchBox, .healthSearch, .productIntro form, .locationPill, .categoryTile, .storeCard, .advancedFilters input, .providerGrid article {
-    border-radius: 12px !important;
-    border: 1px solid rgba(255, 87, 34, 0.25) !important;
-    background: rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
     color: #ffffff !important;
   }
   .categoryTile strong, .categoryTile b, .categoryTile span, .storeCard h3, .storeCard b, .storeCard p, .providerGrid h3 {
@@ -741,17 +741,20 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="hero" id="top" style={{ textAlign: "center", padding: "80px 20px 40px 20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <div className="heroCopy" style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "900px" }}>
+      <section className="hero" id="top" style={{ textAlign: "center", padding: "90px 20px 40px 20px", display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
+        {/* Apple Ambient Aura Backlight */}
+        <div style={{ position: "absolute", top: "10%", width: "500px", height: "220px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,87,34,0.25) 0%, rgba(120,119,198,0.2) 50%, transparent 75%)", filter: "blur(70px)", pointerEvents: "none", zIndex: 0 }} />
+
+        <div className="heroCopy" style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "950px", position: "relative", zIndex: 1 }}>
           {/* Platform Version Badge */}
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", background: "rgba(255, 138, 0, 0.08)", border: "1px solid rgba(255, 138, 0, 0.3)", marginBottom: "28px" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 18px", borderRadius: "9999px", background: "rgba(255, 255, 255, 0.04)", border: "1px solid rgba(255, 255, 255, 0.12)", marginBottom: "32px", backdropFilter: "blur(20px)" }}>
             <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#FF8A00", boxShadow: "0 0 10px #FF8A00", display: "inline-block" }} />
             <span style={{ fontSize: "11px", fontWeight: 800, color: "#FF8A00", letterSpacing: "0.15em", textTransform: "uppercase" }}>PLATFORM V2.4 LIVE</span>
           </div>
 
-          {/* Massive Headline */}
-          <h1 style={{ fontSize: "clamp(3rem, 7.5vw, 5.8rem)", fontWeight: 900, letterSpacing: "-0.04em", lineHeight: 0.95, margin: "0 0 24px 0", textTransform: "uppercase", background: "linear-gradient(180deg, #FFFFFF 0%, #A1A1AA 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            ORCHESTRATE FLOW.
+          {/* Single Word Aesthetic Hero Title: Kynisto */}
+          <h1 style={{ fontSize: "clamp(3.8rem, 11vw, 7.8rem)", fontWeight: 900, letterSpacing: "-0.045em", lineHeight: 0.95, margin: "0 0 24px 0", background: "linear-gradient(180deg, #FFFFFF 20%, rgba(255, 255, 255, 0.65) 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", filter: "drop-shadow(0 15px 35px rgba(0,0,0,0.8))" }}>
+            Kynisto
           </h1>
 
           <p style={{ fontSize: "1.1rem", color: "#94a3b8", maxWidth: "640px", margin: "0 auto 36px auto", lineHeight: 1.6, fontWeight: 500 }}>
