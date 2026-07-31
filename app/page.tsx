@@ -741,9 +741,40 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="hero" id="top">
-        <div className="heroCopy">
-          <h1 className="heroTitleClassical">Kynisto</h1>
+      <section className="hero" id="top" style={{ textAlign: "center", padding: "80px 20px 40px 20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div className="heroCopy" style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "900px" }}>
+          {/* Platform Version Badge */}
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "9999px", background: "rgba(255, 138, 0, 0.08)", border: "1px solid rgba(255, 138, 0, 0.3)", marginBottom: "28px" }}>
+            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#FF8A00", boxShadow: "0 0 10px #FF8A00", display: "inline-block" }} />
+            <span style={{ fontSize: "11px", fontWeight: 800, color: "#FF8A00", letterSpacing: "0.15em", textTransform: "uppercase" }}>PLATFORM V2.4 LIVE</span>
+          </div>
+
+          {/* Massive Headline */}
+          <h1 style={{ fontSize: "clamp(3rem, 7.5vw, 5.8rem)", fontWeight: 900, letterSpacing: "-0.04em", lineHeight: 0.95, margin: "0 0 24px 0", textTransform: "uppercase", background: "linear-gradient(180deg, #FFFFFF 0%, #A1A1AA 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            ORCHESTRATE FLOW.
+          </h1>
+
+          <p style={{ fontSize: "1.1rem", color: "#94a3b8", maxWidth: "640px", margin: "0 auto 36px auto", lineHeight: 1.6, fontWeight: 500 }}>
+            The future of queue management & local commerce is here. Redefining human-to-machine intelligence through silent precision.
+          </p>
+
+          {/* Dual Action Pill Buttons */}
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "40px", flexWrap: "wrap", justifyContent: "center" }}>
+            <button
+              type="button"
+              onClick={() => document.getElementById("places")?.scrollIntoView({ behavior: "smooth" })}
+              style={{ padding: "14px 32px", borderRadius: "9999px", background: "linear-gradient(135deg, #FF5722 0%, #E53935 100%)", color: "#FFFFFF", fontWeight: 800, fontSize: "13px", letterSpacing: "0.08em", textTransform: "uppercase", border: "none", cursor: "pointer", boxShadow: "0 0 30px rgba(255, 87, 34, 0.5)", transition: "all 0.3s ease" }}
+            >
+              DEPLOY AI
+            </button>
+            <button
+              type="button"
+              onClick={() => document.getElementById("places")?.scrollIntoView({ behavior: "smooth" })}
+              style={{ padding: "14px 32px", borderRadius: "9999px", background: "rgba(255, 255, 255, 0.04)", color: "#FFFFFF", fontWeight: 800, fontSize: "13px", letterSpacing: "0.08em", textTransform: "uppercase", border: "1px solid rgba(255, 255, 255, 0.2)", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", backdropFilter: "blur(12px)" }}
+            >
+              <span style={{ fontSize: "11px" }}>▷</span> WATCH FILM
+            </button>
+          </div>
 
           <form
             className="searchBox"
@@ -752,6 +783,7 @@ export default function Home() {
               event.preventDefault();
               document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
             }}
+            style={{ width: "100%", maxWidth: "600px", margin: "0 auto 24px auto" }}
           >
             <span className="searchIcon" aria-hidden="true"><Icons.Search /></span>
             <label className="srOnly" htmlFor="store-search">Search nearby stores</label>
@@ -772,6 +804,9 @@ export default function Home() {
             <span><b>20</b> Categories</span>
             <span><b>Live</b> Status</span>
           </div>
+
+          {/* Vertical Guide Line */}
+          <div style={{ width: "1px", height: "48px", background: "linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%)", margin: "32px auto 0 auto" }} />
         </div>
       </section>
 
@@ -917,6 +952,57 @@ export default function Home() {
             <button type="button" onClick={resetFilters}>Show all nearby places</button>
           </div>
         )}
+      </section>
+
+      {/* Cinematic Join the Future Banner (Image 1 Style) */}
+      <section 
+        style={{ 
+          margin: "60px auto 40px auto", 
+          maxWidth: "1200px", 
+          padding: "0 20px" 
+        }}
+      >
+        <div 
+          style={{ 
+            borderRadius: "28px", 
+            border: "1px solid rgba(255, 255, 255, 0.12)", 
+            background: "linear-gradient(180deg, rgba(18, 20, 26, 0.85) 0%, rgba(10, 11, 15, 0.95) 100%), url('https://images.unsplash.com/photo-1518770660439-4636190af475?w=1600&auto=format&fit=crop&q=80') center/cover no-repeat", 
+            position: "relative", 
+            overflow: "hidden", 
+            padding: "90px 32px", 
+            textAlign: "center", 
+            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.7)" 
+          }}
+        >
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at center, rgba(12, 14, 18, 0.6) 0%, rgba(10, 11, 15, 0.95) 100%)", zIndex: 1 }} />
+          <div style={{ relative: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <h2 style={{ fontSize: "clamp(2.8rem, 5.5vw, 4.5rem)", fontWeight: 900, color: "#FFFFFF", margin: "0 0 16px 0", letterSpacing: "-0.03em" }}>
+              Join the Future.
+            </h2>
+            <p style={{ fontSize: "1.15rem", color: "#CBD5E1", maxWidth: "600px", margin: "0 auto 36px auto", lineHeight: 1.6, fontWeight: 500 }}>
+              The infrastructure of efficiency starts with a single integration.
+            </p>
+            <a 
+              href={userRole ? (userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account") : "/login"}
+              style={{ 
+                display: "inline-block", 
+                padding: "16px 42px", 
+                borderRadius: "9999px", 
+                background: "#FFFFFF", 
+                color: "#0E0F12", 
+                fontWeight: 900, 
+                fontSize: "13px", 
+                letterSpacing: "0.1em", 
+                textTransform: "uppercase", 
+                textDecoration: "none", 
+                boxShadow: "0 10px 30px rgba(255, 255, 255, 0.25)", 
+                transition: "all 0.3s ease" 
+              }}
+            >
+              GET STARTED
+            </a>
+          </div>
+        </div>
       </section>
 
       <section className="trustStrip" aria-label="Why use Kynisto">
