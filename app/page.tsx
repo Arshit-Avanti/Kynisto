@@ -746,38 +746,21 @@ export default function Home() {
         <div style={{ position: "absolute", top: "10%", width: "500px", height: "220px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,87,34,0.25) 0%, rgba(120,119,198,0.2) 50%, transparent 75%)", filter: "blur(70px)", pointerEvents: "none", zIndex: 0 }} />
 
         <div className="heroCopy" style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "950px", position: "relative", zIndex: 1 }}>
-          {/* Platform Version Badge */}
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 18px", borderRadius: "9999px", background: "rgba(255, 255, 255, 0.04)", border: "1px solid rgba(255, 255, 255, 0.12)", marginBottom: "32px", backdropFilter: "blur(20px)" }}>
-            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#FF8A00", boxShadow: "0 0 10px #FF8A00", display: "inline-block" }} />
-            <span style={{ fontSize: "11px", fontWeight: 800, color: "#FF8A00", letterSpacing: "0.15em", textTransform: "uppercase" }}>PLATFORM V2.4 LIVE</span>
-          </div>
-
-          {/* Single Word Aesthetic Hero Title: Kynisto */}
-          <h1 style={{ fontSize: "clamp(3.8rem, 11vw, 7.8rem)", fontWeight: 900, letterSpacing: "-0.045em", lineHeight: 0.95, margin: "0 0 24px 0", background: "linear-gradient(180deg, #FFFFFF 20%, rgba(255, 255, 255, 0.65) 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", filter: "drop-shadow(0 15px 35px rgba(0,0,0,0.8))" }}>
+          {/* Aesthetic Glowing Single Word Hero Title: Kynisto */}
+          <h1 style={{ 
+            fontSize: "clamp(4.2rem, 12vw, 8.5rem)", 
+            fontWeight: 900, 
+            letterSpacing: "-0.05em", 
+            lineHeight: 0.95, 
+            margin: "0 0 32px 0", 
+            background: "linear-gradient(135deg, #FFFFFF 15%, #FFF0EB 45%, #FF5722 80%, #FF8A00 100%)", 
+            WebkitBackgroundClip: "text", 
+            WebkitTextFillColor: "transparent", 
+            filter: "drop-shadow(0 10px 40px rgba(255, 87, 34, 0.45))",
+            fontFamily: "'Outfit', 'Plus Jakarta Sans', -apple-system, sans-serif"
+          }}>
             Kynisto
           </h1>
-
-          <p style={{ fontSize: "1.1rem", color: "#94a3b8", maxWidth: "640px", margin: "0 auto 36px auto", lineHeight: 1.6, fontWeight: 500 }}>
-            The future of queue management & local commerce is here. Redefining human-to-machine intelligence through silent precision.
-          </p>
-
-          {/* Dual Action Pill Buttons */}
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "40px", flexWrap: "wrap", justifyContent: "center" }}>
-            <button
-              type="button"
-              onClick={() => document.getElementById("places")?.scrollIntoView({ behavior: "smooth" })}
-              style={{ padding: "14px 32px", borderRadius: "9999px", background: "linear-gradient(135deg, #FF5722 0%, #E53935 100%)", color: "#FFFFFF", fontWeight: 800, fontSize: "13px", letterSpacing: "0.08em", textTransform: "uppercase", border: "none", cursor: "pointer", boxShadow: "0 0 30px rgba(255, 87, 34, 0.5)", transition: "all 0.3s ease" }}
-            >
-              DEPLOY AI
-            </button>
-            <button
-              type="button"
-              onClick={() => document.getElementById("places")?.scrollIntoView({ behavior: "smooth" })}
-              style={{ padding: "14px 32px", borderRadius: "9999px", background: "rgba(255, 255, 255, 0.04)", color: "#FFFFFF", fontWeight: 800, fontSize: "13px", letterSpacing: "0.08em", textTransform: "uppercase", border: "1px solid rgba(255, 255, 255, 0.2)", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", backdropFilter: "blur(12px)" }}
-            >
-              <span style={{ fontSize: "11px" }}>▷</span> WATCH FILM
-            </button>
-          </div>
 
           <form
             className="searchBox"
@@ -786,7 +769,7 @@ export default function Home() {
               event.preventDefault();
               document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
             }}
-            style={{ width: "100%", maxWidth: "600px", margin: "0 auto 24px auto" }}
+            style={{ width: "100%", maxWidth: "620px", margin: "0 auto 24px auto" }}
           >
             <span className="searchIcon" aria-hidden="true"><Icons.Search /></span>
             <label className="srOnly" htmlFor="store-search">Search nearby stores</label>
