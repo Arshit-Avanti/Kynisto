@@ -186,38 +186,44 @@ export function AdminWalletPanel() {
           <small>Create, limit, activate and delete discount coupons for Kynisto Points & memberships</small>
         </div>
 
-        <form onSubmit={handleAddCoupon} style={{ display: "flex", gap: "12px", alignItems: "flex-end", marginBottom: "20px", flexWrap: "wrap" }}>
-          <label style={{ flex: 1 }}>
-            <small style={{ color: "#cbd5e1", fontWeight: 600 }}>Coupon Code</small>
-            <input
-              placeholder="e.g. FESTIVE200"
-              value={newCoupon.code}
-              onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value })}
-              required
-              style={{ textTransform: "uppercase" }}
-            />
-          </label>
-          <label style={{ width: "130px" }}>
-            <small style={{ color: "#cbd5e1", fontWeight: 600 }}>Discount (₹)</small>
-            <input
-              type="number"
-              min={10}
-              value={newCoupon.discount}
-              onChange={(e) => setNewCoupon({ ...newCoupon, discount: Number(e.target.value) })}
-              required
-            />
-          </label>
-          <label style={{ width: "130px" }}>
-            <small style={{ color: "#cbd5e1", fontWeight: 600 }}>Usage Limit</small>
-            <input
-              type="number"
-              min={1}
-              value={newCoupon.limit}
-              onChange={(e) => setNewCoupon({ ...newCoupon, limit: Number(e.target.value) })}
-              required
-            />
-          </label>
-          <button className="portalButton" type="submit" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <form onSubmit={handleAddCoupon} style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "20px" }}>
+          <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "flex-end" }}>
+            <label style={{ flex: 1 }}>
+              <small style={{ color: "#cbd5e1", fontWeight: 600 }}>Coupon Code</small>
+              <input
+                placeholder="e.g. FESTIVE200"
+                value={newCoupon.code}
+                onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value })}
+                required
+                style={{ textTransform: "uppercase", width: "100%" }}
+              />
+            </label>
+            <div style={{ display: "flex", gap: "16px" }}>
+              <label style={{ width: "130px" }}>
+                <small style={{ color: "#cbd5e1", fontWeight: 600 }}>Discount (₹)</small>
+                <input
+                  type="number"
+                  min={10}
+                  value={newCoupon.discount}
+                  onChange={(e) => setNewCoupon({ ...newCoupon, discount: Number(e.target.value) })}
+                  required
+                  style={{ width: "100%" }}
+                />
+              </label>
+              <label style={{ width: "130px" }}>
+                <small style={{ color: "#cbd5e1", fontWeight: 600 }}>Usage Limit</small>
+                <input
+                  type="number"
+                  min={1}
+                  value={newCoupon.limit}
+                  onChange={(e) => setNewCoupon({ ...newCoupon, limit: Number(e.target.value) })}
+                  required
+                  style={{ width: "100%" }}
+                />
+              </label>
+            </div>
+          </div>
+          <button className="portalButton" type="submit" style={{ display: "flex", alignItems: "center", gap: "6px", width: "fit-content", marginTop: "8px" }}>
             <Plus size={16} /> Add Coupon
           </button>
         </form>
