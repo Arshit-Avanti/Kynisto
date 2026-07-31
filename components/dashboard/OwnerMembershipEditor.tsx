@@ -12,16 +12,22 @@ export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
   const [editingPlan, setEditingPlan] = useState<any>(null);
 
   useEffect(() => {
-    loadPlans();
+    void loadPlans();
   }, [storeId]);
 
   async function loadPlans() {
     setLoading(true);
+    setError("");
     try {
       const res = await apiFetch<{ plans: any[] }>(`/api/owner/memberships?storeId=${storeId}`);
-      setPlans(res.plans);
+      if (res && Array.isArray(res.plans)) {
+        setPlans(res.plans);
+      } else {
+        setPlans([]);
+      }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load plans");
+      console.warn("Failed to load plans", e);
+      setPlans([]);
     } finally {
       setLoading(false);
     }
