@@ -647,3 +647,394 @@
   .statsGrid { grid-template-columns: repeat(2, 1fr); }
   .portalCard { padding: 16px; }
 }
+
+/* ==========================================================================
+   SETTINGS, ACTIVITY LOG (AUDIT) & SECURITY SECTIONS STYLING
+   ========================================================================== */
+
+/* Labels, Actions & Log Titles */
+.adminSettingLabel,
+.adminAuditAction,
+.adminSecurityAction {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+.dark-theme .adminSettingLabel,
+.dark-theme .adminAuditAction,
+.dark-theme .adminSecurityAction,
+.portalShell.dark-theme .adminSettingLabel,
+.portalShell.dark-theme .adminAuditAction,
+.portalShell.dark-theme .adminSecurityAction {
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
+
+.light-theme .adminSettingLabel,
+.light-theme .adminAuditAction,
+.light-theme .adminSecurityAction,
+.portalShell.light-theme .adminSettingLabel,
+.portalShell.light-theme .adminAuditAction,
+.portalShell.light-theme .adminSecurityAction {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+/* Setting Keys, Dates & Secondary Labels */
+.adminSettingKey,
+.adminAuditDate,
+.adminSecurityDate {
+  display: block;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
+  margin-top: 3px;
+}
+
+.dark-theme .adminSettingKey,
+.dark-theme .adminAuditDate,
+.dark-theme .adminSecurityDate,
+.portalShell.dark-theme .adminSettingKey,
+.portalShell.dark-theme .adminAuditDate,
+.portalShell.dark-theme .adminSecurityDate {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+}
+
+.light-theme .adminSettingKey,
+.light-theme .adminAuditDate,
+.light-theme .adminSecurityDate,
+.portalShell.light-theme .adminSettingKey,
+.portalShell.light-theme .adminAuditDate,
+.portalShell.light-theme .adminAuditDate {
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
+}
+
+/* Audit & Security Event Details */
+.adminAuditDetails,
+.adminSecurityDetails {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: #334155 !important;
+  -webkit-text-fill-color: #334155 !important;
+  margin: 4px 0 0 !important;
+  line-height: 1.5 !important;
+}
+
+.dark-theme .adminAuditDetails,
+.dark-theme .adminSecurityDetails,
+.portalShell.dark-theme .adminAuditDetails,
+.portalShell.dark-theme .adminSecurityDetails {
+  color: #cbd5e1 !important;
+  -webkit-text-fill-color: #cbd5e1 !important;
+}
+
+.light-theme .adminAuditDetails,
+.light-theme .adminSecurityDetails,
+.portalShell.light-theme .adminAuditDetails,
+.portalShell.light-theme .adminSecurityDetails {
+  color: #334155 !important;
+  -webkit-text-fill-color: #334155 !important;
+}
+
+/* Unified Article Rows */
+.adminSettingRow,
+.adminAuditRow,
+.adminSecurityRow {
+  padding: 14px 18px !important;
+  border-radius: 12px !important;
+  margin-bottom: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  transition: all 0.2s ease !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+.dark-theme .adminSettingRow,
+.dark-theme .adminAuditRow,
+.dark-theme .adminSecurityRow,
+.portalShell.dark-theme .adminSettingRow,
+.portalShell.dark-theme .adminAuditRow,
+.portalShell.dark-theme .adminSecurityRow {
+  background-color: rgba(30, 41, 59, 0.7) !important;
+  border: 1px solid #334155 !important;
+  box-shadow: none !important;
+}
+
+.light-theme .adminSettingRow,
+.light-theme .adminAuditRow,
+.light-theme .adminSecurityRow,
+.portalShell.light-theme .adminSettingRow,
+.portalShell.light-theme .adminAuditRow,
+.portalShell.light-theme .adminSecurityRow {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+.adminSettingRow:hover,
+.adminAuditRow:hover,
+.adminSecurityRow:hover {
+  border-color: var(--primary, #FF5722) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Unified Form Controls & Buttons Alignment */
+.adminSettingActions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex: 0 0 auto !important;
+}
+
+.adminFormInput,
+.adminFormSelect,
+.adminSaveBtn {
+  box-sizing: border-box !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  line-height: 40px !important;
+  padding: 0 14px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  vertical-align: middle !important;
+  margin: 0 !important;
+  transition: all 0.2s ease !important;
+}
+
+.adminFormInput {
+  min-width: 220px !important;
+  flex: 1 !important;
+}
+
+.adminFormSelect {
+  min-width: 140px !important;
+  cursor: pointer !important;
+}
+
+.adminFormInput,
+.adminFormSelect {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+  outline: none !important;
+}
+
+.dark-theme .adminFormInput,
+.dark-theme .adminFormSelect,
+.portalShell.dark-theme .adminFormInput,
+.portalShell.dark-theme .adminFormSelect {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+}
+
+.light-theme .adminFormInput,
+.light-theme .adminFormSelect,
+.portalShell.light-theme .adminFormInput,
+.portalShell.light-theme .adminFormSelect {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.adminFormInput:focus,
+.adminFormSelect:focus {
+  border-color: var(--primary, #FF5722) !important;
+  box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.2) !important;
+}
+
+/* Unified Save Button */
+.adminSaveBtn {
+  border: none !important;
+  background: linear-gradient(135deg, #FF5722 0%, #E53935 100%) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 8px rgba(255, 87, 34, 0.3) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+}
+
+.adminSaveBtn:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(255, 87, 34, 0.45) !important;
+  opacity: 0.95 !important;
+}
+
+.adminSaveBtn:active {
+  transform: translateY(0) !important;
+}
+
+/* Unified Export Buttons */
+.adminExportGrid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  padding-top: 4px !important;
+}
+
+.adminExportBtn {
+  box-sizing: border-box !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 16px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.dark-theme .adminExportBtn,
+.portalShell.dark-theme .adminExportBtn {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+}
+
+.light-theme .adminExportBtn,
+.portalShell.light-theme .adminExportBtn {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.adminExportBtn:hover {
+  border-color: var(--primary, #FF5722) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Security Metrics Section */
+.adminSecurityMetrics {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 12px !important;
+}
+
+.adminSecurityMetricCard {
+  padding: 18px !important;
+  border-radius: 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  transition: all 0.2s ease !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+.dark-theme .adminSecurityMetricCard,
+.portalShell.dark-theme .adminSecurityMetricCard {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border: 1px solid #334155 !important;
+  box-shadow: none !important;
+}
+
+.light-theme .adminSecurityMetricCard,
+.portalShell.light-theme .adminSecurityMetricCard {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+.adminMetricLabel {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
+}
+
+.dark-theme .adminMetricLabel,
+.portalShell.dark-theme .adminMetricLabel {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+}
+
+.light-theme .adminMetricLabel,
+.portalShell.light-theme .adminMetricLabel {
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
+}
+
+.adminMetricValue {
+  display: block !important;
+  margin-top: 8px !important;
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+.dark-theme .adminMetricValue,
+.portalShell.dark-theme .adminMetricValue {
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
+
+.light-theme .adminMetricValue,
+.portalShell.light-theme .adminMetricValue {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+.light-theme .statusPill,
+.portalShell.light-theme .statusPill {
+  background: rgba(15, 23, 42, 0.06) !important;
+  color: #475569 !important;
+}
+
+.light-theme .statusPill.logged,
+.portalShell.light-theme .statusPill.logged {
+  background: rgba(59, 130, 246, 0.1) !important;
+  color: #2563eb !important;
+  border: 1px solid rgba(59, 130, 246, 0.25) !important;
+}
+
+@media (max-width: 768px) {
+  .adminSecurityMetrics {
+    grid-template-columns: 1fr !important;
+  }
+  .adminSettingRow {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .adminSettingActions {
+    width: 100% !important;
+    justify-content: flex-end !important;
+  }
+  .adminFormInput {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+}
+

@@ -186,7 +186,7 @@ export function AdminWalletPanel() {
           <small>Create, limit, activate and delete discount coupons for Kynisto Points & memberships</small>
         </div>
 
-        <form onSubmit={handleAddCoupon} style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "20px" }}>
+                <form onSubmit={handleAddCoupon} style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "20px" }}>
           <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "flex-end" }}>
             <label style={{ flex: 1 }}>
               <small style={{ color: "#cbd5e1", fontWeight: 600 }}>Coupon Code</small>
@@ -198,7 +198,7 @@ export function AdminWalletPanel() {
                 style={{ textTransform: "uppercase", width: "100%" }}
               />
             </label>
-            <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "16px" }}>
               <label style={{ width: "130px" }}>
                 <small style={{ color: "#cbd5e1", fontWeight: 600 }}>Discount (₹)</small>
                 <input
@@ -221,11 +221,11 @@ export function AdminWalletPanel() {
                   style={{ width: "100%" }}
                 />
               </label>
-              <button className="portalButton" type="submit" style={{ display: "flex", alignItems: "center", gap: "6px", width: "fit-content" }}>
-                <Plus size={16} /> Add Coupon
-              </button>
             </div>
           </div>
+          <button className="portalButton" type="submit" style={{ display: "flex", alignItems: "center", gap: "6px", width: "fit-content", marginTop: "8px" }}>
+            <Plus size={16} /> Add Coupon
+          </button>
         </form>
 
         <div className="workspaceList">
