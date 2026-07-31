@@ -746,18 +746,16 @@ export default function Home() {
         <div style={{ position: "absolute", top: "10%", width: "500px", height: "220px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,87,34,0.25) 0%, rgba(120,119,198,0.2) 50%, transparent 75%)", filter: "blur(70px)", pointerEvents: "none", zIndex: 0 }} />
 
         <div className="heroCopy" style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "950px", position: "relative", zIndex: 1 }}>
-          {/* Aesthetic Glowing Single Word Hero Title: Kynisto */}
+          {/* Crystal Clear Bright White & Glowing Hero Title: Kynisto */}
           <h1 style={{ 
-            fontSize: "clamp(4.2rem, 12vw, 8.5rem)", 
+            fontSize: "clamp(4rem, 12vw, 8rem)", 
             fontWeight: 900, 
-            letterSpacing: "-0.05em", 
-            lineHeight: 0.95, 
+            letterSpacing: "-0.03em", 
+            lineHeight: 1, 
             margin: "0 0 32px 0", 
-            background: "linear-gradient(135deg, #FFFFFF 15%, #FFF0EB 45%, #FF5722 80%, #FF8A00 100%)", 
-            WebkitBackgroundClip: "text", 
-            WebkitTextFillColor: "transparent", 
-            filter: "drop-shadow(0 10px 40px rgba(255, 87, 34, 0.45))",
-            fontFamily: "'Outfit', 'Plus Jakarta Sans', -apple-system, sans-serif"
+            color: "#FFFFFF",
+            textShadow: "0 0 30px rgba(255, 87, 34, 0.7), 0 0 60px rgba(255, 138, 0, 0.4), 0 4px 20px rgba(0, 0, 0, 0.9)",
+            fontFamily: "'Inter', 'Outfit', -apple-system, sans-serif"
           }}>
             Kynisto
           </h1>
