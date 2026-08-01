@@ -95,7 +95,7 @@ const ProgressRing = ({ progress, max = 1000 }: { progress: number, max?: number
           fill="transparent" 
           strokeDasharray={circumference} 
           strokeDashoffset={strokeDashoffset} 
-          className="text-indigo-600 dark:text-indigo-400 transition-all duration-1000 ease-out drop-shadow-md" 
+          className="text-indigo-600 dark:text-indigo-400 transition-all duration-0 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]" 
           strokeLinecap="round"
         />
       </svg>
@@ -189,10 +189,16 @@ export default function KynistoWalletView() {
   const { kynistoPoints, loyaltyPoints, memberships } = walletData;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-4xl space-y-6 relative">
+      {/* Soft Ambient Radial Backlight Glow */}
+      <div className="fixed inset-0 pointer-events-none -z-10 flex items-center justify-center">
+        <div className="w-[80vw] h-[80vw] bg-[radial-gradient(circle_at_center,_rgba(99,102,241,0.15)_0%,_transparent_60%)] blur-[100px]" />
+      </div>
+
       {/* Header */}
-      <div className="overflow-hidden rounded-3xl bg-white dark:bg-black p-6 border border-gray-200 dark:border-gray-800 shadow-lg">
-        <div className="flex items-center space-x-4">
+      <div className="overflow-hidden rounded-3xl bg-white dark:bg-black p-6 border border-gray-200 dark:border-gray-800 shadow-[0_0_40px_rgba(99,102,241,0.15)] relative">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_rgba(99,102,241,0.05)_0%,_transparent_70%)] blur-2xl pointer-events-none" />
+        <div className="flex items-center space-x-4 relative z-10">
           <div className="rounded-full bg-gradient-to-br from-indigo-600 to-purple-700 p-4 shadow-lg text-white">
             <Wallet className="h-8 w-8" />
           </div>
@@ -260,7 +266,7 @@ export default function KynistoWalletView() {
 
                 <div className="h-4 w-full rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden shadow-inner relative">
                   <div 
-                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-1000 ease-out"
+                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-0 shadow-[0_0_20px_rgba(99,102,241,0.6)]"
                     style={{ width: `${(kynistoPoints.progress / 1000) * 100}%` }}
                   ></div>
                 </div>
@@ -401,7 +407,7 @@ export default function KynistoWalletView() {
                         </div>
                         <div className={`h-3 w-full rounded-full overflow-hidden shadow-inner ${isActive ? 'bg-gray-800 dark:bg-gray-300' : 'bg-gray-200 dark:bg-gray-800'}`}>
                           <div 
-                            className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-1000"
+                            className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-0 shadow-[0_0_20px_rgba(99,102,241,0.6)]"
                             style={{ width: `${(store.progress / 1000) * 100}%` }}
                           ></div>
                         </div>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { VideoBackground } from "@/components/media/VideoBackground";
+import { ShaderCanvas } from "@/components/ui/ShaderCanvas";
 import { apiFetch } from "@/lib/client-api";
 
 type Category = {
@@ -135,12 +136,43 @@ const modernCleanTechStyles = `
     stroke: #FF7A00 !important;
   }
   .storeCard {
+    overflow: visible !important;
+    transform-style: preserve-3d !important;
+    transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, border-color 0.15s ease !important;
+    will-change: transform, box-shadow, border-color !important;
+    position: relative !important;
+  }
+  .storeCard::before {
+    content: '';
+    position: absolute; inset: -2px; z-index: -1;
+    border-radius: 18px;
+    background: radial-gradient(circle at 50% 0%, rgba(255, 87, 34, 0.5), rgba(59, 130, 246, 0.3), transparent 75%);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+  }
+  .storeCard:hover::before { opacity: 1; }
+  .storeCard .storeVisual {
+    border-top-left-radius: 16px !important;
+    border-top-right-radius: 16px !important;
     overflow: hidden !important;
   }
+  .storeCard > * {
+    position: relative;
+    z-index: 1;
+    border-radius: inherit;
+  }
   .storeCard:hover, .providerGrid article:hover {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 87, 34, 0.3) !important;
-    border-color: #FF5722 !important;
-    transform: translateY(-6px) !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 87, 34, 0.4) !important;
+    border-color: rgba(255, 87, 34, 0.8) !important;
+    transform: perspective(1200px) rotateX(6deg) rotateY(-4deg) translateZ(20px) translateY(-10px) !important;
+    z-index: 10;
+  }
+  .storeCard:hover .storeBody {
+    transform: translateZ(30px);
+  }
+  .storeCard .storeBody {
+    transition: transform 0.15s ease;
   }
   .storeVisual, .providerTop, .productVisual {
     position: relative !important;
@@ -297,6 +329,7 @@ const modernCleanTechStyles = `
   /* Floating 3D Cards */
   .floatingCardsContainer {
     position: relative; height: 180px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; z-index: 2; margin: 30px 0 40px 0;
+    perspective: 1500px;
   }
   .glassCard3D {
     position: relative;
@@ -309,7 +342,18 @@ const modernCleanTechStyles = `
     display: flex; flex-direction: column; justify-content: center; align-items: center;
     color: #FFFFFF;
     text-decoration: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transform-style: preserve-3d;
+    transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, border-color 0.15s ease;
+    will-change: transform, box-shadow, border-color;
+  }
+  .glassCard3D::before {
+    content: '';
+    position: absolute; inset: -2px; z-index: -1;
+    border-radius: 22px;
+    background: radial-gradient(circle at 50% 0%, rgba(255, 87, 34, 0.5), rgba(59, 130, 246, 0.3), transparent 75%);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
   }
   .mode-light .glassCard3D {
     background: rgba(255, 255, 255, 0.95);
@@ -317,10 +361,19 @@ const modernCleanTechStyles = `
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     color: #000000;
   }
-  .glassCard3D svg { margin-bottom: 12px; opacity: 0.9; }
-  .glassCard3D b { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; }
+  .glassCard3D svg { margin-bottom: 12px; opacity: 0.9; transform: translateZ(20px); transition: transform 0.15s ease; }
+  .glassCard3D b { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; transform: translateZ(30px); transition: transform 0.15s ease; }
   
-  .glassCard3D:hover { cursor: pointer; border-color: rgba(255, 87, 34, 0.8) !important; box-shadow: 0 10px 30px rgba(255, 87, 34, 0.25) !important; }
+  .glassCard3D:hover::before { opacity: 1; }
+  .glassCard3D:hover { 
+    cursor: pointer; 
+    border-color: rgba(255, 87, 34, 0.8) !important; 
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), 0 0 35px rgba(255, 87, 34, 0.4) !important;
+    transform: perspective(1000px) rotateX(10deg) rotateY(-8deg) translateZ(30px) translateY(-12px);
+    z-index: 10;
+  }
+  .glassCard3D:hover svg { transform: translateZ(40px) scale(1.1); }
+  .glassCard3D:hover b { transform: translateZ(50px) scale(1.05); }
   
   .highContrastText {
     color: var(--text-primary) !important;
@@ -983,6 +1036,7 @@ export default function Home() {
 
   return (
     <main className={`site theme-${accent} density-${density} mode-${themeMode}`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
+      <ShaderCanvas />
       <VideoBackground />
       <header className="topbar">
         <a className="brand" href="#top" aria-label="Kynisto home"><KynistoLogo showTagline /></a>

@@ -8,8 +8,8 @@
   --primary: #000000;
   --primary-hover: #333333;
   --text-primary: #000000;
-  --text-secondary: #555555;
-  --text-muted: #888888;
+  --text-secondary: #000000;
+  --text-muted: #000000;
   --border: #e5e5e5;
   --radius: 8px;
 
@@ -25,8 +25,39 @@
   --yellow: #000000;
 
   --bg-space: #ffffff;
-  --glass-bg: rgba(0, 0, 0, 0.03);
-  --glass-border: rgba(0, 0, 0, 0.1);
+.light-theme,
+.mode-light {
+  --portal-bg: #F8FAFC !important;
+  --portal-card-bg: #FFFFFF !important;
+  --portal-text: #050505 !important;
+  --portal-border: #E2E8F0 !important;
+  --portal-muted: #1E293B !important;
+  --portal-input: #FFFFFF !important;
+
+  --bg-page: #F8FAFC !important;
+  --bg-card: #FFFFFF !important;
+  --text-primary: #050505 !important;
+  --text-secondary: #0F172A !important;
+  --ink: #050505 !important;
+  --muted: #1E293B !important;
+  --cream: #F8FAFC !important;
+  --paper: #FFFFFF !important;
+  --line: #E2E8F0 !important;
+  --glass-bg: rgba(255, 255, 255, 0.85) !important;
+  --glass-surface: rgba(255, 255, 255, 0.95) !important;
+  --glass-border: rgba(0, 0, 0, 0.12) !important;
+  --accent-orange: #FF5722 !important;
+  background-color: #F8FAFC !important;
+  color: #050505 !important;
+}
+
+.mode-light h1, .mode-light h2, .mode-light h3, .mode-light h4, .mode-light p, .mode-light span, .mode-light b, .mode-light strong, .mode-light a, .mode-light button, .mode-light label, .mode-light input, .mode-light small,
+.light-theme h1, .light-theme h2, .light-theme h3, .light-theme h4, .light-theme p, .light-theme span, .light-theme b, .light-theme strong, .light-theme a, .light-theme button, .light-theme label, .light-theme input, .light-theme small {
+  color: #050505 !important;
+  -webkit-text-fill-color: #050505 !important;
+  text-shadow: none !important;
+}
+
   --glass-hover: rgba(0, 0, 0, 0.06);
   --glow-orange: #000000;
   --glow-red: #000000;
@@ -288,13 +319,13 @@ textarea:focus {
   --portal-card-bg: #000000;
   --portal-text: #ffffff;
   --portal-border: #333333;
-  --portal-muted: #888888;
+  --portal-muted: #ffffff;
   --portal-input: #000000;
   
   --bg-page: #000000;
   --bg-card: #000000;
   --text-primary: #ffffff;
-  --text-secondary: #cccccc;
+  --text-secondary: #ffffff;
   --glass-bg: rgba(255, 255, 255, 0.05);
   --glass-surface: rgba(255, 255, 255, 0.08);
   --glass-border: rgba(255, 255, 255, 0.15);
@@ -306,13 +337,13 @@ textarea:focus {
   --portal-card-bg: #ffffff;
   --portal-text: #000000;
   --portal-border: #e5e5e5;
-  --portal-muted: #888888;
+  --portal-muted: #000000;
   --portal-input: #ffffff;
 
   --bg-page: #ffffff;
   --bg-card: #ffffff;
   --text-primary: #000000;
-  --text-secondary: #555555;
+  --text-secondary: #000000;
   --glass-bg: rgba(0, 0, 0, 0.03);
   --glass-surface: rgba(0, 0, 0, 0.05);
   --glass-border: rgba(0, 0, 0, 0.1);
@@ -1871,4 +1902,47 @@ footer > p { color: var(--muted); font-size: 11px; }
 .dark-theme [class*="text-gray-900"], .mode-dark [class*="text-gray-900"],
 .dark-theme [class*="text-black"], .mode-dark [class*="text-black"] {
   color: #FFFFFF !important;
+}
+
+/* Zero-lag GPU CSS keyframes (0.15s instant transitions) */
+.zero-lag-transition {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+/* Soft ambient radial backlight glow gradients */
+.ambient-glow {
+  background: radial-gradient(circle at center, rgba(255, 87, 34, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+.dark-theme .ambient-glow, .mode-dark .ambient-glow {
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+/* Zero-lag 3D card flip elevation styles */
+.flip-card-3d {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.flip-card-3d-inner {
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.flip-card-3d:hover .flip-card-3d-inner,
+.flip-card-3d.flipped .flip-card-3d-inner {
+  transform: rotateY(180deg) translateZ(20px);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+}
+
+.flip-card-3d-front, .flip-card-3d-back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-card-3d-back {
+  transform: rotateY(180deg);
 }

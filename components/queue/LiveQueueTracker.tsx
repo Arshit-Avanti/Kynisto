@@ -109,9 +109,13 @@ export default function LiveQueueTracker() {
 
       {/* Main Content - Lifted up over header */}
       <div className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20 pb-12">
-        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 p-8 md:p-12">
+        {/* Soft Ambient Radial Backlight Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[radial-gradient(circle_at_center,_rgba(99,102,241,0.2)_0%,_transparent_60%)] blur-[80px] pointer-events-none -z-10" />
+        
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-[0_0_50px_rgba(99,102,241,0.15)] border border-gray-100 dark:border-gray-800 p-8 md:p-12 relative overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_rgba(99,102,241,0.05)_0%,_transparent_70%)] blur-3xl pointer-events-none" />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12 border-b border-gray-100 dark:border-gray-800 pb-12">
+          <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 mb-12 border-b border-gray-100 dark:border-gray-800 pb-12">
             <div>
               <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 flex items-center">
                  <User className="w-4 h-4 mr-2" /> Your Position
@@ -144,7 +148,7 @@ export default function LiveQueueTracker() {
             </div>
             <div className="h-6 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner relative">
               <div 
-                className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 transition-all duration-1000 ease-out rounded-full relative overflow-hidden"
+                className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 transition-all duration-0 rounded-full relative overflow-hidden shadow-[0_0_20px_rgba(99,102,241,0.6)]"
                 style={{ width: `${progressPercent}%` }}
               >
                 {/* Shimmer effect */}
@@ -152,7 +156,7 @@ export default function LiveQueueTracker() {
               </div>
             </div>
             <div 
-              className="absolute top-12 -ml-5 transition-all duration-1000 ease-out flex flex-col items-center"
+              className="absolute top-12 -ml-5 transition-all duration-0 flex flex-col items-center"
               style={{ left: `${progressPercent}%` }}
             >
               <div className="bg-white dark:bg-gray-900 border-4 border-indigo-600 rounded-full w-10 h-10 shadow-xl flex items-center justify-center relative z-10">
@@ -214,11 +218,11 @@ export default function LiveQueueTracker() {
       </div>
       
       {/* Shimmer CSS */}
-      <style dangerouslySetInnerHTML={{__html: `
+      <style>{`
         @keyframes shimmer {
           100% { transform: translateX(200%); }
         }
-      `}} />
+      `}</style>
     </div>
   );
 }
