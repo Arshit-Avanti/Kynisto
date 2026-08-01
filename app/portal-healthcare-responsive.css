@@ -1,0 +1,31 @@
+.healthcareSetup .portalButton { width: fit-content; margin: 18px auto 0; }
+.healthcareQueueGrid { grid-template-columns: minmax(0, 1.6fr) minmax(310px, .75fr); }
+.calledPatient { grid-template-columns: auto auto minmax(120px, 1fr) repeat(4, auto); }
+.adminQueueLayout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, .65fr); gap: 18px; }
+.adminQueueSettings { padding: 14px; border: 1px solid var(--p-line); border-radius: 13px; background: var(--p-solid); }
+.adminQueueSettings h3 { margin: 0 0 8px; font-size: 11px; }
+.queueLog { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--p-line); }
+.queueLog summary { cursor: pointer; font-size: 9px; font-weight: 800; }
+.queueLog > div { padding: 7px 0; display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--p-line); font-size: 8px; }
+.queueLog span { color: var(--p-muted); }
+.healthcareAdminTable { min-width: 1040px; }
+.queueAccessActions { min-width: 180px; }
+.dangerButton { border-color: #b84b39 !important; color: #a43c2c !important; }
+
+@media (max-width: 760px) {
+  .healthcareQueueGrid, .adminQueueLayout { grid-template-columns: 1fr; }
+  .queueStatsGrid { grid-template-columns: 1fr 1fr; }
+  .queueControlBar { overflow-x: auto; flex-wrap: nowrap; scroll-snap-type: x proximity; }
+  .queueControlBar button { flex: 0 0 auto; scroll-snap-align: start; }
+  .calledPatient { grid-template-columns: auto minmax(0, 1fr); }
+  .calledPatient > div { grid-column: 1 / -1; }
+  .calledPatient button { min-height: 36px; }
+  .queueTable article { grid-template-columns: 34px minmax(0, 1fr); }
+  .queueTable article > .tableActions { grid-column: 1 / -1; }
+  .queueTable article > .tableActions button { flex: 1; }
+  .healthcareAdminToolbar > * { width: 100%; min-width: 0 !important; }
+  .portalTableWrap { margin-inline: -19px; padding-inline: 19px; overscroll-behavior-inline: contain; }
+  .adminQueueConsole .workspaceList article { align-items: stretch; flex-direction: column; }
+  .adminQueueConsole .tableActions button { flex: 1 1 auto; }
+  .queueLog > div { align-items: flex-start; flex-direction: column; }
+}
