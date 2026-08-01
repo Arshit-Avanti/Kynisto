@@ -978,7 +978,7 @@ export default function Home() {
               The infrastructure of efficiency starts with a single integration.
             </p>
             <a 
-              href={userRole ? (userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account") : "/login"}
+              href="/dashboard"
               style={{ 
                 display: "inline-block", 
                 padding: "16px 42px", 
