@@ -969,17 +969,21 @@ export default function Home() {
             boxShadow: "0 20px 60px rgba(0, 0, 0, 0.7)" 
           }}
         >
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at center, rgba(12, 14, 18, 0.6) 0%, rgba(10, 11, 15, 0.95) 100%)", zIndex: 1 }} />
-          <div style={{ relative: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at center, rgba(12, 14, 18, 0.6) 0%, rgba(10, 11, 15, 0.95) 100%)", zIndex: 1, pointerEvents: "none" }} />
+          <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center" }}>
             <h2 style={{ fontSize: "clamp(2.8rem, 5.5vw, 4.5rem)", fontWeight: 900, color: "#FFFFFF", margin: "0 0 16px 0", letterSpacing: "-0.03em" }}>
               Join the Future.
             </h2>
             <p style={{ fontSize: "1.15rem", color: "#CBD5E1", maxWidth: "600px", margin: "0 auto 36px auto", lineHeight: 1.6, fontWeight: 500 }}>
               The infrastructure of efficiency starts with a single integration.
             </p>
-            <a 
+            <Link 
               href="/dashboard"
               style={{ 
+                position: "relative",
+                zIndex: 20,
+                pointerEvents: "auto",
+                cursor: "pointer",
                 display: "inline-block", 
                 padding: "16px 42px", 
                 borderRadius: "9999px", 
@@ -995,7 +999,7 @@ export default function Home() {
               }}
             >
               GET STARTED
-            </a>
+            </Link>
           </div>
         </div>
       </section>
