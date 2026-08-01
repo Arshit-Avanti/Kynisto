@@ -2,6 +2,7 @@
 @import "tailwindcss";
 
 :root {
+  --accent-orange: #FF5722;
   --bg-page: #f8fafc;
   --bg-card: #ffffff;
   --primary: #FF5722;
@@ -39,6 +40,29 @@
 @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 15px rgba(255, 87, 34, 0.4); } 50% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.7); } }
 @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 @keyframes floatCard { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+@keyframes springUp {
+  0% { transform: translateY(20px); opacity: 0; }
+  60% { transform: translateY(-4px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes ambientGlow {
+  0%, 100% { filter: drop-shadow(0 0 10px var(--accent-orange)); }
+  50% { filter: drop-shadow(0 0 25px var(--accent-orange)); }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--glass-bg) 25%, var(--glass-surface) 50%, var(--glass-bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: var(--radius);
+}
 
 
 * {
@@ -265,6 +289,15 @@ textarea:focus {
   --portal-border: #334155;
   --portal-muted: #94a3b8;
   --portal-input: #0f172a;
+  
+  --bg-page: #0f172a;
+  --bg-card: #1e293b;
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-surface: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --accent-orange: #FF5722;
 }
 
 .light-theme {
@@ -274,6 +307,15 @@ textarea:focus {
   --portal-border: #e2e8f0;
   --portal-muted: #64748b;
   --portal-input: #f1f5f9;
+
+  --bg-page: #f8fafc;
+  --bg-card: #ffffff;
+  --text-primary: #000000;
+  --text-secondary: #475569;
+  --glass-bg: rgba(0, 0, 0, 0.03);
+  --glass-surface: rgba(0, 0, 0, 0.05);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --accent-orange: #FF5722;
 }
 
 .mode-dark .mapScene,
@@ -1755,4 +1797,77 @@ footer > p { color: var(--muted); font-size: 11px; }
   color: #ffffff;
   text-align: center;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+
+/* Skeletons */
+.skeleton {
+  background: linear-gradient(90deg, var(--glass-bg) 25%, var(--glass-hover) 50%, var(--glass-bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius);
+}
+
+/* New Keyframes */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes tiltLift {
+  0% { transform: perspective(1000px) rotateX(0) rotateY(0) scale(1); }
+  100% { transform: perspective(1000px) rotateX(5deg) rotateY(-5deg) scale(1.02); }
+}
+
+/* ==========================================================================
+   HIGH CONTRAST TEXT VISIBILITY ENFORCEMENT
+   ========================================================================== */
+
+/* DARK MODE: Enforce 100% White Text */
+.dark-theme, .mode-dark, [data-theme="cyberpunk"], [data-theme="royal"], [data-theme="obsidian"], html.dark {
+  --text-primary: #FFFFFF !important;
+  --text-secondary: #FFFFFF !important;
+  --ink: #FFFFFF !important;
+  --portal-text: #FFFFFF !important;
+}
+
+/* LIGHT MODE: Enforce 100% Dark Slate Text */
+.light-theme, .mode-light, html:not(.dark) {
+  --text-primary: #0F172A !important;
+  --text-secondary: #0F172A !important;
+  --ink: #0F172A !important;
+  --portal-text: #0F172A !important;
+}
+
+/* Force Dark Mode High Contrast for Headings, Body, Cards, Badges, Buttons */
+.dark-theme h1, .dark-theme h2, .dark-theme h3, .dark-theme h4, .dark-theme h5, .dark-theme h6,
+.dark-theme p, .dark-theme body, .dark-theme span, .dark-theme div,
+.dark-theme .card, .dark-theme .dashCard, .dark-theme .portalCard, .dark-theme .authCard,
+.dark-theme .badge, .dark-theme .statusBadge, .dark-theme .roleBadge,
+.dark-theme button:not([class*="bg-"]):not([style*="background"]):not(.searchSubmit):not(.customizeButton),
+.mode-dark h1, .mode-dark h2, .mode-dark h3, .mode-dark h4, .mode-dark h5, .mode-dark h6,
+.mode-dark p, .mode-dark body, .mode-dark span, .mode-dark div,
+.mode-dark .card, .mode-dark .dashCard, .mode-dark .portalCard, .mode-dark .authCard,
+.mode-dark .badge, .mode-dark .statusBadge, .mode-dark .roleBadge,
+.mode-dark button:not([class*="bg-"]):not([style*="background"]):not(.searchSubmit):not(.customizeButton) {
+  color: #FFFFFF !important;
+}
+
+/* Force Light Mode High Contrast for Headings, Body, Cards, Badges, Buttons */
+.light-theme h1, .light-theme h2, .light-theme h3, .light-theme h4, .light-theme h5, .light-theme h6,
+.light-theme p, .light-theme body, .light-theme span, .light-theme div,
+.light-theme .card, .light-theme .dashCard, .light-theme .portalCard, .light-theme .authCard,
+.light-theme .badge, .light-theme .statusBadge, .light-theme .roleBadge,
+.light-theme button:not([class*="bg-"]):not([style*="background"]):not(.searchSubmit):not(.customizeButton) {
+  color: #0F172A !important;
+}
+
+/* Eliminate Dark Text on Dark Background Rules */
+.dark-theme [style*="color: #0f172a"], .mode-dark [style*="color: #0f172a"],
+.dark-theme [style*="color:#0f172a"], .mode-dark [style*="color:#0f172a"],
+.dark-theme [style*="color: #000"], .mode-dark [style*="color: #000"],
+.dark-theme [class*="text-slate-900"], .mode-dark [class*="text-slate-900"],
+.dark-theme [class*="text-gray-900"], .mode-dark [class*="text-gray-900"],
+.dark-theme [class*="text-black"], .mode-dark [class*="text-black"] {
+  color: #FFFFFF !important;
 }

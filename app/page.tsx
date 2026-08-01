@@ -262,6 +262,163 @@ const modernCleanTechStyles = `
   .searchSubmit:hover {
     box-shadow: 0 4px 15px rgba(255, 87, 34, 0.5) !important;
   }
+  
+  /* Ambient Mesh */
+  .ambientMesh {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+      radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+      radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+    filter: blur(80px) saturate(150%); opacity: 0.6;
+  }
+  .mode-light .ambientMesh {
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(253,16%,97%,1) 0, transparent 50%), 
+      radial-gradient(at 50% 0%, hsla(225,39%,80%,1) 0, transparent 50%), 
+      radial-gradient(at 100% 0%, hsla(339,49%,80%,1) 0, transparent 50%);
+  }
+  
+  /* High Contrast Text Custom Properties */
+  .mode-dark {
+    --text-primary: #FFFFFF;
+    --text-secondary: #E2E8F0;
+  }
+  .mode-light {
+    --text-primary: #000000;
+    --text-secondary: #1A202C;
+  }
+  .mode-light.site {
+    background-color: #f8fafc !important;
+    background-image: none !important;
+    color: #000000 !important;
+  }
+  
+  /* Floating 3D Cards */
+  .floatingCardsContainer {
+    position: relative; height: 260px; width: 100%; display: flex; justify-content: center; align-items: center; perspective: 1200px; z-index: 2; margin: 20px 0 60px 0;
+  }
+  .glassCard3D {
+    position: absolute;
+    width: 200px; height: 130px;
+    background: linear-gradient(135deg, rgba(20,20,25,0.7) 0%, rgba(10,10,15,0.9) 100%);
+    backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 87, 34, 0.3);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 87, 34, 0.4);
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    color: #FFFFFF;
+    text-decoration: none;
+    will-change: transform, box-shadow;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  }
+  .mode-light .glassCard3D {
+    background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(240,240,245,0.9) 100%);
+    border: 1px solid rgba(255, 87, 34, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 87, 34, 0.5);
+    color: #000000;
+  }
+  .glassCard3D svg { margin-bottom: 12px; opacity: 0.9; }
+  .glassCard3D b { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; }
+  
+  .glassCard3D:nth-child(1) { transform: translateX(-160px) rotate(-6deg); z-index: 1; }
+  .glassCard3D:nth-child(2) { transform: translateX(0); z-index: 3; width: 230px; height: 150px; }
+  .glassCard3D:nth-child(3) { transform: translateX(160px) rotate(6deg); z-index: 1; }
+  
+  .glassCard3D:hover { transform: translateY(-8px) scale(1.05); z-index: 10; cursor: pointer; box-shadow: 0 20px 40px rgba(255, 87, 34, 0.2), 0 0 20px rgba(255, 87, 34, 0.3); border-color: rgba(255, 87, 34, 0.8); }
+  .mode-light .glassCard3D:hover { box-shadow: 0 20px 40px rgba(255, 87, 34, 0.2), 0 0 20px rgba(255, 87, 34, 0.3); border-color: rgba(255, 87, 34, 0.8); }
+  
+  .highContrastText {
+    color: var(--text-primary) !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    text-shadow: none !important;
+  }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .marqueeContainer {
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    width: 100%;
+    padding: 60px 0;
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+  .marqueeTrack {
+    display: inline-block;
+    animation: marquee 40s linear infinite;
+  }
+  .marqueeTrack span {
+    display: inline-block;
+    padding: 0 40px;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    opacity: 0.7;
+    letter-spacing: -0.02em;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  }
+  
+  .featureGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 80px auto;
+    padding: 0 20px;
+  }
+  .featureCard {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 40px 32px;
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .mode-light .featureCard {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  .featureCard::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.1), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .featureCard:hover::before {
+    opacity: 1;
+  }
+  .featureCard:hover {
+    transform: translateY(-8px);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 87, 34, 0.5);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2), 0 0 30px rgba(255,87,34,0.15);
+  }
+  .mode-light .featureCard:hover {
+    background: rgba(0, 0, 0, 0.04);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.05), 0 0 30px rgba(255,87,34,0.1);
+  }
+  .featureCard h3 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 20px 0 12px 0;
+    color: var(--text-primary) !important;
+    letter-spacing: -0.02em;
+  }
+  .featureCard p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-size: 1.1rem;
+    margin: 0;
+  }
 `;
 
 const categories: Category[] = [
@@ -750,26 +907,42 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="hero" id="top" style={{ textAlign: "center", padding: "90px 20px 40px 20px", display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
+      <section className="hero" id="top" style={{ textAlign: "center", padding: "120px 20px 40px 20px", display: "flex", flexDirection: "column", alignItems: "center", position: "relative", minHeight: "90vh", justifyContent: "center" }}>
+        <div className="ambientMesh" />
         {/* Apple Ambient Aura Backlight */}
-        <div style={{ position: "absolute", top: "10%", width: "500px", height: "220px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,87,34,0.25) 0%, rgba(120,119,198,0.2) 50%, transparent 75%)", filter: "blur(70px)", pointerEvents: "none", zIndex: 0 }} />
+        <div style={{ position: "absolute", top: "15%", width: "600px", height: "300px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,87,34,0.15) 0%, rgba(120,119,198,0.1) 50%, transparent 75%)", filter: "blur(90px)", pointerEvents: "none", zIndex: 1 }} />
 
-        <div className="heroCopy" style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "950px", position: "relative", zIndex: 1 }}>
+        <div className="heroCopy" style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "950px", position: "relative", zIndex: 2, width: "100%" }}>
           {/* Crystal Clear Pure White Hero Title: Kynisto */}
-          <h1 style={{ 
-            fontSize: "clamp(4.2rem, 13vw, 8.5rem)", 
+          <h1 className="highContrastText" style={{ 
+            fontSize: "clamp(5rem, 15vw, 10rem)", 
             fontWeight: 850, 
             letterSpacing: "-0.06em", 
             lineHeight: 1, 
-            margin: "0 0 32px 0", 
-            color: "#FFFFFF",
-            WebkitTextFillColor: "#FFFFFF",
-            textShadow: "none",
-            filter: "none",
+            margin: "0 0 20px 0", 
             fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif"
           }}>
             Kynisto
           </h1>
+          
+          <p className="highContrastText" style={{ fontSize: "clamp(1.2rem, 3vw, 1.8rem)", fontWeight: 500, margin: "0 0 40px 0", opacity: 0.9, letterSpacing: "-0.01em" }}>
+            The infrastructure of efficiency.
+          </p>
+
+          <div className="floatingCardsContainer">
+            <Link href="/wallet" className="glassCard3D">
+              <Icons.Star />
+              <b>Loyalty Card</b>
+            </Link>
+            <Link href="/healthcare" className="glassCard3D">
+              <Icons.Clock />
+              <b style={{ fontSize: "1.3rem" }}>Queue Ticket</b>
+            </Link>
+            <Link href="/dashboard" className="glassCard3D">
+              <Icons.Search />
+              <b>Dashboard</b>
+            </Link>
+          </div>
 
           <form
             className="searchBox"
@@ -778,32 +951,54 @@ export default function Home() {
               event.preventDefault();
               document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
             }}
-            style={{ width: "100%", maxWidth: "620px", margin: "0 auto 24px auto" }}
+            style={{ width: "100%", maxWidth: "660px", margin: "20px auto 32px auto", padding: "8px", borderRadius: "24px", transform: "translateZ(20px)" }}
           >
-            <span className="searchIcon" aria-hidden="true"><Icons.Search /></span>
+            <span className="searchIcon" aria-hidden="true" style={{ paddingLeft: "12px" }}><Icons.Search /></span>
             <label className="srOnly" htmlFor="store-search">Search nearby stores</label>
             <input
               id="store-search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search salon, groceries, clinic..."
+              style={{ fontSize: "1.1rem", padding: "16px 12px" }}
+              className="highContrastText"
             />
             {query && (
-              <button className="clearSearch" type="button" aria-label="Clear search" onClick={() => setQuery("")}>×</button>
+              <button className="clearSearch highContrastText" type="button" aria-label="Clear search" onClick={() => setQuery("")}>×</button>
             )}
-            <button className="searchSubmit" type="submit">Search nearby</button>
+            <button className="searchSubmit" type="submit" style={{ padding: "12px 28px", fontSize: "1.05rem", borderRadius: "16px" }}>Search</button>
           </form>
 
-          <div className="quickProof" aria-label="Kynisto highlights">
-            <span><b>100+</b> Places</span>
-            <span><b>20</b> Categories</span>
-            <span><b>Live</b> Status</span>
+          <div className="quickProof" aria-label="Kynisto highlights" style={{ marginTop: "16px" }}>
+            <span className="highContrastText"><b>100+</b> Places</span>
+            <span className="highContrastText"><b>20</b> Categories</span>
+            <span className="highContrastText"><b>Live</b> Status</span>
           </div>
 
-          {/* Vertical Guide Line */}
-          <div style={{ width: "1px", height: "48px", background: "linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%)", margin: "32px auto 0 auto" }} />
+          {/* Vertical Guide Line indicating scroll */}
+          <div style={{ width: "2px", height: "80px", background: "linear-gradient(180deg, var(--text-primary) 0%, transparent 100%)", margin: "60px auto 0 auto", opacity: 0.3 }} />
         </div>
       </section>
+
+      {/* Feature Grid */}
+      <section className="featureGrid">
+        <div className="featureCard">
+          <div style={{ color: "#FF5722", marginBottom: "16px" }}><Icons.Search /></div>
+          <h3>Universal Discovery</h3>
+          <p>Find what you need, exactly when you need it. Intelligent search that understands intent and proximity.</p>
+        </div>
+        <div className="featureCard">
+          <div style={{ color: "#3B82F6", marginBottom: "16px" }}><Icons.Clock /></div>
+          <h3>Real-time Queues</h3>
+          <p>Skip the waiting room. Monitor your position in line from anywhere and arrive exactly when it's your turn.</p>
+        </div>
+        <div className="featureCard">
+          <div style={{ color: "#10B981", marginBottom: "16px" }}><Icons.Star /></div>
+          <h3>Unified Loyalty</h3>
+          <p>One wallet for every store. Earn, track, and redeem rewards seamlessly without juggling multiple apps.</p>
+        </div>
+      </section>
+
 
       <section className="categorySection" aria-labelledby="category-heading">
         <div className="sectionHeading compactHeading">
@@ -948,6 +1143,8 @@ export default function Home() {
           </div>
         )}
       </section>
+
+
 
       {/* Cinematic Join the Future Banner (Image 1 Style) */}
       <section 
