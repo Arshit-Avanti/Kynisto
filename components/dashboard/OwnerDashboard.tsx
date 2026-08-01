@@ -113,10 +113,10 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
         <div>
           <span className="portalEyebrow">Store owner workspace</span>
           <h1 style={{ fontSize: "2rem", fontWeight: 800 }}>{title}</h1>
-          <p style={{ color: "#64748b" }}>Only businesses assigned to this account are available here.</p>
+          <p style={{ color: "var(--muted, #64748b)" }}>Only businesses assigned to this account are available here.</p>
         </div>
         {stores.length > 1 && (
-          <select value={String(selected?.id ?? "")} onChange={(e) => setSelectedId(e.target.value)} style={{ padding: "0.75rem 1rem", borderRadius: "10px", border: "1px solid #cbd5e1", background: "#f8fafc", fontWeight: 600 }}>
+          <select value={String(selected?.id ?? "")} onChange={(e) => setSelectedId(e.target.value)} style={{ padding: "0.75rem 1rem", borderRadius: "10px", border: "1px solid #cbd5e1", background: "var(--cream, #f8fafc)", fontWeight: 600 }}>
             {stores.map((store) => (
               <option key={String(store.id)} value={String(store.id)}>{store.name}</option>
             ))}
@@ -191,23 +191,23 @@ function OwnerOverview({ store, analytics, reviews }: { store: Store | undefined
       <div className="statsGrid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
         <article className="statCard" style={{ background: "rgba(30, 58, 138, 0.08)", backdropFilter: "blur(12px)", border: "1px solid rgba(59, 130, 246, 0.3)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden", transform: "translateZ(0)" }}>
           <Eye size={28} color="#3b82f6" style={{ marginBottom: "0.75rem" }} />
-          <small style={{ color: "var(--p-muted, #475569)", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Profile views</small>
-          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "var(--p-ink, #0f172a)", lineHeight: 1, marginTop: "0.5rem" }}>{Number(store?.viewCount ?? 0).toLocaleString()}</strong>
+          <small style={{ color: "var(--muted, #475569)", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Profile views</small>
+          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "var(--ink, #0f172a)", lineHeight: 1, marginTop: "0.5rem" }}>{Number(store?.viewCount ?? 0).toLocaleString()}</strong>
         </article>
         <article className="statCard" style={{ background: "rgba(113, 63, 18, 0.08)", backdropFilter: "blur(12px)", border: "1px solid rgba(234, 179, 8, 0.3)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden", transform: "translateZ(0)" }}>
           <Star size={28} color="#eab308" style={{ marginBottom: "0.75rem" }} />
-          <small style={{ color: "var(--p-muted, #475569)", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Average rating</small>
-          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "var(--p-ink, #0f172a)", lineHeight: 1, marginTop: "0.5rem" }}>{Number(store?.rating ?? 0).toFixed(1)}</strong>
+          <small style={{ color: "var(--muted, #475569)", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Average rating</small>
+          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "var(--ink, #0f172a)", lineHeight: 1, marginTop: "0.5rem" }}>{Number(store?.rating ?? 0).toFixed(1)}</strong>
         </article>
         <article className="statCard" style={{ background: "rgba(20, 83, 45, 0.08)", backdropFilter: "blur(12px)", border: "1px solid rgba(34, 197, 94, 0.3)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden", transform: "translateZ(0)" }}>
           <Navigation size={28} color="#22c55e" style={{ marginBottom: "0.75rem" }} />
-          <small style={{ color: "var(--p-muted, #475569)", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Direction taps</small>
-          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "var(--p-ink, #0f172a)", lineHeight: 1, marginTop: "0.5rem" }}>{totals.direction ?? 0}</strong>
+          <small style={{ color: "var(--muted, #475569)", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Direction taps</small>
+          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "var(--ink, #0f172a)", lineHeight: 1, marginTop: "0.5rem" }}>{totals.direction ?? 0}</strong>
         </article>
         <article className="statCard" style={{ background: "rgba(76, 29, 149, 0.08)", backdropFilter: "blur(12px)", border: "1px solid rgba(139, 92, 246, 0.3)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden", transform: "translateZ(0)" }}>
           <Phone size={28} color="#8b5cf6" style={{ marginBottom: "0.75rem" }} />
-          <small style={{ color: "var(--p-muted, #475569)", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Contact actions</small>
-          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "var(--p-ink, #0f172a)", lineHeight: 1, marginTop: "0.5rem" }}>{(totals.phone ?? 0) + (totals.whatsapp ?? 0)}</strong>
+          <small style={{ color: "var(--muted, #475569)", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Contact actions</small>
+          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "var(--ink, #0f172a)", lineHeight: 1, marginTop: "0.5rem" }}>{(totals.phone ?? 0) + (totals.whatsapp ?? 0)}</strong>
         </article>
       </div>
 
@@ -227,23 +227,23 @@ function OwnerOverview({ store, analytics, reviews }: { store: Store | undefined
       )}
 
       <div className="portalGrid" style={{ marginTop: "1.5rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-        <section className="portalCard" style={{ padding: "2rem", borderRadius: "20px", background: "#ffffff", border: "1px solid #e2e8f0", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.05)" }}>
-          <div className="portalCardHeader" style={{ borderBottom: "1px solid #f1f5f9", paddingBottom: "1rem", marginBottom: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <section className="portalCard" style={{ padding: "2rem", borderRadius: "20px", background: "var(--paper, #ffffff)", border: "1px solid var(--line, #e2e8f0)", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.05)" }}>
+          <div className="portalCardHeader" style={{ borderBottom: "1px solid var(--line, #f1f5f9)", paddingBottom: "1rem", marginBottom: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h2 style={{ fontSize: "1.35rem", fontWeight: 800 }}>{store?.name}</h2>
             <Status value={store?.status} />
           </div>
           <div className="ownerProfileSummary" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <div style={{ display: "flex", gap: "1rem", padding: "1rem", background: "#f8fafc", borderRadius: "12px", border: "1px solid #f1f5f9" }}>
-              <span style={{ color: "#64748b", fontSize: "0.85rem", width: "80px", fontWeight: 600 }}>Address</span>
-              <b style={{ color: "#0f172a", fontSize: "0.95rem" }}>{store?.address}</b>
+            <div style={{ display: "flex", gap: "1rem", padding: "1rem", background: "var(--cream, #f8fafc)", borderRadius: "12px", border: "1px solid var(--line, #f1f5f9)" }}>
+              <span style={{ color: "var(--muted, #64748b)", fontSize: "0.85rem", width: "80px", fontWeight: 600 }}>Address</span>
+              <b style={{ color: "var(--ink, #0f172a)", fontSize: "0.95rem" }}>{store?.address}</b>
             </div>
-            <div style={{ display: "flex", gap: "1rem", padding: "1rem", background: "#f8fafc", borderRadius: "12px", border: "1px solid #f1f5f9" }}>
-              <span style={{ color: "#64748b", fontSize: "0.85rem", width: "80px", fontWeight: 600 }}>Category</span>
-              <b style={{ color: "#0f172a", fontSize: "0.95rem" }}>{store?.category}</b>
+            <div style={{ display: "flex", gap: "1rem", padding: "1rem", background: "var(--cream, #f8fafc)", borderRadius: "12px", border: "1px solid var(--line, #f1f5f9)" }}>
+              <span style={{ color: "var(--muted, #64748b)", fontSize: "0.85rem", width: "80px", fontWeight: 600 }}>Category</span>
+              <b style={{ color: "var(--ink, #0f172a)", fontSize: "0.95rem" }}>{store?.category}</b>
             </div>
-            <div style={{ display: "flex", gap: "1rem", padding: "1rem", background: "#f8fafc", borderRadius: "12px", border: "1px solid #f1f5f9" }}>
-              <span style={{ color: "#64748b", fontSize: "0.85rem", width: "80px", fontWeight: 600 }}>Contact</span>
-              <b style={{ color: "#0f172a", fontSize: "0.95rem" }}>{store?.phone ?? "Not added"}</b>
+            <div style={{ display: "flex", gap: "1rem", padding: "1rem", background: "var(--cream, #f8fafc)", borderRadius: "12px", border: "1px solid var(--line, #f1f5f9)" }}>
+              <span style={{ color: "var(--muted, #64748b)", fontSize: "0.85rem", width: "80px", fontWeight: 600 }}>Contact</span>
+              <b style={{ color: "var(--ink, #0f172a)", fontSize: "0.95rem" }}>{store?.phone ?? "Not added"}</b>
             </div>
             {store?.rejectionReason && (
               <div className="authError" style={{ padding: "1rem", background: "#fef2f2", borderRadius: "12px", border: "1px solid #fecaca", marginTop: "0.5rem" }}>
@@ -254,24 +254,24 @@ function OwnerOverview({ store, analytics, reviews }: { store: Store | undefined
           </div>
         </section>
 
-        <section className="portalCard" style={{ padding: "2rem", borderRadius: "20px", background: "#ffffff", border: "1px solid #e2e8f0", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.05)" }}>
-          <div className="portalCardHeader" style={{ borderBottom: "1px solid #f1f5f9", paddingBottom: "1rem", marginBottom: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <section className="portalCard" style={{ padding: "2rem", borderRadius: "20px", background: "var(--paper, #ffffff)", border: "1px solid var(--line, #e2e8f0)", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.05)" }}>
+          <div className="portalCardHeader" style={{ borderBottom: "1px solid var(--line, #f1f5f9)", paddingBottom: "1rem", marginBottom: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h2 style={{ fontSize: "1.35rem", fontWeight: 800 }}>Recent reviews</h2>
-            <small style={{ color: "#64748b", fontWeight: 600 }}>{reviews.length} shown</small>
+            <small style={{ color: "var(--muted, #64748b)", fontWeight: 600 }}>{reviews.length} shown</small>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {reviews.slice(0, 5).map((review) => (
-              <div className="reviewLine" key={String(review.id)} style={{ padding: "1.25rem", border: "1px solid #f1f5f9", borderRadius: "14px", background: "#f8fafc" }}>
+              <div className="reviewLine" key={String(review.id)} style={{ padding: "1.25rem", border: "1px solid var(--line, #f1f5f9)", borderRadius: "14px", background: "var(--cream, #f8fafc)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", color: "#eab308", fontWeight: 800, marginBottom: "0.5rem", fontSize: "0.9rem" }}>
                   <Star size={16} fill="currentColor" /> {review.rating}
                 </div>
                 <p style={{ margin: 0 }}>
-                  <b style={{ display: "block", color: "#0f172a", fontSize: "1rem", marginBottom: "0.2rem" }}>{review.reviewerName}</b>
-                  <small style={{ color: "#475569", fontSize: "0.9rem" }}>{review.comment}</small>
+                  <b style={{ display: "block", color: "var(--ink, #0f172a)", fontSize: "1rem", marginBottom: "0.2rem" }}>{review.reviewerName}</b>
+                  <small style={{ color: "var(--muted, #475569)", fontSize: "0.9rem" }}>{review.comment}</small>
                 </p>
               </div>
             ))}
-            {reviews.length === 0 && <p style={{ color: "#64748b", textAlign: "center", padding: "2rem 0" }}>No reviews yet.</p>}
+            {reviews.length === 0 && <p style={{ color: "var(--muted, #64748b)", textAlign: "center", padding: "2rem 0" }}>No reviews yet.</p>}
           </div>
         </section>
       </div>
@@ -330,4 +330,4 @@ function CatalogPanel({resource,storeId,items,mutate,onChanged,onError}:{resourc
 
 function ReviewsPanel({items,storeId,mutate,pagination,onPageChange}:{items:Item[];storeId:string;mutate:(p:string,m:string,j:unknown,s:string)=>Promise<void>;pagination:Pagination;onPageChange:(page:number)=>void}){return <section className="portalCard"><div className="portalCardHeader"><h2>Customer reviews</h2><small>{pagination.total} total · Reply professionally to public feedback</small></div>{items.length?items.map((item)=><article className="ownerReview" key={String(item.id)}><div><Status value={item.status}/><b><Star size={14} style={{display:"inline",marginRight:"4px"}} /> {item.rating} · {item.reviewerName}</b><p>{item.comment}</p>{item.ownerReply&&<small>Your reply: {item.ownerReply}</small>}</div><form onSubmit={(event)=>{event.preventDefault();const reply=new FormData(event.currentTarget).get("reply");void mutate("/api/owner/reviews","PATCH",{storeId,reviewId:item.id,reply},"Reply published")}}><input name="reply" defaultValue={String(item.ownerReply??"")} placeholder="Write a public reply" required/><button className="portalButton secondary" type="submit">Reply</button></form></article>):<p className="profileEmpty">No customer reviews for this store yet.</p>}{pagination.totalPages>1&&<div className="tableActions reviewPagination"><button type="button" disabled={pagination.page<=1} onClick={()=>onPageChange(pagination.page-1)}>Previous</button><span>Page {pagination.page} of {pagination.totalPages}</span><button type="button" disabled={pagination.page>=pagination.totalPages} onClick={()=>onPageChange(pagination.page+1)}>Next</button></div>}</section>}
 
-function OwnerAnalytics({items}:{items:Item[]}){const eventTypes=[...new Set(items.map((item)=>String(item.eventType)))];return <section className="portalCard"><div className="portalCardHeader"><h2>30-day engagement</h2><small>Views and customer actions</small></div><div className="statsGrid">{eventTypes.map((type)=><article className="statCard" key={type}><BarChart2 size={24} color="#64748b" style={{marginBottom:"0.5rem"}} /><small>{type}</small><strong>{items.filter((item)=>item.eventType===type).reduce((sum,item)=>sum+Number(item.total),0)}</strong></article>)}</div><div className="analyticsLegend">{items.slice(-20).map((item,index)=><span key={`${item.day}-${item.eventType}-${index}`}><b>{item.day}</b>{item.eventType}: {item.total}</span>)}</div></section>}
+function OwnerAnalytics({items}:{items:Item[]}){const eventTypes=[...new Set(items.map((item)=>String(item.eventType)))];return <section className="portalCard"><div className="portalCardHeader"><h2>30-day engagement</h2><small>Views and customer actions</small></div><div className="statsGrid">{eventTypes.map((type)=><article className="statCard" key={type}><BarChart2 size={24} color="var(--muted, #64748b)" style={{marginBottom:"0.5rem"}} /><small>{type}</small><strong>{items.filter((item)=>item.eventType===type).reduce((sum,item)=>sum+Number(item.total),0)}</strong></article>)}</div><div className="analyticsLegend">{items.slice(-20).map((item,index)=><span key={`${item.day}-${item.eventType}-${index}`}><b>{item.day}</b>{item.eventType}: {item.total}</span>)}</div></section>}
