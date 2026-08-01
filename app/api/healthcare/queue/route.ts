@@ -70,8 +70,8 @@ export async function POST(request: Request) {
         if (active) throw new HttpError(409, "You are already in an active healthcare queue. Please leave or complete your current queue before joining another clinic.", "ACTIVE_QUEUE_EXISTS");
         throw new HttpError(409, "The queue changed or reached its daily capacity. Please try again.", "QUEUE_CHANGED");
       }
-      const { position, tokenNumber, waitingCount } = results[0].results[0] as { position: number, tokenNumber: number, waitingCount: number };
-      return noStoreJson({ position, tokenNumber, waitingCount, state: await patientQueueState(storeId, session.user.id) }, { status: 201 });
+      const { id: entryId, position, tokenNumber, waitingCount } = results[0].results[0] as { id: string, position: number, tokenNumber: number, waitingCount: number };
+      return noStoreJson({ entry: { id: entryId }, position, tokenNumber, waitingCount, state: await patientQueueState(storeId, session.user.id) }, { status: 201 });
     }
 
     if (action === "leave" || action === "cancel") {

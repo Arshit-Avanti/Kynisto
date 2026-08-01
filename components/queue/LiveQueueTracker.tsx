@@ -157,6 +157,7 @@ export default function LiveQueueTracker() {
   const [myTokenNumber, setMyTokenNumber] = useState<number>(0);
   const [isQueueOpen, setIsQueueOpen] = useState<boolean>(true);
   const [entryStatus, setEntryStatus] = useState<'waiting' | 'called' | 'completed' | 'cancelled' | 'left' | 'expired'>('waiting');
+  const [currentEntryId, setCurrentEntryId] = useState<string | null>(null);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
@@ -192,13 +193,23 @@ export default function LiveQueueTracker() {
         setCurrentToken(curr);
         
         if (state.entry) {
-          setEntryStatus(state.entry.status);
-          const pos = state.entry.position || 1;
-          setUserPosition(pos);
-          setMyTokenNumber(state.entry.tokenNumber);
-          setTotalInQueue(Math.max(1, state.waitingCount || pos));
-          const ownerConsultationMins = state.consultationMinutes || 15;
-          setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
+          // Only update to completed if entry ID matches current entry or if user was called first
+          if (state.entry.status === 'completed') {
+            if (currentEntryId && state.entry.id === currentEntryId) {
+              setEntryStatus('completed');
+            } else if (entryStatus === 'called') {
+              setEntryStatus('completed');
+            }
+          } else {
+            setEntryStatus(state.entry.status);
+            setCurrentEntryId(state.entry.id);
+            const pos = state.entry.position || 1;
+            setUserPosition(pos);
+            setMyTokenNumber(state.entry.tokenNumber);
+            setTotalInQueue(Math.max(1, state.waitingCount || pos));
+            const ownerConsultationMins = state.consultationMinutes || 15;
+            setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
+          }
         } else if (selectedQueue) {
           const ownerConsultationMins = state.consultationMinutes || selectedQueue.consultationMinutes || 15;
           setEstimatedWait((userPosition > 1 ? userPosition - 1 : 0) * ownerConsultationMins);
@@ -207,7 +218,7 @@ export default function LiveQueueTracker() {
     } catch {
       // Ignore network failures, retain current snapshot
     }
-  }, [selectedQueue, userPosition]);
+  }, [selectedQueue, userPosition, currentEntryId, entryStatus]);
 
   // Poll server every 3 seconds when viewing ticket to sync with Owner's "Call Next", "Pause", or "End Queue" actions
   useEffect(() => {
@@ -243,7 +254,8 @@ export default function LiveQueueTracker() {
       if (response && response.state && response.state.entry) {
         const { entry, consultationMinutes, queueStatus } = response.state;
         setIsQueueOpen(queueStatus !== 'closed');
-        setEntryStatus(entry.status);
+        setCurrentEntryId(entry.id);
+        setEntryStatus('waiting');
         const pos = entry.position || 1;
         setUserPosition(pos);
         setMyTokenNumber(entry.tokenNumber);
@@ -329,7 +341,7 @@ export default function LiveQueueTracker() {
     return matchesSearch && matchesFilter;
   });
 
-  const isCompleted = entryStatus === 'completed' || (currentToken > myTokenNumber && myTokenNumber > 0);
+  const isCompleted = entryStatus === 'completed';
 
   // 1. CANCELLED STATE VIEW
   if (isCancelled && selectedQueue) {
@@ -372,10 +384,11 @@ export default function LiveQueueTracker() {
         <div className="mt-10 flex flex-col sm:flex-row gap-4">
           <button
             onClick={() => {
-              setMyTokenNumber(0);
-              setSelectedQueue(null);
-              setUserPosition(0);
               setEntryStatus('waiting');
+              setSelectedQueue(null);
+              setMyTokenNumber(0);
+              setUserPosition(0);
+              setTotalInQueue(0);
               setView('list');
             }}
             className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base rounded-2xl shadow-xl transition-all"
