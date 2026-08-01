@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { VideoBackground } from "@/components/media/VideoBackground";
 import { ShaderCanvas } from "@/components/ui/ShaderCanvas";
@@ -1184,6 +1184,56 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Feature Grid directly below Hero */}
+      <section className="featureGrid">
+        <div className="featureCard">
+          <div style={{ color: "#FF5722", marginBottom: "16px" }}><Icons.Search /></div>
+          <h3>Universal Discovery</h3>
+          <p>Find what you need, exactly when you need it. Intelligent search that understands intent and proximity.</p>
+        </div>
+        <div className="featureCard">
+          <div style={{ color: "#3B82F6", marginBottom: "16px" }}><Icons.Clock /></div>
+          <h3>Real-time Queues</h3>
+          <p>Skip the waiting room. Monitor your position in line from anywhere and arrive exactly when it's your turn.</p>
+        </div>
+        <div className="featureCard">
+          <div style={{ color: "#10B981", marginBottom: "16px" }}><Icons.Star /></div>
+          <h3>Unified Loyalty</h3>
+          <p>One wallet for every store. Earn, track, and redeem rewards seamlessly without juggling multiple apps.</p>
+        </div>
+      </section>
+
+      <section className="categorySection" aria-labelledby="category-heading">
+        <div className="sectionHeading compactHeading">
+          <div>
+            <span className="kicker">Browse by need</span>
+            <h2 id="category-heading">What are you looking for?</h2>
+          </div>
+          <button className="resetLink" type="button" onClick={resetFilters}>Reset filters <span aria-hidden="true">↗</span></button>
+        </div>
+        <div className="categoryGrid">
+          {catalogCategories.map((item) => {
+            const active = category === item.name;
+            return (
+              <button
+                key={item.name}
+                className={`categoryTile tone-${item.tone}`}
+                type="button"
+                aria-pressed={active}
+                onClick={() => {
+                  setCategory(active ? "All" : item.name);
+                  document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
+                }}
+              >
+                <span className="categoryArt" aria-hidden="true"><i /><b>{item.icon}</b></span>
+                <span>{item.name}</span>
+                <small>{item.storeCount ?? catalogStores.filter((store) => store.category === item.name).length} nearby</small>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
       {/* Interactive 3D Radar Section */}
       <section className="radarSection" aria-label="Live Store Radar">
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
@@ -1220,56 +1270,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Feature Grid */}
-      <section className="featureGrid">
-        <div className="featureCard">
-          <div style={{ color: "#FF5722", marginBottom: "16px" }}><Icons.Search /></div>
-          <h3>Universal Discovery</h3>
-          <p>Find what you need, exactly when you need it. Intelligent search that understands intent and proximity.</p>
-        </div>
-        <div className="featureCard">
-          <div style={{ color: "#3B82F6", marginBottom: "16px" }}><Icons.Clock /></div>
-          <h3>Real-time Queues</h3>
-          <p>Skip the waiting room. Monitor your position in line from anywhere and arrive exactly when it's your turn.</p>
-        </div>
-        <div className="featureCard">
-          <div style={{ color: "#10B981", marginBottom: "16px" }}><Icons.Star /></div>
-          <h3>Unified Loyalty</h3>
-          <p>One wallet for every store. Earn, track, and redeem rewards seamlessly without juggling multiple apps.</p>
-        </div>
-      </section>
-
-
-      <section className="categorySection" aria-labelledby="category-heading">
-        <div className="sectionHeading compactHeading">
-          <div>
-            <span className="kicker">Browse by need</span>
-            <h2 id="category-heading">What are you looking for?</h2>
-          </div>
-          <button className="resetLink" type="button" onClick={resetFilters}>Reset filters <span aria-hidden="true">↗</span></button>
-        </div>
-        <div className="categoryGrid">
-          {catalogCategories.map((item) => {
-            const active = category === item.name;
-            return (
-              <button
-                key={item.name}
-                className={`categoryTile tone-${item.tone}`}
-                type="button"
-                aria-pressed={active}
-                onClick={() => {
-                  setCategory(active ? "All" : item.name);
-                  document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
-                <span className="categoryArt" aria-hidden="true"><i /><b>{item.icon}</b></span>
-                <span>{item.name}</span>
-                <small>{item.storeCount ?? catalogStores.filter((store) => store.category === item.name).length} nearby</small>
-              </button>
-            );
-          })}
-        </div>
-      </section>
+      {/* Places Section */}
 
       <section className="placesSection" id="places" aria-labelledby="places-heading">
         <div className="sectionHeading placesHeading">

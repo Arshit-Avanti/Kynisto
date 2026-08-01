@@ -29,16 +29,16 @@
 .mode-light {
   --portal-bg: #F8FAFC !important;
   --portal-card-bg: #FFFFFF !important;
-  --portal-text: #050505 !important;
+  --portal-text: #000000 !important;
   --portal-border: #E2E8F0 !important;
   --portal-muted: #1E293B !important;
   --portal-input: #FFFFFF !important;
 
   --bg-page: #F8FAFC !important;
   --bg-card: #FFFFFF !important;
-  --text-primary: #050505 !important;
+  --text-primary: #000000 !important;
   --text-secondary: #0F172A !important;
-  --ink: #050505 !important;
+  --ink: #000000 !important;
   --muted: #1E293B !important;
   --cream: #F8FAFC !important;
   --paper: #FFFFFF !important;
@@ -48,13 +48,20 @@
   --glass-border: rgba(0, 0, 0, 0.12) !important;
   --accent-orange: #FF5722 !important;
   background-color: #F8FAFC !important;
-  color: #050505 !important;
+  color: #000000 !important;
 }
 
 .mode-light h1, .mode-light h2, .mode-light h3, .mode-light h4, .mode-light p, .mode-light span, .mode-light b, .mode-light strong, .mode-light a, .mode-light button, .mode-light label, .mode-light input, .mode-light small,
 .light-theme h1, .light-theme h2, .light-theme h3, .light-theme h4, .light-theme p, .light-theme span, .light-theme b, .light-theme strong, .light-theme a, .light-theme button, .light-theme label, .light-theme input, .light-theme small {
-  color: #050505 !important;
-  -webkit-text-fill-color: #050505 !important;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+  text-shadow: none !important;
+}
+
+.mode-dark h1, .mode-dark h2, .mode-dark h3, .mode-dark h4, .mode-dark p, .mode-dark span, .mode-dark b, .mode-dark strong, .mode-dark a, .mode-dark button, .mode-dark label, .mode-dark input, .mode-dark small,
+.dark-theme h1, .dark-theme h2, .dark-theme h3, .dark-theme h4, .dark-theme p, .dark-theme span, .dark-theme b, .dark-theme strong, .dark-theme a, .dark-theme button, .dark-theme label, .dark-theme input, .dark-theme small {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
   text-shadow: none !important;
 }
 
@@ -269,7 +276,7 @@ textarea:focus {
   color-scheme: dark;
 }
 
-/* ⚡ 1. Cyberpunk Neon Dark Theme */
+/* âš¡ 1. Cyberpunk Neon Dark Theme */
 .theme-cyberpunk,
 [data-theme="cyberpunk"] {
   --ink: #F0F6FF;
@@ -284,7 +291,7 @@ textarea:focus {
   color-scheme: dark;
 }
 
-/* 👑 2. Royal Sapphire Dark Theme */
+/* ðŸ‘‘ 2. Royal Sapphire Dark Theme */
 .theme-royal,
 [data-theme="royal"] {
   --ink: #F4F8FF;
@@ -299,7 +306,7 @@ textarea:focus {
   color-scheme: dark;
 }
 
-/* 🌑 3. Minimalist Obsidian OLED Theme */
+/* ðŸŒ‘ 3. Minimalist Obsidian OLED Theme */
 .theme-obsidian,
 [data-theme="obsidian"] {
   --ink: #FFFFFF;
@@ -1715,7 +1722,7 @@ footer > p { color: var(--muted); font-size: 11px; }
   .heroText { margin: 22px 0 25px; line-height: 1.55; }
   .searchBox { min-height: 58px; padding: 6px 6px 6px 17px; gap: 10px; border-radius: 17px; }
   .searchSubmit { min-width: 54px; width: 54px; font-size: 0; }
-  .searchSubmit::after { content: "→"; font-size: 19px; }
+  .searchSubmit::after { content: "â†’"; font-size: 19px; }
   .quickProof { margin-top: 19px; }
   .quickProof span { padding: 0 7px; font-size: 9px; line-height: 1.35; }
   .quickProof b { display: block; font-size: 11px; }

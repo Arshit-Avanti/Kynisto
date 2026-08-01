@@ -62,8 +62,8 @@ const AnimatedNumber = ({ value }: { value: number }) => {
     const step = (timestamp: number) => {
       if (!startTimestamp) startTimestamp = timestamp;
       const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-      // Easing out cubic
-      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      // Smooth lerp inertial tracking easing (easeOutQuart)
+      const easeProgress = 1 - Math.pow(1 - progress, 4);
       setDisplayValue(Math.floor(easeProgress * value));
       if (progress < 1) {
         window.requestAnimationFrame(step);
@@ -191,13 +191,13 @@ export default function KynistoWalletView() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 relative">
       {/* Soft Ambient Radial Backlight Glow */}
-      <div className="fixed inset-0 pointer-events-none -z-10 flex items-center justify-center">
-        <div className="w-[80vw] h-[80vw] bg-[radial-gradient(circle_at_center,_rgba(99,102,241,0.15)_0%,_transparent_60%)] blur-[100px]" />
+      <div className="fixed inset-0 pointer-events-none -z-10 flex items-center justify-center overflow-hidden">
+        <div className="w-[120vw] h-[120vw] bg-[radial-gradient(ellipse_at_center,_rgba(99,102,241,0.25)_0%,_rgba(168,85,247,0.15)_30%,_transparent_70%)] blur-[120px]" />
       </div>
 
       {/* Header */}
       <div className="overflow-hidden rounded-3xl bg-white dark:bg-black p-6 border border-gray-200 dark:border-gray-800 shadow-[0_0_40px_rgba(99,102,241,0.15)] relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_rgba(99,102,241,0.05)_0%,_transparent_70%)] blur-2xl pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[radial-gradient(circle_at_center,_rgba(99,102,241,0.15)_0%,_rgba(168,85,247,0.08)_50%,_transparent_80%)] blur-[80px] pointer-events-none" />
         <div className="flex items-center space-x-4 relative z-10">
           <div className="rounded-full bg-gradient-to-br from-indigo-600 to-purple-700 p-4 shadow-lg text-white">
             <Wallet className="h-8 w-8" />
@@ -266,7 +266,7 @@ export default function KynistoWalletView() {
 
                 <div className="h-4 w-full rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden shadow-inner relative">
                   <div 
-                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-0 shadow-[0_0_20px_rgba(99,102,241,0.6)]"
+                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-[1500ms] ease-[cubic-bezier(0.22,1,0.36,1)] shadow-[0_0_25px_rgba(99,102,241,0.8)]"
                     style={{ width: `${(kynistoPoints.progress / 1000) * 100}%` }}
                   ></div>
                 </div>
@@ -369,10 +369,10 @@ export default function KynistoWalletView() {
                   <div 
                     key={store.storeId} 
                     onClick={() => setActiveCardIndex(index)}
-                    className={`absolute w-full rounded-3xl p-6 md:p-8 border shadow-2xl transition-all duration-500 cursor-pointer ${
+                    className={`absolute w-full rounded-3xl p-6 md:p-8 border shadow-2xl transition-all duration-[800ms] ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer ${
                       isActive 
                         ? 'bg-gradient-to-br from-gray-900 to-black text-white dark:from-white dark:to-gray-100 dark:text-black border-gray-700 dark:border-gray-300 z-30 transform-none' 
-                        : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800'
+                        : 'bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700'
                     }`}
                     style={{
                       top: isActive ? 0 : `${offset * 20 + 20}px`,
@@ -405,9 +405,9 @@ export default function KynistoWalletView() {
                           <span>{store.progress} / 1000 Pts</span>
                           <span>₹100 Off Reward</span>
                         </div>
-                        <div className={`h-3 w-full rounded-full overflow-hidden shadow-inner ${isActive ? 'bg-gray-800 dark:bg-gray-300' : 'bg-gray-200 dark:bg-gray-800'}`}>
+                        <div className={`h-3 w-full rounded-full overflow-hidden shadow-inner ${isActive ? 'bg-gray-700 dark:bg-gray-300' : 'bg-gray-300 dark:bg-gray-700'}`}>
                           <div 
-                            className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-0 shadow-[0_0_20px_rgba(99,102,241,0.6)]"
+                            className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-[1500ms] ease-[cubic-bezier(0.22,1,0.36,1)] shadow-[0_0_25px_rgba(99,102,241,0.8)]"
                             style={{ width: `${(store.progress / 1000) * 100}%` }}
                           ></div>
                         </div>
