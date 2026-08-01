@@ -290,11 +290,25 @@ export async function ensureGoogleLocalIdentity(
   supabaseUser: SupabaseAuthUser,
   role: GoogleRole,
 ): Promise<GoogleLocalIdentity> {
+  if (role === "admin") {
+    throw new HttpError(
+      403,
+      "Administrators must use the protected Admin login.",
+      "ADMIN_OAUTH_BLOCKED",
+    );
+  }
   const profile = googleProfile(supabaseUser);
   const existing = await findGoogleLocalIdentity(
     profile.providerUserId,
     profile.email,
   );
+  if (existing && existing.role === "admin") {
+    throw new HttpError(
+      403,
+      "Administrators must use the protected Admin login.",
+      "ADMIN_OAUTH_BLOCKED",
+    );
+  }
   return existing
     ? refreshGoogleIdentity(existing, profile, role)
     : createGoogleIdentity(profile, role);

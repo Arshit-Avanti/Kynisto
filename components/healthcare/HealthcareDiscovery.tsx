@@ -73,6 +73,15 @@ export function HealthcareDiscovery() {
   const [queueBusy, setQueueBusy] = useState("");
   const canJoinQueue = role === "customer" || role === "admin";
 
+  const queueUnavailableMessage =
+    queueState && !queueState.queueAvailable
+      ? !queueState.withinOperatingHours
+        ? `Queue is closed. Operating hours are ${queueState.openingTime} – ${queueState.closingTime}.`
+        : !queueState.capacityAvailable
+        ? `Queue is full. Maximum daily capacity of ${queueState.maximumDailyPatients} patients reached.`
+        : "Queue is currently closed."
+      : "";
+
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     setError("");
@@ -331,6 +340,9 @@ export function HealthcareDiscovery() {
                         <div className="text-xs text-slate-300 flex items-center justify-between">
                           <span>{provider.waitingCount} patients waiting</span>
                           <span>~{provider.consultationMinutes || 15} min/patient</span>
+                        </div>
+                        <div className="text-[10px] text-slate-400 mt-1">
+                          {`max ${provider.maximumDailyPatients}`}
                         </div>
                       </div>
                     )}

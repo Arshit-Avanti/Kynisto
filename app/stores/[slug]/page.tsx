@@ -251,7 +251,7 @@ export default async function StoreProfilePage({ params }: RouteProps) {
                   {store.products.map((product) => {
                     const media = (product.media ?? []) as Array<Record<string, unknown>>;
                     return (
-                      <article key={String(product.id)} className="glass-card" style={{ padding: "16px", borderRadius: "12px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                      <article key={String(product.id)} className="glass-card productOfferCard" style={{ padding: "16px", borderRadius: "12px", display: "flex", flexDirection: "column", gap: "12px" }}>
                         {(media.length > 0 || product.imageUrl) && (
                           <div className="glass-card-img-wrapper" style={{ width: "100%", height: "160px" }}>
                             {media.length ? media.slice(0, 1).map((asset) => asset.mediaType === "video" ? <video key={String(asset.id)} src={String(asset.publicUrl)} poster={asset.thumbnailUrl ? String(asset.thumbnailUrl) : undefined} controls preload="metadata" playsInline style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <img key={String(asset.id)} src={String(asset.publicUrl)} alt={String(asset.altText ?? product.name)} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: `${Number(asset.cropX ?? 50)}% ${Number(asset.cropY ?? 50)}%` }} />) : Boolean(product.imageUrl) && <img src={String(product.imageUrl)} alt={String(product.name)} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
