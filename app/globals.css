@@ -59,10 +59,10 @@ body {
   max-width: 100%;
   margin: 0;
   overflow-x: clip;
-  background: #140A0C;
-  background-image: radial-gradient(circle at 15% 25%, rgba(255, 87, 34, 0.2), transparent 45%),
-                    radial-gradient(circle at 85% 75%, rgba(239, 68, 68, 0.2), transparent 45%),
-                    radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.1), transparent 60%);
+  -webkit-text-size-adjust: 100%;
+  background: #0f121b;
+  background-image: radial-gradient(circle at top right, #301423, transparent 70%),
+                    radial-gradient(circle at bottom left, #13131d, transparent 70%);
   color: #F8FAFC;
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }

@@ -199,7 +199,6 @@ export function AdminWalletPanel() {
               />
             </label>
             <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", flexDirection: "column" }}>
-            <div style={{ display: "flex", gap: "16px" }}>
               <label style={{ width: "130px" }}>
                 <small style={{ color: "#cbd5e1", fontWeight: 600 }}>Discount (₹)</small>
                 <input
@@ -212,7 +211,6 @@ export function AdminWalletPanel() {
                 />
               </label>
               <label style={{ width: "130px", marginTop: "16px" }}>
-              <label style={{ width: "130px" }}>
                 <small style={{ color: "#cbd5e1", fontWeight: 600 }}>Usage Limit</small>
                 <input
                   type="number"
@@ -228,11 +226,6 @@ export function AdminWalletPanel() {
               </button>
             </div>
           </div>
-            </div>
-          </div>
-          <button className="portalButton" type="submit" style={{ display: "flex", alignItems: "center", gap: "6px", width: "fit-content", marginTop: "8px" }}>
-            <Plus size={16} /> Add Coupon
-          </button>
         </form>
 
         <div className="workspaceList">
