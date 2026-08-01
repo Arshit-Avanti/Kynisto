@@ -53,7 +53,9 @@ export async function POST(request: Request) {
           AND NOT EXISTS (SELECT 1 FROM healthcare_queue_entries active WHERE active.active_key = ? AND active.status IN ('waiting','called'))
           AND (SELECT COUNT(*) FROM healthcare_queue_entries e WHERE e.store_id = q.store_id
             AND e.service_date = q.service_date AND e.status NOT IN ('cancelled','expired')) < q.maximum_daily_patients
-          ON CONFLICT(active_key) DO NOTHING RETURNING id, token_number AS tokenNumber`)
+          ON CONFLICT(active_key) DO NOTHING RETURNING id, token_number AS tokenNumber,
+            (SELECT COUNT(*) FROM healthcare_queue_entries e WHERE e.store_id = store_id AND e.service_date = service_date AND e.status IN ('waiting', 'called') AND e.token_number <= token_number) AS position,
+            (SELECT COUNT(*) FROM healthcare_queue_entries e WHERE e.store_id = store_id AND e.service_date = service_date AND e.status IN ('waiting', 'called')) AS waitingCount`)
           .bind(id, storeId, session.user.id, today, activeKey, now, expiresAt, now, storeId, today, activeKey),
         db.prepare(`UPDATE healthcare_queue_settings SET next_token_number = next_token_number + 1, updated_at = ?
           WHERE store_id = ? AND EXISTS (SELECT 1 FROM healthcare_queue_entries WHERE id = ?)`)
@@ -68,7 +70,8 @@ export async function POST(request: Request) {
         if (active) throw new HttpError(409, "You are already in an active healthcare queue. Please leave or complete your current queue before joining another clinic.", "ACTIVE_QUEUE_EXISTS");
         throw new HttpError(409, "The queue changed or reached its daily capacity. Please try again.", "QUEUE_CHANGED");
       }
-      return noStoreJson({ state: await patientQueueState(storeId, session.user.id) }, { status: 201 });
+      const { position, tokenNumber, waitingCount } = results[0].results[0] as { position: number, tokenNumber: number, waitingCount: number };
+      return noStoreJson({ position, tokenNumber, waitingCount, state: await patientQueueState(storeId, session.user.id) }, { status: 201 });
     }
 
     if (action === "leave" || action === "cancel") {

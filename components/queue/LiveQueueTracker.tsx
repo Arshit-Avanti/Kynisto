@@ -150,11 +150,11 @@ export default function LiveQueueTracker() {
   const [selectedQueue, setSelectedQueue] = useState<HealthcareQueueItem | null>(null);
   
   // Real patient state from D1 Database (managed by owner/admin)
-  const [userPosition, setUserPosition] = useState<number>(4);
-  const [totalInQueue, setTotalInQueue] = useState<number>(12);
-  const [estimatedWait, setEstimatedWait] = useState<number>(45);
+  const [userPosition, setUserPosition] = useState<number>(0);
+  const [totalInQueue, setTotalInQueue] = useState<number>(0);
+  const [estimatedWait, setEstimatedWait] = useState<number>(0);
   const [currentToken, setCurrentToken] = useState<number>(0);
-  const [myTokenNumber, setMyTokenNumber] = useState<number>(4);
+  const [myTokenNumber, setMyTokenNumber] = useState<number>(0);
   const [isQueueOpen, setIsQueueOpen] = useState<boolean>(true);
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -241,20 +241,21 @@ export default function LiveQueueTracker() {
       if (response && response.state && response.state.entry) {
         const { entry, consultationMinutes, queueAvailable, queueStatus } = response.state;
         setIsQueueOpen(queueAvailable && queueStatus === 'open');
-        setUserPosition(entry.position);
+        const pos = entry.position || (item.waitingCount + 1);
+        setUserPosition(pos);
         setMyTokenNumber(entry.tokenNumber);
-        setTotalInQueue(response.state.waitingCount);
+        setTotalInQueue(Math.max(response.state.waitingCount || 0, pos));
         const ownerConsultationMins = consultationMinutes || item.consultationMinutes || 15;
-        setEstimatedWait((entry.position - 1) * ownerConsultationMins);
+        setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
       } else {
         // Fallback calculation using owner's exact database parameters
-        const waiting = Math.max(1, item.waitingCount || 12);
+        const waiting = item.waitingCount || 0;
         const ownerConsultationMins = item.consultationMinutes || 15;
-        const pos = Math.min(4, Math.max(1, Math.floor(waiting / 2)));
-        setTotalInQueue(waiting);
+        const pos = waiting + 1;
+        setTotalInQueue(waiting + 1);
         setUserPosition(pos);
         setMyTokenNumber((item.currentTokenNumber || 0) + pos);
-        setEstimatedWait((pos - 1) * ownerConsultationMins);
+        setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
         setIsQueueOpen(item.queueStatus === 'open');
       }
 
@@ -264,13 +265,13 @@ export default function LiveQueueTracker() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: unknown) {
       // If user not authenticated or API error, still show real owner queue view without crashing
-      const waiting = Math.max(1, item.waitingCount || 12);
+      const waiting = item.waitingCount || 0;
       const ownerConsultationMins = item.consultationMinutes || 15;
-      const pos = 4;
-      setTotalInQueue(waiting);
+      const pos = waiting + 1;
+      setTotalInQueue(waiting + 1);
       setUserPosition(pos);
       setMyTokenNumber((item.currentTokenNumber || 0) + pos);
-      setEstimatedWait((pos - 1) * ownerConsultationMins);
+      setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
       setIsQueueOpen(item.queueStatus === 'open');
       setIsCancelled(false);
       setIsLate(false);

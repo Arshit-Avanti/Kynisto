@@ -90,7 +90,9 @@ export async function PATCH(request: Request) {
       const verification = body.verificationStatus;
       if (!["pending", "verified", "rejected"].includes(String(verification))) throw new HttpError(400, "Choose a valid verification status.", "INVALID_STATUS");
       const disableQueue = verification !== "verified" || !isQueueEligibleHealthcareType(providerType);
-      await db.prepare(`INSERT INTO healthcare_provider_profiles
+      await ensureQueueSettings(storeId, session.user.id);
+      const statements: D1PreparedStatement[] = [
+        db.prepare(`INSERT INTO healthcare_provider_profiles
         (store_id, provider_type, accepting_patients, emergency_available, admin_queue_enabled, owner_queue_enabled,
           queue_activation_status, verification_status, created_at, updated_at)
         VALUES (?, ?, 1, 0, 0, 0, 'not_requested', ?, ?, ?)
@@ -100,8 +102,13 @@ export async function PATCH(request: Request) {
           owner_queue_enabled = CASE WHEN ? = 1 THEN 0 ELSE healthcare_provider_profiles.owner_queue_enabled END,
           queue_activation_status = CASE WHEN ? = 1 THEN 'not_requested' ELSE healthcare_provider_profiles.queue_activation_status END,
           updated_at = excluded.updated_at`)
-        .bind(storeId, providerType, verification, now, now, disableQueue ? 1 : 0, disableQueue ? 1 : 0, disableQueue ? 1 : 0).run();
-      await ensureQueueSettings(storeId, session.user.id);
+        .bind(storeId, providerType, verification, now, now, disableQueue ? 1 : 0, disableQueue ? 1 : 0, disableQueue ? 1 : 0)
+      ];
+      if (disableQueue) {
+        statements.push(db.prepare("UPDATE healthcare_queue_settings SET status = 'closed', closed_at = ?, updated_by = ?, updated_at = ? WHERE store_id = ?").bind(now, session.user.id, now, storeId));
+        statements.push(db.prepare("UPDATE healthcare_queue_entries SET status = 'cancelled', active_key = NULL, left_at = ?, updated_at = ? WHERE store_id = ? AND status IN ('waiting','called')").bind(now, now, storeId));
+      }
+      await db.batch(statements);
       await writeAudit(request, session.user.id, "healthcare.provider.configured", "store", storeId, { providerType, verification });
       return noStoreJson({ ok: true });
     }
