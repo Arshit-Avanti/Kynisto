@@ -283,10 +283,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "subscriptionIds required for bulk delete." }, { status: 400 });
     }
 
-    for (const id of ids) {
-      await db.prepare(`DELETE FROM subscriptions WHERE id = ?`).bind(id).run();
-      await db.prepare(`DELETE FROM subscription_transactions WHERE subscription_id = ?`).bind(id).run();
-    }
+    const placeholders = ids.map(() => "?").join(", ");
+    await db.batch([
+      db.prepare(`DELETE FROM subscriptions WHERE id IN (${placeholders})`).bind(...ids),
+      db.prepare(`DELETE FROM subscription_transactions WHERE subscription_id IN (${placeholders})`).bind(...ids),
+    ]);
 
     return NextResponse.json({
       success: true,
@@ -301,12 +302,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "subscriptionIds required for bulk deactivate." }, { status: 400 });
     }
 
-    for (const id of ids) {
-      await db
-        .prepare(`UPDATE subscriptions SET status = 'cancelled', cancelled_at = ?, updated_at = ? WHERE id = ?`)
-        .bind(now, now, id)
-        .run();
-    }
+    const placeholders = ids.map(() => "?").join(", ");
+    await db
+      .prepare(`UPDATE subscriptions SET status = 'cancelled', cancelled_at = ?, updated_at = ? WHERE id IN (${placeholders})`)
+      .bind(now, now, ...ids)
+      .run();
 
     return NextResponse.json({
       success: true,
@@ -326,14 +326,13 @@ export async function POST(request: Request) {
     const expiresAt = now + durationSeconds;
     const amount = billingCycle === "yearly" ? plan.priceYearly : plan.priceMonthly;
 
-    for (const id of ids) {
-      await db
-        .prepare(
-          `UPDATE subscriptions SET plan_id = ?, billing_cycle = ?, amount = ?, status = 'active', starts_at = ?, expires_at = ?, updated_at = ? WHERE id = ?`
-        )
-        .bind(plan.id, billingCycle, amount, now, expiresAt, now, id)
-        .run();
-    }
+    const placeholders = ids.map(() => "?").join(", ");
+    await db
+      .prepare(
+        `UPDATE subscriptions SET plan_id = ?, billing_cycle = ?, amount = ?, status = 'active', starts_at = ?, expires_at = ?, updated_at = ? WHERE id IN (${placeholders})`
+      )
+      .bind(plan.id, billingCycle, amount, now, expiresAt, now, ...ids)
+      .run();
 
     return NextResponse.json({
       success: true,
@@ -352,14 +351,13 @@ export async function POST(request: Request) {
     const trialSeconds = days * 86400;
     const expiresAt = now + trialSeconds;
 
-    for (const id of ids) {
-      await db
-        .prepare(
-          `UPDATE subscriptions SET plan_id = ?, amount = 0, status = 'trial', auto_renew = 0, starts_at = ?, expires_at = ?, updated_at = ? WHERE id = ?`
-        )
-        .bind(plan.id, now, expiresAt, now, id)
-        .run();
-    }
+    const placeholders = ids.map(() => "?").join(", ");
+    await db
+      .prepare(
+        `UPDATE subscriptions SET plan_id = ?, amount = 0, status = 'trial', auto_renew = 0, starts_at = ?, expires_at = ?, updated_at = ? WHERE id IN (${placeholders})`
+      )
+      .bind(plan.id, now, expiresAt, now, ...ids)
+      .run();
 
     return NextResponse.json({
       success: true,
