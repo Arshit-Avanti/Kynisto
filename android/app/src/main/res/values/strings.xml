@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Kynisto</string>
+    <string name="tagline">Everything Around You, Smarter.</string>
+    <string name="offline_title">You’re offline</string>
+    <string name="offline_message">Kynisto will reconnect automatically when your internet returns. Your account remains signed in.</string>
+    <string name="retry">Try again</string>
+</resources>
+

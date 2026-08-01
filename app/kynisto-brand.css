@@ -1,0 +1,322 @@
+:root {
+  --kyn-primary: var(--primary);
+  --kyn-primary-dark: var(--primary-hover);
+  --kyn-navy: var(--text-primary);
+  --kyn-cyan: #20c7e8;
+  --kyn-success: #149d65;
+  --kyn-bg: var(--bg-page);
+  --kyn-panel: var(--bg-card);
+  --kyn-line: var(--border);
+  --kyn-muted: var(--text-muted);
+  --ink: var(--kyn-navy);
+  --muted: var(--kyn-muted);
+  --cream: var(--kyn-bg);
+  --paper: var(--kyn-panel);
+  --line: var(--kyn-line);
+  --accent: var(--kyn-primary);
+  --accent-dark: var(--kyn-primary-dark);
+  --green: var(--kyn-success);
+  --blue: var(--kyn-primary);
+  --yellow: var(--kyn-cyan);
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.5;
+  background: #140A0C;
+}
+
+.kynistoLogo {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #FF5722;
+}
+
+.kynistoMark {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  filter: drop-shadow(0 8px 16px rgba(255, 87, 34, .35));
+}
+
+.kynistoWordmark {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.kynistoWordmark b {
+  font-size: 21px;
+  font-weight: 840;
+  letter-spacing: -.055em;
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.kynistoWordmark small {
+  color: #FF8A00;
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: .045em;
+  white-space: nowrap;
+}
+
+/* Dark variant — navy wordmark for light backgrounds */
+.kynistoWordmarkDark b {
+  color: #0b1736 !important;
+  -webkit-text-fill-color: #0b1736 !important;
+  text-shadow: none !important;
+}
+
+.kynistoWordmarkDark small {
+  color: #FF5722;
+}
+
+/* Gradient variant — red-orange gradient for premium surfaces */
+.kynistoWordmarkGradient b {
+  background: linear-gradient(135deg, #FF5722 0%, #E53935 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  color: #FF5722 !important;
+  text-shadow: none !important;
+}
+
+.kynistoWordmarkGradient small {
+  color: #FF8A00;
+}
+
+.brand,
+.authBrand,
+.portalBrand,
+.healthBrand,
+.productBrand,
+.profileBrand {
+  color: inherit;
+}
+
+.brand .kynistoWordmark b,
+.productBrand .kynistoWordmark b,
+.profileBrand .kynistoWordmark b {
+  color: #ffffff;
+}
+
+.portal {
+  --p-bg: #140A0C;
+  --p-panel: rgba(255, 255, 255, .04);
+  --p-solid: #fff;
+  --p-ink: #f8fafc;
+  --p-muted: #94a3b8;
+  --p-line: rgba(255, 87, 34, 0.2);
+  --p-accent: #FF5722;
+}
+
+.dark-theme {
+  --p-bg: #140A0C;
+  --p-panel: rgba(255, 255, 255, .04);
+  --p-solid: #1c0e11;
+  --p-ink: #f4f8ff;
+  --p-muted: #9fb0d0;
+  --p-line: rgba(255, 87, 34, 0.2);
+  --p-accent: #FF5722;
+}
+
+.portalSidebar,
+.authStory {
+  background: linear-gradient(160deg, #1c0b0e 0%, #2b0e12 62%, #421015 100%);
+}
+
+.portalBrand .kynistoWordmark b,
+.authBrand .kynistoWordmark b {
+  color: #fff;
+}
+
+.portalBrand .kynistoMark,
+.authBrand .kynistoMark {
+  color: #FF5722;
+}
+
+.portalSidebar nav a:hover,
+.portalSidebar nav a.active {
+  background: rgba(255, 87, 34, .2);
+}
+
+.portalSidebar nav a.active::after {
+  background: #FF5722;
+}
+
+.portalButton,
+.authSubmit,
+button,
+.doneButton,
+.searchSubmit {
+  background: linear-gradient(135deg, #FF5722 0%, #E53935 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  font-size: 0.875rem;
+  font-weight: 700;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);
+}
+
+.portalButton:hover,
+.authSubmit:hover,
+button:hover,
+.doneButton:hover,
+.searchSubmit:hover {
+  background: linear-gradient(135deg, #F4511E 0%, #D32F2F 100%);
+  border-color: #FF8A00;
+  box-shadow: 0 0 20px rgba(255, 87, 34, 0.5);
+  transform: translateY(-2px);
+}
+
+.statCard,
+.portalCard,
+.authCard,
+.dashCard,
+.categoryTile,
+.storeCard,
+.providerGrid article,
+.productGrid article,
+.profileSection,
+.profileAside section {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.3s ease;
+}
+
+.statCard:hover,
+.portalCard:hover,
+.authCard:hover,
+.dashCard:hover,
+.categoryTile:hover,
+.storeCard:hover,
+.providerGrid article:hover,
+.productGrid article:hover,
+.profileSection:hover,
+.profileAside section:hover {
+  border-color: #FF5722;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(255, 87, 34, 0.25);
+}
+
+.theme-royal {
+  --accent: #2457ff;
+  --accent-dark: #173bc4;
+}
+
+.theme-navy {
+  --accent: #102b68;
+  --accent-dark: #071a44;
+}
+
+.theme-cyan {
+  --accent: #089fbe;
+  --accent-dark: #067d96;
+}
+
+.swatch-royal { --swatch: #2457ff; }
+.swatch-navy { --swatch: #102b68; }
+.swatch-cyan { --swatch: #20c7e8; }
+
+.hero {
+  position: relative;
+}
+
+.hero::before {
+  content: "";
+  width: 420px;
+  height: 420px;
+  position: absolute;
+  left: -260px;
+  top: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(32, 199, 232, .18), transparent 68%);
+  pointer-events: none;
+}
+
+.hero h1 em,
+.eyebrow,
+.kicker,
+.categoryLabel {
+  color: var(--kyn-primary);
+}
+
+.hero h1 {
+  color: var(--kyn-navy);
+  font-size: clamp(66px, 8vw, 122px);
+  letter-spacing: -.075em;
+}
+
+.heroTagline {
+  margin: -2px 0 22px;
+  color: var(--kyn-primary);
+  font-size: clamp(19px, 2vw, 28px);
+  font-weight: 760;
+  letter-spacing: -.035em;
+}
+
+.mapScene {
+  background: linear-gradient(145deg, #eaf0ff, #dffaff);
+}
+
+.routeLoading {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  gap: 14px;
+  background: radial-gradient(circle at 50% 45%, #e9f5ff, #f4f7fc 48%, #eef2f9);
+}
+
+.routeLoading .kynistoMark {
+  width: 58px;
+  height: 58px;
+  margin: auto;
+  animation: kynistoFloat 1.2s ease-in-out infinite alternate;
+}
+
+.routeLoading b {
+  color: var(--kyn-navy);
+  font-size: 18px;
+  letter-spacing: -.04em;
+}
+
+.routeLoading small {
+  color: var(--kyn-muted);
+  font-size: 9px;
+  text-align: center;
+}
+
+@keyframes kynistoFloat {
+  to { transform: translateY(-7px); filter: drop-shadow(0 16px 24px rgba(36, 87, 255, .32)); }
+}
+
+@media (max-width: 520px) {
+  .kynistoMark { width: 32px; height: 32px; }
+  .kynistoWordmark b { font-size: 19px; }
+  .kynistoWordmark small { display: none; }
+  .hero h1 {
+    max-width: 100%;
+    font-size: clamp(48px, 16vw, 62px);
+    line-height: .94;
+    overflow-wrap: anywhere;
+  }
+  .heroTagline {
+    max-width: 100%;
+    margin: 5px 0 18px;
+    font-size: clamp(17px, 5.4vw, 21px);
+    line-height: 1.08;
+  }
+}

@@ -1,0 +1,68 @@
+.floatingBulkBar {
+  width: min(820px, calc(100vw - 285px));
+  min-height: 64px;
+  padding: 10px 12px 10px 17px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  position: fixed;
+  left: calc(50% + 122px);
+  bottom: 20px;
+  z-index: 90;
+  transform: translateX(-50%);
+  border: 1px solid color-mix(in srgb, var(--p-accent) 35%, var(--p-line));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--p-solid) 92%, transparent);
+  color: var(--p-ink);
+  box-shadow: 0 18px 55px rgba(20, 32, 24, .23);
+  backdrop-filter: blur(18px);
+}
+.floatingBulkBar > div:first-child { margin-right: auto; display: grid; gap: 2px; }
+.floatingBulkBar b { font-size: 11px; }
+.floatingBulkBar small { color: var(--p-muted); font-size: 8px; }
+.floatingBulkBar > button:not(.bulkDeleteButton), .floatingBulkBar select {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--p-line);
+  border-radius: 9px;
+  background: var(--p-solid);
+  color: var(--p-ink);
+  font-size: 8px;
+}
+.bulkDeleteButton {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 11px;
+  background: #b84332;
+  color: #fff;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 850;
+}
+.bulkDeleteButton:disabled { cursor: wait; opacity: .65; }
+.bulkDeleteButton i { width: 10px; height: 10px; display: inline-block; vertical-align: -2px; border: 2px solid rgba(255,255,255,.45); border-top-color: #fff; border-radius: 50%; animation: bulkSpin .75s linear infinite; }
+.adminSelectCheckbox { width: 16px; height: 16px; accent-color: var(--p-accent); cursor: pointer; }
+@keyframes bulkSpin { to { transform: rotate(360deg); } }
+.bulkActionBar {
+  width: min(920px, calc(100vw - 285px));
+  margin: 0;
+  position: fixed;
+  left: calc(50% + 122px);
+  bottom: 20px;
+  z-index: 89;
+  transform: translateX(-50%);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--p-solid) 94%, transparent);
+  box-shadow: 0 18px 55px rgba(20, 32, 24, .23);
+  backdrop-filter: blur(18px);
+}
+.bulkActionBar .dangerButton { min-height: 40px; padding-inline: 15px; border: 0; background: #b84332; color: #fff; font-size: 0; font-weight: 850; }
+.bulkActionBar .dangerButton::after { content: "Delete Selected"; font-size: 9px; }
+@media (max-width: 760px) {
+  .floatingBulkBar { width: calc(100vw - 20px); left: 50%; bottom: 10px; flex-wrap: wrap; }
+  .floatingBulkBar > div:first-child { flex: 1 1 calc(100% - 145px); }
+  .floatingBulkBar > button:not(.bulkDeleteButton), .floatingBulkBar select { flex: 1 1 auto; }
+  .bulkDeleteButton { margin-left: auto; }
+  .bulkActionBar { width: calc(100vw - 20px); left: 50%; bottom: 10px; max-height: 45vh; overflow: auto; }
+}

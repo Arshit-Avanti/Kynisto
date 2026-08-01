@@ -1,0 +1,7 @@
+.productActions { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px; }
+.productActions button { min-height: 34px; padding: 0 10px; border: 0; border-radius: 9px; background: #0b1736; color: #fff; cursor: pointer; font-size: 9px; font-weight: 800; }
+.productActions button.soft { border: 1px solid #d8d3c8; background: #fff; color: #26352c; }
+.productActions button:disabled { opacity: .55; cursor: not-allowed; }
+.productActions small { width: 100%; color: #34714d; font-size: 8px; }
+.productActions small.error { color: #9a4433; }
+.productActions small a { color: inherit; font-weight: 800; }

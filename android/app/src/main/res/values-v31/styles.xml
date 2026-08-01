@@ -1,0 +1,13 @@
+<resources>
+    <style name="Theme.Kynisto" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@color/kynisto_background</item>
+        <item name="android:navigationBarColor">@color/kynisto_navy</item>
+        <item name="android:windowSplashScreenBackground">@color/kynisto_blue</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_kynisto_foreground</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/kynisto_blue</item>
+        <item name="android:windowSplashScreenAnimationDuration">450</item>
+    </style>
+</resources>
+
