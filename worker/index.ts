@@ -1,4 +1,18 @@
 /** Cloudflare Worker entry point for Kynisto with A+ Grade Security Headers. */
+
+// Safe WeakRef mock polyfill for Cloudflare workerd environment
+if (typeof globalThis.WeakRef === "undefined") {
+  globalThis.WeakRef = class WeakRef<T extends object> {
+    private ref: T;
+    constructor(target: T) {
+      this.ref = target;
+    }
+    deref(): T | undefined {
+      return this.ref;
+    }
+  } as any;
+}
+
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
 
