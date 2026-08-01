@@ -1,4 +1,16 @@
 /** Cloudflare Worker entry point for Kynisto with A+ Grade Security Headers. */
+if (typeof globalThis.WeakRef === "undefined") {
+  (globalThis as any).WeakRef = class WeakRef<T extends object> {
+    private value: T;
+    constructor(value: T) {
+      this.value = value;
+    }
+    deref(): T | undefined {
+      return this.value;
+    }
+  };
+}
+
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
 

@@ -5,7 +5,9 @@ import { healthcareQueueDashboard, isQueueOperation, operateHealthcareQueue } fr
 import { requireOwnedStore, writeAudit } from "@/lib/ownership";
 import { apiError, HttpError, noStoreJson } from "@/lib/security";
 import { getOwnerActivePlan } from "@/lib/subscriptions";
-import { booleanInput, cleanText, numberInput, safeJson } from "@/lib/validation";
+import { cleanText, numberInput, booleanInput, safeJson } from "@/lib/validation";
+
+export const dynamic = "force-dynamic";
 
 async function ownerContext(ownerId: string, storeId: string) {
   await requireOwnedStore(ownerId, storeId);
@@ -45,7 +47,7 @@ export async function PATCH(request: Request) {
         queue_decision_reason = NULL, admin_queue_enabled = 0, owner_queue_enabled = 0, updated_at = ? WHERE store_id = ?`)
         .bind(now, now, storeId).run();
       await writeAudit(request, session.user.id, "healthcare.queue_activation.requested", "store", storeId);
-      return noStoreJson({ ok: true, status: "pending" });
+      return noStoreJson(await healthcareQueueDashboard(storeId));
     }
 
     if (action === "configure") {
@@ -68,7 +70,7 @@ export async function PATCH(request: Request) {
         .bind(now, now, storeId));
       await db.batch(statements);
       await writeAudit(request, session.user.id, "healthcare.queue.configured", "store", storeId, { enabled, minutes, openingTime, closingTime, maximumDailyPatients });
-      return noStoreJson({ ok: true });
+      return noStoreJson(await healthcareQueueDashboard(storeId));
     }
 
     if (!isQueueOperation(action)) throw new HttpError(400, "Unsupported queue action.", "INVALID_ACTION");
@@ -77,8 +79,8 @@ export async function PATCH(request: Request) {
     const addingPatient = action === "add_emergency" || action === "add_walk_in";
     const patientName = addingPatient ? cleanText(body.patientName, "Patient name", { min: 2, max: 120 }) : null;
     const patientPhone = addingPatient ? cleanText(body.patientPhone, "Patient contact", { max: 120, required: false }) || null : null;
-    const result = await operateHealthcareQueue({ storeId, actorId: session.user.id, action, entryId, patientName, patientPhone });
+    await operateHealthcareQueue({ storeId, actorId: session.user.id, action, entryId, patientName, patientPhone });
     await writeAudit(request, session.user.id, `healthcare.queue.${action}`, "store", storeId, { entryId });
-    return noStoreJson(result);
+    return noStoreJson(await healthcareQueueDashboard(storeId));
   } catch (error) { return apiError(error); }
 }

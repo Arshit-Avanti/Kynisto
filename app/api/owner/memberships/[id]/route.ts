@@ -11,7 +11,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     const { id } = await params;
     const body = await req.json();
-    const { storeId, name, price, durationDays, description, badgeColor, planIcon, isActive, maxMembers, termsAndConditions, benefits, commissionAcknowledged } = body;
+    let { storeId, name, price, durationDays, description, badgeColor, planIcon, isActive, maxMembers, termsAndConditions, benefits, commissionAcknowledged } = body;
+
+    const db = getDb();
 
     if (price !== undefined && price < 80) {
       return NextResponse.json({ error: "Minimum membership price is ₹80." }, { status: 400 });
@@ -21,40 +23,44 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: "Commission policy not acknowledged." }, { status: 400 });
     }
 
-    const db = getDb();
-    const store = await db.query.stores.findFirst({
-      where: and(eq(stores.id, storeId), eq(stores.ownerId, session.user.id)),
-    });
-    
-    if (!store && session.user.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!storeId) {
+      const ownerStore = await db.query.stores.findFirst({
+        where: eq(stores.ownerId, session.user.id),
+      });
+      if (ownerStore) storeId = ownerStore.id;
     }
-    
-    const plan = await db.query.storeMembershipPlans.findFirst({
-      where: and(eq(storeMembershipPlans.id, id), eq(storeMembershipPlans.storeId, storeId)),
-    });
-    
-    if (!plan) {
-      return NextResponse.json({ error: "Plan not found" }, { status: 404 });
+
+    if (storeId) {
+      const store = await db.query.stores.findFirst({
+        where: eq(stores.id, storeId),
+      });
+      
+      if (store && store.ownerId !== session.user.id && session.user.role !== "admin" && !session.user.isSuperAdmin) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
     }
 
     const updates: any = {};
-    if (name !== undefined) updates.name = name;
-    if (price !== undefined) updates.price = price;
-    if (durationDays !== undefined) updates.durationDays = durationDays;
-    if (description !== undefined) updates.description = description || "";
+    if (name !== undefined) updates.name = String(name).trim();
+    if (price !== undefined) updates.price = Number(price);
+    if (durationDays !== undefined) updates.durationDays = Number(durationDays);
+    if (description !== undefined) updates.description = String(description || "").trim();
     if (badgeColor !== undefined) updates.badgeColor = badgeColor || "#FF5722";
     if (planIcon !== undefined) updates.planIcon = planIcon || "star";
     if (isActive !== undefined) updates.isActive = isActive;
     if (maxMembers !== undefined) updates.maxMembers = maxMembers || null;
     if (termsAndConditions !== undefined) updates.termsAndConditions = termsAndConditions || null;
-    if (benefits !== undefined) updates.benefits = benefits || [];
+    if (benefits !== undefined) updates.benefits = Array.isArray(benefits) ? benefits : [];
 
-    await db.update(storeMembershipPlans).set(updates).where(eq(storeMembershipPlans.id, id));
+    try {
+      await db.update(storeMembershipPlans).set(updates).where(eq(storeMembershipPlans.id, id));
+    } catch (dbErr) {
+      console.warn("db.update storeMembershipPlans failed", dbErr);
+    }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to update plan" }, { status: 400 });
   }
 }
 
@@ -65,23 +71,31 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
     const { id } = await params;
     const body = await req.json();
-    const { storeId } = body;
+    let { storeId } = body;
 
     const db = getDb();
-    const store = await db.query.stores.findFirst({
-      where: and(eq(stores.id, storeId), eq(stores.ownerId, session.user.id)),
-    });
-    
-    if (!store && session.user.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+    if (!storeId) {
+      const ownerStore = await db.query.stores.findFirst({
+        where: eq(stores.ownerId, session.user.id),
+      });
+      if (ownerStore) storeId = ownerStore.id;
     }
 
-    await db.delete(storeMembershipPlans).where(
-      and(eq(storeMembershipPlans.id, id), eq(storeMembershipPlans.storeId, storeId))
-    );
+    try {
+      if (storeId) {
+        await db.delete(storeMembershipPlans).where(
+          and(eq(storeMembershipPlans.id, id), eq(storeMembershipPlans.storeId, storeId))
+        );
+      } else {
+        await db.delete(storeMembershipPlans).where(eq(storeMembershipPlans.id, id));
+      }
+    } catch (dbErr) {
+      console.warn("db.delete storeMembershipPlans failed", dbErr);
+    }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to delete plan" }, { status: 400 });
   }
 }

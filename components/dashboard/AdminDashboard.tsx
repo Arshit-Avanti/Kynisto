@@ -43,7 +43,7 @@ export function AdminDashboard({ user }: { user: SessionUser }) {
     setLoading(true);
     setError("");
     try {
-      if (ADMIN_WORKSPACE_TABS.has(tab)) {
+      if (ADMIN_WORKSPACE_TABS.has(tab) || tab === "wallet" || tab === "chat" || tab === "healthcare" || tab === "subscriptions" || tab === "subscription" || tab === "notifications") {
         setLoading(false);
         return;
       }

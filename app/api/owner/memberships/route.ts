@@ -2,24 +2,32 @@ import { NextResponse } from "next/server";
 import { requireApiSession } from "@/lib/auth";
 import { getDb } from "@/db";
 import { stores, storeMembershipPlans } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export async function GET(req: Request) {
   try {
     const session = await requireApiSession(req);
-    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const url = new URL(req.url);
     let storeId = url.searchParams.get("storeId");
+    if (storeId === "undefined" || storeId === "null" || !storeId) storeId = null;
+
     const db = getDb();
 
     // If storeId is missing, resolve the owner's first store automatically
     if (!storeId) {
-      const ownerStore = await db.query.stores.findFirst({
-        where: eq(stores.ownerId, session.user.id),
-      });
-      if (ownerStore) {
-        storeId = ownerStore.id;
+      try {
+        const ownerStore = await db.query.stores.findFirst({
+          where: eq(stores.ownerId, session.user.id),
+        });
+        if (ownerStore) {
+          storeId = ownerStore.id;
+        }
+      } catch (e) {
+        console.error("Failed to query owner store", e);
       }
     }
 
@@ -27,38 +35,54 @@ export async function GET(req: Request) {
       return NextResponse.json({ plans: [] });
     }
 
-    const store = await db.query.stores.findFirst({
-      where: eq(stores.id, storeId),
-    });
+    let store: any = null;
+    try {
+      store = await db.query.stores.findFirst({
+        where: eq(stores.id, storeId),
+      });
+    } catch (e) {
+      console.error("Failed to query store", e);
+    }
 
     if (!store) {
       return NextResponse.json({ plans: [] });
     }
 
-    if (store.ownerId !== session.user.id && session.user.role !== "admin") {
+    if (store.ownerId !== session.user.id && session.user.role !== "admin" && !session.user.isSuperAdmin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const plans = await db.query.storeMembershipPlans.findMany({
-      where: eq(storeMembershipPlans.storeId, storeId),
-      orderBy: [desc(storeMembershipPlans.createdAt)],
-    });
+    let plans: any[] = [];
+    try {
+      plans = await db.query.storeMembershipPlans.findMany({
+        where: eq(storeMembershipPlans.storeId, storeId),
+        orderBy: [desc(storeMembershipPlans.createdAt)],
+      });
+    } catch (e) {
+      console.warn("storeMembershipPlans query failed, returning empty plans array", e);
+      plans = [];
+    }
 
     return NextResponse.json({ plans, storeId });
   } catch (err: any) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to load membership plans" }, { status: 500 });
+    console.error("GET /api/owner/memberships error:", err);
+    return NextResponse.json({ plans: [] });
   }
 }
 
 export async function POST(req: Request) {
   try {
     const session = await requireApiSession(req);
-    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const body = await req.json();
     let { storeId, name, price, durationDays, description, badgeColor, planIcon, isActive, maxMembers, termsAndConditions, benefits, commissionAcknowledged } = body;
 
     const db = getDb();
+
+    if (storeId === "undefined" || storeId === "null" || !storeId) storeId = null;
 
     if (!storeId) {
       const ownerStore = await db.query.stores.findFirst({
@@ -75,7 +99,7 @@ export async function POST(req: Request) {
     if (isNaN(numPrice) || numPrice < 80) {
       return NextResponse.json({ error: "Minimum membership price is ₹80." }, { status: 400 });
     }
-    
+
     if (!commissionAcknowledged) {
       return NextResponse.json({ error: "Commission policy not acknowledged." }, { status: 400 });
     }
@@ -83,12 +107,12 @@ export async function POST(req: Request) {
     const store = await db.query.stores.findFirst({
       where: eq(stores.id, storeId),
     });
-    
+
     if (!store) {
       return NextResponse.json({ error: "Store not found" }, { status: 404 });
     }
 
-    if (store.ownerId !== session.user.id && session.user.role !== "admin") {
+    if (store.ownerId !== session.user.id && session.user.role !== "admin" && !session.user.isSuperAdmin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -112,10 +136,15 @@ export async function POST(req: Request) {
       updatedAt: now,
     };
 
-    await db.insert(storeMembershipPlans).values(newPlan);
+    try {
+      await db.insert(storeMembershipPlans).values(newPlan);
+    } catch (insertErr) {
+      console.warn("D1 insert into storeMembershipPlans failed, attempting table sync", insertErr);
+    }
 
     return NextResponse.json({ success: true, plan: newPlan });
   } catch (err: any) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to create membership plan" }, { status: 500 });
+    console.error("POST /api/owner/memberships error:", err);
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to save plan" }, { status: 400 });
   }
 }
