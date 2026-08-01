@@ -41,9 +41,9 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
     setBusy(name);
     setError("");
     try {
-      await apiFetch("/api/owner/healthcare", { method: "PATCH", json: { action: name, storeId, ...extra } });
+      const updated = await apiFetch<Data>("/api/owner/healthcare", { method: "PATCH", json: { action: name, storeId, ...extra } });
+      setData(updated);
       setToast("Queue updated");
-      await load();
     } catch (actionError) {
       setError(actionError instanceof Error ? actionError.message : "Queue action failed.");
     } finally {

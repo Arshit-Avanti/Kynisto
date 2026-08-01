@@ -174,7 +174,7 @@ export async function patientQueueState(storeId: string, userId?: string) {
             WHERE called.store_id = e.store_id AND called.service_date = e.service_date AND called.status = 'called' AND called.id <> e.id)
           + 1 AS position
          FROM healthcare_queue_entries e
-         WHERE e.store_id = ? AND e.user_id = ? AND e.service_date = ? AND e.status IN ('waiting','called')
+         WHERE e.store_id = ? AND e.user_id = ? AND e.service_date = ? AND e.status IN ('waiting','called','completed')
          ORDER BY e.joined_at DESC LIMIT 1`,
       )
       .bind(storeId, userId, today)

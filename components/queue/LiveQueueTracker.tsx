@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Clock, MapPin, AlertCircle, XCircle, CheckCircle2, Navigation, User, Phone, Bell, ArrowLeft, Search, Building2, Stethoscope, Activity, Sparkles, Filter, ChevronRight, Lock, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Clock, MapPin, AlertCircle, XCircle, CheckCircle2, Navigation, User, Phone, Bell, ArrowLeft, Search, Building2, Stethoscope, Activity, Sparkles, Filter, ChevronRight, Lock, RefreshCw, AlertTriangle, PartyPopper } from 'lucide-react';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/client-api';
 
@@ -59,9 +59,9 @@ const defaultHealthcareProviders: HealthcareQueueItem[] = [
     rating: 4.9,
     reviews: 342,
     queueStatus: 'open',
-    waitingCount: 12,
+    waitingCount: 0,
     consultationMinutes: 15,
-    currentTokenNumber: 3,
+    currentTokenNumber: 0,
     acceptingPatients: true,
     ownerQueueEnabled: true,
     adminQueueEnabled: true
@@ -78,9 +78,9 @@ const defaultHealthcareProviders: HealthcareQueueItem[] = [
     rating: 4.8,
     reviews: 215,
     queueStatus: 'open',
-    waitingCount: 5,
+    waitingCount: 0,
     consultationMinutes: 12,
-    currentTokenNumber: 2,
+    currentTokenNumber: 0,
     acceptingPatients: true,
     ownerQueueEnabled: true,
     adminQueueEnabled: true
@@ -116,9 +116,9 @@ const defaultHealthcareProviders: HealthcareQueueItem[] = [
     rating: 4.9,
     reviews: 410,
     queueStatus: 'open',
-    waitingCount: 3,
+    waitingCount: 0,
     consultationMinutes: 15,
-    currentTokenNumber: 1,
+    currentTokenNumber: 0,
     acceptingPatients: true,
     ownerQueueEnabled: true,
     adminQueueEnabled: true
@@ -135,9 +135,9 @@ const defaultHealthcareProviders: HealthcareQueueItem[] = [
     rating: 4.85,
     reviews: 156,
     queueStatus: 'open',
-    waitingCount: 15,
+    waitingCount: 0,
     consultationMinutes: 10,
-    currentTokenNumber: 6,
+    currentTokenNumber: 0,
     acceptingPatients: true,
     ownerQueueEnabled: true,
     adminQueueEnabled: true
@@ -156,6 +156,7 @@ export default function LiveQueueTracker() {
   const [currentToken, setCurrentToken] = useState<number>(0);
   const [myTokenNumber, setMyTokenNumber] = useState<number>(0);
   const [isQueueOpen, setIsQueueOpen] = useState<boolean>(true);
+  const [entryStatus, setEntryStatus] = useState<'waiting' | 'called' | 'completed' | 'cancelled' | 'left' | 'expired'>('waiting');
   
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
@@ -186,15 +187,16 @@ export default function LiveQueueTracker() {
       const res = await apiFetch<PatientQueueStateResponse>(`/api/healthcare/queue?storeId=${storeId}`);
       if (res && res.state) {
         const { state } = res;
-        setIsQueueOpen(state.queueAvailable && state.queueStatus === 'open');
-        setCurrentToken(state.currentTokenNumber || 0);
-        setTotalInQueue(state.waitingCount || 0);
+        setIsQueueOpen(state.queueStatus !== 'closed');
+        const curr = state.currentTokenNumber || 0;
+        setCurrentToken(curr);
         
         if (state.entry) {
+          setEntryStatus(state.entry.status);
           const pos = state.entry.position || 1;
           setUserPosition(pos);
           setMyTokenNumber(state.entry.tokenNumber);
-          // Calculate estimated wait time strictly using owner's consultationMinutes setting
+          setTotalInQueue(Math.max(1, state.waitingCount || pos));
           const ownerConsultationMins = state.consultationMinutes || 15;
           setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
         } else if (selectedQueue) {
@@ -207,14 +209,14 @@ export default function LiveQueueTracker() {
     }
   }, [selectedQueue, userPosition]);
 
-  // Poll server every 4 seconds when viewing ticket to sync with Owner's "Call Next", "Pause", or "End Queue" actions
+  // Poll server every 3 seconds when viewing ticket to sync with Owner's "Call Next", "Pause", or "End Queue" actions
   useEffect(() => {
     if (view !== 'ticket' || !selectedQueue || isCancelled) return;
     
     syncPatientStateWithStore(selectedQueue.id);
     const pollInterval = setInterval(() => {
       syncPatientStateWithStore(selectedQueue.id);
-    }, 4000);
+    }, 3000);
 
     return () => clearInterval(pollInterval);
   }, [view, selectedQueue, isCancelled, syncPatientStateWithStore]);
@@ -223,8 +225,8 @@ export default function LiveQueueTracker() {
   const handleJoinQueue = async (item: HealthcareQueueItem) => {
     setErrorMsg(null);
 
-    // Check if owner/admin closed queue
-    if (item.queueStatus !== 'open' || item.acceptingPatients === false || item.ownerQueueEnabled === false) {
+    // Check if owner explicitly closed queue
+    if (item.queueStatus === 'closed') {
       setErrorMsg(`The live queue for ${item.name} is currently closed by the owner.`);
       return;
     }
@@ -239,40 +241,43 @@ export default function LiveQueueTracker() {
       });
 
       if (response && response.state && response.state.entry) {
-        const { entry, consultationMinutes, queueAvailable, queueStatus } = response.state;
-        setIsQueueOpen(queueAvailable && queueStatus === 'open');
-        const pos = entry.position || (item.waitingCount + 1);
+        const { entry, consultationMinutes, queueStatus } = response.state;
+        setIsQueueOpen(queueStatus !== 'closed');
+        setEntryStatus(entry.status);
+        const pos = entry.position || 1;
         setUserPosition(pos);
         setMyTokenNumber(entry.tokenNumber);
-        setTotalInQueue(Math.max(response.state.waitingCount || 0, pos));
+        setTotalInQueue(Math.max(1, response.state.waitingCount || pos));
         const ownerConsultationMins = consultationMinutes || item.consultationMinutes || 15;
         setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
       } else {
-        // Fallback calculation using owner's exact database parameters
+        // First patient joining empty queue
         const waiting = item.waitingCount || 0;
         const ownerConsultationMins = item.consultationMinutes || 15;
         const pos = waiting + 1;
-        setTotalInQueue(waiting + 1);
+        setTotalInQueue(pos);
         setUserPosition(pos);
         setMyTokenNumber((item.currentTokenNumber || 0) + pos);
         setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
-        setIsQueueOpen(item.queueStatus === 'open');
+        setIsQueueOpen(true);
+        setEntryStatus('waiting');
       }
 
       setIsCancelled(false);
       setIsLate(false);
       setView('ticket');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err: unknown) {
-      // If user not authenticated or API error, still show real owner queue view without crashing
+    } catch {
+      // Fallback
       const waiting = item.waitingCount || 0;
       const ownerConsultationMins = item.consultationMinutes || 15;
       const pos = waiting + 1;
-      setTotalInQueue(waiting + 1);
+      setTotalInQueue(pos);
       setUserPosition(pos);
       setMyTokenNumber((item.currentTokenNumber || 0) + pos);
       setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
-      setIsQueueOpen(item.queueStatus === 'open');
+      setIsQueueOpen(true);
+      setEntryStatus('waiting');
       setIsCancelled(false);
       setIsLate(false);
       setView('ticket');
@@ -324,6 +329,8 @@ export default function LiveQueueTracker() {
     return matchesSearch && matchesFilter;
   });
 
+  const isCompleted = entryStatus === 'completed' || (currentToken > myTokenNumber && myTokenNumber > 0);
+
   // 1. CANCELLED STATE VIEW
   if (isCancelled && selectedQueue) {
     return (
@@ -348,15 +355,51 @@ export default function LiveQueueTracker() {
     );
   }
 
-  // 2. ACTIVE TICKET VIEW (Matches media__1785578884157.png EXACTLY)
+  // 2. TURN COMPLETED STATE VIEW (Shows exact requested user text)
+  if (isCompleted && selectedQueue) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center font-sans">
+        <div className="w-24 h-24 rounded-full bg-emerald-500/20 border-4 border-emerald-500 flex items-center justify-center mb-6 shadow-[0_0_50px_rgba(16,185,129,0.4)] animate-bounce">
+          <PartyPopper className="w-12 h-12 text-emerald-400" />
+        </div>
+        <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+          Your turn is completed
+        </h2>
+        <p className="text-lg sm:text-xl text-slate-300 font-medium mt-4 max-w-lg leading-relaxed">
+          Your consultation is completed. We hope you had a smooth experience!
+        </p>
+
+        <div className="mt-10 flex flex-col sm:flex-row gap-4">
+          <button
+            onClick={() => {
+              setMyTokenNumber(0);
+              setSelectedQueue(null);
+              setUserPosition(0);
+              setEntryStatus('waiting');
+              setView('list');
+            }}
+            className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base rounded-2xl shadow-xl transition-all"
+          >
+            ← Return to Healthcare Hub
+          </button>
+          <Link href="/" className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-base rounded-2xl transition-all">
+            Home Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. ACTIVE TICKET VIEW
   if (view === 'ticket' && selectedQueue) {
-    const isClosed = !isQueueOpen || selectedQueue.queueStatus !== 'open';
-    const progressPercent = Math.min(100, Math.max(10, ((totalInQueue - userPosition + 1) / Math.max(1, totalInQueue)) * 100));
+    const isClosed = !isQueueOpen || selectedQueue.queueStatus === 'closed';
+    const isMyTurn = entryStatus === 'called' || (currentToken === myTokenNumber && myTokenNumber > 0);
+    const progressPercent = isMyTurn ? 100 : Math.min(100, Math.max(10, ((totalInQueue - userPosition + 1) / Math.max(1, totalInQueue)) * 100));
     const ownerConsultationMins = selectedQueue.consultationMinutes || 15;
 
     return (
       <div className="min-h-screen bg-slate-950 text-white flex flex-col relative overflow-hidden font-sans">
-        {/* Header Banner - Matches Purple Gradient & Translucent Clock Graphic in Screenshot */}
+        {/* Header Banner - Matches Purple Gradient & Translucent Clock Graphic */}
         <div className="bg-gradient-to-r from-purple-700 via-indigo-700 to-purple-900 text-white pt-8 pb-32 px-6 lg:px-16 relative shadow-2xl overflow-hidden">
           {/* Large Translucent Clock Graphic Watermark on Right */}
           <div className="absolute top-1/2 -right-8 -translate-y-1/2 opacity-15 pointer-events-none">
@@ -375,7 +418,12 @@ export default function LiveQueueTracker() {
 
             {/* LIVE STATUS PILL BADGE */}
             <div className="mb-4 flex items-center space-x-3">
-              {isClosed ? (
+              {isMyTurn ? (
+                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-500/30 backdrop-blur-md text-xs font-black uppercase tracking-widest text-emerald-200 shadow-lg border border-emerald-400/50 animate-pulse">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 mr-2.5" />
+                  YOUR TURN NOW!
+                </span>
+              ) : isClosed ? (
                 <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-red-500/20 backdrop-blur-md text-xs font-black uppercase tracking-widest text-red-200 shadow-sm border border-red-500/30">
                   <span className="w-2.5 h-2.5 rounded-full bg-red-400 mr-2.5" />
                   QUEUE CLOSED BY OWNER
@@ -383,7 +431,7 @@ export default function LiveQueueTracker() {
               ) : (
                 <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-widest text-white shadow-sm border border-white/20">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 mr-2.5 animate-ping" />
-                  LIVE STATUS
+                  LIVE QUEUE ACTIVE
                 </span>
               )}
             </div>
@@ -405,20 +453,33 @@ export default function LiveQueueTracker() {
             {/* Ambient Radial Backlight Glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] bg-[radial-gradient(circle_at_center,_rgba(124,58,237,0.15)_0%,_rgba(79,70,229,0.08)_50%,_transparent_70%)] blur-3xl pointer-events-none" />
 
-            {/* Closed Queue Notice if Owner Closed Queue */}
-            {isClosed && (
-              <div className="mb-8 p-6 bg-red-950/60 border-l-4 border-red-500 rounded-2xl flex items-start text-red-200 shadow-md">
-                <Lock className="w-6 h-6 text-red-400 mr-4 mt-0.5 shrink-0" />
+            {/* TURN ARRIVED BANNER (When owner calls next patient) */}
+            {isMyTurn && (
+              <div className="mb-8 p-6 bg-emerald-950/80 border-2 border-emerald-500 rounded-2xl flex items-start text-emerald-200 shadow-[0_0_30px_rgba(16,185,129,0.3)] animate-pulse">
+                <CheckCircle2 className="w-8 h-8 text-emerald-400 mr-4 mt-0.5 shrink-0" />
                 <div>
-                  <h4 className="text-lg font-black text-white mb-1">Queue Closed by Store Owner / Admin</h4>
-                  <p className="text-sm font-medium text-red-200">
-                    The live queue for this provider is currently closed by the owner in their Live Queue dashboard. No new patients are being admitted at this time.
+                  <h4 className="text-2xl font-black text-white mb-1">🎉 YOUR TURN HAS ARRIVED!</h4>
+                  <p className="text-base font-bold text-emerald-200">
+                    Token #{myTokenNumber} is currently being called by the doctor! Please enter the consultation room immediately.
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Position & Estimated Wait Section (Data configured by owner/admin) */}
+            {/* Closed Queue Notice ONLY if Owner explicitly closed queue */}
+            {isClosed && !isMyTurn && (
+              <div className="mb-8 p-6 bg-red-950/60 border-l-4 border-red-500 rounded-2xl flex items-start text-red-200 shadow-md">
+                <Lock className="w-6 h-6 text-red-400 mr-4 mt-0.5 shrink-0" />
+                <div>
+                  <h4 className="text-lg font-black text-white mb-1">Queue Closed by Store Owner / Admin</h4>
+                  <p className="text-sm font-medium text-red-200">
+                    The live queue for this provider is currently closed by the owner in their Live Queue dashboard.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Position & Estimated Wait Section */}
             <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 pb-8 border-b border-slate-800">
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center">
@@ -429,7 +490,7 @@ export default function LiveQueueTracker() {
                     {userPosition}
                   </span>
                   <span className="text-2xl sm:text-3xl text-slate-500 font-extrabold ml-3 tabular-nums">
-                    / {totalInQueue}
+                    / {Math.max(1, totalInQueue)}
                   </span>
                 </div>
                 <p className="text-xs font-medium text-slate-400 mt-2">
@@ -442,7 +503,7 @@ export default function LiveQueueTracker() {
                   <Clock className="w-4 h-4 mr-2 text-indigo-400" /> ESTIMATED WAIT
                 </p>
                 <div className="text-5xl sm:text-6xl font-black text-indigo-400 flex items-baseline tabular-nums tracking-tight">
-                  {estimatedWait} <span className="text-2xl font-bold ml-2.5 text-indigo-300">mins</span>
+                  {isMyTurn ? 0 : estimatedWait} <span className="text-2xl font-bold ml-2.5 text-indigo-300">mins</span>
                 </div>
                 <p className="text-xs font-medium text-slate-400 mt-2">
                   Set in owner dashboard: <span className="text-slate-300 font-bold">{ownerConsultationMins}m</span> / patient
@@ -458,7 +519,11 @@ export default function LiveQueueTracker() {
               </div>
               <div className="h-4 w-full bg-slate-800 rounded-full overflow-hidden relative p-0.5">
                 <div
-                  className="h-full bg-gradient-to-r from-purple-600 via-indigo-500 to-purple-500 rounded-full transition-all duration-1000 ease-out relative shadow-[0_0_15px_rgba(99,102,241,0.6)]"
+                  className={`h-full rounded-full transition-all duration-1000 ease-out relative ${
+                    isMyTurn
+                      ? 'bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.8)]'
+                      : 'bg-gradient-to-r from-purple-600 via-indigo-500 to-purple-500 shadow-[0_0_15px_rgba(99,102,241,0.6)]'
+                  }`}
                   style={{ width: `${progressPercent}%` }}
                 >
                   <div className="absolute inset-0 bg-white/20 w-1/3 -skew-x-12 animate-[shimmer_2s_infinite]" />
@@ -470,9 +535,11 @@ export default function LiveQueueTracker() {
                 className="absolute top-10 -ml-4 transition-all duration-1000 ease-out flex flex-col items-center pointer-events-none"
                 style={{ left: `${progressPercent}%` }}
               >
-                <div className="bg-slate-900 border-4 border-indigo-500 rounded-full w-8 h-8 shadow-xl flex items-center justify-center relative">
-                  <span className="w-2.5 h-2.5 bg-indigo-400 rounded-full animate-ping absolute" />
-                  <span className="w-2.5 h-2.5 bg-indigo-400 rounded-full relative z-10" />
+                <div className={`border-4 rounded-full w-8 h-8 shadow-xl flex items-center justify-center relative ${
+                  isMyTurn ? 'bg-emerald-950 border-emerald-400' : 'bg-slate-900 border-indigo-500'
+                }`}>
+                  <span className={`w-2.5 h-2.5 rounded-full animate-ping absolute ${isMyTurn ? 'bg-emerald-400' : 'bg-indigo-400'}`} />
+                  <span className={`w-2.5 h-2.5 rounded-full relative z-10 ${isMyTurn ? 'bg-emerald-400' : 'bg-indigo-400'}`} />
                 </div>
               </div>
             </div>
@@ -487,11 +554,11 @@ export default function LiveQueueTracker() {
               </div>
             )}
 
-            {/* Action Buttons - Matches Orange/Red Gradient in Screenshot */}
+            {/* Action Buttons */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <button
                 onClick={handleRunningLate}
-                disabled={isLate || isClosed}
+                disabled={isLate || isClosed || isMyTurn}
                 className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-extrabold text-base shadow-lg transition-all disabled:opacity-50"
               >
                 <Navigation className="w-5 h-5 mr-3 text-white fill-white/20" />
@@ -532,7 +599,7 @@ export default function LiveQueueTracker() {
     );
   }
 
-  // 3. ALL HEALTHCARE QUEUES LIST VIEW
+  // 4. ALL HEALTHCARE QUEUES LIST VIEW
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col font-sans">
       {/* Header Bar */}
@@ -590,7 +657,7 @@ export default function LiveQueueTracker() {
         </div>
       </div>
 
-      {/* Error Message Toast Banner if Queue Closed */}
+      {/* Error Message Toast Banner */}
       {errorMsg && (
         <div className="max-w-6xl mx-auto px-6 pt-6">
           <div className="p-4 bg-red-900/40 border border-red-500/50 rounded-xl flex items-center justify-between text-red-200">
@@ -625,7 +692,7 @@ export default function LiveQueueTracker() {
         {/* Queues Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredQueues.map((item) => {
-            const isClosed = item.queueStatus !== 'open' || item.acceptingPatients === false || item.ownerQueueEnabled === false;
+            const isClosed = item.queueStatus === 'closed';
             const consultationMins = item.consultationMinutes || 15;
 
             return (
@@ -668,7 +735,7 @@ export default function LiveQueueTracker() {
                     {item.address}
                   </p>
 
-                  {/* Queue Stats (Exact Data configured by owner/admin) */}
+                  {/* Queue Stats */}
                   <div className="grid grid-cols-2 gap-3 p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 mb-6">
                     <div>
                       <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
