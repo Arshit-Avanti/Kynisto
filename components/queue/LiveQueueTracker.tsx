@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Clock, MapPin, AlertCircle, XCircle, CheckCircle2, Navigation, User, Phone, Bell, ArrowLeft, Search, Building2, Stethoscope, Activity, Sparkles, Filter, ChevronRight, Lock, RefreshCw, AlertTriangle, PartyPopper } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/client-api';
 
 interface HealthcareQueueItem {
@@ -145,6 +146,7 @@ const defaultHealthcareProviders: HealthcareQueueItem[] = [
 ];
 
 export default function LiveQueueTracker() {
+  const router = useRouter();
   const [view, setView] = useState<'list' | 'ticket'>('list');
   const [queues, setQueues] = useState<HealthcareQueueItem[]>(defaultHealthcareProviders);
   const [selectedQueue, setSelectedQueue] = useState<HealthcareQueueItem | null>(null);
@@ -241,6 +243,13 @@ export default function LiveQueueTracker() {
     setSelectedQueue(item);
 
     try {
+      const auth = await apiFetch<{ user?: { id: string } }>('/api/auth/me').catch(() => null);
+      if (!auth || !auth.user) {
+        setIsJoining(false);
+        router.push(`/login?returnTo=${encodeURIComponent(window.location.pathname)}`);
+        return;
+      }
+
       const response = await apiFetch<{ state: PatientQueueStateResponse['state'] }>('/api/healthcare/queue', {
         method: 'POST',
         json: { action: 'join', storeId: String(item.id) },
@@ -250,7 +259,10 @@ export default function LiveQueueTracker() {
         const { entry, consultationMinutes, queueStatus } = response.state;
         setIsQueueOpen(queueStatus !== 'closed');
         setCurrentEntryId(entry.id);
-        setEntryStatus(entry.status === 'completed' ? 'waiting' : entry.status);
+        
+        // Ensure that a newly joined/existing entry when joining is treated as 'waiting' if it somehow comes back as 'completed'
+        const initialStatus = entry.status === 'completed' ? 'waiting' : entry.status;
+        setEntryStatus(initialStatus);
         const pos = entry.position || 1;
         setUserPosition(pos);
         setMyTokenNumber(entry.tokenNumber);
@@ -372,7 +384,7 @@ export default function LiveQueueTracker() {
           <PartyPopper className="w-12 h-12 text-emerald-400" />
         </div>
         <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-          Your turn is completed
+          Thanks for Participating in Queue
         </h2>
         <p className="text-lg sm:text-xl text-slate-300 font-medium mt-4 max-w-lg leading-relaxed">
           Your consultation is completed. We hope you had a smooth experience!

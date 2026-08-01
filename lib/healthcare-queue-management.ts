@@ -202,6 +202,10 @@ export async function operateHealthcareQueue(options: {
       .bind(entry.tokenNumber, actorId, now, storeId),
     db.prepare("INSERT INTO healthcare_queue_events (id, store_id, entry_id, actor_id, event_type, metadata, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
       .bind(crypto.randomUUID(), storeId, entry.id, actorId, status, JSON.stringify({ tokenNumber: entry.tokenNumber }), now),
+    ...(!entry.isEmergency && !entry.isWalkIn && status === "completed" ? [db.prepare("INSERT INTO notifications (id, user_id, audience, type, title, message, link, created_at) VALUES (?, ?, 'user', 'queue', 'Visit completed', ?, '/healthcare', ?)")
+      .bind(crypto.randomUUID(), entry.userId, `Your visit at ${provider.name} is complete.`, now)] : []),
+    ...(!entry.isEmergency && !entry.isWalkIn && status === "skipped" ? [db.prepare("INSERT INTO notifications (id, user_id, audience, type, title, message, link, created_at) VALUES (?, ?, 'user', 'queue', 'Skipped', ?, '/healthcare', ?)")
+      .bind(crypto.randomUUID(), entry.userId, `Your token was skipped at ${provider.name}.`, now)] : []),
   ]);
   return { ok: true, status };
 }

@@ -32,8 +32,10 @@ export async function POST(request: Request) {
     const today = indiaServiceDate();
 
     if (action === "join") {
+      await db.prepare("UPDATE healthcare_queue_entries SET active_key = NULL WHERE user_id = ? AND status IN ('completed','cancelled','left','expired','removed') AND active_key IS NOT NULL")
+        .bind(session.user.id).run();
       const state = await patientQueueState(storeId, session.user.id);
-      if (state?.entry) return noStoreJson({ state, existing: true });
+      if (state?.entry && state.entry.status !== 'completed') return noStoreJson({ state, existing: true });
       if (state?.activeQueue) throw new HttpError(409, "You are already in an active healthcare queue. Please leave or complete your current queue before joining another clinic.", "ACTIVE_QUEUE_EXISTS");
       if (!state?.queueAvailable) throw new HttpError(409, "This live queue is not open.", "QUEUE_CLOSED");
       const existing = await activeHealthcareQueueForUser(session.user.id);

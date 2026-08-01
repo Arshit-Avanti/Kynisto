@@ -53,26 +53,61 @@ const modernCleanTechStyles = `
                       radial-gradient(circle at 85% 75%, rgba(59, 130, 246, 0.12) 0%, transparent 45%) !important;
     color: #f8fafc !important;
   }
-  .searchBox, .healthSearch, .productIntro form, .locationPill, .categoryTile, .storeCard, .advancedFilters input, .providerGrid article {
+  
+  /* Mode Dark Styles */
+  .mode-dark .searchBox, .mode-dark .healthSearch, .mode-dark .productIntro form, .mode-dark .locationPill, .mode-dark .categoryTile, .mode-dark .storeCard, .mode-dark .advancedFilters input, .mode-dark .providerGrid article {
     border-radius: 16px !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
     backdrop-filter: blur(25px) !important;
     -webkit-backdrop-filter: blur(25px) !important;
     transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
     color: #ffffff !important;
   }
-  .categoryTile strong, .categoryTile b, .categoryTile span, .storeCard h3, .storeCard b, .storeCard p, .providerGrid h3 {
+  .mode-dark .categoryTile strong, .mode-dark .categoryTile b, .mode-dark .categoryTile span, .mode-dark .storeCard h3, .mode-dark .storeCard b, .mode-dark .storeCard p, .mode-dark .providerGrid h3 {
     color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
     text-shadow: 0 1px 4px rgba(0,0,0,0.8) !important;
   }
-  .topbar a, .topbar button, .headerActions a, .headerActions button, .textButton, .accountButton, .savedButton {
+  .mode-dark .topbar a, .mode-dark .topbar button, .mode-dark .headerActions a, .mode-dark .headerActions button, .mode-dark .textButton, .mode-dark .accountButton, .mode-dark .savedButton {
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
     font-weight: 700 !important;
     font-size: 14px !important;
     transition: all 0.2s ease !important;
+  }
+  .mode-dark .sectionHeading h2, .mode-dark .sectionHeading h3, .mode-dark .hero h1, .mode-dark .hero p, .mode-dark h2, .mode-dark h3 {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    text-shadow: none !important;
+  }
+
+  /* Mode Light Styles (High Contrast Black Ink for Crisp Light Mode) */
+  .mode-light .searchBox, .mode-light .healthSearch, .mode-light .productIntro form, .mode-light .locationPill, .mode-light .categoryTile, .mode-light .storeCard, .mode-light .advancedFilters input, .mode-light .providerGrid article {
+    border-radius: 16px !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    background: #ffffff !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+    color: #0f172a !important;
+  }
+  .mode-light .categoryTile strong, .mode-light .categoryTile b, .mode-light .categoryTile span, .mode-light .storeCard h3, .mode-light .storeCard b, .mode-light .storeCard p, .mode-light .providerGrid h3 {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    text-shadow: none !important;
+  }
+  .mode-light .topbar a, .mode-light .topbar button, .mode-light .headerActions a, .mode-light .headerActions button, .mode-light .textButton, .mode-light .accountButton, .mode-light .savedButton {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    text-shadow: none !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    transition: all 0.2s ease !important;
+  }
+  .mode-light .sectionHeading h2, .mode-light .sectionHeading h3, .mode-light .hero h1, .mode-light .hero p, .mode-light h2, .mode-light h3 {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    text-shadow: none !important;
   }
   .topbar a:hover, .topbar button:hover, .headerActions a:hover, .headerActions button:hover, .textButton:hover {
     color: #FF5722 !important;
@@ -93,15 +128,7 @@ const modernCleanTechStyles = `
     color: #FF8A00 !important;
     font-weight: 700 !important;
   }
-  .sectionHeading h2, .sectionHeading h3, .hero p, h2, h3 {
-    color: #ffffff !important;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.9) !important;
-  }
   .hero h1 {
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-    text-shadow: none !important;
-    filter: none !important;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif !important;
     font-weight: 850 !important;
     letter-spacing: -0.06em !important;
@@ -1314,9 +1341,14 @@ export default function Home() {
           </label>
         </div>
 
-        <div className="resultsBar">
-          <span><b>{catalogTotal}</b> places found</span>
-          {(query || category !== "All") && <span>for {query && <b>“{query}”</b>} {query && category !== "All" ? "in" : ""} {category !== "All" && <b>{category}</b>}</span>}
+        <div className="sectionHeading" style={{ marginTop: "36px", marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <span className="kicker" style={{ color: "#FF5722", fontWeight: 700 }}>📍 Verified Local Services</span>
+            <h2 className="highContrastText" style={{ fontSize: "1.8rem", fontWeight: 800, margin: "4px 0 0 0" }}>Recommended Stores Nearby Me</h2>
+          </div>
+          <div className="resultsBar" style={{ margin: 0 }}>
+            <span><b>{catalogTotal}</b> places found</span>
+          </div>
         </div>
 
         {catalogLoading ? (
