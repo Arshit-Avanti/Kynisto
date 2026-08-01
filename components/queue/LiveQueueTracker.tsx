@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Clock, MapPin, AlertCircle, XCircle, CheckCircle2, Navigation } from 'lucide-react';
+import { Clock, MapPin, AlertCircle, XCircle, CheckCircle2, Navigation, User, Phone, Bell, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 interface QueuePosition {
   currentPosition: number;
@@ -17,7 +18,7 @@ const mockQueue: QueuePosition = {
   totalInQueue: 12,
   estimatedWaitMinutes: 15,
   status: 'waiting',
-  storeName: 'Kynisto Flagship Store',
+  storeName: 'City Hospital - Dr. Sharma',
   storeLocation: 'MG Road, Bangalore'
 };
 
@@ -40,14 +41,13 @@ export default function LiveQueueTracker() {
           estimatedWaitMinutes: Math.max(0, prev.estimatedWaitMinutes - 4)
         };
       });
-    }, 15000); // move forward every 15s for demo
+    }, 10000); // move forward every 10s for demo
     return () => clearInterval(interval);
   }, [queueInfo.status, isCancelled]);
 
   const handleRunningLate = () => {
     setIsLate(true);
-    // Usually would call API here
-    setTimeout(() => setIsLate(false), 4000);
+    setTimeout(() => setIsLate(false), 5000);
   };
 
   const handleNotComing = () => {
@@ -57,20 +57,25 @@ export default function LiveQueueTracker() {
 
   if (queueInfo.status === 'cancelled') {
     return (
-      <div className="max-w-md mx-auto p-6 bg-white dark:bg-black rounded-3xl border border-red-200 dark:border-red-800/50 shadow-xl text-center">
-        <XCircle className="w-16 h-16 mx-auto text-red-500 mb-4" />
-        <h2 className="text-2xl font-black text-gray-900 dark:text-white">Queue Cancelled</h2>
-        <p className="text-gray-700 dark:text-gray-300 font-bold mt-2">You have left the queue.</p>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center p-6 text-center">
+        <XCircle className="w-24 h-24 text-red-500 mb-6" />
+        <h2 className="text-4xl font-black text-gray-900 dark:text-white">Queue Cancelled</h2>
+        <p className="text-xl text-gray-700 dark:text-gray-300 font-bold mt-4">You have left the queue.</p>
+        <Link href="/" className="mt-8 px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-black font-bold rounded-full">
+          Return Home
+        </Link>
       </div>
     );
   }
 
   if (queueInfo.status === 'ready') {
     return (
-      <div className="max-w-md mx-auto p-6 bg-green-50 dark:bg-green-900/20 rounded-3xl border border-green-200 dark:border-green-800/50 shadow-xl text-center animate-in zoom-in">
-        <CheckCircle2 className="w-16 h-16 mx-auto text-green-600 dark:text-green-400 mb-4 animate-bounce" />
-        <h2 className="text-3xl font-black text-green-900 dark:text-green-100">It's your turn!</h2>
-        <p className="text-green-800 dark:text-green-200 font-bold mt-2">Please head to the counter at {queueInfo.storeName}.</p>
+      <div className="min-h-screen bg-green-50 dark:bg-green-950 flex flex-col items-center justify-center p-6 text-center animate-in zoom-in">
+        <CheckCircle2 className="w-32 h-32 text-green-600 dark:text-green-400 mb-8 animate-bounce" />
+        <h2 className="text-5xl font-black text-green-900 dark:text-green-100 mb-4">It's your turn!</h2>
+        <p className="text-2xl text-green-800 dark:text-green-200 font-bold max-w-lg">
+          Please head to the clinic room at {queueInfo.storeName}.
+        </p>
       </div>
     );
   }
@@ -78,86 +83,142 @@ export default function LiveQueueTracker() {
   const progressPercent = ((queueInfo.totalInQueue - queueInfo.currentPosition) / queueInfo.totalInQueue) * 100;
 
   return (
-    <div className="max-w-md mx-auto bg-white dark:bg-black rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden">
+    <div className="min-h-screen bg-gray-50 dark:bg-black flex flex-col overflow-hidden relative">
       {/* Header */}
-      <div className="p-6 bg-gradient-to-br from-indigo-600 to-purple-700 text-white relative">
-        <div className="absolute top-0 right-0 p-4 opacity-20">
-          <Clock className="w-24 h-24" />
+      <div className="bg-gradient-to-br from-indigo-600 via-purple-700 to-indigo-900 text-white pb-24 pt-8 px-6 lg:px-12 relative shadow-lg">
+        <div className="absolute top-0 right-0 p-8 opacity-10">
+          <Clock className="w-64 h-64" />
         </div>
-        <div className="relative z-10">
-          <span className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-widest text-white mb-4">
-            Live Queue
-          </span>
-          <h2 className="text-2xl font-black text-white">{queueInfo.storeName}</h2>
-          <p className="flex items-center text-indigo-100 font-bold mt-1 text-sm">
-            <MapPin className="w-4 h-4 mr-1" /> {queueInfo.storeLocation}
-          </p>
+        <div className="relative z-10 max-w-5xl mx-auto flex flex-col">
+          <Link href="/" className="flex items-center text-indigo-100 hover:text-white font-bold mb-8 w-fit transition-colors">
+             <ArrowLeft className="w-5 h-5 mr-2" /> Back
+          </Link>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-sm font-black uppercase tracking-widest text-white mb-4 shadow-sm border border-white/10">
+                <span className="w-2 h-2 rounded-full bg-green-400 mr-2 animate-pulse" /> Live Status
+              </span>
+              <h2 className="text-4xl md:text-5xl font-black text-white leading-tight">{queueInfo.storeName}</h2>
+              <p className="flex items-center text-indigo-100 font-medium mt-3 text-lg md:text-xl">
+                <MapPin className="w-5 h-5 mr-2" /> {queueInfo.storeLocation}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="p-6">
-        <div className="flex justify-between items-end mb-8">
-          <div>
-            <p className="text-sm font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Your Position</p>
-            <div className="text-6xl font-black text-gray-900 dark:text-white mt-1">
-              {queueInfo.currentPosition}
-              <span className="text-2xl text-gray-400 dark:text-gray-500 font-bold ml-1">/ {queueInfo.totalInQueue}</span>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-sm font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Est. Wait</p>
-            <div className="text-3xl font-black text-indigo-600 dark:text-indigo-400 mt-1">
-              {queueInfo.estimatedWaitMinutes} <span className="text-lg">min</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Timeline Progress */}
-        <div className="relative mb-8 pt-4">
-          <div className="h-4 w-full bg-gray-100 dark:bg-gray-900 rounded-full overflow-hidden shadow-inner">
-            <div 
-              className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 transition-all duration-1000 ease-out rounded-full"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          <div 
-            className="absolute top-0 -ml-3 transition-all duration-1000 ease-out"
-            style={{ left: `${progressPercent}%` }}
-          >
-            <div className="bg-white dark:bg-gray-800 border-4 border-indigo-600 rounded-full w-6 h-6 shadow-lg" />
-          </div>
-        </div>
-
-        {isLate && (
-          <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800/50 rounded-2xl flex items-center animate-in slide-in-from-bottom-2">
-            <AlertCircle className="w-6 h-6 text-yellow-600 dark:text-yellow-500 mr-3 shrink-0" />
-            <p className="text-sm font-bold text-yellow-800 dark:text-yellow-200">
-              We notified the store you're running late. Your spot is held for 10 more minutes.
-            </p>
-          </div>
-        )}
-
-        {/* Action Controls */}
-        <div className="grid grid-cols-2 gap-4">
-          <button 
-            onClick={handleRunningLate}
-            disabled={isLate}
-            className="flex flex-col items-center justify-center p-4 rounded-2xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800 transition-colors disabled:opacity-50 text-gray-900 dark:text-white"
-          >
-            <Navigation className="w-6 h-6 mb-2 text-indigo-600 dark:text-indigo-400" />
-            <span className="font-extrabold text-sm">Running Late</span>
-          </button>
+      {/* Main Content - Lifted up over header */}
+      <div className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20 pb-12">
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 p-8 md:p-12">
           
-          <button 
-            onClick={handleNotComing}
-            className="flex flex-col items-center justify-center p-4 rounded-2xl bg-red-50 hover:bg-red-100 dark:bg-red-900/10 dark:hover:bg-red-900/20 border border-red-200 dark:border-red-900/30 transition-colors text-red-700 dark:text-red-400"
-          >
-            <XCircle className="w-6 h-6 mb-2" />
-            <span className="font-extrabold text-sm">Not Coming</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12 border-b border-gray-100 dark:border-gray-800 pb-12">
+            <div>
+              <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 flex items-center">
+                 <User className="w-4 h-4 mr-2" /> Your Position
+              </p>
+              <div className="flex items-baseline">
+                <span className="text-8xl md:text-9xl font-black text-gray-900 dark:text-white tabular-nums tracking-tighter">
+                  {queueInfo.currentPosition}
+                </span>
+                <span className="text-3xl text-gray-400 dark:text-gray-500 font-bold ml-4 tabular-nums">
+                  / {queueInfo.totalInQueue}
+                </span>
+              </div>
+            </div>
+            
+            <div className="md:text-right flex flex-col md:items-end justify-center">
+              <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 flex items-center md:justify-end">
+                 <Clock className="w-4 h-4 mr-2" /> Estimated Wait
+              </p>
+              <div className="text-6xl md:text-7xl font-black text-indigo-600 dark:text-indigo-400 mt-1 flex items-baseline tabular-nums tracking-tighter">
+                {queueInfo.estimatedWaitMinutes} <span className="text-2xl font-bold ml-3 text-indigo-400 dark:text-indigo-500">mins</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Timeline Progress */}
+          <div className="relative mb-12 pt-8 pb-4">
+            <div className="flex justify-between text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+              <span>Start</span>
+              <span>Your Turn</span>
+            </div>
+            <div className="h-6 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner relative">
+              <div 
+                className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 transition-all duration-1000 ease-out rounded-full relative overflow-hidden"
+                style={{ width: `${progressPercent}%` }}
+              >
+                {/* Shimmer effect */}
+                <div className="absolute inset-0 bg-white/20 w-1/2 -skew-x-12 animate-[shimmer_2s_infinite] -translate-x-full" />
+              </div>
+            </div>
+            <div 
+              className="absolute top-12 -ml-5 transition-all duration-1000 ease-out flex flex-col items-center"
+              style={{ left: `${progressPercent}%` }}
+            >
+              <div className="bg-white dark:bg-gray-900 border-4 border-indigo-600 rounded-full w-10 h-10 shadow-xl flex items-center justify-center relative z-10">
+                 <span className="w-3 h-3 bg-indigo-600 rounded-full animate-ping absolute" />
+                 <span className="w-3 h-3 bg-indigo-600 rounded-full relative z-10" />
+              </div>
+            </div>
+          </div>
+
+          {isLate && (
+            <div className="mb-10 p-6 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 rounded-xl flex items-start animate-in slide-in-from-bottom-2 shadow-sm">
+              <AlertCircle className="w-6 h-6 text-yellow-600 dark:text-yellow-500 mr-4 mt-0.5 shrink-0" />
+              <div>
+                <h4 className="text-lg font-bold text-yellow-800 dark:text-yellow-300 mb-1">We notified the clinic</h4>
+                <p className="text-yellow-700 dark:text-yellow-400 font-medium">
+                  Your spot will be held for 10 additional minutes. Please arrive as soon as possible.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Action Controls */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
+            <button 
+              onClick={handleRunningLate}
+              disabled={isLate}
+              className="group flex items-center justify-center p-6 rounded-2xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/50 dark:hover:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 transition-all disabled:opacity-50 text-gray-900 dark:text-white"
+            >
+              <div className="bg-indigo-100 dark:bg-indigo-900/30 p-3 rounded-full mr-4 group-hover:scale-110 transition-transform">
+                <Navigation className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <span className="font-extrabold text-lg">Running Late</span>
+            </button>
+            
+            <button 
+              onClick={handleNotComing}
+              className="group flex items-center justify-center p-6 rounded-2xl bg-red-50 hover:bg-red-100 dark:bg-red-900/10 dark:hover:bg-red-900/20 border-2 border-red-100 dark:border-red-900/30 transition-all text-red-700 dark:text-red-400"
+            >
+              <div className="bg-red-100 dark:bg-red-900/30 p-3 rounded-full mr-4 group-hover:scale-110 transition-transform">
+                <XCircle className="w-6 h-6 text-red-600 dark:text-red-500" />
+              </div>
+              <span className="font-extrabold text-lg">Cancel Visit</span>
+            </button>
+          </div>
+
+        </div>
+        
+        {/* Support Footer */}
+        <div className="mt-8 text-center flex items-center justify-center space-x-6 text-gray-500 dark:text-gray-400 font-medium">
+          <button className="flex items-center hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <Phone className="w-4 h-4 mr-2" /> Call Clinic
+          </button>
+          <span className="w-1 h-1 bg-gray-300 dark:bg-gray-700 rounded-full" />
+          <button className="flex items-center hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <Bell className="w-4 h-4 mr-2" /> Notification Settings
           </button>
         </div>
+        
       </div>
+      
+      {/* Shimmer CSS */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes shimmer {
+          100% { transform: translateX(200%); }
+        }
+      `}} />
     </div>
   );
 }

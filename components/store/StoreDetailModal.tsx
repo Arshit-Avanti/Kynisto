@@ -22,119 +22,120 @@ export default function StoreDetailModal({ store, isOpen, onClose }: StoreDetail
 
   const handlePurchase = () => {
     if (membershipAmount < minAmount) {
-      alert(`Minimum membership amount is ₹${minAmount}`);
+      alert(`MINIMUM MEMBERSHIP AMOUNT IS ₹${minAmount}`);
       return;
     }
-    alert(`Purchasing membership for ₹${membershipAmount}. Store receives ₹${storeReceives}.`);
+    alert(`PURCHASING MEMBERSHIP FOR ₹${membershipAmount}. STORE RECEIVES ₹${storeReceives}.`);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 font-mono">
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-white/90 dark:bg-black/90 backdrop-blur-md"
         onClick={onClose}
       />
       
-      <div className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-black border border-black dark:border-white shadow-[8px_8px_0_0_rgba(0,0,0,1)] dark:shadow-[8px_8px_0_0_rgba(255,255,255,1)] flex flex-col max-h-[90vh]">
         {/* Header Image */}
-        <div className="relative h-48 sm:h-64 shrink-0">
+        <div className="relative h-48 sm:h-64 shrink-0 border-b border-black dark:border-white filter grayscale">
           <img src={store.image} alt={store.name} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
           
           <button 
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-black/60 text-white rounded-full transition-colors backdrop-blur-md"
+            className="absolute top-4 right-4 p-2 bg-white dark:bg-black border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
           >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={1} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
           
-          <div className="absolute bottom-4 left-6 right-6 flex justify-between items-end">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1">{store.name}</h2>
-              <div className="flex items-center text-gray-200 text-sm">
-                <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                {store.address} ({store.distanceKm} km)
-              </div>
-            </div>
-            
-            <button 
-              onClick={handleDirections}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-lg"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-              </svg>
-              Directions
-            </button>
+          <div className="absolute bottom-4 left-6 bg-white dark:bg-black border border-black dark:border-white px-3 py-1.5">
+            <h2 className="text-lg font-bold uppercase tracking-widest text-black dark:text-white">{store.name}</h2>
           </div>
         </div>
         
         {/* Content */}
-        <div className="p-6 overflow-y-auto">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl text-center border border-gray-100 dark:border-gray-700">
-              <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Rating</div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white flex items-center justify-center gap-1">
-                {store.rating} <span className="text-yellow-400 text-lg">★</span>
+        <div className="p-6 overflow-y-auto text-black dark:text-white">
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-black dark:border-white">
+            <div className="flex items-center text-sm uppercase tracking-wider">
+              <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={1} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={1} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              {store.address} ({store.distanceKm} KM)
+            </div>
+            <button 
+              onClick={handleDirections}
+              className="flex items-center gap-2 border border-black dark:border-white px-3 py-1 text-xs uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={1} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+              Directions
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-0 mb-8 border-l border-t border-black dark:border-white">
+            <div className="p-4 border-r border-b border-black dark:border-white text-center">
+              <div className="text-[10px] uppercase tracking-widest mb-2">Rating</div>
+              <div className="text-xl font-bold flex items-center justify-center gap-1">
+                {store.rating.toFixed(1)}
               </div>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl text-center border border-gray-100 dark:border-gray-700">
-              <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Wait Time</div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{store.waitTimeMins}m</div>
+            <div className="p-4 border-r border-b border-black dark:border-white text-center">
+              <div className="text-[10px] uppercase tracking-widest mb-2">Wait Time</div>
+              <div className="text-xl font-bold">{store.waitTimeMins}M</div>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl text-center border border-gray-100 dark:border-gray-700">
-              <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Live Queue</div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{store.customerCount}</div>
+            <div className="p-4 border-r border-b border-black dark:border-white text-center">
+              <div className="text-[10px] uppercase tracking-widest mb-2">Live Queue</div>
+              <div className="text-xl font-bold">{store.customerCount}</div>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl text-center border border-gray-100 dark:border-gray-700">
-              <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Distance</div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{store.distanceKm}km</div>
+            <div className="p-4 border-r border-b border-black dark:border-white text-center">
+              <div className="text-[10px] uppercase tracking-widest mb-2">Distance</div>
+              <div className="text-xl font-bold">{store.distanceKm}KM</div>
             </div>
           </div>
           
           {/* Membership Section */}
-          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-6 rounded-3xl border border-indigo-100 dark:border-indigo-800">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Get Store Membership</h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm">
-              Support this store directly and get priority access. 
-              <span className="block mt-1 font-medium text-indigo-600 dark:text-indigo-400">
-                Minimum ₹{minAmount} (includes mandatory ₹{commission} Kynisto commission)
+          <div className="border border-black dark:border-white p-6 relative">
+            <div className="absolute -top-3 left-4 bg-white dark:bg-black px-2 text-[10px] uppercase tracking-widest border border-black dark:border-white">
+              Membership
+            </div>
+            <p className="mb-6 text-sm">
+              SUPPORT THIS STORE DIRECTLY AND GET PRIORITY ACCESS. 
+              <span className="block mt-2 font-bold">
+                MINIMUM ₹{minAmount} (INCLUDES MANDATORY ₹{commission} PLATFORM FEE)
               </span>
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 items-end">
               <div className="flex-1 w-full">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-[10px] uppercase tracking-widest mb-2">
                   Amount (₹)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">₹</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold">₹</span>
                   <input 
                     type="number"
                     min={minAmount}
                     value={membershipAmount}
                     onChange={(e) => setMembershipAmount(Number(e.target.value))}
-                    className="w-full pl-8 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-shadow text-lg font-medium"
+                    className="w-full pl-8 pr-4 py-2 border border-black dark:border-white bg-transparent text-black dark:text-white focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white text-lg font-bold"
                   />
                 </div>
               </div>
               
               <button 
                 onClick={handlePurchase}
-                className="w-full sm:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all transform hover:scale-[1.02] active:scale-95"
+                className="w-full sm:w-auto px-8 py-2.5 bg-black text-white dark:bg-white dark:text-black font-bold uppercase tracking-widest border border-black dark:border-white hover:bg-white hover:text-black dark:hover:bg-black dark:hover:text-white transition-colors"
               >
                 Purchase
               </button>
             </div>
             
-            <div className="mt-4 pt-4 border-t border-indigo-200 dark:border-indigo-800/50 flex justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Store receives: <strong className="text-gray-900 dark:text-white">₹{Math.max(0, storeReceives)}</strong></span>
-              <span className="text-gray-600 dark:text-gray-400">Kynisto commission: <strong className="text-gray-900 dark:text-white">₹{commission}</strong></span>
+            <div className="mt-6 pt-4 border-t border-black dark:border-white flex justify-between text-[10px] uppercase tracking-widest">
+              <span>STORE RECEIVES: <strong className="font-bold text-sm">₹{Math.max(0, storeReceives)}</strong></span>
+              <span>PLATFORM FEE: <strong className="font-bold text-sm">₹{commission}</strong></span>
             </div>
           </div>
         </div>

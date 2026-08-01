@@ -296,37 +296,31 @@ const modernCleanTechStyles = `
   
   /* Floating 3D Cards */
   .floatingCardsContainer {
-    position: relative; height: 260px; width: 100%; display: flex; justify-content: center; align-items: center; perspective: 1200px; z-index: 2; margin: 20px 0 60px 0;
+    position: relative; height: 180px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; z-index: 2; margin: 30px 0 40px 0;
   }
   .glassCard3D {
-    position: absolute;
+    position: relative;
     width: 200px; height: 130px;
-    background: linear-gradient(135deg, rgba(20,20,25,0.7) 0%, rgba(10,10,15,0.9) 100%);
-    backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-    border: 1px solid rgba(255, 87, 34, 0.3);
+    background: rgba(18, 18, 24, 0.8);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 87, 34, 0.4);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     display: flex; flex-direction: column; justify-content: center; align-items: center;
     color: #FFFFFF;
     text-decoration: none;
-    will-change: transform, box-shadow;
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
   .mode-light .glassCard3D {
-    background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(240,240,245,0.9) 100%);
-    border: 1px solid rgba(255, 87, 34, 0.3);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 87, 34, 0.5);
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     color: #000000;
   }
   .glassCard3D svg { margin-bottom: 12px; opacity: 0.9; }
   .glassCard3D b { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; }
   
-  .glassCard3D:nth-child(1) { transform: translateX(-160px) rotate(-6deg); z-index: 1; }
-  .glassCard3D:nth-child(2) { transform: translateX(0); z-index: 3; width: 230px; height: 150px; }
-  .glassCard3D:nth-child(3) { transform: translateX(160px) rotate(6deg); z-index: 1; }
-  
-  .glassCard3D:hover { transform: translateY(-8px) scale(1.05); z-index: 10; cursor: pointer; box-shadow: 0 20px 40px rgba(255, 87, 34, 0.2), 0 0 20px rgba(255, 87, 34, 0.3); border-color: rgba(255, 87, 34, 0.8); }
-  .mode-light .glassCard3D:hover { box-shadow: 0 20px 40px rgba(255, 87, 34, 0.2), 0 0 20px rgba(255, 87, 34, 0.3); border-color: rgba(255, 87, 34, 0.8); }
+  .glassCard3D:hover { cursor: pointer; border-color: rgba(255, 87, 34, 0.8) !important; box-shadow: 0 10px 30px rgba(255, 87, 34, 0.25) !important; }
   
   .highContrastText {
     color: var(--text-primary) !important;
@@ -418,6 +412,162 @@ const modernCleanTechStyles = `
     line-height: 1.6;
     font-size: 1.1rem;
     margin: 0;
+  }
+  
+  /* Interactive 3D Radar */
+  .radarSection {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 40px auto 80px auto;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+  }
+  .radarContainer {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    height: 450px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 40px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    perspective: 1000px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .mode-light .radarContainer {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+  .radarGrid {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: rotateX(60deg) translateY(-100px) translateZ(-200px);
+    transform-origin: center top;
+    animation: radarPan 20s linear infinite;
+  }
+  .mode-light .radarGrid {
+    background-image: 
+      linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+  }
+  @keyframes radarPan {
+    from { background-position: 0 0; }
+    to { background-position: 0 40px; }
+  }
+  .radarSweep {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1000px;
+    height: 1000px;
+    margin-top: -500px;
+    margin-left: -500px;
+    background: conic-gradient(from 0deg, transparent 70%, rgba(59, 130, 246, 0.1) 90%, rgba(59, 130, 246, 0.4) 100%);
+    border-radius: 50%;
+    transform: rotateX(60deg) translateZ(-50px);
+    animation: radarSpin 4s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes radarSpin {
+    from { transform: rotateX(60deg) translateZ(-50px) rotateZ(0deg); }
+    to { transform: rotateX(60deg) translateZ(-50px) rotateZ(360deg); }
+  }
+  .radarCenter {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #3B82F6;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #3B82F6, 0 0 40px #3B82F6;
+    z-index: 10;
+  }
+  .radarCenter::after {
+    content: '';
+    position: absolute;
+    top: -14px; left: -14px; right: -14px; bottom: -14px;
+    border: 1px solid rgba(59, 130, 246, 0.5);
+    border-radius: 50%;
+    animation: pingPulse 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  @keyframes pingPulse {
+    0% { transform: scale(0.5); opacity: 1; }
+    100% { transform: scale(2.5); opacity: 0; }
+  }
+  .radarPin {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translate(-50%, -100%);
+    cursor: pointer;
+    z-index: 5;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .radarPin:hover {
+    z-index: 20;
+    transform: translate(-50%, -120%) scale(1.1);
+  }
+  .pinDot {
+    width: 10px;
+    height: 10px;
+    background: #FF5722;
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(255, 87, 34, 0.8);
+    position: relative;
+  }
+  .pinDot.isClosed {
+    background: #94A3B8;
+    box-shadow: 0 0 10px rgba(148, 163, 184, 0.5);
+  }
+  .pinLine {
+    width: 1px;
+    height: 30px;
+    background: linear-gradient(to bottom, #FF5722, transparent);
+  }
+  .radarPin.isClosed .pinLine {
+    background: linear-gradient(to bottom, #94A3B8, transparent);
+  }
+  .pinLabel {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 12px;
+    color: #FFF;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    pointer-events: none;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+  .radarPin:hover .pinLabel {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .mode-light .pinLabel {
+    background: rgba(255, 255, 255, 0.8);
+    color: #000;
+    border: 1px solid rgba(0, 0, 0, 0.1);
   }
 `;
 
@@ -977,6 +1127,42 @@ export default function Home() {
 
           {/* Vertical Guide Line indicating scroll */}
           <div style={{ width: "2px", height: "80px", background: "linear-gradient(180deg, var(--text-primary) 0%, transparent 100%)", margin: "60px auto 0 auto", opacity: 0.3 }} />
+        </div>
+      </section>
+
+      {/* Interactive 3D Radar Section */}
+      <section className="radarSection" aria-label="Live Store Radar">
+        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+          <h2 className="highContrastText" style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace", fontSize: "1rem", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "8px", opacity: 0.8 }}>Live Radar</h2>
+          <p className="highContrastText" style={{ fontSize: "2rem", fontWeight: 700, letterSpacing: "-0.02em", margin: 0 }}>Discover what's around you.</p>
+        </div>
+        
+        <div className="radarContainer">
+          <div className="radarGrid" />
+          <div className="radarSweep" />
+          <div className="radarCenter" />
+          
+          {catalogStores.slice(0, 8).map((store, index) => {
+            const angle = (index * 45) * (Math.PI / 180);
+            const radius = 60 + (index * 25);
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+            
+            return (
+              <div 
+                key={store.id} 
+                className={`radarPin ${store.open ? "" : "isClosed"}`}
+                style={{ left: `calc(50% + ${x}px)`, top: `calc(50% + ${y}px)` }}
+                onClick={() => setSelectedStore(store)}
+              >
+                <div className="pinLabel">
+                  {store.icon} {store.name} • {store.distance.toFixed(1)}km
+                </div>
+                <div className={`pinDot ${store.open ? "" : "isClosed"}`} />
+                <div className="pinLine" />
+              </div>
+            );
+          })}
         </div>
       </section>
 
