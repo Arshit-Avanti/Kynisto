@@ -47,10 +47,11 @@ const Icons = {
 const modernCleanTechStyles = `
   .site, .healthPage, .productDiscovery {
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif !important;
-    background-color: #050507 !important;
-    background-image: radial-gradient(circle at 50% 15%, rgba(120, 119, 198, 0.16) 0%, transparent 45%),
-                      radial-gradient(circle at 15% 45%, rgba(255, 87, 34, 0.14) 0%, transparent 40%),
-                      radial-gradient(circle at 85% 75%, rgba(59, 130, 246, 0.12) 0%, transparent 45%) !important;
+    background-color: #060914 !important;
+    background-image: linear-gradient(120deg, #060914 0%, #0a0d1f 45%, #141030 75%, #1a0f2b 100%),
+                      radial-gradient(circle at 85% 25%, rgba(168, 85, 247, 0.22), transparent 55%),
+                      radial-gradient(circle at 95% 85%, rgba(236, 72, 153, 0.14), transparent 50%),
+                      radial-gradient(circle at 10% 90%, rgba(15, 23, 42, 0.55), transparent 60%) !important;
     color: #f8fafc !important;
   }
   

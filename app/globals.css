@@ -60,9 +60,11 @@ body {
   margin: 0;
   overflow-x: clip;
   -webkit-text-size-adjust: 100%;
-  background: #0f121b;
-  background-image: radial-gradient(circle at top right, #301423, transparent 70%),
-                    radial-gradient(circle at bottom left, #13131d, transparent 70%);
+  background: #060914;
+  background-image: linear-gradient(120deg, #060914 0%, #0a0d1f 45%, #141030 75%, #1a0f2b 100%),
+                    radial-gradient(circle at 85% 25%, rgba(168, 85, 247, 0.22), transparent 55%),
+                    radial-gradient(circle at 95% 85%, rgba(236, 72, 153, 0.14), transparent 50%),
+                    radial-gradient(circle at 10% 90%, rgba(15, 23, 42, 0.55), transparent 60%);
   color: #F8FAFC;
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
