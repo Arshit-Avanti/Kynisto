@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { VideoBackground } from "@/components/media/VideoBackground";
-import { ShaderCanvas } from "@/components/ui/ShaderCanvas";
 import { apiFetch } from "@/lib/client-api";
 
 type Category = {
@@ -45,248 +44,123 @@ const Icons = {
 };
 
 const modernCleanTechStyles = `
+  /* ── Base typography ── */
   .site, .healthPage, .productDiscovery {
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif !important;
-    background-color: #060914 !important;
-    background-image: linear-gradient(120deg, #060914 0%, #0a0d1f 45%, #141030 75%, #1a0f2b 100%),
-                      radial-gradient(circle at 85% 25%, rgba(168, 85, 247, 0.22), transparent 55%),
-                      radial-gradient(circle at 95% 85%, rgba(236, 72, 153, 0.14), transparent 50%),
-                      radial-gradient(circle at 10% 90%, rgba(15, 23, 42, 0.55), transparent 60%) !important;
-    color: #f8fafc !important;
-  }
-  
-  /* Mode Dark Styles */
-  .mode-dark .searchBox, .mode-dark .healthSearch, .mode-dark .productIntro form, .mode-dark .locationPill, .mode-dark .categoryTile, .mode-dark .storeCard, .mode-dark .advancedFilters input, .mode-dark .providerGrid article {
-    border-radius: 16px !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    backdrop-filter: blur(25px) !important;
-    -webkit-backdrop-filter: blur(25px) !important;
-    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    color: #ffffff !important;
-  }
-  .mode-dark .categoryTile strong, .mode-dark .categoryTile b, .mode-dark .categoryTile span, .mode-dark .storeCard h3, .mode-dark .storeCard b, .mode-dark .storeCard p, .mode-dark .providerGrid h3 {
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.8) !important;
-  }
-  .mode-dark .topbar a, .mode-dark .topbar button, .mode-dark .headerActions a, .mode-dark .headerActions button, .mode-dark .textButton, .mode-dark .accountButton, .mode-dark .savedButton {
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
-    transition: all 0.2s ease !important;
-  }
-  .mode-dark .sectionHeading h2, .mode-dark .sectionHeading h3, .mode-dark .hero h1, .mode-dark .hero p, .mode-dark h2, .mode-dark h3 {
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-    text-shadow: none !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
   }
 
-  /* Mode Light Styles (High Contrast Black Ink for Crisp Light Mode) */
-  .mode-light .searchBox, .mode-light .healthSearch, .mode-light .productIntro form, .mode-light .locationPill, .mode-light .categoryTile, .mode-light .storeCard, .mode-light .advancedFilters input, .mode-light .providerGrid article {
-    border-radius: 16px !important;
-    border: 1px solid rgba(0, 0, 0, 0.15) !important;
-    background: #ffffff !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
-    color: #0f172a !important;
+  /* ── Floating Glassmorphism Pill Navbar ── */
+  .topbar {
+    position: fixed !important;
+    top: 14px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: min(1280px, calc(100% - 32px)) !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 24px !important;
+    background: rgba(15, 17, 26, 0.82) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: 9999px !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), 0 0 24px rgba(139, 92, 246, 0.12) !important;
+    transition: all 0.3s ease !important;
+    height: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    grid-template-columns: none !important;
+    gap: 16px !important;
   }
-  .mode-light .categoryTile strong, .mode-light .categoryTile b, .mode-light .categoryTile span, .mode-light .storeCard h3, .mode-light .storeCard b, .mode-light .storeCard p, .mode-light .providerGrid h3 {
-    color: #0f172a !important;
-    -webkit-text-fill-color: #0f172a !important;
+
+  /* ── Navbar text visibility fix ── */
+  .topbar a, .topbar button, .topbar span, .topbar strong,
+  .headerActions a, .headerActions button, .textButton, .accountButton {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
     text-shadow: none !important;
   }
-  .mode-light .topbar a, .mode-light .topbar button, .mode-light .headerActions a, .mode-light .headerActions button, .mode-light .textButton, .mode-light .accountButton, .mode-light .savedButton {
-    color: #0f172a !important;
-    -webkit-text-fill-color: #0f172a !important;
-    text-shadow: none !important;
+  .topbar a:hover, .topbar button:hover, .textButton:hover {
+    color: #FF7A50 !important;
+    -webkit-text-fill-color: #FF7A50 !important;
+  }
+
+  /* ── Navigation links typography ── */
+  .textButton {
+    font-family: 'Inter', system-ui, sans-serif !important;
     font-weight: 700 !important;
-    font-size: 14px !important;
+    font-size: 13px !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: rgba(255, 255, 255, 0.92) !important;
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.92) !important;
+    padding: 7px 14px !important;
+    border-radius: 9999px !important;
     transition: all 0.2s ease !important;
   }
-  .mode-light .sectionHeading h2, .mode-light .sectionHeading h3, .mode-light .hero h1, .mode-light .hero p, .mode-light h2, .mode-light h3 {
-    color: #0f172a !important;
-    -webkit-text-fill-color: #0f172a !important;
-    text-shadow: none !important;
-  }
-  .topbar a:hover, .topbar button:hover, .headerActions a:hover, .headerActions button:hover, .textButton:hover {
-    color: #FF5722 !important;
-    -webkit-text-fill-color: #FF5722 !important;
-    text-shadow: 0 0 12px rgba(255, 87, 34, 0.6) !important;
-  }
-  .savedButton b {
-    background: rgba(255, 87, 34, 0.25) !important;
-    color: #FF8A00 !important;
-    -webkit-text-fill-color: #FF8A00 !important;
-    border: 1px solid rgba(255, 138, 0, 0.4) !important;
-    padding: 2px 8px !important;
-    border-radius: 10px !important;
-    font-size: 12px !important;
-    margin-left: 4px !important;
-  }
-  .categoryTile small {
-    color: #FF8A00 !important;
-    font-weight: 700 !important;
-  }
-  .hero h1 {
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif !important;
-    font-weight: 850 !important;
-    letter-spacing: -0.06em !important;
-  }
-  .searchBox input, .healthSearch input, .productIntro form input, .advancedFilters input {
-    background: transparent !important;
-    color: #ffffff !important;
-  }
-  .searchBox input::placeholder, .productIntro form input::placeholder {
-    color: rgba(255,255,255,0.75) !important;
-  }
-  .searchBox:focus-within, .healthSearch:focus-within, .productIntro form:focus-within, .advancedFilters input:focus {
-    border-color: #FF5722 !important;
-    box-shadow: 0 0 18px rgba(255, 87, 34, 0.45) !important;
-    outline: none !important;
-  }
-  .locationPill:hover, .categoryTile:hover {
-    border-color: rgba(255, 87, 34, 0.5) !important;
-    background: rgba(255, 255, 255, 0.12) !important;
-  }
-  .categoryTile {
-    transition: all 0.3s ease, transform 0.2s ease !important;
-  }
-  .categoryTile[aria-pressed="true"], .careTypes button.active {
-    background: rgba(255, 87, 34, 0.3) !important;
-    color: #fff !important;
-    border-color: #FF5722 !important;
-    box-shadow: 0 0 20px rgba(255, 87, 34, 0.45) !important;
-    transform: translateY(-2px) !important;
-  }
-  .categoryTile[aria-pressed="true"] svg, .careTypes button.active svg {
-    stroke: #FF7A00 !important;
-  }
-  .storeCard {
-    overflow: visible !important;
-    transform-style: preserve-3d !important;
-    transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, border-color 0.15s ease !important;
-    will-change: transform, box-shadow, border-color !important;
-    position: relative !important;
-  }
-  .storeCard::before {
-    content: '';
-    position: absolute; inset: -2px; z-index: -1;
-    border-radius: 18px;
-    background: radial-gradient(circle at 50% 0%, rgba(255, 87, 34, 0.5), rgba(59, 130, 246, 0.3), transparent 75%);
-    opacity: 0;
-    transition: opacity 0.15s ease;
-    pointer-events: none;
-  }
-  .storeCard:hover::before { opacity: 1; }
-  .storeCard .storeVisual {
-    border-top-left-radius: 16px !important;
-    border-top-right-radius: 16px !important;
-    overflow: hidden !important;
-  }
-  .storeCard > * {
-    position: relative;
-    z-index: 1;
-    border-radius: inherit;
-  }
-  .storeCard:hover, .providerGrid article:hover {
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 87, 34, 0.4) !important;
-    border-color: rgba(255, 87, 34, 0.8) !important;
-    transform: perspective(1200px) rotateX(6deg) rotateY(-4deg) translateZ(20px) translateY(-10px) !important;
-    z-index: 10;
-  }
-  .storeCard:hover .storeBody {
-    transform: translateZ(30px);
-  }
-  .storeCard .storeBody {
-    transition: transform 0.15s ease;
-  }
-  .storeVisual, .providerTop, .productVisual {
-    position: relative !important;
-    background: rgba(0, 0, 0, 0.2) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-    overflow: hidden !important;
-  }
-  .storeVisual img, .productVisual img {
-    transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-  }
-  .storeCard:hover .storeVisual img, .storeCard:hover .productVisual img, article:hover .productVisual img {
-    transform: scale(1.05) !important;
-  }
-  .statusBadge, .liveQueueBadge {
-    border-radius: 4px !important;
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
-    backdrop-filter: blur(8px) !important;
-  }
-  .statusBadge.isOpen {
-    background: rgba(34, 197, 94, 0.2) !important;
-    color: #86efac !important;
-    border: 1px solid rgba(34, 197, 94, 0.3) !important;
-    box-shadow: 0 0 10px rgba(34, 197, 94, 0.2) !important;
-  }
-  .statusBadge.isClosed {
+  .textButton:hover {
     background: rgba(255, 255, 255, 0.1) !important;
-    color: #94a3b8 !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
   }
-  .distanceBadge {
-    border-radius: 4px !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    color: #cbd5e1 !important;
-    background: rgba(0, 0, 0, 0.5) !important;
-    backdrop-filter: blur(4px) !important;
+
+  /* ── Location pill ── */
+  .locationPill {
+    border-radius: 9999px !important;
+    border: 1.5px solid rgba(255, 87, 34, 0.45) !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 14px rgba(255, 87, 34, 0.2) !important;
+    min-width: 0 !important;
+    padding: 6px 16px !important;
   }
-  .categoryLabel {
-    font-size: 0.75rem !important;
-    text-transform: uppercase !important;
+  .locationPill small {
+    color: rgba(255, 255, 255, 0.65) !important;
+  }
+  .locationPill strong {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+  }
+
+  /* ── Account/Saved button ── */
+  .accountButton {
+    font-weight: 750 !important;
+    font-size: 13px !important;
     letter-spacing: 0.05em !important;
-    color: #93c5fd !important;
-    background: rgba(59, 130, 246, 0.15) !important;
-    padding: 4px 8px !important;
-    border-radius: 4px !important;
-    font-weight: 700 !important;
-    border: 1px solid rgba(59, 130, 246, 0.3) !important;
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.2) !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    border-radius: 9999px !important;
+    padding: 8px 14px !important;
   }
-  .detailsButton, .cardActions a, .providerActions a, .providerActions button {
-    background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
-    color: white !important;
-    border-radius: 6px !important;
+  .savedButton span { color: #FF7A50 !important; }
+  .savedButton b {
+    background: rgba(255, 87, 34, 0.3) !important;
+    color: #FFB894 !important;
+    -webkit-text-fill-color: #FFB894 !important;
     border: none !important;
-    font-weight: 500 !important;
-    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4) !important;
-    transition: all 0.3s ease !important;
   }
-  .detailsButton:hover, .cardActions a:hover, .providerActions a:hover, .providerActions button:hover {
-    background: linear-gradient(135deg, #1d4ed8, #2563eb) !important;
-    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6) !important;
+
+  /* ── Customize button premium pill ── */
+  .customizeButton {
+    background: #FFFFFF !important;
+    color: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
+    border: none !important;
+    border-radius: 9999px !important;
+    padding: 8px 18px !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+    transition: all 0.25s ease !important;
+  }
+  .customizeButton:hover {
+    background: #f0f0f0 !important;
     transform: translateY(-1px) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
   }
-  .storeGlyph {
-    font-size: 2rem !important;
-    color: #94a3b8 !important;
-  }
-  .rating, .productRating {
-    color: #fef08a !important;
-    text-shadow: 0 0 8px rgba(253, 224, 71, 0.4) !important;
-  }
-  .productDiscovery article, .productGrid article {
-    border-radius: 12px !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-    color: #f8fafc !important;
-    overflow: hidden !important;
-  }
-  .productGrid article:hover {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.2) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    transform: translateY(-6px) !important;
-  }
+
+  /* ── Hero brand center ── */
   .heroBrandCenter {
     display: flex;
     justify-content: center;
@@ -309,346 +183,136 @@ const modernCleanTechStyles = `
     margin-left: auto !important;
     margin-right: auto !important;
   }
+
+  /* ── Popular Near You / Store Cards - Dark Mode Visibility Fix ── */
+  .mode-dark .storeCard, .mode-dark .storeGrid .storeCard {
+    background: rgba(22, 28, 45, 0.92) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45) !important;
+  }
+  .mode-dark .storeCard h3 {
+    color: #F1F5F9 !important;
+    -webkit-text-fill-color: #F1F5F9 !important;
+  }
+  .mode-dark .storeCard .address {
+    color: #94a3b8 !important;
+    -webkit-text-fill-color: #94a3b8 !important;
+  }
+  .mode-dark .storeCard .storeMeta {
+    color: #94a3b8 !important;
+    -webkit-text-fill-color: #94a3b8 !important;
+  }
+  .mode-dark .storeCard .categoryLabel {
+    color: #FF7A50 !important;
+    -webkit-text-fill-color: #FF7A50 !important;
+  }
+  .mode-dark .storeCard .rating {
+    color: #fde68a !important;
+    -webkit-text-fill-color: #fde68a !important;
+  }
+  .mode-dark .sectionHeading h2, .mode-dark .sectionHeading h3 {
+    color: #F8FAFC !important;
+    -webkit-text-fill-color: #F8FAFC !important;
+  }
+  .mode-dark .kicker {
+    color: #38bdf8 !important;
+    -webkit-text-fill-color: #38bdf8 !important;
+  }
+  .mode-dark .filterGroup button {
+    color: #CBD5E1 !important;
+    -webkit-text-fill-color: #CBD5E1 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+  }
+  .mode-dark .filterGroup button[aria-pressed="true"] {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    background: rgba(255, 87, 34, 0.25) !important;
+    border-color: rgba(255, 87, 34, 0.55) !important;
+  }
+  .mode-dark .resultsBar {
+    color: #94a3b8 !important;
+    -webkit-text-fill-color: #94a3b8 !important;
+  }
+  .mode-dark .resultsBar b {
+    color: #F1F5F9 !important;
+    -webkit-text-fill-color: #F1F5F9 !important;
+  }
+  .mode-dark .advancedFilters {
+    background: rgba(15, 17, 26, 0.7) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  .mode-dark .advancedFilters label span {
+    color: #94a3b8 !important;
+    -webkit-text-fill-color: #94a3b8 !important;
+  }
+  .mode-dark .advancedFilters input {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #F1F5F9 !important;
+    -webkit-text-fill-color: #F1F5F9 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+
+  /* ── Category tiles dark mode ── */
+  .mode-dark .categoryTile {
+    background: rgba(22, 28, 45, 0.85) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #F1F5F9 !important;
+  }
+  .mode-dark .categoryTile > span:nth-child(2) {
+    color: #F1F5F9 !important;
+    -webkit-text-fill-color: #F1F5F9 !important;
+  }
+  .mode-dark .categoryTile small {
+    color: #94a3b8 !important;
+    -webkit-text-fill-color: #94a3b8 !important;
+  }
+
+  /* ── Product discovery styling ── */
+  .productDiscovery article, .productGrid article {
+    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    color: #f8fafc !important;
+    overflow: hidden !important;
+  }
+  .productGrid article:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-6px) !important;
+  }
+  .rating, .productRating {
+    color: #fef08a !important;
+  }
+
+  /* ── Detail/action buttons ── */
+  .detailsButton, .cardActions a, .providerActions a, .providerActions button {
+    background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+    color: white !important;
+    -webkit-text-fill-color: white !important;
+    border-radius: 8px !important;
+    border: none !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4) !important;
+    transition: all 0.3s ease !important;
+  }
+  .detailsButton:hover, .cardActions a:hover {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb) !important;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  /* ── Misc ── */
   .emptyState button {
     background: #FF5722 !important;
     color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
     box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4) !important;
-  }
-  .emptyState button:hover {
-    background: #E64A19 !important;
-    box-shadow: 0 6px 20px rgba(255, 87, 34, 0.6) !important;
-    transform: translateY(-2px) !important;
   }
   .searchSubmit:hover {
     box-shadow: 0 4px 15px rgba(255, 87, 34, 0.5) !important;
-  }
-  
-  /* Ambient Mesh */
-  .ambientMesh {
-    position: absolute; inset: 0; z-index: 0; pointer-events: none;
-    background-image: 
-      radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-      radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-      radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-    filter: blur(80px) saturate(150%); opacity: 0.6;
-  }
-  .mode-light .ambientMesh {
-    background-image: 
-      radial-gradient(at 0% 0%, hsla(253,16%,97%,1) 0, transparent 50%), 
-      radial-gradient(at 50% 0%, hsla(225,39%,80%,1) 0, transparent 50%), 
-      radial-gradient(at 100% 0%, hsla(339,49%,80%,1) 0, transparent 50%);
-  }
-  
-  /* High Contrast Text Custom Properties */
-  .mode-dark {
-    --text-primary: #FFFFFF;
-    --text-secondary: #E2E8F0;
-  }
-  .mode-light {
-    --text-primary: #000000;
-    --text-secondary: #1A202C;
-  }
-  .mode-light.site {
-    background-color: #f8fafc !important;
-    background-image: none !important;
-    color: #000000 !important;
-  }
-  
-  /* Floating 3D Cards */
-  .floatingCardsContainer {
-    position: relative; height: 180px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; z-index: 2; margin: 30px 0 40px 0;
-    perspective: 1500px;
-  }
-  .glassCard3D {
-    position: relative;
-    width: 200px; height: 130px;
-    background: rgba(18, 18, 24, 0.8);
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    display: flex; flex-direction: column; justify-content: center; align-items: center;
-    color: #FFFFFF;
-    text-decoration: none;
-    transform-style: preserve-3d;
-    transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, border-color 0.15s ease;
-    will-change: transform, box-shadow, border-color;
-  }
-  .glassCard3D::before {
-    content: '';
-    position: absolute; inset: -2px; z-index: -1;
-    border-radius: 22px;
-    background: radial-gradient(circle at 50% 0%, rgba(255, 87, 34, 0.5), rgba(59, 130, 246, 0.3), transparent 75%);
-    opacity: 0;
-    transition: opacity 0.15s ease;
-    pointer-events: none;
-  }
-  .mode-light .glassCard3D {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-    color: #000000;
-  }
-  .glassCard3D svg { margin-bottom: 12px; opacity: 0.9; transform: translateZ(20px); transition: transform 0.15s ease; }
-  .glassCard3D b { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; transform: translateZ(30px); transition: transform 0.15s ease; }
-  
-  .glassCard3D:hover::before { opacity: 1; }
-  .glassCard3D:hover { 
-    cursor: pointer; 
-    border-color: rgba(255, 87, 34, 0.8) !important; 
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), 0 0 35px rgba(255, 87, 34, 0.4) !important;
-    transform: perspective(1000px) rotateX(10deg) rotateY(-8deg) translateZ(30px) translateY(-12px);
-    z-index: 10;
-  }
-  .glassCard3D:hover svg { transform: translateZ(40px) scale(1.1); }
-  .glassCard3D:hover b { transform: translateZ(50px) scale(1.05); }
-  
-  .highContrastText {
-    color: var(--text-primary) !important;
-    -webkit-text-fill-color: var(--text-primary) !important;
-    text-shadow: none !important;
-  }
-
-  @keyframes marquee {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-  .marqueeContainer {
-    overflow: hidden;
-    white-space: nowrap;
-    position: relative;
-    width: 100%;
-    padding: 60px 0;
-    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-  }
-  .marqueeTrack {
-    display: inline-block;
-    animation: marquee 40s linear infinite;
-  }
-  .marqueeTrack span {
-    display: inline-block;
-    padding: 0 40px;
-    font-size: 1.6rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    opacity: 0.7;
-    letter-spacing: -0.02em;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-  }
-  
-  .featureGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    max-width: 1200px;
-    margin: 80px auto;
-    padding: 0 20px;
-  }
-  .featureCard {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 24px;
-    padding: 40px 32px;
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    overflow: hidden;
-  }
-  .mode-light .featureCard {
-    background: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-  }
-  .featureCard::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.1), transparent 70%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  .featureCard:hover::before {
-    opacity: 1;
-  }
-  .featureCard:hover {
-    transform: translateY(-8px);
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 87, 34, 0.5);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2), 0 0 30px rgba(255,87,34,0.15);
-  }
-  .mode-light .featureCard:hover {
-    background: rgba(0, 0, 0, 0.04);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.05), 0 0 30px rgba(255,87,34,0.1);
-  }
-  .featureCard h3 {
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin: 20px 0 12px 0;
-    color: var(--text-primary) !important;
-    letter-spacing: -0.02em;
-  }
-  .featureCard p {
-    color: var(--text-secondary);
-    line-height: 1.6;
-    font-size: 1.1rem;
-    margin: 0;
-  }
-  
-  /* Interactive 3D Radar */
-  .radarSection {
-    position: relative;
-    width: 100%;
-    max-width: 1200px;
-    margin: 40px auto 80px auto;
-    padding: 40px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow: hidden;
-  }
-  .radarContainer {
-    position: relative;
-    width: 100%;
-    max-width: 800px;
-    height: 450px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 40px;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    perspective: 1000px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-  }
-  .mode-light .radarContainer {
-    background: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  }
-  .radarGrid {
-    position: absolute;
-    width: 200%;
-    height: 200%;
-    background-image: 
-      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    transform: rotateX(60deg) translateY(-100px) translateZ(-200px);
-    transform-origin: center top;
-    animation: radarPan 20s linear infinite;
-  }
-  .mode-light .radarGrid {
-    background-image: 
-      linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
-  }
-  @keyframes radarPan {
-    from { background-position: 0 0; }
-    to { background-position: 0 40px; }
-  }
-  .radarSweep {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 1000px;
-    height: 1000px;
-    margin-top: -500px;
-    margin-left: -500px;
-    background: conic-gradient(from 0deg, transparent 70%, rgba(59, 130, 246, 0.1) 90%, rgba(59, 130, 246, 0.4) 100%);
-    border-radius: 50%;
-    transform: rotateX(60deg) translateZ(-50px);
-    animation: radarSpin 4s linear infinite;
-    pointer-events: none;
-  }
-  @keyframes radarSpin {
-    from { transform: rotateX(60deg) translateZ(-50px) rotateZ(0deg); }
-    to { transform: rotateX(60deg) translateZ(-50px) rotateZ(360deg); }
-  }
-  .radarCenter {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    background: #3B82F6;
-    border-radius: 50%;
-    box-shadow: 0 0 20px #3B82F6, 0 0 40px #3B82F6;
-    z-index: 10;
-  }
-  .radarCenter::after {
-    content: '';
-    position: absolute;
-    top: -14px; left: -14px; right: -14px; bottom: -14px;
-    border: 1px solid rgba(59, 130, 246, 0.5);
-    border-radius: 50%;
-    animation: pingPulse 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-  }
-  @keyframes pingPulse {
-    0% { transform: scale(0.5); opacity: 1; }
-    100% { transform: scale(2.5); opacity: 0; }
-  }
-  .radarPin {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transform: translate(-50%, -100%);
-    cursor: pointer;
-    z-index: 5;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .radarPin:hover {
-    z-index: 20;
-    transform: translate(-50%, -120%) scale(1.1);
-  }
-  .pinDot {
-    width: 10px;
-    height: 10px;
-    background: #FF5722;
-    border-radius: 50%;
-    box-shadow: 0 0 15px rgba(255, 87, 34, 0.8);
-    position: relative;
-  }
-  .pinDot.isClosed {
-    background: #94A3B8;
-    box-shadow: 0 0 10px rgba(148, 163, 184, 0.5);
-  }
-  .pinLine {
-    width: 1px;
-    height: 30px;
-    background: linear-gradient(to bottom, #FF5722, transparent);
-  }
-  .radarPin.isClosed .pinLine {
-    background: linear-gradient(to bottom, #94A3B8, transparent);
-  }
-  .pinLabel {
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 6px 12px;
-    border-radius: 12px;
-    color: #FFF;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-    white-space: nowrap;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    pointer-events: none;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  }
-  .radarPin:hover .pinLabel {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .mode-light .pinLabel {
-    background: rgba(255, 255, 255, 0.8);
-    color: #000;
-    border: 1px solid rgba(0, 0, 0, 0.1);
   }
 `;
 
@@ -1064,7 +728,6 @@ export default function Home() {
 
   return (
     <main className={`site theme-${accent} density-${density} mode-${themeMode}`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
-      <ShaderCanvas />
       <VideoBackground />
       <header className="topbar">
         <a className="brand" href="#top" aria-label="Kynisto home"><KynistoLogo showTagline /></a>
@@ -1139,42 +802,12 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="hero" id="top" style={{ textAlign: "center", padding: "120px 20px 40px 20px", display: "flex", flexDirection: "column", alignItems: "center", position: "relative", minHeight: "90vh", justifyContent: "center" }}>
-        <div className="ambientMesh" />
-        {/* Apple Ambient Aura Backlight */}
-        <div style={{ position: "absolute", top: "15%", width: "600px", height: "300px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,87,34,0.15) 0%, rgba(120,119,198,0.1) 50%, transparent 75%)", filter: "blur(90px)", pointerEvents: "none", zIndex: 1 }} />
-
-        <div className="heroCopy" style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "950px", position: "relative", zIndex: 2, width: "100%" }}>
-          {/* Crystal Clear Pure White Hero Title: Kynisto */}
-          <h1 className="highContrastText" style={{ 
-            fontSize: "clamp(5rem, 15vw, 10rem)", 
-            fontWeight: 850, 
-            letterSpacing: "-0.06em", 
-            lineHeight: 1, 
-            margin: "0 0 20px 0", 
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif"
-          }}>
-            Kynisto
-          </h1>
-          
-          <p className="highContrastText" style={{ fontSize: "clamp(1.2rem, 3vw, 1.8rem)", fontWeight: 500, margin: "0 0 40px 0", opacity: 0.9, letterSpacing: "-0.01em" }}>
-            The infrastructure of efficiency.
-          </p>
-
-          <div className="floatingCardsContainer">
-            <Link href="/wallet" className="glassCard3D">
-              <Icons.Star />
-              <b>Loyalty Card</b>
-            </Link>
-            <Link href="/healthcare" className="glassCard3D">
-              <Icons.Clock />
-              <b style={{ fontSize: "1.3rem" }}>Queue Ticket</b>
-            </Link>
-            <Link href="/dashboard" className="glassCard3D">
-              <Icons.Search />
-              <b>Dashboard</b>
-            </Link>
+      <section className="hero" id="top">
+        <div className="heroCopy">
+          <div className="heroBrandCenter">
+            <KynistoLogo showTagline />
           </div>
+          <h1 className="heroTitleClassical">Everything around you,<br /><em>smarter.</em></h1>
 
           <form
             className="searchBox"
@@ -1183,51 +816,43 @@ export default function Home() {
               event.preventDefault();
               document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
             }}
-            style={{ width: "100%", maxWidth: "660px", margin: "20px auto 32px auto", padding: "8px", borderRadius: "24px", transform: "translateZ(20px)" }}
           >
-            <span className="searchIcon" aria-hidden="true" style={{ paddingLeft: "12px" }}><Icons.Search /></span>
+            <span className="searchIcon" aria-hidden="true"><Icons.Search /></span>
             <label className="srOnly" htmlFor="store-search">Search nearby stores</label>
             <input
               id="store-search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search salon, groceries, clinic..."
-              style={{ fontSize: "1.1rem", padding: "16px 12px" }}
-              className="highContrastText"
             />
             {query && (
-              <button className="clearSearch highContrastText" type="button" aria-label="Clear search" onClick={() => setQuery("")}>×</button>
+              <button className="clearSearch" type="button" aria-label="Clear search" onClick={() => setQuery("")}>×</button>
             )}
-            <button className="searchSubmit" type="submit" style={{ padding: "12px 28px", fontSize: "1.05rem", borderRadius: "16px" }}>Search</button>
+            <button className="searchSubmit" type="submit">Search nearby</button>
           </form>
 
-          <div className="quickProof" aria-label="Kynisto highlights" style={{ marginTop: "16px" }}>
-            <span className="highContrastText"><b>100+</b> Places</span>
-            <span className="highContrastText"><b>20</b> Categories</span>
-            <span className="highContrastText"><b>Live</b> Status</span>
+          <div className="quickProof" aria-label="Kynisto highlights">
+            <span><b>100+</b> Places</span>
+            <span><b>20</b> Categories</span>
+            <span><b>Live</b> Status</span>
           </div>
+        </div>
 
-          {/* Vertical Guide Line indicating scroll */}
-          <div style={{ width: "2px", height: "80px", background: "linear-gradient(180deg, var(--text-primary) 0%, transparent 100%)", margin: "60px auto 0 auto", opacity: 0.3 }} />
-        </div>
-      </section>
-
-      {/* Feature Grid directly below Hero */}
-      <section className="featureGrid">
-        <div className="featureCard">
-          <div style={{ color: "#FF5722", marginBottom: "16px" }}><Icons.Search /></div>
-          <h3>Universal Discovery</h3>
-          <p>Find what you need, exactly when you need it. Intelligent search that understands intent and proximity.</p>
-        </div>
-        <div className="featureCard">
-          <div style={{ color: "#3B82F6", marginBottom: "16px" }}><Icons.Clock /></div>
-          <h3>Real-time Queues</h3>
-          <p>Skip the waiting room. Monitor your position in line from anywhere and arrive exactly when it's your turn.</p>
-        </div>
-        <div className="featureCard">
-          <div style={{ color: "#10B981", marginBottom: "16px" }}><Icons.Star /></div>
-          <h3>Unified Loyalty</h3>
-          <p>One wallet for every store. Earn, track, and redeem rewards seamlessly without juggling multiple apps.</p>
+        {/* Live Radar / Map Scene */}
+        <div className="mapScene" aria-hidden="true">
+          <div className="mapGrid" />
+          <div className="sunDisc" />
+          <div className="road roadOne" />
+          <div className="road roadTwo" />
+          <div className="road roadThree" />
+          <div className="parkPatch"><span>City Park</span></div>
+          <div className="mapPin pinSalon"><span>✂</span>Glow &amp; Go</div>
+          <div className="mapPin pinGrocery"><span>◒</span>FreshBasket</div>
+          <div className="mapPin pinClinic"><span>+</span>QuickCare</div>
+          <div className="mapPin pinCafe"><span>☕</span>Brew House</div>
+          <div className="youAreHere"><i /><span>You</span></div>
+          <div className="nearbyBadge"><strong>14 places</strong><span>within 1 km</span></div>
+          <div className="mapCaption"><span>Live radar</span><strong>DLF Ankur Vihar</strong></div>
         </div>
       </section>
 
@@ -1261,44 +886,6 @@ export default function Home() {
           })}
         </div>
       </section>
-
-      {/* Interactive 3D Radar Section */}
-      <section className="radarSection" aria-label="Live Store Radar">
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <h2 className="highContrastText" style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace", fontSize: "1rem", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "8px", opacity: 0.8 }}>Live Radar</h2>
-          <p className="highContrastText" style={{ fontSize: "2rem", fontWeight: 700, letterSpacing: "-0.02em", margin: 0 }}>Discover what's around you.</p>
-        </div>
-        
-        <div className="radarContainer">
-          <div className="radarGrid" />
-          <div className="radarSweep" />
-          <div className="radarCenter" />
-          
-          {catalogStores.slice(0, 8).map((store, index) => {
-            const angle = (index * 45) * (Math.PI / 180);
-            const radius = 60 + (index * 25);
-            const x = Math.cos(angle) * radius;
-            const y = Math.sin(angle) * radius;
-            
-            return (
-              <div 
-                key={store.id} 
-                className={`radarPin ${store.open ? "" : "isClosed"}`}
-                style={{ left: `calc(50% + ${x}px)`, top: `calc(50% + ${y}px)` }}
-                onClick={() => setSelectedStore(store)}
-              >
-                <div className="pinLabel">
-                  {store.icon} {store.name} • {store.distance.toFixed(1)}km
-                </div>
-                <div className={`pinDot ${store.open ? "" : "isClosed"}`} />
-                <div className="pinLine" />
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Places Section */}
 
       <section className="placesSection" id="places" aria-labelledby="places-heading">
         <div className="sectionHeading placesHeading">
@@ -1342,14 +929,9 @@ export default function Home() {
           </label>
         </div>
 
-        <div className="sectionHeading" style={{ marginTop: "36px", marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <span className="kicker" style={{ color: "#FF5722", fontWeight: 700 }}>📍 Verified Local Services</span>
-            <h2 className="highContrastText" style={{ fontSize: "1.8rem", fontWeight: 800, margin: "4px 0 0 0" }}>Recommended Stores Nearby Me</h2>
-          </div>
-          <div className="resultsBar" style={{ margin: 0 }}>
-            <span><b>{catalogTotal}</b> places found</span>
-          </div>
+        <div className="resultsBar">
+          <span><b>{catalogTotal}</b> places found</span>
+          {(query || category !== "All") && <span>for {query && <b>“{query}”</b>} {query && category !== "All" ? "in" : ""} {category !== "All" && <b>{category}</b>}</span>}
         </div>
 
         {catalogLoading ? (
@@ -1416,63 +998,6 @@ export default function Home() {
             <button type="button" onClick={resetFilters}>Show all nearby places</button>
           </div>
         )}
-      </section>
-
-
-
-      {/* Cinematic Join the Future Banner (Image 1 Style) */}
-      <section 
-        style={{ 
-          margin: "60px auto 40px auto", 
-          maxWidth: "1200px", 
-          padding: "0 20px" 
-        }}
-      >
-        <div 
-          style={{ 
-            borderRadius: "28px", 
-            border: "1px solid rgba(255, 255, 255, 0.12)", 
-            background: "linear-gradient(180deg, rgba(18, 20, 26, 0.85) 0%, rgba(10, 11, 15, 0.95) 100%), url('https://images.unsplash.com/photo-1518770660439-4636190af475?w=1600&auto=format&fit=crop&q=80') center/cover no-repeat", 
-            position: "relative", 
-            overflow: "hidden", 
-            padding: "90px 32px", 
-            textAlign: "center", 
-            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.7)" 
-          }}
-        >
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at center, rgba(12, 14, 18, 0.6) 0%, rgba(10, 11, 15, 0.95) 100%)", zIndex: 1, pointerEvents: "none" }} />
-          <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <h2 style={{ fontSize: "clamp(2.8rem, 5.5vw, 4.5rem)", fontWeight: 900, color: "#FFFFFF", margin: "0 0 16px 0", letterSpacing: "-0.03em" }}>
-              Join the Future.
-            </h2>
-            <p style={{ fontSize: "1.15rem", color: "#CBD5E1", maxWidth: "600px", margin: "0 auto 36px auto", lineHeight: 1.6, fontWeight: 500 }}>
-              The infrastructure of efficiency starts with a single integration.
-            </p>
-            <Link 
-              href="/dashboard"
-              style={{ 
-                position: "relative",
-                zIndex: 20,
-                pointerEvents: "auto",
-                cursor: "pointer",
-                display: "inline-block", 
-                padding: "16px 42px", 
-                borderRadius: "9999px", 
-                background: "#FFFFFF", 
-                color: "#0E0F12", 
-                fontWeight: 900, 
-                fontSize: "13px", 
-                letterSpacing: "0.1em", 
-                textTransform: "uppercase", 
-                textDecoration: "none", 
-                boxShadow: "0 10px 30px rgba(255, 255, 255, 0.25)", 
-                transition: "all 0.3s ease" 
-              }}
-            >
-              GET STARTED
-            </Link>
-          </div>
-        </div>
       </section>
 
       <section className="trustStrip" aria-label="Why use Kynisto">

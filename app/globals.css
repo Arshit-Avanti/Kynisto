@@ -59,12 +59,10 @@ body {
   max-width: 100%;
   margin: 0;
   overflow-x: clip;
-  -webkit-text-size-adjust: 100%;
-  background: #060914;
-  background-image: linear-gradient(120deg, #060914 0%, #0a0d1f 45%, #141030 75%, #1a0f2b 100%),
-                    radial-gradient(circle at 85% 25%, rgba(168, 85, 247, 0.22), transparent 55%),
-                    radial-gradient(circle at 95% 85%, rgba(236, 72, 153, 0.14), transparent 50%),
-                    radial-gradient(circle at 10% 90%, rgba(15, 23, 42, 0.55), transparent 60%);
+  background: #140A0C;
+  background-image: radial-gradient(circle at 15% 25%, rgba(255, 87, 34, 0.2), transparent 45%),
+                    radial-gradient(circle at 85% 75%, rgba(239, 68, 68, 0.2), transparent 45%),
+                    radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.1), transparent 60%);
   color: #F8FAFC;
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
@@ -417,6 +415,45 @@ textarea:focus {
 .mode-dark .placesSection .sectionHeading h2,
 .mode-dark .placesSection .kicker {
   color: #f8fafc !important;
+}
+
+/* Dark mode store card visibility */
+.mode-dark .storeCard {
+  background: rgba(20, 26, 42, 0.95);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.mode-dark .storeCard h3 {
+  color: #F1F5F9;
+}
+
+.mode-dark .storeBody .address {
+  color: #94a3b8;
+}
+
+.mode-dark .storeBody .storeMeta {
+  color: #94a3b8;
+}
+
+.mode-dark .storeCard .categoryLabel {
+  color: #FF7A50;
+}
+
+/* Light mode store card visibility */
+.mode-light .storeCard {
+  background: #ffffff;
+}
+
+.mode-light .storeCard h3 {
+  color: #0f172a;
+}
+
+.mode-light .storeBody .address {
+  color: #626b64;
+}
+
+.mode-light .storeBody .storeMeta {
+  color: #747c75;
 }
 
 .themeModeIcon {
