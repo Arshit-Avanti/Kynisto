@@ -75,6 +75,7 @@ export function Navbar3D({
         <nav aria-label="Main Navigation" style={{ display: "flex", alignItems: "center", gap: "28px", fontSize: "14px", fontWeight: 700, color: "var(--text-primary)" }}>
           <Link href="/products" style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s" }}>Products</Link>
           <Link href="/healthcare" style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s" }}>Healthcare</Link>
+          <Link href="/services" style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s" }}>Services</Link>
           <Link href="/pricing" style={{ color: "#FF7A00", WebkitTextFillColor: "#FF7A00", textDecoration: "none", transition: "all 0.15s", fontWeight: 700 }}>Pricing & Plans</Link>
           <button
             type="button"
@@ -140,6 +141,7 @@ export function Navbar3D({
           </Link>
           <Link href="/products" onClick={() => setMobileOpen(false)} style={{ color: "#FFFFFF", textDecoration: "none", fontSize: "15px" }}>Products</Link>
           <Link href="/healthcare" onClick={() => setMobileOpen(false)} style={{ color: "#FFFFFF", textDecoration: "none", fontSize: "15px" }}>Healthcare</Link>
+          <Link href="/services" onClick={() => setMobileOpen(false)} style={{ color: "#FFFFFF", textDecoration: "none", fontSize: "15px" }}>Services</Link>
           <Link
             href={userRole === "customer" || userRole === "admin" ? "/account?tab=favorites" : "/login?returnTo=%2Faccount%3Ftab%3Dfavorites"}
             onClick={() => setMobileOpen(false)}

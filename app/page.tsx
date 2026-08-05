@@ -1356,6 +1356,7 @@ export default function Home() {
           </Link>
           <Link className="textButton accountButton" href="/products">Products</Link>
           <Link className="textButton accountButton" href="/healthcare">Healthcare</Link>
+          <Link className="textButton accountButton" href="/services">Services</Link>
           <button
             className="textButton savedButton"
             type="button"
@@ -1390,6 +1391,7 @@ export default function Home() {
               </Link>
               <Link href="/products">Products</Link>
               <Link href="/healthcare">Healthcare</Link>
+              <Link href="/services">Services</Link>
               <Link href={userRole === "customer" || userRole === "admin" ? "/account?tab=favorites" : "/login?returnTo=%2Faccount%3Ftab%3Dfavorites"}>
                 Saved places
               </Link>

@@ -1,0 +1,1332 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { KynistoLogo } from "@/components/brand/KynistoLogo";
+import { Navbar3D } from "@/components/ui/Navbar3D";
+import { VideoBackground } from "@/components/media/VideoBackground";
+import { ShaderCanvas } from "@/components/ui/ShaderCanvas";
+import { apiFetch } from "@/lib/client-api";
+
+export interface HomeService {
+  id: string;
+  name: string;
+  category: "Emergency" | "Appliance" | "Cleaning" | "Maintenance" | "Tech" | "Shifting";
+  icon: string;
+  badgeTone: string;
+  description: string;
+  rating: number;
+  reviewsCount: number;
+  startingPrice: number;
+  estimatedArrival: string;
+  featured?: boolean;
+}
+
+const ALL_HOME_SERVICES: HomeService[] = [
+  {
+    id: "plumber",
+    name: "Plumber",
+    category: "Emergency",
+    icon: "🔧",
+    badgeTone: "#FF5722",
+    description: "Leaking pipes, tap repair, bathroom fitting & drain blockages.",
+    rating: 4.9,
+    reviewsCount: 1240,
+    startingPrice: 299,
+    estimatedArrival: "25–45 min",
+    featured: true,
+  },
+  {
+    id: "electrician",
+    name: "Electrician",
+    category: "Emergency",
+    icon: "⚡",
+    badgeTone: "#F59E0B",
+    description: "Short circuits, wiring, switchboards, fans & MCB repairs.",
+    rating: 4.8,
+    reviewsCount: 1890,
+    startingPrice: 199,
+    estimatedArrival: "20–40 min",
+    featured: true,
+  },
+  {
+    id: "carpenter",
+    name: "Carpenter",
+    category: "Maintenance",
+    icon: "🪚",
+    badgeTone: "#10B981",
+    description: "Furniture repair, door locks, modular kitchen & custom woodwork.",
+    rating: 4.9,
+    reviewsCount: 870,
+    startingPrice: 349,
+    estimatedArrival: "30–60 min",
+  },
+  {
+    id: "ac-repair",
+    name: "AC Repair & Service",
+    category: "Appliance",
+    icon: "❄️",
+    badgeTone: "#3B82F6",
+    description: "Deep jet cleaning, gas refill, cooling fix & split/window install.",
+    rating: 4.9,
+    reviewsCount: 2450,
+    startingPrice: 499,
+    estimatedArrival: "30–45 min",
+    featured: true,
+  },
+  {
+    id: "home-appliance",
+    name: "Home Appliance Repair",
+    category: "Appliance",
+    icon: "🔌",
+    badgeTone: "#8B5CF6",
+    description: "Fridge, washing machine, microwave & dishwasher expert repair.",
+    rating: 4.8,
+    reviewsCount: 1120,
+    startingPrice: 399,
+    estimatedArrival: "35–50 min",
+  },
+  {
+    id: "ro-service",
+    name: "RO Water Purifier Service",
+    category: "Appliance",
+    icon: "💧",
+    badgeTone: "#06B6D4",
+    description: "Filter replacement, membrane change, TDS adjustment & leak fix.",
+    rating: 4.9,
+    reviewsCount: 940,
+    startingPrice: 299,
+    estimatedArrival: "30–45 min",
+  },
+  {
+    id: "painter",
+    name: "Painter",
+    category: "Maintenance",
+    icon: "🎨",
+    badgeTone: "#EC4899",
+    description: "Full home painting, waterproof coating & wall stencil designs.",
+    rating: 4.9,
+    reviewsCount: 780,
+    startingPrice: 699,
+    estimatedArrival: "Same Day",
+  },
+  {
+    id: "home-cleaning",
+    name: "Home Cleaning",
+    category: "Cleaning",
+    icon: "🧹",
+    badgeTone: "#14B8A6",
+    description: "Deep kitchen, bathroom, window & full sofa/carpet sanitization.",
+    rating: 4.9,
+    reviewsCount: 1560,
+    startingPrice: 799,
+    estimatedArrival: "Scheduled",
+    featured: true,
+  },
+  {
+    id: "pest-control",
+    name: "Pest Control",
+    category: "Cleaning",
+    icon: "🪲",
+    badgeTone: "#E11D48",
+    description: "Cockroach, termite, bed bug, ant & mosquito eradication.",
+    rating: 4.8,
+    reviewsCount: 890,
+    startingPrice: 599,
+    estimatedArrival: "45–60 min",
+  },
+  {
+    id: "cctv-installation",
+    name: "CCTV Installation",
+    category: "Tech",
+    icon: "📹",
+    badgeTone: "#6366F1",
+    description: "Security camera setup, DVR config, mobile live view & wiring.",
+    rating: 4.9,
+    reviewsCount: 620,
+    startingPrice: 899,
+    estimatedArrival: "Same Day",
+  },
+  {
+    id: "wifi-technician",
+    name: "Wi-Fi & Internet Technician",
+    category: "Tech",
+    icon: "📡",
+    badgeTone: "#0284C7",
+    description: "Router setup, fiber line splicing, mesh network & speed fix.",
+    rating: 4.8,
+    reviewsCount: 740,
+    startingPrice: 249,
+    estimatedArrival: "20–35 min",
+  },
+  {
+    id: "computer-mobile-repair",
+    name: "Computer, Laptop & Mobile Repair",
+    category: "Tech",
+    icon: "💻",
+    badgeTone: "#3B82F6",
+    description: "Screen replacement, OS install, hardware upgrade & data recovery.",
+    rating: 4.9,
+    reviewsCount: 1310,
+    startingPrice: 399,
+    estimatedArrival: "30–60 min",
+    featured: true,
+  },
+  {
+    id: "tv-repair",
+    name: "TV Repair & Installation",
+    category: "Tech",
+    icon: "📺",
+    badgeTone: "#8B5CF6",
+    description: "LED/OLED wall mounting, display panel fix, backlight & audio repair.",
+    rating: 4.8,
+    reviewsCount: 830,
+    startingPrice: 349,
+    estimatedArrival: "30–50 min",
+  },
+  {
+    id: "interior-designer",
+    name: "Interior Designer",
+    category: "Maintenance",
+    icon: "📐",
+    badgeTone: "#D97706",
+    description: "3D layout planning, modular wardrobes, false ceiling & lighting.",
+    rating: 5.0,
+    reviewsCount: 310,
+    startingPrice: 1499,
+    estimatedArrival: "Appointment",
+  },
+  {
+    id: "mason-construction",
+    name: "Mason / Construction Worker",
+    category: "Maintenance",
+    icon: "🧱",
+    badgeTone: "#78350F",
+    description: "Tile fixing, plastering, wall break, brickwork & cement repairs.",
+    rating: 4.8,
+    reviewsCount: 540,
+    startingPrice: 699,
+    estimatedArrival: "Same Day",
+  },
+  {
+    id: "welder",
+    name: "Welder",
+    category: "Maintenance",
+    icon: "👨‍🏭",
+    badgeTone: "#EA580C",
+    description: "Iron gate, window grill repair, shed fabrication & structural welding.",
+    rating: 4.8,
+    reviewsCount: 410,
+    startingPrice: 499,
+    estimatedArrival: "45–60 min",
+  },
+  {
+    id: "locksmith",
+    name: "Locksmith",
+    category: "Emergency",
+    icon: "🔑",
+    badgeTone: "#CA8A04",
+    description: "Key duplicate, digital lock install & emergency door unlock.",
+    rating: 4.9,
+    reviewsCount: 670,
+    startingPrice: 299,
+    estimatedArrival: "15–30 min",
+    featured: true,
+  },
+  {
+    id: "solar-installation",
+    name: "Solar Panel Installation",
+    category: "Tech",
+    icon: "☀️",
+    badgeTone: "#EAB308",
+    description: "Rooftop solar setup, inverter wiring, net metering & maintenance.",
+    rating: 4.9,
+    reviewsCount: 290,
+    startingPrice: 1999,
+    estimatedArrival: "Appointment",
+  },
+  {
+    id: "gardening-landscaping",
+    name: "Gardening & Landscaping",
+    category: "Cleaning",
+    icon: "🪴",
+    badgeTone: "#16A34A",
+    description: "Lawn mowing, plant pruning, organic manuring & terrace garden setup.",
+    rating: 4.8,
+    reviewsCount: 480,
+    startingPrice: 499,
+    estimatedArrival: "Scheduled",
+  },
+  {
+    id: "packers-movers",
+    name: "Packers & Movers",
+    category: "Shifting",
+    icon: "📦",
+    badgeTone: "#9333EA",
+    description: "Safe house shifting, bubble wrapping, furniture dismantling & truck transport.",
+    rating: 4.9,
+    reviewsCount: 980,
+    startingPrice: 2499,
+    estimatedArrival: "Scheduled",
+    featured: true,
+  },
+  {
+    id: "appliance-installation",
+    name: "Appliance Installation",
+    category: "Appliance",
+    icon: "⚙️",
+    badgeTone: "#2563EB",
+    description: "Geyser, chimney, ceiling fan, TV, washing machine & RO setup.",
+    rating: 4.9,
+    reviewsCount: 1050,
+    startingPrice: 349,
+    estimatedArrival: "30–45 min",
+  },
+  {
+    id: "shifting-helpers",
+    name: "House Shifting Helpers",
+    category: "Shifting",
+    icon: "🏋️‍♂️",
+    badgeTone: "#C026D3",
+    description: "Heavy luggage lifting, furniture assembly, loading & unloading.",
+    rating: 4.8,
+    reviewsCount: 760,
+    startingPrice: 599,
+    estimatedArrival: "30–60 min",
+  },
+  {
+    id: "water-tank-cleaning",
+    name: "Water Tank Cleaning",
+    category: "Cleaning",
+    icon: "🛢️",
+    badgeTone: "#0284C7",
+    description: "High-pressure jet cleaning, sludge removal & antibacterial UV treatment.",
+    rating: 4.9,
+    reviewsCount: 1150,
+    startingPrice: 499,
+    estimatedArrival: "45–60 min",
+  },
+];
+
+export function HomeServicesDiscovery() {
+  const [userRole, setUserRole] = useState<"admin" | "store_owner" | "customer" | null>(null);
+  const [savedCount, setSavedCount] = useState(0);
+  const [locationLabel, setLocationLabel] = useState("DLF Ankur Vihar, Loni");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [selectedService, setSelectedService] = useState<HomeService | null>(null);
+  const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [customizing, setCustomizing] = useState(false);
+
+  // Booking Form State
+  const [bookingDate, setBookingDate] = useState("Today");
+  const [bookingSlot, setBookingSlot] = useState("10:00 AM - 12:00 PM");
+  const [userAddress, setUserAddress] = useState("DLF Ankur Vihar, Block A, Loni");
+  const [notes, setNotes] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    apiFetch<{ user: { role: "admin" | "store_owner" | "customer" } | null }>("/api/auth/me")
+      .then(async (sessionData) => {
+        if (!active) return;
+        setUserRole(sessionData.user?.role ?? null);
+        if (sessionData.user?.role === "customer" || sessionData.user?.role === "admin") {
+          const favoriteData = await apiFetch<{ items: Array<{ storeId: string }> }>("/api/favorites");
+          if (active) setSavedCount(favoriteData.items.length);
+        }
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+
+  const handleUseLocation = () => {
+    if (!navigator.geolocation) {
+      setToastMessage("Geolocation is not supported by your browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const label = `DLF Ankur Vihar (${position.coords.latitude.toFixed(2)}, ${position.coords.longitude.toFixed(2)})`;
+        setLocationLabel(label);
+        setUserAddress(label);
+        setToastMessage("Location updated to your GPS position!");
+      },
+      () => {
+        setToastMessage("Could not retrieve precise GPS location.");
+      }
+    );
+  };
+
+  const filteredServices = useMemo(() => {
+    return ALL_HOME_SERVICES.filter((service) => {
+      const matchesSearch =
+        service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        service.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory =
+        selectedCategory === "All" || service.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchQuery, selectedCategory]);
+
+  const handleConfirmBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedService) return;
+    setIsSubmitting(true);
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      const bookingId = `KS-SERV-${Math.floor(100000 + Math.random() * 900000)}`;
+      setBookingSuccess(bookingId);
+      setIsSubmitting(false);
+    } catch {
+      setToastMessage("Failed to process booking. Please try again.");
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <main className="services-page-shell">
+      <style dangerouslySetInnerHTML={{ __html: servicesCustomCss }} />
+      <VideoBackground />
+      <ShaderCanvas />
+
+      <Navbar3D
+        userRole={userRole}
+        savedCount={savedCount}
+        locationLabel={locationLabel}
+        onUseLocation={handleUseLocation}
+        onOpenCustomize={() => setCustomizing(true)}
+      />
+
+      {toastMessage && (
+        <div className="services-toast-banner" role="alert">
+          <span>{toastMessage}</span>
+          <button type="button" onClick={() => setToastMessage(null)}>×</button>
+        </div>
+      )}
+
+      {/* Hero Header */}
+      <section className="services-hero">
+        <div className="services-hero-kicker">
+          <span>⚡ INSTANT LOCAL BOOKING</span>
+        </div>
+        <h1 className="services-hero-title">
+          Book Trusted Local Professionals in Minutes.
+        </h1>
+        <p className="services-hero-subtitle">
+          Verified plumbers, electricians, technicians & home experts near {locationLabel}. 100% upfront pricing & 30–60 min arrival guarantee.
+        </p>
+
+        {/* Real-time Proof Badges */}
+        <div className="services-proof-badges">
+          <div className="proof-chip">⚡ 30-60 Min Express Arrival</div>
+          <div className="proof-chip">🛡️ 100% Background Verified</div>
+          <div className="proof-chip">💰 Upfront Prices · No Hidden Fees</div>
+        </div>
+
+        {/* Search Bar */}
+        <div className="services-search-wrapper">
+          <span className="search-icon">🔍</span>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search plumber, electrician, AC repair, cleaning..."
+            aria-label="Search home services"
+            className="services-search-input"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              className="clear-search-btn"
+              onClick={() => setSearchQuery("")}
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        {/* Category Filters */}
+        <div className="services-category-bar">
+          {[
+            "All",
+            "Emergency",
+            "Appliance",
+            "Cleaning",
+            "Maintenance",
+            "Tech",
+            "Shifting",
+          ].map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              className={`category-pill ${selectedCategory === cat ? "active" : ""}`}
+              onClick={() => setSelectedCategory(cat)}
+            >
+              {cat === "All" ? "All Services (23)" : cat}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Services Grid Section */}
+      <section className="services-grid-container">
+        <div className="services-grid-header">
+          <h2>
+            {selectedCategory === "All"
+              ? "All Available Home Services"
+              : `${selectedCategory} Services`}
+            <span className="count-badge">{filteredServices.length}</span>
+          </h2>
+          <span className="sub-note">Instant Dispatch to {locationLabel}</span>
+        </div>
+
+        {filteredServices.length > 0 ? (
+          <div className="services-grid">
+            {filteredServices.map((service) => (
+              <article key={service.id} className="service-card">
+                {service.featured && (
+                  <span className="popular-tag">MOST BOOKED</span>
+                )}
+                
+                <div className="service-card-top">
+                  <div
+                    className="service-icon-box"
+                    style={{ borderColor: service.badgeTone }}
+                  >
+                    <span>{service.icon}</span>
+                  </div>
+                  <span className="arrival-badge">⏱️ {service.estimatedArrival}</span>
+                </div>
+
+                <div className="service-card-body">
+                  <span className="category-meta">{service.category}</span>
+                  <h3 className="service-name">{service.name}</h3>
+                  <p className="service-desc">{service.description}</p>
+                </div>
+
+                <div className="service-card-meta">
+                  <div className="rating-box">
+                    <span className="star">⭐ {service.rating.toFixed(1)}</span>
+                    <span className="reviews">({service.reviewsCount})</span>
+                  </div>
+                  <div className="price-box">
+                    <small>Starting from</small>
+                    <strong>₹{service.startingPrice.toLocaleString("en-IN")}</strong>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="book-now-btn"
+                  onClick={() => setSelectedService(service)}
+                >
+                  Book Now ➔
+                </button>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="services-empty-state">
+            <span className="empty-icon">🔍</span>
+            <h3>No matching services found</h3>
+            <p>Try searching for a different keyword or category.</p>
+            <button
+              type="button"
+              className="reset-search-btn"
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedCategory("All");
+              }}
+            >
+              Reset Filters
+            </button>
+          </div>
+        )}
+      </section>
+
+      {/* Booking Modal */}
+      {selectedService && (
+        <div
+          className="services-modal-overlay"
+          role="presentation"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setSelectedService(null);
+              setBookingSuccess(null);
+            }
+          }}
+        >
+          <div className="services-modal-content" role="dialog" aria-modal="true">
+            <button
+              type="button"
+              className="modal-close-btn"
+              onClick={() => {
+                setSelectedService(null);
+                setBookingSuccess(null);
+              }}
+            >
+              ×
+            </button>
+
+            {bookingSuccess ? (
+              <div className="booking-success-box">
+                <div className="success-icon">🎉</div>
+                <h2>Booking Confirmed!</h2>
+                <p>
+                  Your booking for <strong>{selectedService.name}</strong> has been received.
+                </p>
+                <div className="booking-ticket">
+                  <div className="ticket-row">
+                    <span>Booking Reference:</span>
+                    <strong>{bookingSuccess}</strong>
+                  </div>
+                  <div className="ticket-row">
+                    <span>Estimated Arrival:</span>
+                    <strong>{selectedService.estimatedArrival}</strong>
+                  </div>
+                  <div className="ticket-row">
+                    <span>Assigned Professional:</span>
+                    <strong>Nearest Kynisto Partner</strong>
+                  </div>
+                  <div className="ticket-row">
+                    <span>Service Location:</span>
+                    <strong>{userAddress}</strong>
+                  </div>
+                  <div className="ticket-row">
+                    <span>Estimated Fee:</span>
+                    <strong style={{ color: "#10B981" }}>₹{selectedService.startingPrice} (Pay After Job)</strong>
+                  </div>
+                </div>
+                <p className="ticket-note">
+                  You will receive an SMS and WhatsApp confirmation shortly.
+                </p>
+                <button
+                  type="button"
+                  className="done-btn"
+                  onClick={() => {
+                    setSelectedService(null);
+                    setBookingSuccess(null);
+                  }}
+                >
+                  Done & Close
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleConfirmBooking} className="booking-form">
+                <div className="modal-header-banner">
+                  <span className="modal-icon">{selectedService.icon}</span>
+                  <div>
+                    <span className="modal-kicker">{selectedService.category} Service</span>
+                    <h2 className="modal-service-title">{selectedService.name}</h2>
+                    <span className="modal-price">Starting from ₹{selectedService.startingPrice}</span>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="service-date">Select Preferred Date</label>
+                  <div className="option-pills">
+                    {["Today", "Tomorrow", "Pick Later"].map((d) => (
+                      <button
+                        key={d}
+                        type="button"
+                        className={`pill-option ${bookingDate === d ? "selected" : ""}`}
+                        onClick={() => setBookingDate(d)}
+                      >
+                        {d}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="service-slot">Select Preferred Time Slot</label>
+                  <div className="option-pills">
+                    {[
+                      "8:00 AM - 10:00 AM",
+                      "10:00 AM - 12:00 PM",
+                      "2:00 PM - 4:00 PM",
+                      "4:00 PM - 6:00 PM",
+                    ].map((slot) => (
+                      <button
+                        key={slot}
+                        type="button"
+                        className={`pill-option ${bookingSlot === slot ? "selected" : ""}`}
+                        onClick={() => setBookingSlot(slot)}
+                      >
+                        {slot}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="service-address">Service Address / Locality</label>
+                  <input
+                    id="service-address"
+                    type="text"
+                    value={userAddress}
+                    onChange={(e) => setUserAddress(e.target.value)}
+                    required
+                    placeholder="Enter complete address & landmark"
+                    className="modal-text-input"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="service-notes">Instructions for Professional (Optional)</label>
+                  <textarea
+                    id="service-notes"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="e.g. Bring extra long wire, call before arrival..."
+                    rows={2}
+                    className="modal-text-input"
+                  />
+                </div>
+
+                <div className="booking-summary-strip">
+                  <div>
+                    <small>Payment Method</small>
+                    <strong>Pay After Service (Cash / UPI)</strong>
+                  </div>
+                  <button type="submit" className="confirm-booking-btn" disabled={isSubmitting}>
+                    {isSubmitting ? "Dispatching Expert..." : `Confirm Booking · ₹${selectedService.startingPrice}`}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Footer */}
+      <footer className="services-footer">
+        <Link className="brand footerBrand" href="/">
+          <KynistoLogo />
+        </Link>
+        <p className="demoNote">
+          Kynisto Home Services · {locationLabel} · © 2026 Kynisto
+        </p>
+      </footer>
+    </main>
+  );
+}
+
+const servicesCustomCss = `
+.services-page-shell {
+  min-height: 100vh;
+  position: relative;
+  color: #FFFFFF !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif !important;
+}
+
+.services-toast-banner {
+  position: fixed;
+  top: 90px;
+  right: 20px;
+  z-index: 999;
+  background: rgba(16, 185, 129, 0.95);
+  backdrop-filter: blur(16px);
+  color: #FFFFFF;
+  padding: 12px 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.services-hero {
+  max-width: 1200px;
+  margin: 110px auto 40px auto;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.services-hero-kicker {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  background: rgba(255, 87, 34, 0.15);
+  border: 1px solid rgba(255, 87, 34, 0.35);
+  color: #FF8A00;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+}
+
+.services-hero-title {
+  font-size: clamp(2.4rem, 6vw, 4.2rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  margin-bottom: 16px;
+}
+
+.services-hero-subtitle {
+  font-size: 1.15rem;
+  color: #CBD5E1 !important;
+  -webkit-text-fill-color: #CBD5E1 !important;
+  max-width: 750px;
+  margin: 0 auto 28px auto;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.services-proof-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.proof-chip {
+  padding: 8px 18px;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  color: #F8FAFC;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.services-search-wrapper {
+  position: relative;
+  max-width: 680px;
+  margin: 0 auto 28px auto;
+  display: flex;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 24px;
+  padding: 8px 16px;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.5);
+  backdrop-filter: blur(25px);
+}
+
+.services-search-wrapper .search-icon {
+  font-size: 18px;
+  margin-right: 12px;
+  opacity: 0.8;
+}
+
+.services-search-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #FFFFFF !important;
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.services-search-input::placeholder {
+  color: #94A3B8 !important;
+}
+
+.clear-search-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #CBD5E1;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.services-category-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.category-pill {
+  padding: 10px 20px;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94A3B8;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.category-pill:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  border-color: rgba(255, 87, 34, 0.4);
+}
+
+.category-pill.active {
+  background: linear-gradient(135deg, #FF5722 0%, #E53935 100%);
+  color: #FFFFFF !important;
+  border-color: transparent;
+  box-shadow: 0 4px 16px rgba(255, 87, 34, 0.4);
+}
+
+.services-grid-container {
+  max-width: 1350px;
+  margin: 0 auto 80px auto;
+  padding: 0 20px;
+}
+
+.services-grid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 16px;
+}
+
+.services-grid-header h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #FFFFFF !important;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.count-badge {
+  background: rgba(255, 87, 34, 0.25);
+  color: #FF8A00;
+  border: 1px solid rgba(255, 138, 0, 0.4);
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.sub-note {
+  font-size: 13px;
+  color: #94A3B8;
+  font-weight: 600;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 22px;
+}
+
+.service-card {
+  position: relative;
+  background: rgba(12, 18, 30, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  padding: 24px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.service-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 87, 34, 0.5);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 87, 34, 0.2);
+}
+
+.popular-tag {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: linear-gradient(135deg, #FF5722 0%, #F59E0B 100%);
+  color: #FFFFFF;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.service-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.service-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+}
+
+.arrival-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #10B981;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 4px 10px;
+  border-radius: 9999px;
+}
+
+.category-meta {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #FF8A00;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.service-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #FFFFFF !important;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.service-desc {
+  font-size: 0.9rem;
+  color: #CBD5E1 !important;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  min-height: 40px;
+}
+
+.service-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.rating-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rating-box .star {
+  font-size: 13px;
+  font-weight: 800;
+  color: #F59E0B;
+}
+
+.rating-box .reviews {
+  font-size: 11px;
+  color: #94A3B8;
+}
+
+.price-box small {
+  display: block;
+  font-size: 9px;
+  color: #94A3B8;
+  text-transform: uppercase;
+}
+
+.price-box strong {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #FFFFFF;
+}
+
+.book-now-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.book-now-btn:hover {
+  background: linear-gradient(135deg, #FF5722 0%, #E53935 100%);
+  border-color: transparent;
+  box-shadow: 0 4px 18px rgba(255, 87, 34, 0.4);
+}
+
+.services-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: rgba(12, 18, 30, 0.6);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+}
+
+.services-empty-state .empty-icon {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.reset-search-btn {
+  margin-top: 16px;
+  padding: 10px 24px;
+  border-radius: 12px;
+  background: #FF5722;
+  color: white;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Modal Styling */
+.services-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(12px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.services-modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  background: #0F172A;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 28px;
+  padding: 32px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #FFFFFF;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.modal-header-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-icon {
+  font-size: 36px;
+}
+
+.modal-kicker {
+  font-size: 10px;
+  color: #FF8A00;
+  font-weight: 800;
+  text-transform: uppercase;
+  display: block;
+}
+
+.modal-service-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 2px 0;
+}
+
+.modal-price {
+  font-size: 13px;
+  color: #10B981;
+  font-weight: 700;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #CBD5E1;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.option-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill-option {
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #CBD5E1;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pill-option.selected {
+  background: rgba(255, 87, 34, 0.25);
+  border-color: #FF5722;
+  color: #FF8A00;
+  font-weight: 700;
+}
+
+.modal-text-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  outline: none;
+  font-size: 14px;
+}
+
+.booking-summary-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 16px;
+}
+
+.booking-summary-strip small {
+  font-size: 10px;
+  color: #94A3B8;
+  display: block;
+}
+
+.booking-summary-strip strong {
+  font-size: 12px;
+  color: #10B981;
+}
+
+.confirm-booking-btn {
+  padding: 14px 24px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #FF5722 0%, #E53935 100%);
+  border: none;
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(255, 87, 34, 0.4);
+}
+
+.booking-success-box {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.success-icon {
+  font-size: 50px;
+  margin-bottom: 12px;
+}
+
+.booking-ticket {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 16px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.ticket-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.ticket-row:last-child {
+  border-bottom: none;
+}
+
+.ticket-row span {
+  color: #94A3B8;
+}
+
+.ticket-row strong {
+  color: #FFFFFF;
+}
+
+.ticket-note {
+  font-size: 12px;
+  color: #94A3B8;
+  margin-bottom: 20px;
+}
+
+.done-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  background: #10B981;
+  border: none;
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.services-footer {
+  text-align: center;
+  padding: 40px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 768px) {
+  .services-hero-title {
+    font-size: 2.1rem !important;
+  }
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+  .services-modal-content {
+    padding: 20px;
+  }
+  .booking-summary-strip {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+`;
