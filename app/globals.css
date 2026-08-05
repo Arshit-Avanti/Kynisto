@@ -2,14 +2,15 @@
 @import "tailwindcss";
 
 :root {
-  --bg-page: #f8fafc;
+  --accent-orange: #000000;
+  --bg-page: #ffffff;
   --bg-card: #ffffff;
-  --primary: #FF5722;
-  --primary-hover: #E64A19;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --border: #e2e8f0;
+  --primary: #000000;
+  --primary-hover: #333333;
+  --text-primary: #000000;
+  --text-secondary: #000000;
+  --text-muted: #000000;
+  --border: #e5e5e5;
   --radius: 8px;
 
   --ink: var(--text-primary);
@@ -19,26 +20,87 @@
   --line: var(--border);
   --accent: var(--primary);
   --accent-dark: var(--primary-hover);
-  --green: #10b981;
-  --blue: #3b82f6;
-  --yellow: #f59e0b;
+  --green: #000000;
+  --blue: #000000;
+  --yellow: #000000;
 
-  --bg-space: #140A0C;
-  --glass-bg: rgba(255, 255, 255, 0.04);
-  --glass-border: rgba(255, 87, 34, 0.18);
-  --glass-hover: rgba(255, 255, 255, 0.08);
-  --glow-orange: #FF5722;
-  --glow-red: #EF4444;
-  --glow-amber: #F59E0B;
-  --glow-blue: #FF5722;
-  --glow-violet: #EF4444;
-  --glow-emerald: #10b981;
+  --bg-space: #ffffff;
+.light-theme,
+.mode-light {
+  --portal-bg: #F8FAFC !important;
+  --portal-card-bg: #FFFFFF !important;
+  --portal-text: #000000 !important;
+  --portal-border: #E2E8F0 !important;
+  --portal-muted: #1E293B !important;
+  --portal-input: #FFFFFF !important;
+
+  --bg-page: #F8FAFC !important;
+  --bg-card: #FFFFFF !important;
+  --text-primary: #000000 !important;
+  --text-secondary: #0F172A !important;
+  --ink: #000000 !important;
+  --muted: #1E293B !important;
+  --cream: #F8FAFC !important;
+  --paper: #FFFFFF !important;
+  --line: #E2E8F0 !important;
+  --glass-bg: rgba(255, 255, 255, 0.85) !important;
+  --glass-surface: rgba(255, 255, 255, 0.95) !important;
+  --glass-border: rgba(0, 0, 0, 0.12) !important;
+  --accent-orange: #FF5722 !important;
+  background-color: #F8FAFC !important;
+  color: #000000 !important;
+}
+
+.mode-light h1, .mode-light h2, .mode-light h3, .mode-light h4, .mode-light p, .mode-light span, .mode-light b, .mode-light strong, .mode-light a, .mode-light button, .mode-light label, .mode-light input, .mode-light small,
+.light-theme h1, .light-theme h2, .light-theme h3, .light-theme h4, .light-theme p, .light-theme span, .light-theme b, .light-theme strong, .light-theme a, .light-theme button, .light-theme label, .light-theme input, .light-theme small {
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+  text-shadow: none !important;
+}
+
+.mode-dark h1, .mode-dark h2, .mode-dark h3, .mode-dark h4, .mode-dark p, .mode-dark span, .mode-dark b, .mode-dark strong, .mode-dark a, .mode-dark button, .mode-dark label, .mode-dark input, .mode-dark small,
+.dark-theme h1, .dark-theme h2, .dark-theme h3, .dark-theme h4, .dark-theme p, .dark-theme span, .dark-theme b, .dark-theme strong, .dark-theme a, .dark-theme button, .dark-theme label, .dark-theme input, .dark-theme small {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  text-shadow: none !important;
+}
+
+  --glass-hover: rgba(0, 0, 0, 0.06);
+  --glow-orange: #000000;
+  --glow-red: #000000;
+  --glow-amber: #000000;
+  --glow-blue: #000000;
+  --glow-violet: #000000;
+  --glow-emerald: #000000;
 }
 
 @keyframes rotateRadar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 15px rgba(255, 87, 34, 0.4); } 50% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.7); } }
 @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 @keyframes floatCard { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+@keyframes springUp {
+  0% { transform: translateY(20px); opacity: 0; }
+  60% { transform: translateY(-4px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes ambientGlow {
+  0%, 100% { filter: drop-shadow(0 0 10px var(--accent-orange)); }
+  50% { filter: drop-shadow(0 0 25px var(--accent-orange)); }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--glass-bg) 25%, var(--glass-surface) 50%, var(--glass-bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: var(--radius);
+}
 
 
 * {
@@ -59,12 +121,11 @@ body {
   max-width: 100%;
   margin: 0;
   overflow-x: clip;
-  background: #140A0C;
-  background-image: radial-gradient(circle at 15% 25%, rgba(255, 87, 34, 0.2), transparent 45%),
-                    radial-gradient(circle at 85% 75%, rgba(239, 68, 68, 0.2), transparent 45%),
-                    radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.1), transparent 60%);
-  color: #F8FAFC;
+  background: var(--bg-page);
+  color: var(--text-primary);
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 button,
@@ -205,15 +266,17 @@ textarea:focus {
 }
 
 .mode-dark {
-  --ink: #eff5f0;
-  --muted: #a4afa7;
-  --cream: #071126;
-  --paper: #101f3f;
-  --line: #344239;
+  --ink: #FFFFFF;
+  --muted: #888888;
+  --cream: #000000;
+  --paper: #000000;
+  --line: #333333;
+  --accent: #FFFFFF;
+  --accent-dark: #CCCCCC;
   color-scheme: dark;
 }
 
-/* ⚡ 1. Cyberpunk Neon Dark Theme */
+/* âš¡ 1. Cyberpunk Neon Dark Theme */
 .theme-cyberpunk,
 [data-theme="cyberpunk"] {
   --ink: #F0F6FF;
@@ -228,7 +291,7 @@ textarea:focus {
   color-scheme: dark;
 }
 
-/* 👑 2. Royal Sapphire Dark Theme */
+/* ðŸ‘‘ 2. Royal Sapphire Dark Theme */
 .theme-royal,
 [data-theme="royal"] {
   --ink: #F4F8FF;
@@ -243,7 +306,7 @@ textarea:focus {
   color-scheme: dark;
 }
 
-/* 🌑 3. Minimalist Obsidian OLED Theme */
+/* ðŸŒ‘ 3. Minimalist Obsidian OLED Theme */
 .theme-obsidian,
 [data-theme="obsidian"] {
   --ink: #FFFFFF;
@@ -259,21 +322,39 @@ textarea:focus {
 }
 
 .dark-theme {
-  --portal-bg: #0b1120;
-  --portal-card-bg: #1e293b;
-  --portal-text: #f8fafc;
-  --portal-border: #334155;
-  --portal-muted: #94a3b8;
-  --portal-input: #0f172a;
+  --portal-bg: #000000;
+  --portal-card-bg: #000000;
+  --portal-text: #ffffff;
+  --portal-border: #333333;
+  --portal-muted: #ffffff;
+  --portal-input: #000000;
+
+  --bg-page: #000000;
+  --bg-card: #000000;
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-surface: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --accent-orange: #ffffff;
 }
 
 .light-theme {
-  --portal-bg: #f8fafc;
+  --portal-bg: #ffffff;
   --portal-card-bg: #ffffff;
-  --portal-text: #0f172a;
-  --portal-border: #e2e8f0;
-  --portal-muted: #64748b;
-  --portal-input: #f1f5f9;
+  --portal-text: #000000;
+  --portal-border: #e5e5e5;
+  --portal-muted: #000000;
+  --portal-input: #ffffff;
+
+  --bg-page: #ffffff;
+  --bg-card: #ffffff;
+  --text-primary: #000000;
+  --text-secondary: #000000;
+  --glass-bg: rgba(0, 0, 0, 0.03);
+  --glass-surface: rgba(0, 0, 0, 0.05);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --accent-orange: #000000;
 }
 
 .mode-dark .mapScene,
@@ -415,45 +496,6 @@ textarea:focus {
 .mode-dark .placesSection .sectionHeading h2,
 .mode-dark .placesSection .kicker {
   color: #f8fafc !important;
-}
-
-/* Dark mode store card visibility */
-.mode-dark .storeCard {
-  background: rgba(20, 26, 42, 0.95);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.mode-dark .storeCard h3 {
-  color: #F1F5F9;
-}
-
-.mode-dark .storeBody .address {
-  color: #94a3b8;
-}
-
-.mode-dark .storeBody .storeMeta {
-  color: #94a3b8;
-}
-
-.mode-dark .storeCard .categoryLabel {
-  color: #FF7A50;
-}
-
-/* Light mode store card visibility */
-.mode-light .storeCard {
-  background: #ffffff;
-}
-
-.mode-light .storeCard h3 {
-  color: #0f172a;
-}
-
-.mode-light .storeBody .address {
-  color: #626b64;
-}
-
-.mode-light .storeBody .storeMeta {
-  color: #747c75;
 }
 
 .themeModeIcon {
@@ -1680,7 +1722,7 @@ footer > p { color: var(--muted); font-size: 11px; }
   .heroText { margin: 22px 0 25px; line-height: 1.55; }
   .searchBox { min-height: 58px; padding: 6px 6px 6px 17px; gap: 10px; border-radius: 17px; }
   .searchSubmit { min-width: 54px; width: 54px; font-size: 0; }
-  .searchSubmit::after { content: "→"; font-size: 19px; }
+  .searchSubmit::after { content: "â†’"; font-size: 19px; }
   .quickProof { margin-top: 19px; }
   .quickProof span { padding: 0 7px; font-size: 9px; line-height: 1.35; }
   .quickProof b { display: block; font-size: 11px; }
@@ -1794,4 +1836,120 @@ footer > p { color: var(--muted); font-size: 11px; }
   color: #ffffff;
   text-align: center;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+
+/* Skeletons */
+.skeleton {
+  background: linear-gradient(90deg, var(--glass-bg) 25%, var(--glass-hover) 50%, var(--glass-bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius);
+}
+
+/* New Keyframes */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes tiltLift {
+  0% { transform: perspective(1000px) rotateX(0) rotateY(0) scale(1); }
+  100% { transform: perspective(1000px) rotateX(5deg) rotateY(-5deg) scale(1.02); }
+}
+
+/* ==========================================================================
+   HIGH CONTRAST TEXT VISIBILITY ENFORCEMENT
+   ========================================================================== */
+
+/* DARK MODE: Enforce 100% White Text */
+.dark-theme, .mode-dark, [data-theme="cyberpunk"], [data-theme="royal"], [data-theme="obsidian"], html.dark {
+  --text-primary: #FFFFFF !important;
+  --text-secondary: #FFFFFF !important;
+  --ink: #FFFFFF !important;
+  --portal-text: #FFFFFF !important;
+}
+
+/* LIGHT MODE: Enforce 100% Dark Slate Text */
+.light-theme, .mode-light, html:not(.dark) {
+  --text-primary: #0F172A !important;
+  --text-secondary: #0F172A !important;
+  --ink: #0F172A !important;
+  --portal-text: #0F172A !important;
+}
+
+/* Force Dark Mode High Contrast for Headings, Body, Cards, Badges, Buttons */
+.dark-theme h1, .dark-theme h2, .dark-theme h3, .dark-theme h4, .dark-theme h5, .dark-theme h6,
+.dark-theme p, .dark-theme body, .dark-theme span, .dark-theme div,
+.dark-theme .card, .dark-theme .dashCard, .dark-theme .portalCard, .dark-theme .authCard,
+.dark-theme .badge, .dark-theme .statusBadge, .dark-theme .roleBadge,
+.dark-theme button:not([class*="bg-"]):not([style*="background"]):not(.searchSubmit):not(.customizeButton),
+.mode-dark h1, .mode-dark h2, .mode-dark h3, .mode-dark h4, .mode-dark h5, .mode-dark h6,
+.mode-dark p, .mode-dark body, .mode-dark span, .mode-dark div,
+.mode-dark .card, .mode-dark .dashCard, .mode-dark .portalCard, .mode-dark .authCard,
+.mode-dark .badge, .mode-dark .statusBadge, .mode-dark .roleBadge,
+.mode-dark button:not([class*="bg-"]):not([style*="background"]):not(.searchSubmit):not(.customizeButton) {
+  color: #FFFFFF !important;
+}
+
+/* Force Light Mode High Contrast for Headings, Body, Cards, Badges, Buttons */
+.light-theme h1, .light-theme h2, .light-theme h3, .light-theme h4, .light-theme h5, .light-theme h6,
+.light-theme p, .light-theme body, .light-theme span, .light-theme div,
+.light-theme .card, .light-theme .dashCard, .light-theme .portalCard, .light-theme .authCard,
+.light-theme .badge, .light-theme .statusBadge, .light-theme .roleBadge,
+.light-theme button:not([class*="bg-"]):not([style*="background"]):not(.searchSubmit):not(.customizeButton) {
+  color: #0F172A !important;
+}
+
+/* Eliminate Dark Text on Dark Background Rules */
+.dark-theme [style*="color: #0f172a"], .mode-dark [style*="color: #0f172a"],
+.dark-theme [style*="color:#0f172a"], .mode-dark [style*="color:#0f172a"],
+.dark-theme [style*="color: #000"], .mode-dark [style*="color: #000"],
+.dark-theme [class*="text-slate-900"], .mode-dark [class*="text-slate-900"],
+.dark-theme [class*="text-gray-900"], .mode-dark [class*="text-gray-900"],
+.dark-theme [class*="text-black"], .mode-dark [class*="text-black"] {
+  color: #FFFFFF !important;
+}
+
+/* Zero-lag GPU CSS keyframes (0.15s instant transitions) */
+.zero-lag-transition {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+/* Soft ambient radial backlight glow gradients */
+.ambient-glow {
+  background: radial-gradient(circle at center, rgba(255, 87, 34, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+.dark-theme .ambient-glow, .mode-dark .ambient-glow {
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+/* Zero-lag 3D card flip elevation styles */
+.flip-card-3d {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.flip-card-3d-inner {
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.flip-card-3d:hover .flip-card-3d-inner,
+.flip-card-3d.flipped .flip-card-3d-inner {
+  transform: rotateY(180deg) translateZ(20px);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+}
+
+.flip-card-3d-front, .flip-card-3d-back {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-card-3d-back {
+  transform: rotateY(180deg);
 }
