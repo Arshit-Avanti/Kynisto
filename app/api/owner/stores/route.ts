@@ -113,10 +113,8 @@ export async function PATCH(request: Request) {
           address = ?, area = ?, city = ?, state = ?, country = ?, postal_code = ?, latitude = ?, longitude = ?,
           location_accuracy = ?, location_verified = ?,
           google_maps_url = ?, phone = ?, whatsapp = ?, email = ?, website = ?, business_hours = ?, opening_days = ?,
-          status = CASE WHEN status IN ('rejected', 'approved') THEN 'pending' ELSE status END,
-          rejection_reason = CASE WHEN status IN ('rejected', 'approved') THEN NULL ELSE rejection_reason END,
-          approved_at = CASE WHEN status = 'approved' THEN NULL ELSE approved_at END,
-          approved_by = CASE WHEN status = 'approved' THEN NULL ELSE approved_by END,
+          status = CASE WHEN status = 'rejected' THEN 'pending' ELSE status END,
+          rejection_reason = CASE WHEN status = 'rejected' THEN NULL ELSE rejection_reason END,
           updated_at = ? WHERE id = ? AND owner_id = ?`,
       )
       .bind(
