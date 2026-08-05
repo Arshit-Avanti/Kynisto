@@ -1468,41 +1468,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Interactive 3D Radar Section */}
-      <section className="radarSection" aria-label="Live Store Radar">
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <h2 className="highContrastText" style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace", fontSize: "1rem", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "8px", opacity: 0.8 }}>Live Radar</h2>
-          <p className="highContrastText" style={{ fontSize: "2rem", fontWeight: 700, letterSpacing: "-0.02em", margin: 0 }}>Discover what's around you.</p>
-        </div>
-        
-        <div className="radarContainer">
-          <div className="radarGrid" />
-          <div className="radarSweep" />
-          <div className="radarCenter" />
-          
-          {catalogStores.slice(0, 8).map((store, index) => {
-            const angle = (index * 45) * (Math.PI / 180);
-            const radius = 60 + (index * 25);
-            const x = Math.cos(angle) * radius;
-            const y = Math.sin(angle) * radius;
-            
-            return (
-              <div 
-                key={store.id} 
-                className={`radarPin ${store.open ? "" : "isClosed"}`}
-                style={{ left: `calc(50% + ${x}px)`, top: `calc(50% + ${y}px)` }}
-                onClick={() => setSelectedStore(store)}
-              >
-                <div className="pinLabel">
-                  {store.icon} {store.name} • {store.distance.toFixed(1)}km
-                </div>
-                <div className={`pinDot ${store.open ? "" : "isClosed"}`} />
-                <div className="pinLine" />
-              </div>
-            );
-          })}
-        </div>
-      </section>
+
 
       {/* Places Section */}
 
@@ -1626,61 +1592,7 @@ export default function Home() {
 
 
 
-      {/* Cinematic Join the Future Banner (Image 1 Style) */}
-      <section 
-        className="cinematicSection"
-        style={{ 
-          margin: "60px auto 40px auto", 
-          maxWidth: "1200px", 
-          padding: "0 20px" 
-        }}
-      >
-        <div 
-          style={{ 
-            borderRadius: "28px", 
-            border: "1px solid rgba(255, 255, 255, 0.12)", 
-            background: "linear-gradient(180deg, rgba(18, 20, 26, 0.85) 0%, rgba(10, 11, 15, 0.95) 100%), url('https://images.unsplash.com/photo-1518770660439-4636190af475?w=1600&auto=format&fit=crop&q=80') center/cover no-repeat", 
-            position: "relative", 
-            overflow: "hidden", 
-            padding: "90px 32px", 
-            textAlign: "center", 
-            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.7)" 
-          }}
-        >
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at center, rgba(12, 14, 18, 0.6) 0%, rgba(10, 11, 15, 0.95) 100%)", zIndex: 1, pointerEvents: "none" }} />
-          <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <h2 style={{ fontSize: "clamp(2.8rem, 5.5vw, 4.5rem)", fontWeight: 900, color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF", margin: "0 0 16px 0", letterSpacing: "-0.03em" }}>
-              Join the Future.
-            </h2>
-            <p style={{ fontSize: "1.15rem", color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1", maxWidth: "600px", margin: "0 auto 36px auto", lineHeight: 1.6, fontWeight: 500 }}>
-              The infrastructure of efficiency starts with a single integration.
-            </p>
-            <Link 
-              href="/dashboard"
-              style={{ 
-                position: "relative",
-                zIndex: 20,
-                pointerEvents: "auto",
-                cursor: "pointer",
-                display: "inline-block", 
-                padding: "16px 42px", 
-                borderRadius: "9999px", 
-                background: "#FFFFFF", 
-                color: "#0E0F12", 
-                fontWeight: 900, 
-                fontSize: "13px", 
-                letterSpacing: "0.1em", 
-                textTransform: "uppercase", 
-                textDecoration: "none", 
-                boxShadow: "0 10px 30px rgba(255, 255, 255, 0.25)", 
-                transition: "all 0.3s ease" 
-              }}
-            >
-              GET STARTED
-            </Link>
-          </div>
-        </div>
-      </section>
+
 
       <section className="trustStrip" aria-label="Why use Kynisto">
         <div><Icons.Location /><p><b>Exact Location</b></p></div>
