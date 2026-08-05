@@ -280,6 +280,7 @@ export function HealthcareDiscovery() {
               const queueEnabled = Boolean(provider.queueActivationStatus === "approved" && provider.adminQueueEnabled && provider.ownerQueueEnabled);
               const queueOpen = Boolean(queueEnabled && provider.queueStatus === "open");
               const queueJoinable = Boolean(queueOpen && provider.acceptingPatients);
+              const capacityLabel = `max ${provider.maximumDailyPatients} patients/day`;
               const IconComp = categoryIcons[provider.providerType] ?? Stethoscope;
 
               return (
@@ -330,6 +331,9 @@ export function HealthcareDiscovery() {
                         </div>
                         <div className="text-xs text-slate-300 flex items-center justify-between">
                           <span>{provider.waitingCount} patients waiting</span>
+                          <span>{capacityLabel}</span>
+                        </div>
+                        <div className="text-xs text-slate-400 flex items-center justify-between mt-1">
                           <span>~{provider.consultationMinutes || 15} min/patient</span>
                         </div>
                       </div>

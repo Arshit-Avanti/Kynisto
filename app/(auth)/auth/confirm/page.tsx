@@ -20,5 +20,10 @@ export default function ConfirmPage() {
     }
   }, []);
 
-  return <AuthConfirmChoice hash={hash} accessToken={accessToken} />;
+  return (
+    <>
+      <p role="status" className="sr-only">Finalizing secure login with Kynisto…</p>
+      <AuthConfirmChoice hash={hash} accessToken={accessToken} />
+    </>
+  );
 }
