@@ -88,15 +88,11 @@ export function ShaderCanvas() {
         
         vec3 finalColor = mix(mix(color1, color2, uv.x + blob), color3, uv.y - blob);
         
-        // Soft ambient lighting background base
-        vec3 bgDark = vec3(0.0, 0.0, 0.0);
-        vec3 bgLight = vec3(1.0, 1.0, 1.0);
-        vec3 bg = mix(bgLight, bgDark, u_isDark);
+        // Dynamic soft ambient transparency based on fluid blob waves without solid background blocking
+        float blobIntensity = smoothstep(-0.4, 0.6, blob);
+        float alpha = mix(0.02, 0.14, blobIntensity);
         
-        float alpha = 0.12; // smooth soft intensity
-        vec3 renderColor = mix(bg, finalColor, alpha + blob * 0.04);
-        
-        gl_FragColor = vec4(renderColor, 1.0);
+        gl_FragColor = vec4(finalColor, alpha);
       }
     `;
 
@@ -127,6 +123,9 @@ export function ShaderCanvas() {
       return;
     }
     gl.useProgram(program);
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     const positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -185,7 +184,7 @@ export function ShaderCanvas() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0"
+      className="fixed inset-0 pointer-events-none z-[1]"
       style={{ width: "100vw", height: "100vh" }}
     />
   );

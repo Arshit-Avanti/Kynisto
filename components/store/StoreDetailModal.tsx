@@ -16,9 +16,18 @@ export default function StoreDetailModal({ store, isOpen, onClose }: StoreDetail
   if (!isOpen) return null;
 
   const handleDirections = () => {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${store.coordinates.lat},${store.coordinates.lng}`;
+    // Use GPS coordinates if available — works even for shops not on Google Maps
+    const lat = (store as Record<string, unknown>).latitude as number | undefined;
+    const lng = (store as Record<string, unknown>).longitude as number | undefined;
+    const url = (lat && lng)
+      ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+      : `https://www.google.com/maps/dir/?api=1&destination=${store.coordinates.lat},${store.coordinates.lng}`;
     window.open(url, '_blank');
   };
+
+  const locationVerified = Boolean((store as Record<string, unknown>).locationVerified);
+  const storeLat = ((store as Record<string, unknown>).latitude as number | undefined) ?? store.coordinates.lat;
+  const storeLng = ((store as Record<string, unknown>).longitude as number | undefined) ?? store.coordinates.lng;
 
   const handlePurchase = () => {
     if (membershipAmount < minAmount) {
@@ -59,6 +68,13 @@ export default function StoreDetailModal({ store, isOpen, onClose }: StoreDetail
               </svg>
               {store.address} ({store.distanceKm} km away)
             </div>
+            {locationVerified && (
+              <div className="flex items-center gap-1.5 mt-1.5">
+                <span className="inline-flex items-center gap-1 bg-green-500/20 border border-green-500/40 text-green-300 text-xs font-bold px-2.5 py-0.5 rounded-full backdrop-blur-sm">
+                  📍 Verified Location
+                </span>
+              </div>
+            )}
           </div>
         </div>
         
@@ -87,7 +103,12 @@ export default function StoreDetailModal({ store, isOpen, onClose }: StoreDetail
                 <svg className="w-6 h-6 text-blue-600 dark:text-blue-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Route</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                  {locationVerified ? '✅ Navigate' : 'Route'}
+                </span>
+                {locationVerified && (
+                  <span className="text-[9px] text-green-500 font-semibold mt-0.5">GPS Verified</span>
+                )}
               </div>
             </div>
           </div>

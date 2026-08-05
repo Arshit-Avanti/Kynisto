@@ -36,6 +36,10 @@ export function parseStoreInput(body: Record<string, unknown>) {
     postalCode: cleanText(body.postalCode ?? "201102", "PIN code", { min: 4, max: 12 }),
     latitude: numberInput(body.latitude ?? 28.7381, "Latitude", { min: -90, max: 90 }) as number,
     longitude: numberInput(body.longitude ?? 77.2669, "Longitude", { min: -180, max: 180 }) as number,
+    // GPS accuracy in metres (null if owner did not use GPS capture)
+    locationAccuracy: body.locationAccuracy != null ? (numberInput(body.locationAccuracy, "Location accuracy", { min: 0, max: 50000 }) as number) : null,
+    // Whether the owner confirmed GPS coordinates via the location step
+    locationVerified: Boolean(body.locationVerified),
     googleMapsUrl: urlInput(body.googleMapsUrl, "Google Maps URL"),
     phone: phoneInput(body.phone, "Phone"),
     whatsapp: phoneInput(body.whatsapp, "WhatsApp"),

@@ -1056,3 +1056,45 @@
   }
 }
 
+/* ============================================================
+   LIGHT-THEME PORTAL OVERRIDES — Readable in both modes
+   ============================================================ */
+.light-theme .portal, .portalShell.light-theme { background: #F1F5F9; color: #0f172a; }
+.light-theme .portalSidebar, .portalShell.light-theme .portalSidebar { background: rgba(255,255,255,0.95) !important; border-right: 1px solid #E2E8F0 !important; color: #0f172a !important; }
+.light-theme .portalBrand, .portalShell.light-theme .portalBrand { color: #0f172a !important; }
+.light-theme .portalRole, .portalShell.light-theme .portalRole { background: rgba(0,0,0,0.04) !important; border-color: rgba(0,0,0,0.1) !important; }
+.light-theme .portalRole small, .portalShell.light-theme .portalRole small { color: #2563eb !important; }
+.light-theme .portalRole strong, .portalShell.light-theme .portalRole strong { color: #0f172a !important; }
+.light-theme .portalSidebar nav a, .light-theme .portalSidebarFooter a, .light-theme .portalSidebarFooter button, .portalShell.light-theme .portalSidebar nav a, .portalShell.light-theme .portalSidebarFooter a, .portalShell.light-theme .portalSidebarFooter button { color: #374151 !important; }
+.light-theme .portalSidebar nav a:hover, .portalShell.light-theme .portalSidebar nav a:hover { background: rgba(0,0,0,0.06) !important; color: #0f172a !important; }
+.light-theme .portalSidebar nav a.active, .portalShell.light-theme .portalSidebar nav a.active { background: rgba(255,87,34,0.1) !important; color: #FF5722 !important; border-left-color: #FF5722 !important; }
+.light-theme .portalSidebar nav a.active:after, .portalShell.light-theme .portalSidebar nav a.active:after { background: #FF5722 !important; box-shadow: 0 0 8px rgba(255,87,34,0.5) !important; }
+.light-theme .portalSidebarFooter, .portalShell.light-theme .portalSidebarFooter { border-top-color: #E2E8F0 !important; }
+.light-theme .portalHeader, .portalShell.light-theme .portalHeader { background: rgba(255,255,255,0.92) !important; border-bottom: 1px solid #E2E8F0 !important; }
+.light-theme .portalHeader > div:first-of-type small, .portalShell.light-theme .portalHeader > div:first-of-type small { color: #2563eb !important; }
+.light-theme .portalHeader > div:first-of-type strong, .portalShell.light-theme .portalHeader > div:first-of-type strong { color: #0f172a !important; }
+.light-theme .portalHeaderActions > button, .light-theme .mobileMenu, .portalShell.light-theme .portalHeaderActions > button, .portalShell.light-theme .mobileMenu { border-color: #E2E8F0 !important; background: #ffffff !important; color: #374151 !important; }
+.light-theme .userMeta b, .portalShell.light-theme .userMeta b { color: #0f172a !important; }
+.light-theme .userMeta small, .portalShell.light-theme .userMeta small { color: #64748b !important; }
+.light-theme .statCard, .light-theme .portalCard, .portalShell.light-theme .statCard, .portalShell.light-theme .portalCard { background: #ffffff !important; border: 1px solid #E2E8F0 !important; box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important; }
+.light-theme .statCard > span, .portalShell.light-theme .statCard > span { background: rgba(255,87,34,0.1) !important; color: #FF5722 !important; border-color: rgba(255,87,34,0.2) !important; }
+.light-theme .statCard small, .portalShell.light-theme .statCard small { color: #FF5722 !important; }
+.light-theme .statCard strong, .portalShell.light-theme .statCard strong { color: #0f172a !important; }
+.light-theme .statCard .subText, .portalShell.light-theme .statCard .subText { color: #64748b !important; }
+.light-theme .portalTitleRow h1, .portalShell.light-theme .portalTitleRow h1 { color: #0f172a !important; }
+.light-theme .portalTitleRow p, .portalShell.light-theme .portalTitleRow p { color: #64748b !important; }
+.light-theme .portalEyebrow, .portalShell.light-theme .portalEyebrow { color: #2563eb !important; }
+.light-theme .portalButton, .portalShell.light-theme .portalButton { color: #0f172a !important; background: #ffffff !important; border: 1px solid #CBD5E1 !important; }
+.light-theme .portalTable th, .portalShell.light-theme .portalTable th { color: #2563eb !important; border-bottom-color: rgba(37,99,235,0.2) !important; }
+.light-theme .portalTable td, .portalShell.light-theme .portalTable td { color: #374151 !important; border-bottom-color: #E2E8F0 !important; }
+.light-theme .portalTable td b, .portalShell.light-theme .portalTable td b { color: #0f172a !important; }
+.light-theme .portalTable td small, .portalShell.light-theme .portalTable td small { color: #64748b !important; }
+.light-theme .portalCardHeader h1, .light-theme .portalCardHeader h2, .light-theme .portalCardHeader h3, .portalShell.light-theme .portalCardHeader h1, .portalShell.light-theme .portalCardHeader h2, .portalShell.light-theme .portalCardHeader h3 { color: #0f172a !important; }
+.light-theme .portalCardHeader small, .portalShell.light-theme .portalCardHeader small { color: #64748b !important; opacity: 1 !important; }
+.light-theme .emptyPortal, .portalShell.light-theme .emptyPortal { color: #64748b !important; }
+.light-theme .emptyPortal b, .portalShell.light-theme .emptyPortal b { color: #0f172a !important; }
+.light-theme .emptyPortal p, .portalShell.light-theme .emptyPortal p { color: #64748b !important; }
+.light-theme .emptyGraphic, .portalShell.light-theme .emptyGraphic { background: rgba(255,87,34,0.1) !important; color: #FF5722 !important; border-color: rgba(255,87,34,0.2) !important; }
+.light-theme .accountDetail b, .portalShell.light-theme .accountDetail b { color: #0f172a !important; }
+.light-theme .accountDetail small, .portalShell.light-theme .accountDetail small { color: #64748b !important; }
+.light-theme .accountDetail em, .portalShell.light-theme .accountDetail em { color: #2563eb !important; }

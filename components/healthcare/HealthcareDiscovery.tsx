@@ -170,6 +170,19 @@ export function HealthcareDiscovery() {
     setActiveStore(storeId);
   }
 
+  const queueUnavailableMessage = useMemo(() => {
+    if (!queueState) return "";
+    if (queueState.status === "closed") return "This queue is currently closed by the provider.";
+    if (!queueState.queueAvailable) {
+      if (!queueState.withinOperatingHours) return `Queue is closed outside operating hours (${queueState.openingTime || ''} - ${queueState.closingTime || ''}).`;
+      // max ${provider.maximumDailyPatients}
+      if (!queueState.capacityAvailable) return `Maximum daily capacity reached (${queueState.maximumDailyPatients || 0} patients).`;
+      if (!queueState.acceptingPatients) return "Clinic is not currently accepting new patients.";
+      if (!queueState.adminQueueEnabled || !queueState.ownerQueueEnabled) return "Queue service disabled by clinic administration.";
+    }
+    return "";
+  }, [queueState]);
+
   const arrivalNotice = queueState?.arrivalReminder && queueState.entry ? (
     <div className="queueArrivalReminder flex items-center gap-3 p-4 rounded-2xl bg-orange-500/10 border border-orange-500/30 text-white mb-6 backdrop-blur-xl">
       <AlertCircle size={24} className="text-orange-400 shrink-0" />
@@ -433,7 +446,7 @@ export function HealthcareDiscovery() {
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <p className="text-xs text-slate-300">{queueUnavailableMessage || "Join remotely and get notified when your turn approaches."}</p>
               <button
                 type="button"
@@ -443,6 +456,15 @@ export function HealthcareDiscovery() {
               >
                 {queueBusy === "join" ? "Joining…" : "Join Live Queue"}
               </button>
+              {activeProvider?.slug && (
+                <Link
+                  href={`/stores/${activeProvider.slug}`}
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white/8 hover:bg-white/14 border border-white/15 text-white/85 hover:text-white font-semibold text-xs transition-all"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                  View Shop Profile
+                </Link>
+              )}
             </div>
           )}
         </div>

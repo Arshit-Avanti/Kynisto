@@ -133,6 +133,8 @@ function toPublicStore(row: StoreRow, latitude: number, longitude: number) {
     postalCode: row.postalCode,
     latitude: row.latitude,
     longitude: row.longitude,
+    locationVerified: Boolean(row.locationVerified),
+    locationAccuracy: row.locationAccuracy as number | null,
     googleMapsUrl: row.googleMapsUrl,
     phone: row.phone,
     whatsapp: row.whatsapp,
@@ -159,7 +161,8 @@ function toPublicStore(row: StoreRow, latitude: number, longitude: number) {
 const storeSelect = `SELECT
   s.id, s.owner_id AS ownerId, s.name, s.slug, s.description, s.business_type AS businessType,
   s.address, s.area, s.city, s.state, s.country, s.postal_code AS postalCode,
-  s.latitude, s.longitude, s.google_maps_url AS googleMapsUrl,
+  s.latitude, s.longitude, s.location_accuracy AS locationAccuracy, s.location_verified AS locationVerified,
+  s.google_maps_url AS googleMapsUrl,
   s.phone, s.whatsapp, s.email, s.website,
   s.business_hours AS businessHours, s.opening_days AS openingDays,
   s.logo_url AS logoUrl, s.banner_url AS bannerUrl,

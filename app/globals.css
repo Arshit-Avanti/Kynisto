@@ -51,18 +51,41 @@
   color: #000000 !important;
 }
 
-.mode-light h1, .mode-light h2, .mode-light h3, .mode-light h4, .mode-light p, .mode-light span, .mode-light b, .mode-light strong, .mode-light a, .mode-light button, .mode-light label, .mode-light input, .mode-light small,
-.light-theme h1, .light-theme h2, .light-theme h3, .light-theme h4, .light-theme p, .light-theme span, .light-theme b, .light-theme strong, .light-theme a, .light-theme button, .light-theme label, .light-theme input, .light-theme small {
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
-  text-shadow: none !important;
+/* Light mode: ensure readable dark text on content elements only.
+   Exclude elements with explicit background colors (badges, status, buttons) */
+.mode-light h1:not([class*="text-"]),
+.mode-light h2:not([class*="text-"]),
+.mode-light h3:not([class*="text-"]),
+.mode-light h4:not([class*="text-"]),
+.mode-light p:not([class*="text-"]),
+.mode-light label:not([class*="text-"]),
+.light-theme h1:not([class*="text-"]),
+.light-theme h2:not([class*="text-"]),
+.light-theme h3:not([class*="text-"]),
+.light-theme h4:not([class*="text-"]),
+.light-theme p:not([class*="text-"]),
+.light-theme label:not([class*="text-"]) {
+  color: #0f172a;
+  -webkit-text-fill-color: #0f172a;
+  text-shadow: none;
 }
 
-.mode-dark h1, .mode-dark h2, .mode-dark h3, .mode-dark h4, .mode-dark p, .mode-dark span, .mode-dark b, .mode-dark strong, .mode-dark a, .mode-dark button, .mode-dark label, .mode-dark input, .mode-dark small,
-.dark-theme h1, .dark-theme h2, .dark-theme h3, .dark-theme h4, .dark-theme p, .dark-theme span, .dark-theme b, .dark-theme strong, .dark-theme a, .dark-theme button, .dark-theme label, .dark-theme input, .dark-theme small {
-  color: #FFFFFF !important;
-  -webkit-text-fill-color: #FFFFFF !important;
-  text-shadow: none !important;
+/* Dark mode: ensure readable white text on content elements only */
+.mode-dark h1:not([class*="text-"]),
+.mode-dark h2:not([class*="text-"]),
+.mode-dark h3:not([class*="text-"]),
+.mode-dark h4:not([class*="text-"]),
+.mode-dark p:not([class*="text-"]),
+.mode-dark label:not([class*="text-"]),
+.dark-theme h1:not([class*="text-"]),
+.dark-theme h2:not([class*="text-"]),
+.dark-theme h3:not([class*="text-"]),
+.dark-theme h4:not([class*="text-"]),
+.dark-theme p:not([class*="text-"]),
+.dark-theme label:not([class*="text-"]) {
+  color: #f1f5f9;
+  -webkit-text-fill-color: #f1f5f9;
+  text-shadow: none;
 }
 
   --glass-hover: rgba(0, 0, 0, 0.06);
@@ -189,9 +212,26 @@ select option {
   border: 1px solid #cbd5e1 !important;
 }
 
+/* Light mode: placeholders must be dark */
+.mode-light input:not([type="checkbox"]):not([type="radio"])::placeholder,
+.mode-light textarea::placeholder,
+.light-theme input:not([type="checkbox"]):not([type="radio"])::placeholder,
+.light-theme textarea::placeholder {
+  color: rgba(0, 0, 0, 0.4) !important;
+  -webkit-text-fill-color: rgba(0, 0, 0, 0.4) !important;
+}
+/* Dark mode: placeholders stay light */
+.mode-dark input:not([type="checkbox"]):not([type="radio"])::placeholder,
+.mode-dark textarea::placeholder,
+.dark-theme input:not([type="checkbox"]):not([type="radio"])::placeholder,
+.dark-theme textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.5) !important;
+}
+/* Default (neither class): keep original */
 input:not([type="checkbox"]):not([type="radio"])::placeholder,
 textarea::placeholder {
-  color: rgba(255, 255, 255, 0.65) !important;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 input:not([type="checkbox"]):not([type="radio"]):focus,
@@ -328,7 +368,7 @@ textarea:focus {
   --portal-border: #333333;
   --portal-muted: #ffffff;
   --portal-input: #000000;
-
+  
   --bg-page: #000000;
   --bg-card: #000000;
   --text-primary: #ffffff;

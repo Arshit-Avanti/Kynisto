@@ -36,9 +36,9 @@ export async function POST(request: Request) {
       db.prepare(
         `INSERT INTO stores
          (id, owner_id, category_id, subcategory_id, name, slug, description, business_type,
-          address, area, city, state, country, postal_code, latitude, longitude, google_maps_url,
-          phone, whatsapp, email, website, business_hours, opening_days, status, approved_at, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          address, area, city, state, country, postal_code, latitude, longitude, location_accuracy, location_verified,
+          google_maps_url, phone, whatsapp, email, website, business_hours, opening_days, status, approved_at, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .bind(
         storeId,
@@ -57,6 +57,8 @@ export async function POST(request: Request) {
         input.postalCode,
         input.latitude,
         input.longitude,
+        input.locationAccuracy,
+        input.locationVerified ? 1 : 0,
         input.googleMapsUrl,
         input.phone,
         input.whatsapp,
@@ -92,6 +94,7 @@ export async function PATCH(request: Request) {
       .prepare(
         `UPDATE stores SET category_id = ?, subcategory_id = ?, name = ?, description = ?, business_type = ?,
           address = ?, area = ?, city = ?, state = ?, country = ?, postal_code = ?, latitude = ?, longitude = ?,
+          location_accuracy = ?, location_verified = ?,
           google_maps_url = ?, phone = ?, whatsapp = ?, email = ?, website = ?, business_hours = ?, opening_days = ?,
           status = CASE WHEN status IN ('rejected', 'approved') THEN 'pending' ELSE status END,
           rejection_reason = CASE WHEN status IN ('rejected', 'approved') THEN NULL ELSE rejection_reason END,
@@ -113,6 +116,8 @@ export async function PATCH(request: Request) {
         input.postalCode,
         input.latitude,
         input.longitude,
+        input.locationAccuracy,
+        input.locationVerified ? 1 : 0,
         input.googleMapsUrl,
         input.phone,
         input.whatsapp,

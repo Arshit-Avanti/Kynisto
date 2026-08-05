@@ -220,6 +220,8 @@ export const stores = sqliteTable(
     postalCode: text("postal_code").notNull(),
     latitude: real("latitude").notNull(),
     longitude: real("longitude").notNull(),
+    locationAccuracy: real("location_accuracy"),
+    locationVerified: integer("location_verified", { mode: "boolean" }).notNull().default(false),
     googleMapsUrl: text("google_maps_url"),
     phone: text("phone"),
     whatsapp: text("whatsapp"),

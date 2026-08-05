@@ -8,6 +8,7 @@ import { apiFetch } from '@/lib/client-api';
 
 interface HealthcareQueueItem {
   id: string | number;
+  slug?: string;
   name: string;
   category: string;
   subcategory?: string;
@@ -422,37 +423,38 @@ export default function LiveQueueTracker() {
 
     return (
       <div className="min-h-screen bg-slate-950 text-white flex flex-col relative overflow-hidden font-sans">
-        {/* Header Banner - Matches Purple Gradient & Translucent Clock Graphic */}
-        <div className="bg-gradient-to-r from-purple-700 via-indigo-700 to-purple-900 text-white pt-8 pb-32 px-6 lg:px-16 relative shadow-2xl overflow-hidden">
-          {/* Large Translucent Clock Graphic Watermark on Right */}
-          <div className="absolute top-1/2 -right-8 -translate-y-1/2 opacity-15 pointer-events-none">
-            <Clock className="w-80 h-80 sm:w-[420px] sm:h-[420px] text-white stroke-[1.2]" />
+        {/* Header Banner - Premium Medical Teal & Emerald Gradient */}
+        <div className="bg-gradient-to-r from-teal-900 via-emerald-900 to-slate-950 text-white pt-8 pb-32 px-6 lg:px-16 relative shadow-2xl overflow-hidden border-b border-emerald-500/20">
+          {/* Ambient Glow Orbs */}
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-1/2 -right-8 -translate-y-1/2 opacity-10 pointer-events-none">
+            <Clock className="w-80 h-80 sm:w-[420px] sm:h-[420px] text-teal-200 stroke-[1.2]" />
           </div>
 
           <div className="relative z-10 max-w-5xl mx-auto flex flex-col">
             {/* BACK BUTTON */}
             <button
               onClick={() => setView('list')}
-              className="flex items-center text-white/90 hover:text-white font-bold text-base mb-6 w-fit group transition-all"
+              className="flex items-center text-emerald-200/90 hover:text-white font-bold text-sm mb-6 w-fit group transition-all bg-slate-900/60 backdrop-blur-md px-4 py-2 rounded-xl border border-emerald-500/20 shadow-md"
             >
-              <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-              <span>Back</span>
+              <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform text-emerald-400" />
+              <span>Back to Healthcare Hub</span>
             </button>
 
             {/* LIVE STATUS PILL BADGE */}
             <div className="mb-4 flex items-center space-x-3">
               {isMyTurn ? (
-                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-500/30 backdrop-blur-md text-xs font-black uppercase tracking-widest text-emerald-200 shadow-lg border border-emerald-400/50 animate-pulse">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 mr-2.5" />
+                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-500/25 backdrop-blur-md text-xs font-black uppercase tracking-widest text-emerald-300 shadow-lg border border-emerald-400/40 animate-pulse">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 mr-2.5 shadow-[0_0_10px_#10b981]" />
                   YOUR TURN NOW!
                 </span>
               ) : isClosed ? (
-                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-red-500/20 backdrop-blur-md text-xs font-black uppercase tracking-widest text-red-200 shadow-sm border border-red-500/30">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-400 mr-2.5" />
-                  QUEUE CLOSED BY OWNER
+                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-rose-500/20 backdrop-blur-md text-xs font-black uppercase tracking-widest text-rose-200 shadow-sm border border-rose-500/30">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-400 mr-2.5" />
+                  QUEUE CLOSED BY CLINIC
                 </span>
               ) : (
-                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-widest text-white shadow-sm border border-white/20">
+                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-teal-500/20 backdrop-blur-md text-xs font-black uppercase tracking-widest text-teal-200 shadow-sm border border-teal-400/30">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 mr-2.5 animate-ping" />
                   LIVE QUEUE ACTIVE
                 </span>
@@ -463,22 +465,22 @@ export default function LiveQueueTracker() {
             <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
               {selectedQueue.name}
             </h1>
-            <p className="flex items-center text-white/80 font-medium mt-3 text-base sm:text-xl">
-              <MapPin className="w-5 h-5 mr-2 text-purple-200 shrink-0" />
+            <p className="flex items-center text-emerald-100/80 font-medium mt-3 text-base sm:text-lg">
+              <MapPin className="w-5 h-5 mr-2 text-teal-400 shrink-0" />
               <span>{selectedQueue.address}</span>
             </p>
           </div>
         </div>
 
-        {/* Floating Ticket Container - Lifted up over purple header banner */}
+        {/* Floating Ticket Container */}
         <div className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20 pb-16">
-          <div className="bg-slate-900/95 backdrop-blur-2xl rounded-3xl border border-slate-800/80 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] p-6 sm:p-10 relative overflow-hidden">
-            {/* Ambient Radial Backlight Glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] bg-[radial-gradient(circle_at_center,_rgba(124,58,237,0.15)_0%,_rgba(79,70,229,0.08)_50%,_transparent_70%)] blur-3xl pointer-events-none" />
+          <div className="bg-slate-900/90 backdrop-blur-2xl rounded-3xl border border-slate-800/90 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] p-6 sm:p-10 relative overflow-hidden">
+            {/* Ambient Backlight Glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] bg-[radial-gradient(circle_at_center,_rgba(16,185,129,0.12)_0%,_rgba(6,182,212,0.06)_50%,_transparent_70%)] blur-3xl pointer-events-none" />
 
-            {/* TURN ARRIVED BANNER (When owner calls next patient) */}
+            {/* TURN ARRIVED BANNER */}
             {isMyTurn && (
-              <div className="mb-8 p-6 bg-emerald-950/80 border-2 border-emerald-500 rounded-2xl flex items-start text-emerald-200 shadow-[0_0_30px_rgba(16,185,129,0.3)] animate-pulse">
+              <div className="mb-8 p-6 bg-emerald-950/80 border-2 border-emerald-500/80 rounded-2xl flex items-start text-emerald-100 shadow-[0_0_40px_rgba(16,185,129,0.3)] animate-pulse">
                 <CheckCircle2 className="w-8 h-8 text-emerald-400 mr-4 mt-0.5 shrink-0" />
                 <div>
                   <h4 className="text-2xl font-black text-white mb-1">🎉 YOUR TURN HAS ARRIVED!</h4>
@@ -489,13 +491,13 @@ export default function LiveQueueTracker() {
               </div>
             )}
 
-            {/* Closed Queue Notice ONLY if Owner explicitly closed queue */}
+            {/* Closed Queue Notice */}
             {isClosed && !isMyTurn && (
-              <div className="mb-8 p-6 bg-red-950/60 border-l-4 border-red-500 rounded-2xl flex items-start text-red-200 shadow-md">
-                <Lock className="w-6 h-6 text-red-400 mr-4 mt-0.5 shrink-0" />
+              <div className="mb-8 p-6 bg-rose-950/60 border-l-4 border-rose-500 rounded-2xl flex items-start text-rose-200 shadow-md">
+                <Lock className="w-6 h-6 text-rose-400 mr-4 mt-0.5 shrink-0" />
                 <div>
                   <h4 className="text-lg font-black text-white mb-1">Queue Closed by Store Owner / Admin</h4>
-                  <p className="text-sm font-medium text-red-200">
+                  <p className="text-sm font-medium text-rose-200">
                     The live queue for this provider is currently closed by the owner in their Live Queue dashboard.
                   </p>
                 </div>
@@ -503,49 +505,49 @@ export default function LiveQueueTracker() {
             )}
 
             {/* Position & Estimated Wait Section */}
-            <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 pb-8 border-b border-slate-800">
-              <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center">
-                  <User className="w-4 h-4 mr-2 text-purple-400" /> YOUR POSITION
+            <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 pb-8 border-b border-slate-800/80">
+              <div className="bg-slate-950/60 p-6 rounded-2xl border border-slate-800/80">
+                <p className="text-xs font-black text-emerald-400 uppercase tracking-widest mb-3 flex items-center">
+                  <User className="w-4 h-4 mr-2 text-emerald-400" /> YOUR POSITION
                 </p>
                 <div className="flex items-baseline">
-                  <span className="text-7xl sm:text-8xl font-black text-white tabular-nums tracking-tighter">
+                  <span className="text-6xl sm:text-7xl font-black text-white tabular-nums tracking-tighter">
                     {userPosition}
                   </span>
                   <span className="text-2xl sm:text-3xl text-slate-500 font-extrabold ml-3 tabular-nums">
                     / {Math.max(1, totalInQueue)}
                   </span>
                 </div>
-                <p className="text-xs font-medium text-slate-400 mt-2">
-                  Your Token #: <span className="text-white font-bold">{myTokenNumber}</span> • Serving Token #: <span className="text-indigo-400 font-bold">{currentToken}</span>
+                <p className="text-xs font-semibold text-slate-400 mt-3 pt-3 border-t border-slate-800/60">
+                  Your Token #: <span className="text-white font-bold">{myTokenNumber}</span> • Serving Token #: <span className="text-emerald-400 font-bold">{currentToken}</span>
                 </p>
               </div>
 
-              <div className="md:text-right flex flex-col md:items-end justify-center">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center md:justify-end">
-                  <Clock className="w-4 h-4 mr-2 text-indigo-400" /> ESTIMATED WAIT
+              <div className="bg-slate-950/60 p-6 rounded-2xl border border-slate-800/80 flex flex-col justify-center">
+                <p className="text-xs font-black text-teal-400 uppercase tracking-widest mb-3 flex items-center">
+                  <Clock className="w-4 h-4 mr-2 text-teal-400" /> ESTIMATED WAIT
                 </p>
-                <div className="text-5xl sm:text-6xl font-black text-indigo-400 flex items-baseline tabular-nums tracking-tight">
-                  {isMyTurn ? 0 : estimatedWait} <span className="text-2xl font-bold ml-2.5 text-indigo-300">mins</span>
+                <div className="text-5xl sm:text-6xl font-black text-teal-400 flex items-baseline tabular-nums tracking-tight">
+                  {isMyTurn ? 0 : estimatedWait} <span className="text-2xl font-bold ml-2.5 text-teal-300">mins</span>
                 </div>
-                <p className="text-xs font-medium text-slate-400 mt-2">
-                  Set in owner dashboard: <span className="text-slate-300 font-bold">{ownerConsultationMins}m</span> / patient
+                <p className="text-xs font-semibold text-slate-400 mt-3 pt-3 border-t border-slate-800/60">
+                  Clinic Consultation Speed: <span className="text-slate-200 font-bold">{ownerConsultationMins}m</span> / patient
                 </p>
               </div>
             </div>
 
             {/* Glowing Slider Progress Bar */}
-            <div className="relative mb-10 pt-4">
+            <div className="relative mb-10 pt-2">
               <div className="flex justify-between text-xs font-black text-slate-400 uppercase tracking-widest mb-3">
                 <span>START</span>
                 <span>YOUR TURN</span>
               </div>
-              <div className="h-4 w-full bg-slate-800 rounded-full overflow-hidden relative p-0.5">
+              <div className="h-4 w-full bg-slate-950 rounded-full overflow-hidden relative p-0.5 border border-slate-800">
                 <div
                   className={`h-full rounded-full transition-all duration-1000 ease-out relative ${
                     isMyTurn
-                      ? 'bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.8)]'
-                      : 'bg-gradient-to-r from-purple-600 via-indigo-500 to-purple-500 shadow-[0_0_15px_rgba(99,102,241,0.6)]'
+                      ? 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.8)]'
+                      : 'bg-gradient-to-r from-teal-600 via-emerald-500 to-cyan-400 shadow-[0_0_15px_rgba(16,185,129,0.5)]'
                   }`}
                   style={{ width: `${progressPercent}%` }}
                 >
@@ -555,14 +557,14 @@ export default function LiveQueueTracker() {
 
               {/* Slider Handle Knob */}
               <div
-                className="absolute top-10 -ml-4 transition-all duration-1000 ease-out flex flex-col items-center pointer-events-none"
+                className="absolute top-8 -ml-4 transition-all duration-1000 ease-out flex flex-col items-center pointer-events-none"
                 style={{ left: `${progressPercent}%` }}
               >
                 <div className={`border-4 rounded-full w-8 h-8 shadow-xl flex items-center justify-center relative ${
-                  isMyTurn ? 'bg-emerald-950 border-emerald-400' : 'bg-slate-900 border-indigo-500'
+                  isMyTurn ? 'bg-emerald-950 border-emerald-400' : 'bg-slate-900 border-teal-400'
                 }`}>
-                  <span className={`w-2.5 h-2.5 rounded-full animate-ping absolute ${isMyTurn ? 'bg-emerald-400' : 'bg-indigo-400'}`} />
-                  <span className={`w-2.5 h-2.5 rounded-full relative z-10 ${isMyTurn ? 'bg-emerald-400' : 'bg-indigo-400'}`} />
+                  <span className={`w-2.5 h-2.5 rounded-full animate-ping absolute ${isMyTurn ? 'bg-emerald-400' : 'bg-teal-400'}`} />
+                  <span className={`w-2.5 h-2.5 rounded-full relative z-10 ${isMyTurn ? 'bg-emerald-400' : 'bg-teal-400'}`} />
                 </div>
               </div>
             </div>
@@ -582,7 +584,7 @@ export default function LiveQueueTracker() {
               <button
                 onClick={handleRunningLate}
                 disabled={isLate || isClosed || isMyTurn}
-                className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-extrabold text-base shadow-lg transition-all disabled:opacity-50"
+                className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-extrabold text-base shadow-lg transition-all disabled:opacity-50 cursor-pointer"
               >
                 <Navigation className="w-5 h-5 mr-3 text-white fill-white/20" />
                 <span>Running Late</span>
@@ -590,7 +592,7 @@ export default function LiveQueueTracker() {
 
               <button
                 onClick={handleCancelVisit}
-                className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-extrabold text-base shadow-lg transition-all"
+                className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-500 hover:to-red-600 text-white font-extrabold text-base shadow-lg transition-all cursor-pointer"
               >
                 <XCircle className="w-5 h-5 mr-3 text-white fill-white/20" />
                 <span>Cancel Visit</span>
@@ -602,18 +604,18 @@ export default function LiveQueueTracker() {
           <div className="mt-8 flex flex-wrap items-center justify-between gap-4 px-2">
             <button
               onClick={() => setView('list')}
-              className="flex items-center text-indigo-400 hover:text-indigo-300 font-bold text-sm transition-colors"
+              className="flex items-center text-teal-400 hover:text-teal-300 font-bold text-sm transition-colors cursor-pointer"
             >
               <ChevronRight className="w-4 h-4 mr-1 rotate-180" />
               View All Other Healthcare Queues
             </button>
 
-            <div className="flex items-center space-x-6 text-sm font-medium text-slate-400">
-              <button className="flex items-center hover:text-white transition-colors">
-                <Phone className="w-4 h-4 mr-2 text-indigo-400" /> Call Clinic
+            <div className="flex items-center space-x-6 text-sm font-semibold text-slate-400">
+              <button className="flex items-center hover:text-white transition-colors cursor-pointer">
+                <Phone className="w-4 h-4 mr-2 text-teal-400" /> Call Clinic
               </button>
-              <button className="flex items-center hover:text-white transition-colors">
-                <Bell className="w-4 h-4 mr-2 text-purple-400" /> Notifications
+              <button className="flex items-center hover:text-white transition-colors cursor-pointer">
+                <Bell className="w-4 h-4 mr-2 text-emerald-400" /> Notifications
               </button>
             </div>
           </div>
@@ -626,55 +628,61 @@ export default function LiveQueueTracker() {
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col font-sans">
       {/* Header Bar */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border-b border-slate-800 sticky top-0 z-40 px-6 py-4">
+      <div className="bg-slate-900/85 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-40 px-6 py-4">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-4">
             <Link
               href="/"
-              className="flex items-center text-slate-400 hover:text-white font-bold text-sm transition-colors bg-slate-800/80 px-3.5 py-2 rounded-lg border border-slate-700"
+              className="flex items-center text-slate-300 hover:text-white font-bold text-sm transition-colors bg-slate-800/90 hover:bg-slate-800 px-3.5 py-2 rounded-xl border border-slate-700/80 shadow-sm"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" /> Home
+              <ArrowLeft className="w-4 h-4 mr-2 text-emerald-400" /> Home
             </Link>
-            <div className="flex items-center space-x-2">
-              <Activity className="w-6 h-6 text-indigo-400" />
-              <h1 className="text-xl font-black text-white tracking-tight">Kynisto Healthcare Hub</h1>
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                <Activity className="w-5 h-5" />
+              </div>
+              <div>
+                <h1 className="text-xl font-black text-white tracking-tight">Kynisto Healthcare Hub</h1>
+                <span className="text-xs text-slate-400 font-medium">Verified local care & live queue tracking</span>
+              </div>
             </div>
           </div>
 
           {selectedQueue && (
             <button
               onClick={() => setView('ticket')}
-              className="flex items-center bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-lg text-sm transition-all shadow-md"
+              className="flex items-center bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-emerald-600/25 cursor-pointer"
             >
               <Sparkles className="w-4 h-4 mr-2" />
-              View My Active Ticket ({selectedQueue.name.split('–')[0].trim()})
+              View Active Ticket ({selectedQueue.name.split('–')[0].trim()})
             </button>
           )}
         </div>
       </div>
 
-      {/* Main Banner */}
-      <div className="bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 py-12 px-6 relative overflow-hidden">
+      {/* Main Hero Banner */}
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-teal-950 py-12 px-6 relative overflow-hidden border-b border-slate-800/80">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-6xl mx-auto relative z-10">
-          <div className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-3">
-            <Activity className="w-3.5 h-3.5 mr-2 text-indigo-400" /> Live Queue System
+          <div className="inline-flex items-center px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black uppercase tracking-wider mb-3">
+            <Activity className="w-3.5 h-3.5 mr-2" /> Verified Care Network
           </div>
-          <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-            Available Healthcare Queues
+          <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+            Local care, <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">without the waiting room.</span>
           </h2>
-          <p className="text-slate-300 text-base sm:text-lg font-medium mt-2 max-w-2xl">
-            Select a hospital, OPD clinic, or diagnostic center below to view exact live queue status configured by clinic owners in their live queue dashboard.
+          <p className="text-slate-300 text-base sm:text-lg font-medium mt-3 max-w-2xl leading-relaxed">
+            Select a verified clinic, OPD, or diagnostic lab near DLF Ankur Vihar. Join live queues remotely and arrive right on time.
           </p>
 
           {/* Search Input */}
           <div className="mt-8 max-w-xl relative">
-            <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+            <Search className="w-5 h-5 text-emerald-400 absolute left-4 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search clinic, doctor, specialty or area..."
-              className="w-full bg-slate-900/90 border border-slate-700 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder-slate-400 font-medium focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+              className="w-full bg-slate-900/90 border border-slate-700/80 rounded-2xl py-3.5 pl-12 pr-4 text-white placeholder-slate-400 font-medium focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 transition-all shadow-lg"
             />
           </div>
         </div>
@@ -683,12 +691,12 @@ export default function LiveQueueTracker() {
       {/* Error Message Toast Banner */}
       {errorMsg && (
         <div className="max-w-6xl mx-auto px-6 pt-6">
-          <div className="p-4 bg-red-900/40 border border-red-500/50 rounded-xl flex items-center justify-between text-red-200">
+          <div className="p-4 bg-rose-950/60 border border-rose-500/50 rounded-xl flex items-center justify-between text-rose-200">
             <div className="flex items-center space-x-3">
-              <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
+              <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
               <span className="font-bold text-sm">{errorMsg}</span>
             </div>
-            <button onClick={() => setErrorMsg(null)} className="text-red-400 hover:text-white font-bold text-lg">×</button>
+            <button onClick={() => setErrorMsg(null)} className="text-rose-400 hover:text-white font-bold text-lg cursor-pointer">×</button>
           </div>
         </div>
       )}
@@ -701,10 +709,10 @@ export default function LiveQueueTracker() {
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
+              className={`px-5 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer ${
                 activeFilter === filter
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                  : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-600/30'
+                  : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800'
               }`}
             >
               {filter}
@@ -721,76 +729,86 @@ export default function LiveQueueTracker() {
             return (
               <div
                 key={item.id}
-                className="bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-6 transition-all shadow-lg flex flex-col justify-between group"
+                className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800/90 hover:border-emerald-500/40 rounded-2xl p-6 transition-all duration-300 shadow-xl flex flex-col justify-between group relative overflow-hidden"
               >
                 <div>
-                  <div className="flex items-start justify-between gap-4 mb-3">
+                  <div className="flex items-start justify-between gap-4 mb-4">
                     <div className="flex items-center space-x-2">
-                      <span className="px-2.5 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold">
+                      <span className="px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs font-extrabold uppercase tracking-wider">
                         {item.providerType || 'Clinic'}
                       </span>
                       {item.subcategory && (
-                        <span className="px-2.5 py-1 rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-bold">
+                        <span className="px-3 py-1 rounded-lg bg-teal-500/10 border border-teal-500/25 text-teal-300 text-xs font-extrabold uppercase tracking-wider">
                           {item.subcategory}
                         </span>
                       )}
                     </div>
 
                     {isClosed ? (
-                      <span className="inline-flex items-center text-xs font-bold text-red-400 bg-red-500/10 px-2.5 py-1 rounded-full border border-red-500/20">
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-400 mr-1.5" />
+                      <span className="inline-flex items-center text-xs font-black text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400 mr-2" />
                         CLOSED
                       </span>
                     ) : (
-                      <span className="inline-flex items-center text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
-                        OPEN
+                      <span className="inline-flex items-center text-xs font-black text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2 animate-pulse" />
+                        OPEN LIVE QUEUE
                       </span>
                     )}
                   </div>
 
-                  <h3 className="text-xl font-black text-white group-hover:text-indigo-400 transition-colors mb-2">
+                  <h3 className="text-xl font-black text-white group-hover:text-emerald-400 transition-colors mb-2">
                     {item.name}
                   </h3>
 
-                  <p className="flex items-center text-slate-400 text-sm font-medium mb-6">
-                    <MapPin className="w-4 h-4 mr-1.5 text-slate-500 shrink-0" />
+                  <p className="flex items-center text-slate-300 text-sm font-medium mb-6">
+                    <MapPin className="w-4 h-4 mr-2 text-teal-400 shrink-0" />
                     {item.address}
                   </p>
 
                   {/* Queue Stats */}
-                  <div className="grid grid-cols-2 gap-3 p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 mb-6">
+                  <div className="grid grid-cols-2 gap-3 p-3.5 bg-slate-950/80 rounded-xl border border-slate-800/80 mb-6">
                     <div>
                       <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
                         Waiting Patients
                       </span>
                       <span className="text-lg font-black text-white tabular-nums">
-                        {isClosed ? 0 : item.waitingCount} <span className="text-xs font-normal text-slate-400">in queue</span>
+                        {isClosed ? 0 : item.waitingCount} <span className="text-xs font-medium text-slate-400">in queue</span>
                       </span>
                     </div>
                     <div>
                       <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
-                        Owner Consultation
+                        Consultation Speed
                       </span>
-                      <span className="text-lg font-black text-indigo-400 tabular-nums">
-                        {consultationMins}m <span className="text-xs font-normal text-slate-400">/ patient</span>
+                      <span className="text-lg font-black text-emerald-400 tabular-nums">
+                        {consultationMins}m <span className="text-xs font-medium text-slate-400">/ patient</span>
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <button
-                  onClick={() => handleJoinQueue(item)}
-                  disabled={isClosed || isJoining}
-                  className={`w-full py-3.5 px-4 font-bold rounded-xl transition-all shadow-md flex items-center justify-center space-x-2 group/btn ${
-                    isClosed
-                      ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50'
-                      : 'bg-indigo-600 hover:bg-indigo-500 text-white'
-                  }`}
-                >
-                  <span>{isClosed ? 'Queue Closed by Owner' : isJoining ? 'Joining Queue...' : 'Join Live Queue'}</span>
-                  {!isClosed && !isJoining && <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />}
-                </button>
+                <div className="flex flex-col sm:flex-row gap-3 pt-1">
+                  <Link
+                    href={`/stores/${item.slug || item.id}`}
+                    className="flex-1 py-3 px-4 font-bold text-sm rounded-xl transition-all shadow-md flex items-center justify-center space-x-2 bg-slate-800/90 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 cursor-pointer"
+                  >
+                    <Building2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Visit Profile</span>
+                  </Link>
+
+                  <button
+                    onClick={() => handleJoinQueue(item)}
+                    disabled={isClosed || isJoining}
+                    className={`flex-1 py-3 px-4 font-bold text-sm rounded-xl transition-all shadow-lg flex items-center justify-center space-x-2 group/btn cursor-pointer ${
+                      isClosed
+                        ? 'bg-slate-800/60 text-slate-400 cursor-not-allowed border border-slate-700/50'
+                        : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-600/25'
+                    }`}
+                  >
+                    <span>{isClosed ? 'Queue Closed' : isJoining ? 'Joining...' : 'Join Live Queue'}</span>
+                    {!isClosed && !isJoining && <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />}
+                  </button>
+                </div>
               </div>
             );
           })}
@@ -799,3 +817,4 @@ export default function LiveQueueTracker() {
     </div>
   );
 }
+

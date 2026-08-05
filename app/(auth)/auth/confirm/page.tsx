@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import AuthConfirmChoice from "@/components/auth/AuthConfirmChoice";
 
+// Finalizing secure login
 export default function ConfirmPage() {
   const [hash, setHash] = useState("");
   const [accessToken, setAccessToken] = useState<string | null>(null);

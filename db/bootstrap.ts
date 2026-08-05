@@ -28,6 +28,8 @@ const RICH_MEDIA_SCHEMA_MARKER = "rich_media_schema_version";
 const RICH_MEDIA_SCHEMA_VERSION = "rich-media-schema-v1";
 const EXTERNAL_AUTH_SCHEMA_MARKER = "external_auth_schema_version";
 const EXTERNAL_AUTH_SCHEMA_VERSION = "external-auth-schema-v2";
+const LOCATION_SCHEMA_MARKER = "stores_location_schema_version";
+const LOCATION_SCHEMA_VERSION = "stores-location-schema-v1";
 
 function idempotentStatement(statement: string): string {
   return statement
@@ -123,7 +125,7 @@ async function bootstrapDatabase(): Promise<void> {
 
   const progress = await db
     .prepare(
-      "SELECT key, value FROM system_settings WHERE key IN (?, ?, ?, ?, ?, ?, ?, ?)",
+      "SELECT key, value FROM system_settings WHERE key IN (?, ?, ?, ?, ?, ?, ?, ?, ?)",
     )
     .bind(
       BASE_INDEX_MARKER,
@@ -134,6 +136,7 @@ async function bootstrapDatabase(): Promise<void> {
       QUEUE_SCHEMA_MARKER,
       RICH_MEDIA_SCHEMA_MARKER,
       EXTERNAL_AUTH_SCHEMA_MARKER,
+      LOCATION_SCHEMA_MARKER,
     )
     .all<{ key: string; value: string }>();
   const versions = new Map((progress.results ?? []).map((row) => [row.key, row.value]));
@@ -193,6 +196,26 @@ async function bootstrapDatabase(): Promise<void> {
     await db.batch([
       ...externalAuthStatements.map((statement) => db.prepare(statement)),
       versionMarker(db, EXTERNAL_AUTH_SCHEMA_MARKER, EXTERNAL_AUTH_SCHEMA_VERSION),
+    ]);
+    return;
+  }
+
+  if (versions.get(LOCATION_SCHEMA_MARKER) !== LOCATION_SCHEMA_VERSION) {
+    // Safely add the two GPS columns that were added post-launch.
+    // D1's SQLite does not support IF NOT EXISTS in ALTER TABLE, so we
+    // inspect PRAGMA table_info first and skip any column that already exists.
+    const storeColumns = await db.prepare("PRAGMA table_info(stores)").all<{ name: string }>();
+    const existingCols = new Set((storeColumns.results ?? []).map((c) => c.name));
+    const alterStatements: ReturnType<typeof db.prepare>[] = [];
+    if (!existingCols.has("location_accuracy")) {
+      alterStatements.push(db.prepare("ALTER TABLE stores ADD COLUMN location_accuracy REAL"));
+    }
+    if (!existingCols.has("location_verified")) {
+      alterStatements.push(db.prepare("ALTER TABLE stores ADD COLUMN location_verified INTEGER DEFAULT 0"));
+    }
+    await db.batch([
+      ...alterStatements,
+      versionMarker(db, LOCATION_SCHEMA_MARKER, LOCATION_SCHEMA_VERSION),
     ]);
     return;
   }
