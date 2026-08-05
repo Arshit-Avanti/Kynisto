@@ -145,10 +145,23 @@ export function ShaderCanvas() {
 
     let animationFrameId: number;
     const startTime = performance.now();
+    let lastFrameTime = 0;
+    const isMobileDevice = typeof navigator !== "undefined" && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const targetFps = isMobileDevice ? 20 : 30;
+    const targetInterval = 1000 / targetFps;
 
     const handleResize = () => {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
+      // Downscale canvas resolution to dramatically reduce GPU fill rate load (Zero-Lag)
+      const maxDim = isMobileDevice ? 720 : 1280;
+      let width = window.innerWidth;
+      let height = window.innerHeight;
+
+      if (width > maxDim || height > maxDim) {
+        const ratio = Math.min(maxDim / width, maxDim / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+
       canvas.width = width;
       canvas.height = height;
       gl.viewport(0, 0, width, height);
@@ -159,6 +172,12 @@ export function ShaderCanvas() {
     handleResize();
 
     const render = (now: number) => {
+      animationFrameId = requestAnimationFrame(render);
+
+      // Frame throttling: target 30 FPS on Desktop, 20 FPS on Mobile
+      if (now - lastFrameTime < targetInterval) return;
+      lastFrameTime = now;
+
       const time = (now - startTime) * 0.001;
       gl.uniform1f(timeLocation, time);
       
@@ -166,7 +185,6 @@ export function ShaderCanvas() {
       gl.uniform1f(isDarkLocation, isDark ? 1.0 : 0.0);
 
       gl.drawArrays(gl.TRIANGLES, 0, 6);
-      animationFrameId = requestAnimationFrame(render);
     };
 
     animationFrameId = requestAnimationFrame(render);
