@@ -487,6 +487,45 @@ textarea:focus {
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35) !important;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  color: #ffffff !important;
+}
+
+/* Force all text inside topbar to be white — navbar always has dark glass bg */
+.topbar .brand,
+.topbar .brand *,
+.topbar .textButton,
+.topbar .accountButton,
+.topbar .savedButton,
+.topbar .customizeButton,
+.topbar .locationPill,
+.topbar .locationPill small,
+.topbar .locationPill strong,
+.topbar a,
+.topbar button {
+  color: #ffffff !important;
+}
+
+/* Keep orange on saved icon, muted text on location sublabel */
+.topbar .locationPill small {
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+.topbar .savedButton span {
+  color: #ff6b2b !important;
+}
+.topbar .savedButton b {
+  background: rgba(255, 107, 43, 0.18) !important;
+  color: #ff9e6b !important;
+}
+
+/* Customize button: keep dark text on its own bg */
+.topbar .customizeButton {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+.topbar .customizeButton:hover {
+  background: rgba(255, 107, 43, 0.85) !important;
+  border-color: rgba(255, 107, 43, 0.6) !important;
 }
 
 .topbarScrolled {

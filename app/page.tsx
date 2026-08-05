@@ -722,6 +722,130 @@ const modernCleanTechStyles = `
     -webkit-text-fill-color: #000000 !important;
     background-color: #ffffff !important;
   }
+
+  /* FLOATING GLASS NAVBAR LIGHT MODE & DARK MODE UNIFIED STYLES */
+  .topbar,
+  .mode-light .topbar,
+  .mode-dark .topbar {
+    background: rgba(12, 18, 30, 0.88) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35) !important;
+    color: #ffffff !important;
+  }
+
+  .mode-light .topbar a,
+  .mode-light .topbar button,
+  .mode-light .topbar span,
+  .mode-light .topbar strong,
+  .mode-light .topbar b,
+  .mode-light .topbar small,
+  .mode-light .topbar div,
+  .mode-light .headerActions a,
+  .mode-light .headerActions button,
+  .mode-light .headerActions span,
+  .mode-light .headerActions b,
+  .mode-dark .topbar a,
+  .mode-dark .topbar button,
+  .mode-dark .topbar span,
+  .mode-dark .topbar strong,
+  .mode-dark .topbar b,
+  .mode-dark .topbar small,
+  .mode-dark .topbar div,
+  .mode-dark .headerActions a,
+  .mode-dark .headerActions button,
+  .mode-dark .headerActions span,
+  .mode-dark .headerActions b {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  /* Logo brand text inside floating topbar */
+  .topbar .kynistoLogo b,
+  .mode-light .topbar .kynistoLogo b,
+  .mode-dark .topbar .kynistoLogo b {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    background: linear-gradient(90deg, #ffffff 0%, #f1f5f9 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+  }
+
+  /* Tagline text inside floating topbar */
+  .topbar .kynistoLogo small,
+  .mode-light .topbar .kynistoLogo small,
+  .mode-dark .topbar .kynistoLogo small {
+    color: #ff8a00 !important;
+    -webkit-text-fill-color: #ff8a00 !important;
+  }
+
+  /* Location pill inside floating topbar */
+  .topbar .locationPill,
+  .mode-light .topbar .locationPill,
+  .mode-dark .topbar .locationPill {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  .topbar .locationPill small,
+  .mode-light .topbar .locationPill small,
+  .mode-dark .topbar .locationPill small {
+    color: #ff8a00 !important;
+    -webkit-text-fill-color: #ff8a00 !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+  }
+
+  .topbar .locationPill strong,
+  .mode-light .topbar .locationPill strong,
+  .mode-dark .topbar .locationPill strong {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+  }
+
+  /* Saved Places button inside floating topbar */
+  .topbar .savedButton,
+  .mode-light .topbar .savedButton,
+  .mode-dark .topbar .savedButton {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+
+  .topbar .savedButton span,
+  .mode-light .topbar .savedButton span,
+  .mode-dark .topbar .savedButton span {
+    color: #ff6b2b !important;
+    -webkit-text-fill-color: #ff6b2b !important;
+  }
+
+  .topbar .savedButton b,
+  .mode-light .topbar .savedButton b,
+  .mode-dark .topbar .savedButton b {
+    background: rgba(255, 87, 34, 0.25) !important;
+    color: #ff8a00 !important;
+    -webkit-text-fill-color: #ff8a00 !important;
+    border: 1px solid rgba(255, 138, 0, 0.4) !important;
+  }
+
+  /* Customize button inside floating topbar */
+  .topbar .customizeButton,
+  .mode-light .topbar .customizeButton,
+  .mode-dark .topbar .customizeButton {
+    background: linear-gradient(135deg, #ff5722 0%, #e53935 100%) !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 4px 16px rgba(255, 87, 34, 0.4) !important;
+  }
 `;
 
 const categories: Category[] = [
