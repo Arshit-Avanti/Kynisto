@@ -521,6 +521,10 @@ export function OwnerStoreEditor({
   }
 
   // ─── Step indicator styles ──────────────────────────────────────────────────
+  const [selectedBusinessType, setSelectedBusinessType] = useState<string>(text("businessType", "Physical Store / Shop"));
+  const isHomeService = selectedBusinessType === "Home Service Business";
+
+  // ─── Step indicator styles ──────────────────────────────────────────────────
   const stepBtn = (s: number) => ({
     fontWeight: step === s ? "bold" as const : "normal" as const,
     background: "none" as const,
@@ -533,90 +537,129 @@ export function OwnerStoreEditor({
 
   return (
     <form className="portalForm" onSubmit={submit}>
-      {/* Step indicator */}
-      <div className="onboardingSteps" style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap", alignItems: "center" }}>
-        <button type="button" onClick={() => setStep(1)} style={stepBtn(1)} aria-current={step === 1 ? "step" : undefined}>1. Basic Info</button>
-        <span aria-hidden="true" style={{ color: "#cbd5e1" }}>/</span>
-        <button type="button" onClick={() => setStep(2)} style={stepBtn(2)} aria-current={step === 2 ? "step" : undefined}>2. Location &amp; Contact</button>
-        <span aria-hidden="true" style={{ color: "#cbd5e1" }}>/</span>
-        <button type="button" onClick={() => setStep(3)} style={stepBtn(3)} aria-current={step === 3 ? "step" : undefined}>
-          3. Shop Location {gpsVerified ? "✅" : ""}
-        </button>
-        <span aria-hidden="true" style={{ color: "#cbd5e1" }}>/</span>
-        <button type="button" onClick={() => setStep(4)} style={stepBtn(4)} aria-current={step === 4 ? "step" : undefined}>4. Photo &amp; Hours</button>
-      </div>
-
-      {/* ── Step 1: Basic Info ─────────────────────────────────────────────── */}
-      <div style={{ display: step === 1 ? "contents" : "none" }}>
-        <label>Store / Business name<input name="name" defaultValue={text("name")} required placeholder="e.g. Ankur Vihar Plumbing Services" /></label>
-        <label className="full">Business Type / Model
+      {/* Business Model Choice */}
+      <div style={{ background: "rgba(255,87,34,0.08)", border: "1px solid rgba(255,87,34,0.3)", borderRadius: "14px", padding: "16px", marginBottom: "20px" }}>
+        <label className="full" style={{ margin: 0, color: "#FF7A00", fontWeight: 700 }}>
+          Business Type / Model
           <select
             name="businessType"
-            defaultValue={text("businessType", "Physical Store / Shop")}
+            value={selectedBusinessType}
+            onChange={(e) => setSelectedBusinessType(e.target.value)}
             required
-            style={{ width: "100%", padding: "12px", borderRadius: "12px", background: "rgba(255,255,255,0.06)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.15)", marginTop: "6px" }}
+            style={{ width: "100%", padding: "12px", borderRadius: "12px", background: "rgba(15,23,42,0.9)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.2)", marginTop: "6px", fontSize: "14px" }}
           >
             <option value="Physical Store / Shop" style={{ background: "#0F172A", color: "#FFF" }}>🏪 Physical Store / Shop (Retail, Grocery, Clinic, Pharmacy, Bakery)</option>
             <option value="Home Service Business" style={{ background: "#0F172A", color: "#FFF" }}>🛠️ Home Service Business (Plumber, Electrician, Carpenter, AC Repair, Cleaning, etc.)</option>
           </select>
         </label>
-        <label>Category
-          <select name="categoryId" value={categoryId} onChange={(event) => setCategoryId(event.target.value)} required>
-            <option value="">Choose category</option>
-            {categories.map((category) => <option key={String(category.id)} value={String(category.id)}>{String(category.name)}</option>)}
-          </select>
-        </label>
-        <label>Subcategory / Service Specialty
-          <select name="subcategoryId" defaultValue={text("subcategoryId")}>
-            <option value="">Optional</option>
-            {children.map((child) => <option key={String(child.id)} value={String(child.id)}>{String(child.name)}</option>)}
-          </select>
-        </label>
-        <label className="full">Description<textarea name="description" defaultValue={text("description", "Tell customers what makes your business useful and trustworthy.")} required /></label>
-
-        <div className="formActions full" style={{ marginTop: "16px" }}>
-          <button type="button" className="portalButton" onClick={() => setStep(2)}>Next Step: Location</button>
-        </div>
       </div>
 
-      {/* ── Step 2: Location & Contact ─────────────────────────────────────── */}
-      <div style={{ display: step === 2 ? "contents" : "none" }}>
-        <label className="full">Full address<input name="address" defaultValue={text("address", "Main Market Road, DLF Ankur Vihar")} required /></label>
-        <label>Area<input name="area" defaultValue={text("area", "DLF Ankur Vihar")} /></label>
-        <label>City<input name="city" defaultValue={text("city", "Loni")} /></label>
-        <label>State<input name="state" defaultValue={text("state", "Uttar Pradesh")} /></label>
-        <label>Country<input name="country" defaultValue={text("country", "India")} /></label>
-        <label>PIN code<input name="postalCode" defaultValue={text("postalCode", "201102")} /></label>
-        <label>Phone<input name="phone" defaultValue={text("phone")} /></label>
-        <label>WhatsApp<input name="whatsapp" defaultValue={text("whatsapp")} /></label>
-        <label>Email<input name="email" type="email" defaultValue={text("email")} /></label>
-        <label>Website<input name="website" type="url" defaultValue={text("website")} /></label>
-        {/* Fallback manual lat/lng — auto-overridden by GPS step */}
-        <label>Latitude<input name="latitude" type="number" step="any" defaultValue={String(gpsLat ?? text("latitude", "28.7381"))} /></label>
-        <label>Longitude<input name="longitude" type="number" step="any" defaultValue={String(gpsLng ?? text("longitude", "77.2669"))} /></label>
-        <label className="full">Google Maps URL<input name="googleMapsUrl" type="url" defaultValue={text("googleMapsUrl")} /></label>
+      {isHomeService ? (
+        /* ── Streamlined Home Service Form ───────────────────────────── */
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+          <label className="full">Service Business Name<input name="name" defaultValue={text("name")} required placeholder="e.g. Ankur Vihar Plumbing & Sanitary Work" /></label>
 
-        <div className="formActions full" style={{ marginTop: "16px", display: "flex", gap: "12px" }}>
-          <button type="button" className="portalButton secondary" onClick={() => setStep(1)}>Back</button>
-          <button type="button" className="portalButton" onClick={() => setStep(3)}>Next: Set Shop Location</button>
-        </div>
-      </div>
+          <label>Service Category / Specialty
+            <select name="categoryId" value={categoryId} onChange={(event) => setCategoryId(event.target.value)} required>
+              <option value="">Choose service category</option>
+              {categories.map((category) => <option key={String(category.id)} value={String(category.id)}>{String(category.name)}</option>)}
+            </select>
+          </label>
 
-      {/* ── Step 3: GPS Location ───────────────────────────────────────────── */}
-      <div style={{ display: step === 3 ? "block" : "none" }}>
-        <LocationStep
-          initialLat={Number(text("latitude", "28.7381"))}
-          initialLng={Number(text("longitude", "77.2669"))}
-          onConfirm={handleGpsConfirm}
-          onSkip={() => setStep(4)}
-        />
-        <div style={{ marginTop: "20px", display: "flex", gap: "12px" }}>
-          <button type="button" className="portalButton secondary" onClick={() => setStep(2)}>← Back</button>
-          {!gpsVerified && (
-            <button type="button" className="portalButton" onClick={() => setStep(4)}>Continue without GPS →</button>
-          )}
+          <label>Starting Service Fee (₹)<input name="startingPrice" type="number" step="any" defaultValue={text("priceFrom", "299")} required placeholder="e.g. 299" /></label>
+
+          <label>Phone Number<input name="phone" defaultValue={text("phone")} required placeholder="+91 98765 43210" /></label>
+          <label>WhatsApp Number<input name="whatsapp" defaultValue={text("whatsapp")} placeholder="+91 98765 43210" /></label>
+
+          <label>Timings / Working Hours<input name="businessHours" defaultValue={text("businessHours", "09:00 AM - 08:00 PM")} placeholder="e.g. 09:00 AM - 08:00 PM" /></label>
+          <label>Availability / Response Time<input name="estimatedArrival" defaultValue={text("estimatedArrival", "30–60 min Arrival")} placeholder="e.g. 30-60 min Express Arrival" /></label>
+
+          <label className="full">Physical Store / Office Address (Optional)<input name="address" defaultValue={text("address")} placeholder="Leave blank if mobile / home visit only" /></label>
+          <label className="full">Short Service Description<textarea name="description" defaultValue={text("description")} placeholder="Describe your service expertise, warranty, and pricing..." /></label>
+
+          <div className="formActions full" style={{ marginTop: "20px" }}>
+            <button type="submit" className="portalButton" style={{ width: "100%", padding: "14px", fontSize: "16px" }}>
+              Save &amp; Publish Home Service
+            </button>
+          </div>
         </div>
-      </div>
+      ) : (
+        /* ── Standard Physical Store Multi-step Form ─────────────────── */
+        <>
+          <div className="onboardingSteps" style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap", alignItems: "center" }}>
+            <button type="button" onClick={() => setStep(1)} style={stepBtn(1)} aria-current={step === 1 ? "step" : undefined}>1. Basic Info</button>
+            <span aria-hidden="true" style={{ color: "#cbd5e1" }}>/</span>
+            <button type="button" onClick={() => setStep(2)} style={stepBtn(2)} aria-current={step === 2 ? "step" : undefined}>2. Location &amp; Contact</button>
+            <span aria-hidden="true" style={{ color: "#cbd5e1" }}>/</span>
+            <button type="button" onClick={() => setStep(3)} style={stepBtn(3)} aria-current={step === 3 ? "step" : undefined}>
+              3. Shop Location {gpsVerified ? "✅" : ""}
+            </button>
+            <span aria-hidden="true" style={{ color: "#cbd5e1" }}>/</span>
+            <button type="button" onClick={() => setStep(4)} style={stepBtn(4)} aria-current={step === 4 ? "step" : undefined}>4. Photo &amp; Hours</button>
+          </div>
+
+          {/* ── Step 1: Basic Info ─────────────────────────────────────────────── */}
+          <div style={{ display: step === 1 ? "contents" : "none" }}>
+            <label>Store / Business name<input name="name" defaultValue={text("name")} required placeholder="e.g. Ankur Vihar Supermarket" /></label>
+            <label>Category
+              <select name="categoryId" value={categoryId} onChange={(event) => setCategoryId(event.target.value)} required>
+                <option value="">Choose category</option>
+                {categories.map((category) => <option key={String(category.id)} value={String(category.id)}>{String(category.name)}</option>)}
+              </select>
+            </label>
+            <label>Subcategory
+              <select name="subcategoryId" defaultValue={text("subcategoryId")}>
+                <option value="">Optional</option>
+                {children.map((child) => <option key={String(child.id)} value={String(child.id)}>{String(child.name)}</option>)}
+              </select>
+            </label>
+            <label className="full">Description<textarea name="description" defaultValue={text("description", "Tell customers what makes your local business useful and trustworthy.")} required /></label>
+
+            <div className="formActions full" style={{ marginTop: "16px" }}>
+              <button type="button" className="portalButton" onClick={() => setStep(2)}>Next Step: Location</button>
+            </div>
+          </div>
+
+          {/* ── Step 2: Location & Contact ─────────────────────────────────────── */}
+          <div style={{ display: step === 2 ? "contents" : "none" }}>
+            <label className="full">Full address<input name="address" defaultValue={text("address", "Main Market Road, DLF Ankur Vihar")} required /></label>
+            <label>Area<input name="area" defaultValue={text("area", "DLF Ankur Vihar")} /></label>
+            <label>City<input name="city" defaultValue={text("city", "Loni")} /></label>
+            <label>State<input name="state" defaultValue={text("state", "Uttar Pradesh")} /></label>
+            <label>Country<input name="country" defaultValue={text("country", "India")} /></label>
+            <label>PIN code<input name="postalCode" defaultValue={text("postalCode", "201102")} /></label>
+            <label>Phone<input name="phone" defaultValue={text("phone")} /></label>
+            <label>WhatsApp<input name="whatsapp" defaultValue={text("whatsapp")} /></label>
+            <label>Email<input name="email" type="email" defaultValue={text("email")} /></label>
+            <label>Website<input name="website" type="url" defaultValue={text("website")} /></label>
+            {/* Fallback manual lat/lng — auto-overridden by GPS step */}
+            <label>Latitude<input name="latitude" type="number" step="any" defaultValue={String(gpsLat ?? text("latitude", "28.7381"))} /></label>
+            <label>Longitude<input name="longitude" type="number" step="any" defaultValue={String(gpsLng ?? text("longitude", "77.2669"))} /></label>
+            <label className="full">Google Maps URL<input name="googleMapsUrl" type="url" defaultValue={text("googleMapsUrl")} /></label>
+
+            <div className="formActions full" style={{ marginTop: "16px", display: "flex", gap: "12px" }}>
+              <button type="button" className="portalButton secondary" onClick={() => setStep(1)}>Back</button>
+              <button type="button" className="portalButton" onClick={() => setStep(3)}>Next: Set Shop Location</button>
+            </div>
+          </div>
+
+          {/* ── Step 3: GPS Location ───────────────────────────────────────────── */}
+          <div style={{ display: step === 3 ? "block" : "none" }}>
+            <LocationStep
+              initialLat={Number(text("latitude", "28.7381"))}
+              initialLng={Number(text("longitude", "77.2669"))}
+              onConfirm={handleGpsConfirm}
+              onSkip={() => setStep(4)}
+            />
+            <div style={{ marginTop: "20px", display: "flex", gap: "12px" }}>
+              <button type="button" className="portalButton secondary" onClick={() => setStep(2)}>← Back</button>
+              {!gpsVerified && (
+                <button type="button" className="portalButton" onClick={() => setStep(4)}>Continue without GPS →</button>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* ── Step 4: Photo & Hours ──────────────────────────────────────────── */}
       <div style={{ display: step === 4 ? "contents" : "none" }}>

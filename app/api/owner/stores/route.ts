@@ -75,6 +75,23 @@ export async function POST(request: Request) {
         "INSERT INTO store_settings (store_id, accepting_orders, pickup_enabled, delivery_enabled, minimum_order, delivery_fee, delivery_radius_km, auto_accept_orders, updated_at) VALUES (?, 1, 1, 1, 0, 0, 5, 0, ?)",
       ).bind(storeId, now),
     ]);
+
+    if (input.businessType === "Home Service Business") {
+      const serviceId = crypto.randomUUID();
+      const serviceSlug = `${slugify(input.name)}-${crypto.randomUUID().slice(0, 6)}`;
+      const priceFrom = Number((body as any)?.startingPrice ?? (body as any)?.priceFrom ?? 299);
+      const estimatedArrival = cleanText((body as any)?.estimatedArrival ?? "30–60 min Arrival");
+
+      // Fetch category name
+      const categoryRow = await db.prepare("SELECT name FROM categories WHERE id = ?").bind(input.categoryId).first<{ name: string }>();
+      const categoryName = categoryRow?.name || "General Service";
+
+      await db.prepare(
+        `INSERT INTO services (id, store_id, name, category_name, slug, description, price_from, estimated_arrival, status, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)`
+      ).bind(serviceId, storeId, input.name, categoryName, serviceSlug, input.description || "Professional home service", priceFrom, estimatedArrival, now, now).run().catch(() => {});
+    }
+
     await writeAudit(request, session.user.id, "store.created", "store", storeId, { status, autoApproved: autoApprove });
     return Response.json({ storeId, status }, { status: 201 });
   } catch (error) {

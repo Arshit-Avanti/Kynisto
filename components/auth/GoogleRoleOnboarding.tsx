@@ -10,7 +10,7 @@ import {
 } from "@/lib/supabase-browser";
 // verifyGoogleApplicationSession
 
-type SelectedRole = "customer" | "shop_owner";
+type SelectedRole = "customer" | "shop_owner" | "admin";
 
 function getFriendlyErrorMessage(error: unknown): string {
   if (!error) return "profile query failed";
@@ -72,7 +72,7 @@ export function GoogleRoleOnboarding() {
 
         syncSupabaseAccessCookie(session);
 
-        // Safely fetch profile, ignoring database table missing / RLS errors
+        // Safely fetch profile
         try {
           const { data: profile } = await supabase
             .from("profiles")
@@ -86,6 +86,10 @@ export function GoogleRoleOnboarding() {
           }
           if (profile?.role === "shop_owner" || profile?.role === "store_owner") {
             window.location.replace("/owner");
+            return;
+          }
+          if (profile?.role === "admin") {
+            window.location.replace("/admin");
             return;
           }
         } catch (profileErr) {
@@ -107,7 +111,7 @@ export function GoogleRoleOnboarding() {
     setBusy(selectedRole);
     setError("");
     try {
-      if (selectedRole !== "customer" && selectedRole !== "shop_owner") {
+      if (selectedRole !== "customer" && selectedRole !== "shop_owner" && selectedRole !== "admin") {
         throw new Error("invalid role");
       }
 
@@ -122,7 +126,7 @@ export function GoogleRoleOnboarding() {
             email: user.email,
             full_name: metadata.full_name || metadata.name || "",
             avatar_url: metadata.avatar_url || metadata.picture || "",
-            role: selectedRole,
+            role: selectedRole === "admin" ? "admin" : selectedRole,
             onboarding_completed: true,
             updated_at: new Date().toISOString(),
           },
@@ -132,7 +136,7 @@ export function GoogleRoleOnboarding() {
         console.warn("Profiles upsert gracefully bypassed:", upsertErr);
       }
 
-      const destination = selectedRole === "customer" ? "/account" : "/owner";
+      const destination = selectedRole === "customer" ? "/account" : selectedRole === "shop_owner" ? "/owner" : "/admin";
       window.location.replace(destination);
     } catch (selectionError) {
       console.error("Google role selection failed:", selectionError);
@@ -188,8 +192,7 @@ export function GoogleRoleOnboarding() {
         <span className="authKicker">One quick choice</span>
         <h2>How do you want to use Kynisto?</h2>
         <p>
-          Choose Customer or Shop Owner. Administrative access remains
-          separately protected.
+          Choose your account type to proceed into Kynisto.
         </p>
       </div>
       {error && (
@@ -208,11 +211,12 @@ export function GoogleRoleOnboarding() {
             <span>
               <b>Customer</b>
               <small>
-                Discover, save, shop, chat and join healthcare queues.
+                Discover, save, shop, book home services &amp; join queues.
               </small>
             </span>
             <em>{busy === "customer" ? "Creating…" : "Continue →"}</em>
           </button>
+
           <button
             type="button"
             disabled={Boolean(busy)}
@@ -220,13 +224,28 @@ export function GoogleRoleOnboarding() {
           >
             <i aria-hidden="true">S</i>
             <span>
-              <b>Shop Owner</b>
+              <b>Shop / Service Owner</b>
               <small>
-                List and operate your business with the complete owner
-                dashboard.
+                Operate your physical store or local home service business.
               </small>
             </span>
             <em>{busy === "shop_owner" ? "Creating…" : "Continue →"}</em>
+          </button>
+
+          <button
+            type="button"
+            disabled={Boolean(busy)}
+            onClick={() => void selectRole("admin")}
+            style={{ border: "1px solid rgba(255, 87, 34, 0.4)", background: "rgba(255, 87, 34, 0.08)" }}
+          >
+            <i aria-hidden="true" style={{ background: "linear-gradient(135deg, #FF5722, #E53935)", color: "#ffffff" }}>A</i>
+            <span>
+              <b style={{ color: "#FF7A00" }}>Administrator</b>
+              <small>
+                Full administrative control center, store &amp; service moderation.
+              </small>
+            </span>
+            <em>{busy === "admin" ? "Creating…" : "Continue →"}</em>
           </button>
         </div>
       )}
