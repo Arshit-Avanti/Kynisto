@@ -96,12 +96,32 @@ export async function getOrCreatePermanentQueueId(storeId: string, ownerId: stri
   };
 }
 
+export async function ensureHealthcareQueueSettings(storeId: string) {
+  const db = getD1();
+  const existing = await db
+    .prepare("SELECT 1 FROM healthcare_queue_settings WHERE store_id = ? LIMIT 1")
+    .bind(storeId)
+    .first();
+
+  if (!existing) {
+    const today = indiaServiceDate();
+    const now = Math.floor(Date.now() / 1000);
+    await db
+      .prepare(`INSERT OR IGNORE INTO healthcare_queue_settings
+        (store_id, status, consultation_minutes, current_token_number, next_token_number, service_date, opening_time, closing_time, maximum_daily_patients, opened_at, updated_at)
+        VALUES (?, 'open', 15, 0, 1, ?, '09:00', '18:00', 100, ?, ?)`)
+      .bind(storeId, today, now, now)
+      .run();
+  }
+}
+
 export async function resolveHealthcareQueueByCode(queueCode: string, userId?: string) {
   await ensureQrTablesExist();
   await expireHealthcareQueueEntries();
   const db = getD1();
+  const cleanCode = queueCode.trim();
 
-  const record = await db
+  let record = await db
     .prepare(`SELECT q.id, q.store_id AS storeId, q.owner_id AS ownerId, q.queue_code AS queueCode, q.status AS qrStatus,
         s.name AS storeName, s.slug AS storeSlug, s.address, s.area, s.city, s.phone,
         s.logo_url AS logoUrl, s.banner_url AS bannerUrl,
@@ -112,8 +132,8 @@ export async function resolveHealthcareQueueByCode(queueCode: string, userId?: s
       JOIN stores s ON s.id = q.store_id
       JOIN categories c ON c.id = s.category_id
       LEFT JOIN healthcare_provider_profiles hp ON hp.store_id = s.id
-      WHERE q.queue_code = ? LIMIT 1`)
-    .bind(queueCode)
+      WHERE UPPER(q.queue_code) = UPPER(?) OR s.id = ? OR s.slug = ? LIMIT 1`)
+    .bind(cleanCode, cleanCode, cleanCode)
     .first<{
       id: string;
       storeId: string;
@@ -136,8 +156,23 @@ export async function resolveHealthcareQueueByCode(queueCode: string, userId?: s
     }>();
 
   if (!record) {
-    throw new HttpError(404, "Invalid healthcare Queue QR code.", "INVALID_QUEUE_CODE");
+    const storeRecord = await db
+      .prepare(`SELECT s.id AS storeId, s.owner_id AS ownerId, s.name AS storeName
+        FROM stores s JOIN categories c ON c.id = s.category_id
+        WHERE (s.id = ? OR s.slug = ?) AND c.module = 'healthcare' LIMIT 1`)
+      .bind(cleanCode, cleanCode)
+      .first<{ storeId: string; ownerId: string; storeName: string }>();
+
+    if (storeRecord) {
+      const qrRecord = await getOrCreatePermanentQueueId(storeRecord.storeId, storeRecord.ownerId ?? "system");
+      return resolveHealthcareQueueByCode(qrRecord.queueCode, userId);
+    }
+
+    throw new HttpError(404, "Invalid or expired healthcare QR code. Please scan a valid Kynisto QR code.", "INVALID_QUEUE_CODE");
   }
+
+  // Ensure queue settings exist for this provider
+  await ensureHealthcareQueueSettings(record.storeId);
 
   const queueState = await patientQueueState(record.storeId, userId);
 

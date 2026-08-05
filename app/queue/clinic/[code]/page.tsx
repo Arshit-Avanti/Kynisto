@@ -170,20 +170,12 @@ export default function HealthcareQueueQRPage() {
     }
   }, [code]);
 
-  // Initial load
-  useEffect(() => {
-    void fetchData();
-  }, [fetchData]);
+  const autoJoinAttempted = useRef(false);
 
-  // Auto-refresh every 30 seconds
-  useEffect(() => {
-    const timer = setInterval(() => { void fetchData(); }, 30_000);
-    return () => clearInterval(timer);
-  }, [fetchData]);
-
-  const handleJoinQueue = async () => {
-    if (!data?.user) {
-      const returnUrl = encodeURIComponent(`/q/${code}`);
+  const handleJoinQueue = useCallback(async (forcedUser?: QueueResponse["user"]) => {
+    const currentUser = forcedUser ?? data?.user;
+    if (!currentUser) {
+      const returnUrl = encodeURIComponent(`/queue/clinic/${code}?autoJoin=true`);
       router.push(`/login?returnTo=${returnUrl}`);
       return;
     }
@@ -195,6 +187,9 @@ export default function HealthcareQueueQRPage() {
         json: { queueCode: code },
       });
       setJoinMsg(res.message);
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        try { navigator.vibrate([100, 50, 100]); } catch { /* ignore */ }
+      }
       const refreshed = await apiFetch<QueueResponse>(`/api/healthcare/qr/${code}`);
       setData(refreshed);
       setLastUpdated(new Date());
@@ -213,7 +208,34 @@ export default function HealthcareQueueQRPage() {
     } finally {
       setJoining(false);
     }
-  };
+  }, [code, data?.user, router]);
+
+  // Initial load
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const timer = setInterval(() => { void fetchData(); }, 30_000);
+    return () => clearInterval(timer);
+  }, [fetchData]);
+
+  // Auto-join effect for authenticated QR scans or return-from-login
+  useEffect(() => {
+    if (!data || autoJoinAttempted.current) return;
+    const searchParams = new URLSearchParams(window.location.search);
+    const hasAutoJoinParam = searchParams.get("autoJoin") === "true" || searchParams.get("autojoin") === "true";
+
+    if (data.user && data.queueState?.queueAvailable && !data.queueState?.entry) {
+      autoJoinAttempted.current = true;
+      void handleJoinQueue(data.user);
+    } else if (!data.user && hasAutoJoinParam) {
+      autoJoinAttempted.current = true;
+      const returnUrl = encodeURIComponent(`/queue/clinic/${code}?autoJoin=true`);
+      router.push(`/login?returnTo=${returnUrl}`);
+    }
+  }, [data, code, handleJoinQueue, router]);
 
   const handleRunningLate = async (minutes: number) => {
     setShowLateModal(false);

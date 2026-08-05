@@ -43,7 +43,13 @@ export async function POST(request: NextRequest) {
     const now = Math.floor(Date.now() / 1000);
     const today = ((queueState as any)?.serviceDate as string | undefined) || indiaServiceDate();
 
-    const tokenNumber = Number((queueState as any)?.nextTokenNumber ?? 1);
+    // Query fresh next_token_number directly from db settings
+    const settingsRow = await db
+      .prepare("SELECT next_token_number AS nextTokenNumber FROM healthcare_queue_settings WHERE store_id = ?")
+      .bind(record.storeId)
+      .first<{ nextTokenNumber: number }>();
+
+    const tokenNumber = Number(settingsRow?.nextTokenNumber ?? 1);
     const entryId = crypto.randomUUID();
     const activeKey = `customer:${user.id}`;
     const expiresAt = now + 3 * 60 * 60; // 3 hours TTL
@@ -68,7 +74,7 @@ export async function POST(request: NextRequest) {
     return noStoreJson({
       ok: true,
       alreadyJoined: false,
-      message: `Successfully joined queue! Your token number is #${tokenNumber}.`,
+      message: `Successfully joined ${record.storeName} queue! Your token number is #${tokenNumber}.`,
       queueState: updatedState,
     });
   } catch (error) {
