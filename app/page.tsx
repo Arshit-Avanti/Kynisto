@@ -929,6 +929,16 @@ export default function Home() {
   const [customizing, setCustomizing] = useState(false);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [toast, setToast] = useState("");
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const stored = window.localStorage.getItem("kynisto-preferences");
@@ -1138,7 +1148,7 @@ export default function Home() {
     <main className={`site theme-${accent} density-${density} mode-${themeMode}`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
       <VideoBackground />
       <ShaderCanvas />
-      <header className="topbar">
+      <header className={`topbar ${isScrolled ? "topbarScrolled" : ""}`}>
         <a className="brand" href="#top" aria-label="Kynisto home"><KynistoLogo showTagline /></a>
 
         <button className="locationPill" type="button" aria-label="Use current location" onClick={useCurrentLocation}>

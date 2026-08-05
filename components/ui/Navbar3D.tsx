@@ -36,24 +36,7 @@ export function Navbar3D({
   }, []);
 
   return (
-    <header
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "14px 28px",
-        background: "rgba(20, 10, 12, 0.95)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderBottom: "1px solid rgba(255, 87, 34, 0.25)",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.6)",
-      }}
-    >
+    <header className="floating-nav-container">
       <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
         <BackButton
           fallback="/"
