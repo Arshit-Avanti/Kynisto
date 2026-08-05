@@ -679,6 +679,239 @@ const modernCleanTechStyles = `
     border: none !important;
     box-shadow: 0 4px 16px rgba(255, 87, 34, 0.4) !important;
   }
+
+  /* HIGH CONTRAST FEATURE CARD STYLES */
+  .featureCard,
+  .mode-light .featureCard,
+  .mode-dark .featureCard {
+    background: rgba(12, 18, 30, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 24px !important;
+    padding: 36px 28px !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .featureCard h3,
+  .mode-light .featureCard h3,
+  .mode-dark .featureCard h3 {
+    font-size: 1.5rem !important;
+    font-weight: 800 !important;
+    margin: 16px 0 10px 0 !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8) !important;
+    letter-spacing: -0.02em !important;
+  }
+
+  .featureCard p,
+  .mode-light .featureCard p,
+  .mode-dark .featureCard p {
+    color: #F1F5F9 !important;
+    -webkit-text-fill-color: #F1F5F9 !important;
+    line-height: 1.6 !important;
+    font-size: 1.05rem !important;
+    font-weight: 500 !important;
+    margin: 0 !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6) !important;
+  }
+
+  /* ==========================================================================
+     MOBILE RESPONSIVE & HIGH CONTRAST AUDIT (max-width: 768px)
+     ========================================================================== */
+  @media (max-width: 768px) {
+    /* Fixed Floating Topbar Header on Mobile */
+    .topbar,
+    .mode-light .topbar,
+    .mode-dark .topbar {
+      height: 60px !important;
+      top: 10px !important;
+      width: 94vw !important;
+      padding: 0 14px !important;
+      border-radius: 20px !important;
+    }
+
+    .topbarScrolled,
+    .mode-light .topbarScrolled,
+    .mode-dark .topbarScrolled {
+      height: 56px !important;
+      top: 8px !important;
+    }
+
+    /* Hide tagline on mobile brand logo so it fits in 60px header */
+    .topbar .kynistoLogo small {
+      display: none !important;
+    }
+
+    .topbar .kynistoLogo b {
+      font-size: 20px !important;
+    }
+
+    /* Hero section responsiveness */
+    .hero {
+      padding: 80px 16px 40px 16px !important;
+      text-align: center !important;
+    }
+
+    .heroTitleClassical,
+    .hero h1 {
+      font-size: clamp(2.1rem, 10.5vw, 3.6rem) !important;
+      line-height: 1.1 !important;
+      letter-spacing: -0.04em !important;
+      white-space: nowrap !important;
+      word-break: keep-all !important;
+      overflow-wrap: normal !important;
+      max-width: 100% !important;
+    }
+
+    .hero p {
+      font-size: 1.1rem !important;
+      margin-bottom: 24px !important;
+    }
+
+    /* Hero Floating Action Cards ("Loyalty Card", "Queue Ticket", "Dashboard") */
+    .floatingCardsContainer {
+      height: auto !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      justify-content: center !important;
+      align-items: stretch !important;
+      gap: 8px !important;
+      margin: 20px 0 28px 0 !important;
+      padding: 0 4px !important;
+      width: 100% !important;
+    }
+
+    .glassCard3D {
+      flex: 1 1 0% !important;
+      min-width: 0 !important;
+      max-width: 32% !important;
+      height: 105px !important;
+      padding: 12px 4px !important;
+      border-radius: 16px !important;
+      background: rgba(15, 23, 42, 0.88) !important;
+      border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    }
+
+    .glassCard3D svg {
+      margin-bottom: 6px !important;
+      width: 20px !important;
+      height: 20px !important;
+    }
+
+    .glassCard3D b {
+      font-size: 0.8rem !important;
+      font-weight: 700 !important;
+      line-height: 1.2 !important;
+      text-align: center !important;
+      white-space: normal !important;
+      word-break: normal !important;
+      color: #FFFFFF !important;
+      -webkit-text-fill-color: #FFFFFF !important;
+    }
+
+    /* Search box on mobile */
+    .searchBox {
+      margin: 16px auto 24px auto !important;
+      padding: 6px !important;
+    }
+
+    .searchBox input {
+      font-size: 0.95rem !important;
+      padding: 12px 8px !important;
+    }
+
+    .searchSubmit {
+      padding: 10px 18px !important;
+      font-size: 0.9rem !important;
+      border-radius: 14px !important;
+    }
+
+    /* Feature Cards ("Universal Discovery", "Real-time Queues") Mobile Visibility */
+    .featureGrid {
+      grid-template-columns: 1fr !important;
+      gap: 16px !important;
+      margin: 40px auto !important;
+      padding: 0 16px !important;
+    }
+
+    .featureCard,
+    .mode-light .featureCard,
+    .mode-dark .featureCard {
+      background: rgba(15, 23, 42, 0.88) !important;
+      border: 1px solid rgba(255, 255, 255, 0.16) !important;
+      padding: 24px 20px !important;
+      border-radius: 20px !important;
+    }
+
+    .featureCard h3,
+    .mode-light .featureCard h3,
+    .mode-dark .featureCard h3 {
+      font-size: 1.3rem !important;
+      margin: 12px 0 8px 0 !important;
+      color: #FFFFFF !important;
+      -webkit-text-fill-color: #FFFFFF !important;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8) !important;
+    }
+
+    .featureCard p,
+    .mode-light .featureCard p,
+    .mode-dark .featureCard p {
+      font-size: 0.95rem !important;
+      line-height: 1.55 !important;
+      color: #F1F5F9 !important;
+      -webkit-text-fill-color: #F1F5F9 !important;
+      opacity: 1 !important;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.7) !important;
+    }
+
+    /* Store Cards & Category Grid on Mobile */
+    .categoryGrid {
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+      gap: 10px !important;
+    }
+
+    .categoryTile {
+      padding: 14px 10px !important;
+      border-radius: 16px !important;
+    }
+
+    .categoryTile span {
+      font-size: 0.85rem !important;
+    }
+
+    .storesGrid {
+      grid-template-columns: 1fr !important;
+      gap: 16px !important;
+    }
+
+    .storeCard {
+      padding: 16px !important;
+      border-radius: 20px !important;
+    }
+
+    .storeCard h3 {
+      font-size: 1.15rem !important;
+    }
+
+    .storeCard p {
+      font-size: 0.9rem !important;
+      line-height: 1.45 !important;
+      color: #F1F5F9 !important;
+      -webkit-text-fill-color: #F1F5F9 !important;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .heroTitleClassical,
+    .hero h1 {
+      font-size: 2.1rem !important;
+    }
+    .glassCard3D b {
+      font-size: 0.75rem !important;
+    }
+  }
 `;
 
 const categories: Category[] = [
@@ -1186,17 +1419,21 @@ export default function Home() {
         <div className="heroCopy" style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "950px", position: "relative", zIndex: 2, width: "100%" }}>
           {/* Crystal Clear Pure White Hero Title: Kynisto */}
           <h1 className="highContrastText" style={{ 
-            fontSize: "clamp(5rem, 15vw, 10rem)", 
+            fontSize: "clamp(2.2rem, 10.5vw, 9rem)", 
             fontWeight: 850, 
             letterSpacing: "-0.06em", 
             lineHeight: 1, 
             margin: "0 0 20px 0", 
+            whiteSpace: "nowrap",
+            wordBreak: "keep-all",
+            overflowWrap: "normal",
+            maxWidth: "100%",
             fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif"
           }}>
             Kynisto
           </h1>
           
-          <p className="highContrastText" style={{ fontSize: "clamp(1.2rem, 3vw, 1.8rem)", fontWeight: 500, margin: "0 0 40px 0", opacity: 0.9, letterSpacing: "-0.01em" }}>
+          <p className="highContrastText" style={{ fontSize: "clamp(1.1rem, 3vw, 1.8rem)", fontWeight: 500, margin: "0 0 40px 0", opacity: 0.9, letterSpacing: "-0.01em" }}>
             The infrastructure of efficiency.
           </p>
 
@@ -1207,7 +1444,7 @@ export default function Home() {
             </Link>
             <Link href="/healthcare" className="glassCard3D">
               <Icons.Clock />
-              <b style={{ fontSize: "1.3rem" }}>Queue Ticket</b>
+              <b>Queue Ticket</b>
             </Link>
             <Link href="/dashboard" className="glassCard3D">
               <Icons.Search />
