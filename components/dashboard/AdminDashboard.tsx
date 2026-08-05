@@ -98,7 +98,8 @@ export function AdminDashboard({ user }: { user: SessionUser }) {
       {(tab === "subscriptions" || tab === "subscription") && <AdminSubscriptionsPanel />}
       {tab === "notifications" && <AdminNotificationPanel />}
       {tab === "wallet" && <AdminWalletPanel />}
-      {tab !== "overview" && tab !== "analytics" && tab !== "chat" && tab !== "healthcare" && tab !== "subscriptions" && tab !== "subscription" && tab !== "notifications" && tab !== "wallet" && !ADMIN_WORKSPACE_TABS.has(tab) && (
+      {tab === "services" && <AdminServicesPanel mutate={mutate} />}
+      {tab !== "overview" && tab !== "analytics" && tab !== "chat" && tab !== "healthcare" && tab !== "subscriptions" && tab !== "subscription" && tab !== "notifications" && tab !== "wallet" && tab !== "services" && !ADMIN_WORKSPACE_TABS.has(tab) && (
         <>
           <form className="portalToolbar" onSubmit={(event) => { event.preventDefault(); void load(); }}>
             {tab !== "categories" && <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Search ${tab}…`} />}
@@ -151,3 +152,137 @@ function ReportsTable({ items, mutate }: { items: Item[]; mutate:(p:string,m:str
 }
 
 function CreateCategory({onSubmit}:{onSubmit:(body:unknown)=>Promise<void>}){async function submit(event:FormEvent<HTMLFormElement>){event.preventDefault();const form=new FormData(event.currentTarget);await onSubmit(Object.fromEntries(form));}return <section className="portalCard" style={{marginBottom:14}}><div className="portalCardHeader"><h2>Create category</h2></div><form className="portalForm" onSubmit={submit}><label>Name<input name="name" required /></label><label>Icon<input name="icon" defaultValue="⌖" maxLength={8}/></label><label>Colour<input name="color" type="color" defaultValue="#f15f3a"/></label><label>Sort order<input name="sortOrder" type="number" defaultValue="0"/></label><label className="full">Description<textarea name="description" /></label><div className="formActions"><button className="portalButton" type="submit">Create category</button></div></form></section>}
+
+function AdminServicesPanel({ mutate }: { mutate: (p: string, m: string, j: unknown, s: string) => Promise<boolean> }) {
+  const [items, setItems] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filterStatus, setFilterStatus] = useState("all");
+
+  const loadServices = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await apiFetch<{ items: Item[] }>("/api/admin/services");
+      setItems(res.items || []);
+    } catch {
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { void loadServices(); }, [loadServices]);
+
+  const filteredItems = useMemo(() => {
+    if (filterStatus === "all") return items;
+    return items.filter((item) => String(item.status) === filterStatus);
+  }, [items, filterStatus]);
+
+  const selection = useAdminBulkSelection(filteredItems.map((item) => String(item.id)));
+  const selectedIds = selection.selectedIds;
+
+  if (loading) return <div className="portalSkeleton"><span /><span /><span /></div>;
+
+  return (
+    <>
+      <div className="portalToolbar" style={{ display: "flex", gap: "12px", alignItems: "center", marginBottom: "16px" }}>
+        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="adminSelect">
+          <option value="all">All Service Statuses</option>
+          <option value="active">Allowed / Active</option>
+          <option value="pending">Pending Approval</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <span style={{ fontSize: "13px", color: "var(--text-secondary)", fontWeight: 600 }}>
+          Total Listed Services: <b>{filteredItems.length}</b>
+        </span>
+      </div>
+
+      {!filteredItems.length ? (
+        <section className="portalCard">
+          <div className="emptyPortal">
+            <div>
+              <b>No services listed yet</b>
+              <p>Store &amp; Service Owners can create services in their owner dashboard.</p>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="portalCard">
+          <div className="portalTableWrap">
+            <table className="portalTable">
+              <thead>
+                <tr>
+                  <th><SelectAllCheckbox checked={selection.allSelected} onChange={selection.toggleAll} label="services" /></th>
+                  {["Service Name", "Category", "Provider / Store", "Starting Price", "Arrival", "Status", "Actions"].map((header) => <th key={header}>{header}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredItems.map((item) => {
+                  const id = String(item.id);
+                  const isSelected = selection.selected.has(id);
+                  return (
+                    <tr key={id} className={isSelected ? "selectedRow" : ""}>
+                      <td><RowSelectCheckbox checked={isSelected} onChange={() => selection.toggle(id)} label={String(item.name)} /></td>
+                      <td><b>{String(item.name)}</b><small>{String(item.description || "No description")}</small></td>
+                      <td><span style={{ fontWeight: 700, color: "#FF8A00" }}>{String(item.categoryName || "General")}</span></td>
+                      <td><b>{String(item.storeName || "Unassigned")}</b><small>{String(item.ownerEmail || "")}</small></td>
+                      <td><b>₹{Number(item.priceFrom || 0).toLocaleString("en-IN")}</b></td>
+                      <td>{String(item.estimatedArrival || "30–60 min")}</td>
+                      <td><Status value={item.status} /></td>
+                      <td>
+                        <div className="tableActions" style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                          {item.status !== "active" && (
+                            <button
+                              type="button"
+                              onClick={() => void mutate("/api/admin/services", "PATCH", { serviceId: id, action: "allow" }, "Service allowed/approved").then(() => loadServices())}
+                              style={{ background: "#10b981", color: "#ffffff", border: "none", padding: "6px 12px", borderRadius: "8px", fontWeight: 700, cursor: "pointer" }}
+                            >
+                              Allow
+                            </button>
+                          )}
+                          {item.status === "active" && (
+                            <button
+                              type="button"
+                              onClick={() => void mutate("/api/admin/services", "PATCH", { serviceId: id, action: "reject" }, "Service rejected").then(() => loadServices())}
+                              style={{ background: "#f59e0b", color: "#ffffff", border: "none", padding: "6px 12px", borderRadius: "8px", fontWeight: 700, cursor: "pointer" }}
+                            >
+                              Reject
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (window.confirm(`Delete service "${String(item.name)}"?`)) {
+                                void mutate("/api/admin/services", "DELETE", { serviceId: id }, "Service deleted").then(() => loadServices());
+                              }
+                            }}
+                            className="adminDeleteBtn"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <BulkDeleteBar
+            count={selectedIds.length}
+            itemLabel="service"
+            onDelete={() => mutate("/api/admin/services", "DELETE", { action: "bulk_delete", serviceIds: selectedIds }, `${selectedIds.length} services deleted`).then(() => { selection.clear(); void loadServices(); })}
+            onDeleted={selection.clear}
+          >
+            <button
+              type="button"
+              onClick={() => void mutate("/api/admin/services", "PATCH", { action: "bulk_approve", serviceIds: selectedIds }, `${selectedIds.length} services allowed/approved`).then(() => { selection.clear(); void loadServices(); })}
+              style={{ background: "#10b981", color: "#ffffff", border: "none", padding: "6px 14px", borderRadius: "8px", fontWeight: 700, cursor: "pointer" }}
+            >
+              Allow Selected ({selectedIds.length})
+            </button>
+          </BulkDeleteBar>
+        </section>
+      )}
+    </>
+  );
+}

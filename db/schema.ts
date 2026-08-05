@@ -410,13 +410,15 @@ export const services = sqliteTable(
       .notNull()
       .references(() => stores.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
+    categoryName: text("category_name").notNull().default("General"),
     slug: text("slug").notNull(),
     description: text("description").notNull().default(""),
     priceFrom: real("price_from"),
     durationMinutes: integer("duration_minutes"),
+    estimatedArrival: text("estimated_arrival").notNull().default("30–60 min"),
     imageKey: text("image_key"),
     imageUrl: text("image_url"),
-    status: text("status", { enum: ["active", "draft", "archived"] })
+    status: text("status", { enum: ["active", "pending", "rejected", "draft", "archived"] })
       .notNull()
       .default("active"),
     ...timestamps,

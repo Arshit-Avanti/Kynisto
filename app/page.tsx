@@ -1339,7 +1339,7 @@ export default function Home() {
       <VideoBackground />
       <ShaderCanvas />
       <header className={`topbar ${isScrolled ? "topbarScrolled" : ""}`}>
-        <a className="brand" href="#top" aria-label="Kynisto home"><KynistoLogo showTagline /></a>
+        <a className="brand" href="#top" aria-label="Kynisto home"><KynistoLogo showTagline={false} /></a>
 
         <button className="locationPill" type="button" aria-label="Use current location" onClick={useCurrentLocation}>
           <span className="locationDot" aria-hidden="true" />

@@ -11,304 +11,20 @@ import { apiFetch } from "@/lib/client-api";
 export interface HomeService {
   id: string;
   name: string;
-  category: "Emergency" | "Appliance" | "Cleaning" | "Maintenance" | "Tech" | "Shifting";
-  icon: string;
-  badgeTone: string;
+  categoryName: string;
+  slug: string;
   description: string;
-  rating: number;
-  reviewsCount: number;
   startingPrice: number;
   estimatedArrival: string;
-  featured?: boolean;
+  storeName: string;
+  storePhone?: string | null;
+  area?: string;
+  city?: string;
 }
 
-const ALL_HOME_SERVICES: HomeService[] = [
-  {
-    id: "plumber",
-    name: "Plumber",
-    category: "Emergency",
-    icon: "🔧",
-    badgeTone: "#FF5722",
-    description: "Leaking pipes, tap repair, bathroom fitting & drain blockages.",
-    rating: 4.9,
-    reviewsCount: 1240,
-    startingPrice: 299,
-    estimatedArrival: "25–45 min",
-    featured: true,
-  },
-  {
-    id: "electrician",
-    name: "Electrician",
-    category: "Emergency",
-    icon: "⚡",
-    badgeTone: "#F59E0B",
-    description: "Short circuits, wiring, switchboards, fans & MCB repairs.",
-    rating: 4.8,
-    reviewsCount: 1890,
-    startingPrice: 199,
-    estimatedArrival: "20–40 min",
-    featured: true,
-  },
-  {
-    id: "carpenter",
-    name: "Carpenter",
-    category: "Maintenance",
-    icon: "🪚",
-    badgeTone: "#10B981",
-    description: "Furniture repair, door locks, modular kitchen & custom woodwork.",
-    rating: 4.9,
-    reviewsCount: 870,
-    startingPrice: 349,
-    estimatedArrival: "30–60 min",
-  },
-  {
-    id: "ac-repair",
-    name: "AC Repair & Service",
-    category: "Appliance",
-    icon: "❄️",
-    badgeTone: "#3B82F6",
-    description: "Deep jet cleaning, gas refill, cooling fix & split/window install.",
-    rating: 4.9,
-    reviewsCount: 2450,
-    startingPrice: 499,
-    estimatedArrival: "30–45 min",
-    featured: true,
-  },
-  {
-    id: "home-appliance",
-    name: "Home Appliance Repair",
-    category: "Appliance",
-    icon: "🔌",
-    badgeTone: "#8B5CF6",
-    description: "Fridge, washing machine, microwave & dishwasher expert repair.",
-    rating: 4.8,
-    reviewsCount: 1120,
-    startingPrice: 399,
-    estimatedArrival: "35–50 min",
-  },
-  {
-    id: "ro-service",
-    name: "RO Water Purifier Service",
-    category: "Appliance",
-    icon: "💧",
-    badgeTone: "#06B6D4",
-    description: "Filter replacement, membrane change, TDS adjustment & leak fix.",
-    rating: 4.9,
-    reviewsCount: 940,
-    startingPrice: 299,
-    estimatedArrival: "30–45 min",
-  },
-  {
-    id: "painter",
-    name: "Painter",
-    category: "Maintenance",
-    icon: "🎨",
-    badgeTone: "#EC4899",
-    description: "Full home painting, waterproof coating & wall stencil designs.",
-    rating: 4.9,
-    reviewsCount: 780,
-    startingPrice: 699,
-    estimatedArrival: "Same Day",
-  },
-  {
-    id: "home-cleaning",
-    name: "Home Cleaning",
-    category: "Cleaning",
-    icon: "🧹",
-    badgeTone: "#14B8A6",
-    description: "Deep kitchen, bathroom, window & full sofa/carpet sanitization.",
-    rating: 4.9,
-    reviewsCount: 1560,
-    startingPrice: 799,
-    estimatedArrival: "Scheduled",
-    featured: true,
-  },
-  {
-    id: "pest-control",
-    name: "Pest Control",
-    category: "Cleaning",
-    icon: "🪲",
-    badgeTone: "#E11D48",
-    description: "Cockroach, termite, bed bug, ant & mosquito eradication.",
-    rating: 4.8,
-    reviewsCount: 890,
-    startingPrice: 599,
-    estimatedArrival: "45–60 min",
-  },
-  {
-    id: "cctv-installation",
-    name: "CCTV Installation",
-    category: "Tech",
-    icon: "📹",
-    badgeTone: "#6366F1",
-    description: "Security camera setup, DVR config, mobile live view & wiring.",
-    rating: 4.9,
-    reviewsCount: 620,
-    startingPrice: 899,
-    estimatedArrival: "Same Day",
-  },
-  {
-    id: "wifi-technician",
-    name: "Wi-Fi & Internet Technician",
-    category: "Tech",
-    icon: "📡",
-    badgeTone: "#0284C7",
-    description: "Router setup, fiber line splicing, mesh network & speed fix.",
-    rating: 4.8,
-    reviewsCount: 740,
-    startingPrice: 249,
-    estimatedArrival: "20–35 min",
-  },
-  {
-    id: "computer-mobile-repair",
-    name: "Computer, Laptop & Mobile Repair",
-    category: "Tech",
-    icon: "💻",
-    badgeTone: "#3B82F6",
-    description: "Screen replacement, OS install, hardware upgrade & data recovery.",
-    rating: 4.9,
-    reviewsCount: 1310,
-    startingPrice: 399,
-    estimatedArrival: "30–60 min",
-    featured: true,
-  },
-  {
-    id: "tv-repair",
-    name: "TV Repair & Installation",
-    category: "Tech",
-    icon: "📺",
-    badgeTone: "#8B5CF6",
-    description: "LED/OLED wall mounting, display panel fix, backlight & audio repair.",
-    rating: 4.8,
-    reviewsCount: 830,
-    startingPrice: 349,
-    estimatedArrival: "30–50 min",
-  },
-  {
-    id: "interior-designer",
-    name: "Interior Designer",
-    category: "Maintenance",
-    icon: "📐",
-    badgeTone: "#D97706",
-    description: "3D layout planning, modular wardrobes, false ceiling & lighting.",
-    rating: 5.0,
-    reviewsCount: 310,
-    startingPrice: 1499,
-    estimatedArrival: "Appointment",
-  },
-  {
-    id: "mason-construction",
-    name: "Mason / Construction Worker",
-    category: "Maintenance",
-    icon: "🧱",
-    badgeTone: "#78350F",
-    description: "Tile fixing, plastering, wall break, brickwork & cement repairs.",
-    rating: 4.8,
-    reviewsCount: 540,
-    startingPrice: 699,
-    estimatedArrival: "Same Day",
-  },
-  {
-    id: "welder",
-    name: "Welder",
-    category: "Maintenance",
-    icon: "👨‍🏭",
-    badgeTone: "#EA580C",
-    description: "Iron gate, window grill repair, shed fabrication & structural welding.",
-    rating: 4.8,
-    reviewsCount: 410,
-    startingPrice: 499,
-    estimatedArrival: "45–60 min",
-  },
-  {
-    id: "locksmith",
-    name: "Locksmith",
-    category: "Emergency",
-    icon: "🔑",
-    badgeTone: "#CA8A04",
-    description: "Key duplicate, digital lock install & emergency door unlock.",
-    rating: 4.9,
-    reviewsCount: 670,
-    startingPrice: 299,
-    estimatedArrival: "15–30 min",
-    featured: true,
-  },
-  {
-    id: "solar-installation",
-    name: "Solar Panel Installation",
-    category: "Tech",
-    icon: "☀️",
-    badgeTone: "#EAB308",
-    description: "Rooftop solar setup, inverter wiring, net metering & maintenance.",
-    rating: 4.9,
-    reviewsCount: 290,
-    startingPrice: 1999,
-    estimatedArrival: "Appointment",
-  },
-  {
-    id: "gardening-landscaping",
-    name: "Gardening & Landscaping",
-    category: "Cleaning",
-    icon: "🪴",
-    badgeTone: "#16A34A",
-    description: "Lawn mowing, plant pruning, organic manuring & terrace garden setup.",
-    rating: 4.8,
-    reviewsCount: 480,
-    startingPrice: 499,
-    estimatedArrival: "Scheduled",
-  },
-  {
-    id: "packers-movers",
-    name: "Packers & Movers",
-    category: "Shifting",
-    icon: "📦",
-    badgeTone: "#9333EA",
-    description: "Safe house shifting, bubble wrapping, furniture dismantling & truck transport.",
-    rating: 4.9,
-    reviewsCount: 980,
-    startingPrice: 2499,
-    estimatedArrival: "Scheduled",
-    featured: true,
-  },
-  {
-    id: "appliance-installation",
-    name: "Appliance Installation",
-    category: "Appliance",
-    icon: "⚙️",
-    badgeTone: "#2563EB",
-    description: "Geyser, chimney, ceiling fan, TV, washing machine & RO setup.",
-    rating: 4.9,
-    reviewsCount: 1050,
-    startingPrice: 349,
-    estimatedArrival: "30–45 min",
-  },
-  {
-    id: "shifting-helpers",
-    name: "House Shifting Helpers",
-    category: "Shifting",
-    icon: "🏋️‍♂️",
-    badgeTone: "#C026D3",
-    description: "Heavy luggage lifting, furniture assembly, loading & unloading.",
-    rating: 4.8,
-    reviewsCount: 760,
-    startingPrice: 599,
-    estimatedArrival: "30–60 min",
-  },
-  {
-    id: "water-tank-cleaning",
-    name: "Water Tank Cleaning",
-    category: "Cleaning",
-    icon: "🛢️",
-    badgeTone: "#0284C7",
-    description: "High-pressure jet cleaning, sludge removal & antibacterial UV treatment.",
-    rating: 4.9,
-    reviewsCount: 1150,
-    startingPrice: 499,
-    estimatedArrival: "45–60 min",
-  },
-];
-
 export function HomeServicesDiscovery() {
+  const [services, setServices] = useState<HomeService[]>([]);
+  const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<"admin" | "store_owner" | "customer" | null>(null);
   const [savedCount, setSavedCount] = useState(0);
   const [locationLabel, setLocationLabel] = useState("DLF Ankur Vihar, Loni");
@@ -325,6 +41,21 @@ export function HomeServicesDiscovery() {
   const [userAddress, setUserAddress] = useState("DLF Ankur Vihar, Block A, Loni");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    async function loadServices() {
+      try {
+        setLoading(true);
+        const data = await apiFetch<{ ok: boolean; items: HomeService[] }>("/api/services");
+        setServices(data.items || []);
+      } catch {
+        setServices([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    void loadServices();
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -360,15 +91,19 @@ export function HomeServicesDiscovery() {
   };
 
   const filteredServices = useMemo(() => {
-    return ALL_HOME_SERVICES.filter((service) => {
+    return services.filter((service) => {
+      const query = searchQuery.toLowerCase();
       const matchesSearch =
-        service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        service.description.toLowerCase().includes(searchQuery.toLowerCase());
+        !query ||
+        service.name.toLowerCase().includes(query) ||
+        service.description.toLowerCase().includes(query) ||
+        (service.categoryName && service.categoryName.toLowerCase().includes(query)) ||
+        (service.storeName && service.storeName.toLowerCase().includes(query));
       const matchesCategory =
-        selectedCategory === "All" || service.category === selectedCategory;
+        selectedCategory === "All" || service.categoryName === selectedCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [searchQuery, selectedCategory]);
+  }, [services, searchQuery, selectedCategory]);
 
   const handleConfirmBooking = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -487,34 +222,37 @@ export function HomeServicesDiscovery() {
           <div className="services-grid">
             {filteredServices.map((service) => (
               <article key={service.id} className="service-card">
-                {service.featured && (
-                  <span className="popular-tag">MOST BOOKED</span>
-                )}
-                
                 <div className="service-card-top">
                   <div
                     className="service-icon-box"
-                    style={{ borderColor: service.badgeTone }}
+                    style={{ borderColor: "#FF5722" }}
                   >
-                    <span>{service.icon}</span>
+                    <span>🛠️</span>
                   </div>
-                  <span className="arrival-badge">⏱️ {service.estimatedArrival}</span>
+                  <span className="arrival-badge">⏱️ {service.estimatedArrival || "30–60 min"}</span>
                 </div>
 
                 <div className="service-card-body">
-                  <span className="category-meta">{service.category}</span>
+                  <span className="category-meta" style={{ color: "#FF8A00", fontWeight: 700 }}>
+                    {service.categoryName || "General Service"}
+                  </span>
                   <h3 className="service-name">{service.name}</h3>
-                  <p className="service-desc">{service.description}</p>
+                  <p className="service-desc">{service.description || "Professional service provided by local verified business."}</p>
+                  {service.storeName && (
+                    <div style={{ marginTop: "8px", fontSize: "0.85rem", color: "var(--text-secondary, #94a3b8)" }}>
+                      🏪 Provided by: <strong style={{ color: "#f8fafc" }}>{service.storeName}</strong>
+                    </div>
+                  )}
                 </div>
 
                 <div className="service-card-meta">
                   <div className="rating-box">
-                    <span className="star">⭐ {service.rating.toFixed(1)}</span>
-                    <span className="reviews">({service.reviewsCount})</span>
+                    <span className="star">⭐ 4.9</span>
+                    <span className="reviews">(Verified)</span>
                   </div>
                   <div className="price-box">
                     <small>Starting from</small>
-                    <strong>₹{service.startingPrice.toLocaleString("en-IN")}</strong>
+                    <strong>₹{Number(service.startingPrice || 0).toLocaleString("en-IN")}</strong>
                   </div>
                 </div>
 
@@ -529,20 +267,30 @@ export function HomeServicesDiscovery() {
             ))}
           </div>
         ) : (
-          <div className="services-empty-state">
-            <span className="empty-icon">🔍</span>
-            <h3>No matching services found</h3>
-            <p>Try searching for a different keyword or category.</p>
-            <button
-              type="button"
-              className="reset-search-btn"
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedCategory("All");
-              }}
-            >
-              Reset Filters
-            </button>
+          <div className="services-empty-state" style={{ padding: "48px 24px", textAlign: "center", background: "rgba(255,255,255,0.03)", borderRadius: "20px", border: "1px solid rgba(255,255,255,0.1)" }}>
+            <span className="empty-icon" style={{ fontSize: "3rem" }}>🛠️</span>
+            <h3 style={{ fontSize: "1.3rem", marginTop: "12px", color: "#f8fafc" }}>No active services listed in this category yet</h3>
+            <p style={{ color: "#94a3b8", maxWidth: "500px", margin: "8px auto 20px" }}>
+              Are you a service professional, electrician, plumber, or technician? Register your business on Kynisto and start accepting bookings today!
+            </p>
+            <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+              <Link href="/onboarding" className="portalButton" style={{ padding: "10px 24px", textDecoration: "none", display: "inline-block" }}>
+                + List Your Business Now
+              </Link>
+              {(searchQuery || selectedCategory !== "All") && (
+                <button
+                  type="button"
+                  className="reset-search-btn"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCategory("All");
+                  }}
+                  style={{ background: "rgba(255,255,255,0.1)", color: "#fff", border: "none", padding: "10px 20px", borderRadius: "10px", cursor: "pointer" }}
+                >
+                  Reset Filters
+                </button>
+              )}
+            </div>
           </div>
         )}
       </section>

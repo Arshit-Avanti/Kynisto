@@ -548,21 +548,31 @@ export function OwnerStoreEditor({
 
       {/* ── Step 1: Basic Info ─────────────────────────────────────────────── */}
       <div style={{ display: step === 1 ? "contents" : "none" }}>
-        <label>Store name<input name="name" defaultValue={text("name")} required /></label>
-        <label>Business type<input name="businessType" defaultValue={text("businessType", "Local business")} required /></label>
+        <label>Store / Business name<input name="name" defaultValue={text("name")} required placeholder="e.g. Ankur Vihar Plumbing Services" /></label>
+        <label className="full">Business Type / Model
+          <select
+            name="businessType"
+            defaultValue={text("businessType", "Physical Store / Shop")}
+            required
+            style={{ width: "100%", padding: "12px", borderRadius: "12px", background: "rgba(255,255,255,0.06)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.15)", marginTop: "6px" }}
+          >
+            <option value="Physical Store / Shop" style={{ background: "#0F172A", color: "#FFF" }}>🏪 Physical Store / Shop (Retail, Grocery, Clinic, Pharmacy, Bakery)</option>
+            <option value="Home Service Business" style={{ background: "#0F172A", color: "#FFF" }}>🛠️ Home Service Business (Plumber, Electrician, Carpenter, AC Repair, Cleaning, etc.)</option>
+          </select>
+        </label>
         <label>Category
           <select name="categoryId" value={categoryId} onChange={(event) => setCategoryId(event.target.value)} required>
             <option value="">Choose category</option>
             {categories.map((category) => <option key={String(category.id)} value={String(category.id)}>{String(category.name)}</option>)}
           </select>
         </label>
-        <label>Subcategory
+        <label>Subcategory / Service Specialty
           <select name="subcategoryId" defaultValue={text("subcategoryId")}>
             <option value="">Optional</option>
             {children.map((child) => <option key={String(child.id)} value={String(child.id)}>{String(child.name)}</option>)}
           </select>
         </label>
-        <label className="full">Description<textarea name="description" defaultValue={text("description", "Tell customers what makes your local business useful and trustworthy.")} required /></label>
+        <label className="full">Description<textarea name="description" defaultValue={text("description", "Tell customers what makes your business useful and trustworthy.")} required /></label>
 
         <div className="formActions full" style={{ marginTop: "16px" }}>
           <button type="button" className="portalButton" onClick={() => setStep(2)}>Next Step: Location</button>

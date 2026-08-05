@@ -44,7 +44,7 @@ export function Navbar3D({
           style={{ fontSize: "12px", padding: "6px 12px", borderRadius: "10px", background: "rgba(255,255,255,0.1)", color: "#ffffff", border: "1px solid rgba(255,255,255,0.2)" }}
         />
         <Link href="/" aria-label="Kynisto Home" style={{ textDecoration: "none", display: "flex" }}>
-          <KynistoLogo showTagline />
+          <KynistoLogo showTagline={false} />
         </Link>
         <button
           type="button"
