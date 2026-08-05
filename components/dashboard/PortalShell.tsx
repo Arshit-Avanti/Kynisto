@@ -193,7 +193,7 @@ export function PortalShell({
       <section className="portalMain">
         <header className="portalHeader" style={{ background: dark ? "rgba(15, 23, 42, 0.6)" : "rgba(255, 255, 255, 0.6)", backdropFilter: "blur(20px)", borderBottom: dark ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid rgba(0, 0, 0, 0.05)", boxShadow: "0 4px 30px rgba(0,0,0,0.05)" }}>
           <button className="mobileMenu" type="button" aria-label="Open navigation" onClick={() => setOpen(true)} style={{ color: dark ? "#f8fafc" : "#0f172a" }}><Menu size={24} /></button>
-          <div><small style={{ color: dark ? "#94a3b8" : "#64748b" }}>DLF Ankur Vihar · Kynisto</small><strong style={{ color: dark ? "#f8fafc" : "#0f172a" }}>{nav.find((item) => item.tab === active)?.label ?? "Dashboard"}</strong></div>
+          <div><small style={{ color: dark ? "#94a3b8" : "#64748b" }}>Your Locality · Kynisto</small><strong style={{ color: dark ? "#f8fafc" : "#0f172a" }}>{nav.find((item) => item.tab === active)?.label ?? "Dashboard"}</strong></div>
           <div className="portalHeaderActions">
             <button type="button" onClick={toggleTheme} aria-label="Toggle dark mode" style={{ background: dark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)", color: dark ? "#fbbf24" : "#475569", borderRadius: "50%", padding: "0.5rem", border: dark ? "1px solid rgba(251, 191, 36, 0.3)" : "none", boxShadow: dark ? "0 0 15px rgba(251, 191, 36, 0.2)" : "none" }}>
               {dark ? <Sun size={20} style={{ filter: "drop-shadow(0 0 5px rgba(251, 191, 36, 0.8))" }} /> : <Moon size={20} />}

@@ -24,13 +24,13 @@ export async function generateMetadata(): Promise<Metadata> {
   const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "kynisto.app";
   const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
   const origin = `${protocol}://${host}`;
-  const description = "Discover trusted salons, groceries, clinics, stationery shops and more around DLF Ankur Vihar, Loni, with verified addresses, hours, ratings and directions.";
+  const description = "Discover trusted salons, groceries, clinics, home services and local professionals near you with verified addresses, hours, ratings and directions.";
   return {
     metadataBase: new URL(origin),
     applicationName: "Kynisto",
     title: { default: "Kynisto – Everything Around You, Smarter.", template: "%s | Kynisto" },
     description,
-    keywords: ["local businesses", "DLF Ankur Vihar", "Loni", "Ghaziabad", "nearby stores", "salon", "grocery", "clinic"],
+    keywords: ["local businesses", "home services", "nearby stores", "salon", "grocery", "clinic", "plumber", "electrician"],
     authors: [{ name: "Kynisto" }],
     alternates: { canonical: "/" },
     manifest: "/manifest.webmanifest",

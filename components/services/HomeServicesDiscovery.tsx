@@ -27,7 +27,7 @@ export function HomeServicesDiscovery() {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<"admin" | "store_owner" | "customer" | null>(null);
   const [savedCount, setSavedCount] = useState(0);
-  const [locationLabel, setLocationLabel] = useState("DLF Ankur Vihar, Loni");
+  const [locationLabel, setLocationLabel] = useState("Your Locality");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [selectedService, setSelectedService] = useState<HomeService | null>(null);
@@ -38,7 +38,7 @@ export function HomeServicesDiscovery() {
   // Booking Form State
   const [bookingDate, setBookingDate] = useState("Today");
   const [bookingSlot, setBookingSlot] = useState("10:00 AM - 12:00 PM");
-  const [userAddress, setUserAddress] = useState("DLF Ankur Vihar, Block A, Loni");
+  const [userAddress, setUserAddress] = useState("Your Locality, Block A");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -79,7 +79,7 @@ export function HomeServicesDiscovery() {
     }
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const label = `DLF Ankur Vihar (${position.coords.latitude.toFixed(2)}, ${position.coords.longitude.toFixed(2)})`;
+        const label = `Your Locality (${position.coords.latitude.toFixed(2)}, ${position.coords.longitude.toFixed(2)})`;
         setLocationLabel(label);
         setUserAddress(label);
         setToastMessage("Location updated to your GPS position!");
@@ -130,9 +130,7 @@ export function HomeServicesDiscovery() {
       <Navbar3D
         userRole={userRole}
         savedCount={savedCount}
-        locationLabel={locationLabel}
-        onUseLocation={handleUseLocation}
-        onOpenCustomize={() => setCustomizing(true)}
+        mode="services"
       />
 
       {toastMessage && (

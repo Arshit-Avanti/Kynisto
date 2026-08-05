@@ -179,7 +179,7 @@ async function seedDatabase(): Promise<void> {
       null,
       name,
       slugify(name),
-      `Trusted ${name.toLowerCase()} in and around DLF Ankur Vihar.`,
+      `Trusted ${name.toLowerCase()} in and around Your Locality.`,
       icon,
       color,
       HEALTHCARE_CATEGORY_INDEXES.has(categoryIndex) ? "healthcare" : "local",
@@ -194,7 +194,7 @@ async function seedDatabase(): Promise<void> {
         parentId,
         child,
         `${slugify(name)}-${slugify(child)}`,
-        `${child} businesses serving DLF Ankur Vihar and Loni.`,
+        `${child} businesses serving Your Locality and Loni.`,
         icon,
         color,
         HEALTHCARE_CATEGORY_INDEXES.has(categoryIndex) ? "healthcare" : "local",
@@ -224,18 +224,18 @@ async function seedDatabase(): Promise<void> {
     const subcategoryId = `${categoryId}-${(index % 2) + 1}`;
     const categoryName = categorySeeds[categoryIndex][0];
     const storeName = `${nameSeeds[categoryIndex]} ${sequence === 1 ? "" : sequence}`.trim();
-    const slug = `${slugify(storeName)}-ankur-vihar`;
+    const slug = `${slugify(storeName)}-local`;
     const street = streets[index % streets.length];
     const house = 12 + ((index * 17) % 380);
     // Keep the deterministic catalog in a compact, symmetric grid around the
-    // user-confirmed DLF Ankur Vihar point near Karawal Nagar.
+    // local coordinates.
     const latitude = DEFAULT_LATITUDE + ((index % 10) - 4.5) * 0.00105;
     const longitude = DEFAULT_LONGITUDE + (Math.floor(index / 10) - 4.5) * 0.00103;
     const ratingAverage = Number((4.1 + ((index * 7) % 9) / 10).toFixed(1));
     const ratingCount = 18 + ((index * 29) % 360);
     const status = index >= 98 ? "suspended" : index >= 90 ? "pending" : "approved";
     const createdAt = now - (100 - index) * 21_600;
-    const address = `${house}, ${street}, DLF Ankur Vihar, Loni, Ghaziabad, Uttar Pradesh 201102`;
+    const address = `${house}, ${street}, Your Locality, Loni, Ghaziabad, Uttar Pradesh 201102`;
 
     storeRows.push([
       storeId,
@@ -244,10 +244,10 @@ async function seedDatabase(): Promise<void> {
       subcategoryId,
       storeName,
       slug,
-      `${storeName} is a trusted ${categoryName.toLowerCase()} business serving DLF Ankur Vihar, Loni near Karawal Nagar and nearby Ghaziabad communities. Clear pricing, friendly service and convenient local access.`,
+      `${storeName} is a trusted ${categoryName.toLowerCase()} business serving Your Locality, Loni and nearby communities. Clear pricing, friendly service and convenient local access.`,
       categoryName,
       address,
-      "DLF Ankur Vihar",
+      "Your Locality",
       "Loni",
       "Uttar Pradesh",
       "India",

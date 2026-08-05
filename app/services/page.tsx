@@ -1,8 +1,8 @@
 import { HomeServicesDiscovery } from "@/components/services/HomeServicesDiscovery";
 
 export const metadata = {
-  title: "Local Home Services & Professionals near DLF Ankur Vihar | Kynisto",
-  description: "Book verified plumbers, electricians, carpenters, AC technicians, cleaning experts and home service professionals near DLF Ankur Vihar & Loni.",
+  title: "Local Home Services & Professionals Near You | Kynisto",
+  description: "Book verified plumbers, electricians, carpenters, AC technicians, cleaning experts and home service professionals near you.",
 };
 
 export default function ServicesPage() {

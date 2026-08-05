@@ -21,7 +21,7 @@ export default async function UserSubscriptionPage() {
       <Navbar3D
         userRole={session.user.role}
         savedCount={0}
-        locationLabel="DLF Ankur Vihar"
+        locationLabel="Your Locality"
         onUseLocation={() => {}}
         onOpenCustomize={() => {}}
       />

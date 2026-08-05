@@ -29,7 +29,7 @@ export function parseStoreInput(body: Record<string, unknown>) {
     categoryId: cleanText(body.categoryId, "Category", { max: 80 }),
     subcategoryId: cleanText(body.subcategoryId, "Subcategory", { max: 80, required: false }) || null,
     address: cleanText(body.address, "Address", { min: 8, max: 300 }),
-    area: cleanText(body.area ?? "DLF Ankur Vihar", "Area", { min: 2, max: 100 }),
+    area: cleanText(body.area ?? "Your Locality", "Area", { min: 2, max: 100 }),
     city: cleanText(body.city ?? "Loni", "City", { min: 2, max: 100 }),
     state: cleanText(body.state ?? "Uttar Pradesh", "State", { min: 2, max: 100 }),
     country: cleanText(body.country ?? "India", "Country", { min: 2, max: 100 }),

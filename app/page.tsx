@@ -933,7 +933,7 @@ const stores: Store[] = [
     name: "Glow & Go Salon",
     category: "Salon",
     icon: "✂",
-    address: "B-42, Main Market Road, DLF Ankur Vihar, Loni, Ghaziabad",
+    address: "B-42, Main Market Road, Your Locality, Loni, Ghaziabad",
     shortAddress: "Main Market Road",
     rating: 4.8,
     reviews: 214,
@@ -949,8 +949,8 @@ const stores: Store[] = [
     name: "FreshBasket Grocers",
     category: "Grocery",
     icon: "◒",
-    address: "MM-18, DLF Ankur Vihar, Loni, Ghaziabad",
-    shortAddress: "DLF Main Market",
+    address: "MM-18, Your Locality, Loni, Ghaziabad",
+    shortAddress: "Main Market",
     rating: 4.6,
     reviews: 389,
     distance: 0.7,
@@ -965,7 +965,7 @@ const stores: Store[] = [
     name: "Aarogya Family Clinic",
     category: "Clinic",
     icon: "+",
-    address: "C-215, Shiv Chowk Road, DLF Ankur Vihar, Loni, Ghaziabad",
+    address: "C-215, Shiv Chowk Road, Your Locality, Loni, Ghaziabad",
     shortAddress: "Shiv Chowk Road",
     rating: 4.9,
     reviews: 156,
@@ -981,7 +981,7 @@ const stores: Store[] = [
     name: "Paper Trail Stationery",
     category: "Stationery",
     icon: "✎",
-    address: "A-9, Mangal Bazaar Road, DLF Ankur Vihar, Loni, Ghaziabad",
+    address: "A-9, Mangal Bazaar Road, Your Locality, Loni, Ghaziabad",
     shortAddress: "Mangal Bazaar Road",
     rating: 4.7,
     reviews: 98,
@@ -997,7 +997,7 @@ const stores: Store[] = [
     name: "WellSpring Pharmacy",
     category: "Pharmacy",
     icon: "✚",
-    address: "D-33, Main Market, DLF Ankur Vihar, Loni, Ghaziabad",
+    address: "D-33, Main Market, Your Locality, Loni, Ghaziabad",
     shortAddress: "Main Market",
     rating: 4.7,
     reviews: 271,
@@ -1013,7 +1013,7 @@ const stores: Store[] = [
     name: "Oven & Crumb Bakery",
     category: "Bakery",
     icon: "♨",
-    address: "B-66, 25 Foota Road, DLF Ankur Vihar, Loni, Ghaziabad",
+    address: "B-66, 25 Foota Road, Your Locality, Loni, Ghaziabad",
     shortAddress: "25 Foota Road",
     rating: 4.8,
     reviews: 342,
@@ -1029,7 +1029,7 @@ const stores: Store[] = [
     name: "QuickFix Mobile Repair",
     category: "Repair",
     icon: "⚙",
-    address: "A-401, Mangal Bazaar Road, DLF Ankur Vihar, Loni, Ghaziabad",
+    address: "A-401, Mangal Bazaar Road, Your Locality, Loni, Ghaziabad",
     shortAddress: "Mangal Bazaar Road",
     rating: 4.5,
     reviews: 124,
@@ -1045,7 +1045,7 @@ const stores: Store[] = [
     name: "Paw & Whisker Pet Care",
     category: "Pet care",
     icon: "●",
-    address: "C-25, Shani Bazaar Road, DLF Ankur Vihar, Loni, Ghaziabad",
+    address: "C-25, Shani Bazaar Road, Your Locality, Loni, Ghaziabad",
     shortAddress: "Shani Bazaar Road",
     rating: 4.9,
     reviews: 181,
@@ -1061,7 +1061,7 @@ const stores: Store[] = [
     name: "MoveWell Fitness Studio",
     category: "Fitness",
     icon: "↔",
-    address: "D-77, Shiv Chowk Road, DLF Ankur Vihar, Loni, Ghaziabad",
+    address: "D-77, Shiv Chowk Road, Your Locality, Loni, Ghaziabad",
     shortAddress: "Shiv Chowk Road",
     rating: 4.8,
     reviews: 205,
@@ -1077,8 +1077,8 @@ const stores: Store[] = [
     name: "Third Place Café",
     category: "Café",
     icon: "☕",
-    address: "MM-4, Main Market, DLF Ankur Vihar, Loni, Ghaziabad",
-    shortAddress: "DLF Main Market",
+    address: "MM-4, Main Market, Your Locality, Loni, Ghaziabad",
+    shortAddress: "Main Market",
     rating: 4.6,
     reviews: 417,
     distance: 1.8,
@@ -1115,7 +1115,7 @@ export default function Home() {
   const [pinFilter, setPinFilter] = useState("");
   const [businessTypeFilter, setBusinessTypeFilter] = useState("");
   const [currentCoords, setCurrentCoords] = useState({ latitude: 28.7381, longitude: 77.2669 });
-  const [locationLabel, setLocationLabel] = useState("DLF Ankur Vihar, Loni");
+  const [locationLabel, setLocationLabel] = useState("Your Locality");
   const [customizing, setCustomizing] = useState(false);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [toast, setToast] = useState("");
@@ -1320,7 +1320,7 @@ export default function Home() {
         setSortMode("nearest");
         setToast("Showing businesses nearest to you.");
       },
-      () => setToast("Location access was not enabled. Using DLF Ankur Vihar."),
+      () => setToast("Location access was not enabled. Using Your Locality."),
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
     );
   };
@@ -1574,7 +1574,7 @@ export default function Home() {
         <div className="advancedFilters" aria-label="Detailed business filters">
           <label>
             <span>Area or neighbourhood</span>
-            <input value={areaFilter} onChange={(event) => setAreaFilter(event.target.value)} placeholder="DLF Ankur Vihar" />
+            <input value={areaFilter} onChange={(event) => setAreaFilter(event.target.value)} placeholder="Search area..." />
           </label>
           <label>
             <span>PIN code</span>
@@ -1674,7 +1674,7 @@ export default function Home() {
 
       <footer>
         <a className="brand footerBrand" href="#top"><KynistoLogo /></a>
-        <p className="demoNote">DLF Ankur Vihar, Loni · © 2026 Kynisto</p>
+        <p className="demoNote">Your Locality · © 2026 Kynisto</p>
       </footer>
 
       {customizing && (

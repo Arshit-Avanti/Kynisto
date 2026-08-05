@@ -71,10 +71,14 @@ export async function GET(request: NextRequest) {
       city: string;
     }>();
 
-    return noStoreJson({
-      ok: true,
-      items: items.results || [],
-    });
+    return NextResponse.json(
+      { ok: true, items: items.results || [] },
+      {
+        headers: {
+          "Cache-Control": "public, max-age=15, s-maxage=60, stale-while-revalidate=300",
+        },
+      }
+    );
   } catch (error) {
     return apiError(error);
   }

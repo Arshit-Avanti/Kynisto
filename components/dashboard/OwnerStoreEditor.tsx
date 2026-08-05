@@ -622,8 +622,8 @@ export function OwnerStoreEditor({
 
           {/* ── Step 2: Location & Contact ─────────────────────────────────────── */}
           <div style={{ display: step === 2 ? "contents" : "none" }}>
-            <label className="full">Full address<input name="address" defaultValue={text("address", "Main Market Road, DLF Ankur Vihar")} required /></label>
-            <label>Area<input name="area" defaultValue={text("area", "DLF Ankur Vihar")} /></label>
+            <label className="full">Full address<input name="address" defaultValue={text("address", "Main Market Road, Your Locality")} required /></label>
+            <label>Area<input name="area" defaultValue={text("area", "Your Locality")} /></label>
             <label>City<input name="city" defaultValue={text("city", "Loni")} /></label>
             <label>State<input name="state" defaultValue={text("state", "Uttar Pradesh")} /></label>
             <label>Country<input name="country" defaultValue={text("country", "India")} /></label>

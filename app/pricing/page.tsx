@@ -33,7 +33,7 @@ export default function PricingPage() {
       <Navbar3D
         userRole={currentUserRole}
         savedCount={0}
-        locationLabel="DLF Ankur Vihar"
+        locationLabel="Your Locality"
         onUseLocation={() => {}}
         onOpenCustomize={() => {}}
       />

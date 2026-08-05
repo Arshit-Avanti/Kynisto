@@ -671,7 +671,7 @@ export default function LiveQueueTracker() {
             Local care, <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">without the waiting room.</span>
           </h2>
           <p className="text-slate-300 text-base sm:text-lg font-medium mt-3 max-w-2xl leading-relaxed">
-            Select a verified clinic, OPD, or diagnostic lab near DLF Ankur Vihar. Join live queues remotely and arrive right on time.
+            Select a verified clinic, OPD, or diagnostic lab near you. Join live queues remotely and arrive right on time.
           </p>
 
           {/* Search Input */}

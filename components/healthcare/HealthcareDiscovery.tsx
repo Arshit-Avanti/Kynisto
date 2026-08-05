@@ -217,7 +217,7 @@ export function HealthcareDiscovery() {
             Local care, <em className="not-italic text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">without the waiting-room guesswork.</em>
           </h1>
           <p className="text-slate-300 text-base md:text-lg mb-8">
-            Find verified clinics & doctors near DLF Ankur Vihar. Track live queue status and join remotely before leaving home.
+            Find verified clinics & doctors near you. Track live queue status and join remotely before leaving home.
           </p>
 
           <form className="healthSearch flex flex-col md:flex-row gap-3 p-2 rounded-2xl bg-white/5 border border-white/15 backdrop-blur-xl mb-6" onSubmit={(event) => { event.preventDefault(); void load(); }}>
