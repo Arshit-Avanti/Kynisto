@@ -8,6 +8,9 @@ import { VideoBackground } from "@/components/media/VideoBackground";
 import { ShaderCanvas } from "@/components/ui/ShaderCanvas";
 import { apiFetch } from "@/lib/client-api";
 
+import { generateWhatsAppBookingUrl } from "@/lib/whatsapp";
+import { PushNotificationManager } from "@/components/ui/PushNotificationManager";
+
 export interface HomeService {
   id: string;
   name: string;
@@ -206,63 +209,99 @@ export function HomeServicesDiscovery() {
 
       {/* Services Grid Section */}
       <section className="services-grid-container">
-        <div className="services-grid-header">
-          <h2>
-            {selectedCategory === "All"
-              ? "All Available Home Services"
-              : `${selectedCategory} Services`}
-            <span className="count-badge">{filteredServices.length}</span>
-          </h2>
-          <span className="sub-note">Instant Dispatch to {locationLabel}</span>
+        <div className="section-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+          <div>
+            <h2>
+              {selectedCategory === "All"
+                ? "All Available Home Services"
+                : `${selectedCategory} Services`}
+              <span className="count-badge">{filteredServices.length}</span>
+            </h2>
+            <span className="sub-note">Instant Dispatch in {locationLabel}</span>
+          </div>
+          <PushNotificationManager />
         </div>
 
         {filteredServices.length > 0 ? (
           <div className="services-grid">
-            {filteredServices.map((service) => (
-              <article key={service.id} className="service-card">
-                <div className="service-card-top">
-                  <div
-                    className="service-icon-box"
-                    style={{ borderColor: "#FF5722" }}
-                  >
-                    <span>🛠️</span>
-                  </div>
-                  <span className="arrival-badge">⏱️ {service.estimatedArrival || "30–60 min"}</span>
-                </div>
+            {filteredServices.map((service) => {
+              const waUrl = generateWhatsAppBookingUrl({
+                storeOrServiceName: service.storeName || service.name,
+                whatsappNumber: service.storePhone || "919876543210",
+                serviceOrProductName: service.name,
+                price: service.startingPrice,
+                customerAddress: userAddress,
+              });
 
-                <div className="service-card-body">
-                  <span className="category-meta" style={{ color: "#FF8A00", fontWeight: 700 }}>
-                    {service.categoryName || "General Service"}
-                  </span>
-                  <h3 className="service-name">{service.name}</h3>
-                  <p className="service-desc">{service.description || "Professional service provided by local verified business."}</p>
-                  {service.storeName && (
-                    <div style={{ marginTop: "8px", fontSize: "0.85rem", color: "var(--text-secondary, #94a3b8)" }}>
-                      🏪 Provided by: <strong style={{ color: "#f8fafc" }}>{service.storeName}</strong>
+              return (
+                <article key={service.id} className="service-card">
+                  <div className="service-card-top">
+                    <div
+                      className="service-icon-box"
+                      style={{ borderColor: "#FF5722" }}
+                    >
+                      <span>🛠️</span>
                     </div>
-                  )}
-                </div>
-
-                <div className="service-card-meta">
-                  <div className="rating-box">
-                    <span className="star">⭐ 4.9</span>
-                    <span className="reviews">(Verified)</span>
+                    <span className="arrival-badge">⏱️ {service.estimatedArrival || "30–60 min"}</span>
                   </div>
-                  <div className="price-box">
-                    <small>Starting from</small>
-                    <strong>₹{Number(service.startingPrice || 0).toLocaleString("en-IN")}</strong>
-                  </div>
-                </div>
 
-                <button
-                  type="button"
-                  className="book-now-btn"
-                  onClick={() => setSelectedService(service)}
-                >
-                  Book Now ➔
-                </button>
-              </article>
-            ))}
+                  <div className="service-card-body">
+                    <span className="category-meta" style={{ color: "#FF8A00", fontWeight: 700 }}>
+                      {service.categoryName || "General Service"}
+                    </span>
+                    <h3 className="service-name">{service.name}</h3>
+                    <p className="service-desc">{service.description || "Professional service provided by local verified business."}</p>
+                    {service.storeName && (
+                      <div style={{ marginTop: "8px", fontSize: "0.85rem", color: "var(--text-secondary, #94a3b8)" }}>
+                        🏪 Provided by: <strong style={{ color: "#f8fafc" }}>{service.storeName}</strong>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="service-card-meta">
+                    <div className="rating-box">
+                      <span className="star">⭐ 4.9</span>
+                      <span className="reviews">(Verified)</span>
+                    </div>
+                    <div className="price-box">
+                      <small>Starting from</small>
+                      <strong>₹{Number(service.startingPrice || 0).toLocaleString("en-IN")}</strong>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "16px" }}>
+                    <button
+                      type="button"
+                      className="book-now-btn"
+                      style={{ margin: 0 }}
+                      onClick={() => setSelectedService(service)}
+                    >
+                      Book Now ➔
+                    </button>
+                    <a
+                      href={waUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="book-now-btn"
+                      style={{
+                        margin: 0,
+                        background: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)",
+                        color: "#FFFFFF",
+                        textDecoration: "none",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "6px",
+                        fontWeight: 700,
+                        fontSize: "13px",
+                      }}
+                    >
+                      💬 WhatsApp
+                    </a>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         ) : (
           <div className="services-empty-state" style={{ padding: "48px 24px", textAlign: "center", background: "rgba(255,255,255,0.03)", borderRadius: "20px", border: "1px solid rgba(255,255,255,0.1)" }}>

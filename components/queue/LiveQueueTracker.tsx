@@ -5,6 +5,7 @@ import { Clock, MapPin, AlertCircle, XCircle, CheckCircle2, Navigation, User, Ph
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/client-api';
+import { PushNotificationManager } from '@/components/ui/PushNotificationManager';
 
 interface HealthcareQueueItem {
   id: string | number;
@@ -674,16 +675,19 @@ export default function LiveQueueTracker() {
             Select a verified clinic, OPD, or diagnostic lab near you. Join live queues remotely and arrive right on time.
           </p>
 
-          {/* Search Input */}
-          <div className="mt-8 max-w-xl relative">
-            <Search className="w-5 h-5 text-emerald-400 absolute left-4 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search clinic, doctor, specialty or area..."
-              className="w-full bg-slate-900/90 border border-slate-700/80 rounded-2xl py-3.5 pl-12 pr-4 text-white placeholder-slate-400 font-medium focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 transition-all shadow-lg"
-            />
+          {/* Search Input & Push Alerts */}
+          <div className="mt-8 max-w-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex-1 relative">
+              <Search className="w-5 h-5 text-emerald-400 absolute left-4 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search clinic, doctor, specialty or area..."
+                className="w-full bg-slate-900/90 border border-slate-700/80 rounded-2xl py-3.5 pl-12 pr-4 text-white placeholder-slate-400 font-medium focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 transition-all shadow-lg"
+              />
+            </div>
+            <PushNotificationManager />
           </div>
         </div>
       </div>
