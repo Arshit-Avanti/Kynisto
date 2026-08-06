@@ -27,13 +27,23 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
 
   useEffect(() => {
     void load();
+    const pollInterval = setInterval(() => {
+      void load();
+    }, 3000);
+
     const source = new EventSource(`/api/healthcare/queue/manage-stream?storeId=${encodeURIComponent(storeId)}`);
     source.addEventListener("queue", (event) => {
-      const payload = JSON.parse((event as MessageEvent).data) as { queue: Data };
-      setData(payload.queue);
-      setLoading(false);
+      try {
+        const payload = JSON.parse((event as MessageEvent).data) as { queue: Data };
+        setData(payload.queue);
+        setLoading(false);
+      } catch {}
     });
-    return () => source.close();
+
+    return () => {
+      clearInterval(pollInterval);
+      source.close();
+    };
   }, [load, storeId]);
 
   async function action(name: string, extra: Record<string, unknown> = {}) {

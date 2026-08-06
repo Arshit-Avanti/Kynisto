@@ -69,6 +69,14 @@ export async function POST(request: NextRequest) {
     const platform = request.headers.get("x-kynisto-platform") === "android-app" ? "app" : "web";
     recordQrEvent(body.queueCode, record.storeId, user.id, platform, "join").catch(() => {});
 
+    // Notify owner inbox in notifications table
+    if (record.ownerId) {
+      await db.prepare(`INSERT INTO notifications (id, user_id, audience, type, title, message, link, created_at)
+        VALUES (?, ?, 'owner', 'queue', '🚨 New Patient Joined Queue!', ?, '/owner', ?)`)
+        .bind(crypto.randomUUID(), record.ownerId, `Token #${tokenNumber} (${user.name ?? "Patient"}) joined live queue for ${record.storeName}.`, now)
+        .run().catch(() => {});
+    }
+
     const updatedState = await patientQueueState(record.storeId, user.id);
 
     return noStoreJson({

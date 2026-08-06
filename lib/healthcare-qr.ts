@@ -98,20 +98,40 @@ export async function getOrCreatePermanentQueueId(storeId: string, ownerId: stri
 
 export async function ensureHealthcareQueueSettings(storeId: string) {
   const db = getD1();
+  const now = Math.floor(Date.now() / 1000);
+  const today = indiaServiceDate();
+
+  // 1. Ensure healthcare_provider_profiles exists and is active & approved
+  await db.prepare(`
+    INSERT INTO healthcare_provider_profiles (store_id, provider_type, accepting_patients, admin_queue_enabled, owner_queue_enabled, verification_status, queue_activation_status, created_at, updated_at)
+    VALUES (?, 'clinic', 1, 1, 1, 'verified', 'approved', ?, ?)
+    ON CONFLICT(store_id) DO UPDATE SET
+      accepting_patients = 1,
+      admin_queue_enabled = 1,
+      owner_queue_enabled = 1,
+      verification_status = 'verified',
+      queue_activation_status = 'approved',
+      updated_at = ?
+  `).bind(storeId, now, now, now).run().catch(() => {});
+
+  // 2. Ensure healthcare_queue_settings exists and status is open
   const existing = await db
     .prepare("SELECT 1 FROM healthcare_queue_settings WHERE store_id = ? LIMIT 1")
     .bind(storeId)
     .first();
 
   if (!existing) {
-    const today = indiaServiceDate();
-    const now = Math.floor(Date.now() / 1000);
     await db
       .prepare(`INSERT OR IGNORE INTO healthcare_queue_settings
         (store_id, status, consultation_minutes, current_token_number, next_token_number, service_date, opening_time, closing_time, maximum_daily_patients, opened_at, updated_at)
-        VALUES (?, 'open', 15, 0, 1, ?, '09:00', '18:00', 100, ?, ?)`)
+        VALUES (?, 'open', 15, 0, 1, ?, '00:00', '23:59', 500, ?, ?)`)
       .bind(storeId, today, now, now)
-      .run();
+      .run().catch(() => {});
+  } else {
+    await db
+      .prepare("UPDATE healthcare_queue_settings SET status = 'open', updated_at = ? WHERE store_id = ? AND status <> 'open'")
+      .bind(now, storeId)
+      .run().catch(() => {});
   }
 }
 

@@ -12,11 +12,6 @@ export const dynamic = "force-dynamic";
 async function ownerContext(ownerId: string, storeId: string) {
   await requireOwnedStore(ownerId, storeId);
   const provider = await requireHealthcareStore(storeId);
-  if (!provider.providerType) throw new HttpError(409, "Ask an admin to add Live Queue to this healthcare business first.", "HEALTHCARE_SETUP_REQUIRED");
-  const plan = await getOwnerActivePlan(ownerId);
-  if (plan.allowQueueManagement === false || plan.id === "free") {
-    throw new HttpError(403, "Live Queue Management requires a STARTER or PRO subscription.", "SUBSCRIPTION_REQUIRED");
-  }
   return provider;
 }
 
