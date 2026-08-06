@@ -385,8 +385,42 @@ export function HomeServicesDiscovery() {
                     <strong style={{ color: "#10B981" }}>₹{selectedService.startingPrice} (Pay After Job)</strong>
                   </div>
                 </div>
-                <p className="ticket-note">
-                  You will receive an SMS and WhatsApp confirmation shortly.
+                
+                <a
+                  href={generateWhatsAppBookingUrl({
+                    storeOrServiceName: selectedService.storeName || selectedService.name,
+                    whatsappNumber: selectedService.storePhone || "919876543210",
+                    serviceOrProductName: selectedService.name,
+                    price: selectedService.startingPrice,
+                    customerAddress: userAddress,
+                    bookingDate: bookingDate,
+                    bookingSlot: bookingSlot,
+                    bookingId: bookingSuccess,
+                  })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    width: "100%",
+                    padding: "14px",
+                    background: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)",
+                    color: "#FFFFFF",
+                    fontWeight: 800,
+                    fontSize: "14px",
+                    textDecoration: "none",
+                    borderRadius: "14px",
+                    marginBottom: "12px",
+                    boxShadow: "0 4px 20px rgba(37, 211, 102, 0.4)",
+                  }}
+                >
+                  💬 Send Invoice &amp; Details to WhatsApp ➔
+                </a>
+
+                <p className="ticket-note" style={{ marginBottom: "16px" }}>
+                  You can also click above to send this invoice directly to WhatsApp.
                 </p>
                 <button
                   type="button"
@@ -396,7 +430,7 @@ export function HomeServicesDiscovery() {
                     setBookingSuccess(null);
                   }}
                 >
-                  Done & Close
+                  Done &amp; Close
                 </button>
               </div>
             ) : (

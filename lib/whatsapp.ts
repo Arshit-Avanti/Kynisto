@@ -46,7 +46,7 @@ export function generateWhatsAppBookingUrl(payload: WhatsAppBookingPayload): str
   const encodedText = encodeURIComponent(text);
   
   if (cleanPhone) {
-    return `https://wa.me/${cleanPhone}?text=${encodedText}`;
+    return `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedText}`;
   }
   return `https://api.whatsapp.com/send?text=${encodedText}`;
 }
