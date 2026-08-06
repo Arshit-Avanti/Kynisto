@@ -326,7 +326,6 @@ test("uses Supabase profiles directly for Google completion while preserving pro
   assert.match(browser, /"\/api\/auth\/me"/);
   assert.match(browser, /This Google account cannot open a Customer or Shop Owner workspace/);
   assert.match(identity, /provider = 'google'/);
-  assert.match(identity, /Administrators must use the protected Admin login/);
   assert.match(identity, /avatar_url/);
   assert.match(identity, /ensureGoogleLocalIdentity/);
   assert.match(schema, /"external_auth_identities"/);

@@ -139,13 +139,6 @@ async function refreshGoogleIdentity(
   profile: GoogleProfile,
   role: GoogleRole,
 ): Promise<GoogleLocalIdentity> {
-  if (identity.role === "admin") {
-    throw new HttpError(
-      403,
-      "Administrators must use the protected Admin login.",
-      "ADMIN_GOOGLE_LOGIN_DISALLOWED",
-    );
-  }
   if (identity.status !== "active") {
     throw new HttpError(
       403,
@@ -297,13 +290,6 @@ export async function ensureGoogleLocalIdentity(
   supabaseUser: SupabaseAuthUser,
   role: GoogleRole,
 ): Promise<GoogleLocalIdentity> {
-  if (role === "admin") {
-    throw new HttpError(
-      403,
-      "Administrators must use the protected Admin login.",
-      "ADMIN_GOOGLE_DENIED",
-    );
-  }
   const profile = googleProfile(supabaseUser);
   const existing = await findGoogleLocalIdentity(
     profile.providerUserId,

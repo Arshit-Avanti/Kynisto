@@ -45,7 +45,7 @@ export type SupabaseProfile = {
   updated_at?: string | null;
 };
 
-export type SupabaseApplicationRole = "customer" | "store_owner";
+export type SupabaseApplicationRole = "customer" | "store_owner" | "admin";
 
 const DEFAULT_SUPABASE_URL = "https://gdakvxqegfnxflaqijwf.supabase.co";
 const DEFAULT_SUPABASE_KEY_PREFIX = "sb_secret_";
@@ -176,6 +176,7 @@ export function applicationRoleFromProfile(
 ): SupabaseApplicationRole | null {
   if (role === "customer") return "customer";
   if (role === "shop_owner" || role === "store_owner") return "store_owner";
+  if (role === "admin") return "admin";
   return null;
 }
 
