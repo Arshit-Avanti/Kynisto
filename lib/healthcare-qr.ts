@@ -1,6 +1,6 @@
 import { getD1 } from "@/db/runtime";
 import { HttpError } from "@/lib/security";
-import { patientQueueState, expireHealthcareQueueEntries } from "@/lib/healthcare";
+import { patientQueueState, expireHealthcareQueueEntries, indiaServiceDate } from "@/lib/healthcare";
 
 export interface PermanentQueueRecord {
   id: string;
