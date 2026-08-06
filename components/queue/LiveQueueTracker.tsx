@@ -268,11 +268,12 @@ export default function LiveQueueTracker() {
     return () => clearInterval(pollInterval);
   }, [view, selectedQueue, isCancelled, syncPatientStateWithStore]);
 
-  // 🔔 Trigger Native Push Notification, Chime Sound, and Vibration when Turn Arrives
+  // 🔔 Trigger Native Push Notification, Chime Sound, and Vibration ONLY when Turn Arrives
   useEffect(() => {
     if (view !== 'ticket' || !selectedQueue || !myTokenNumber) return;
 
-    const isTurnHere = entryStatus === 'called' || userPosition === 1 || (currentToken === myTokenNumber && myTokenNumber > 0);
+    // Turn has arrived ONLY when doctor/owner calls token or currentToken equals myTokenNumber
+    const isTurnHere = entryStatus === 'called' || (currentToken > 0 && currentToken === myTokenNumber);
 
     if (isTurnHere && notifiedTokenRef.current !== myTokenNumber) {
       notifiedTokenRef.current = myTokenNumber;
@@ -314,6 +315,7 @@ export default function LiveQueueTracker() {
   // Handle Joining Live Queue (Calls REAL D1 Database API)
   const handleJoinQueue = async (item: HealthcareQueueItem) => {
     setErrorMsg(null);
+    notifiedTokenRef.current = null;
 
     // Check if owner explicitly closed queue
     if (item.queueStatus === 'closed') {
