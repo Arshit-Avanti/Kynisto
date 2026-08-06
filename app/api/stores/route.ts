@@ -1,5 +1,6 @@
 import { listStores, recordAnalytics } from "@/lib/store-data";
 import { apiError } from "@/lib/security";
+import { microCacheJson } from "@/lib/micro-cache";
 
 export async function GET(request: Request) {
   try {
@@ -24,13 +25,13 @@ export async function GET(request: Request) {
       longitude: number("lng", 77.2669),
     });
     if (url.searchParams.get("q")) {
-      await recordAnalytics(request, null, "search_impression", null, {
+      recordAnalytics(request, null, "search_impression", null, {
         query: url.searchParams.get("q")?.slice(0, 100),
         results: result.pagination.total,
-      });
+      }).catch((error) => console.warn("Analytics error:", error));
     }
     return Response.json(result, {
-      headers: { "Cache-Control": "no-store" },
+      headers: { "Cache-Control": "public, max-age=15, stale-while-revalidate=60" },
     });
   } catch (error) {
     return apiError(error);

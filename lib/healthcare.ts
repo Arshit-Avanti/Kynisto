@@ -52,26 +52,13 @@ export function indiaServiceDate(date = new Date()): string {
   return `${value("year")}-${value("month")}-${value("day")}`;
 }
 
+let lastGlobalSweepAt = 0;
+
 export async function requireHealthcareStore(storeId: string) {
   await ensureSeeded();
   const db = getD1();
-  const now = Math.floor(Date.now() / 1000);
 
-  // Auto-ensure healthcare_provider_profiles profile is active & approved
-  await db.prepare(`
-    INSERT INTO healthcare_provider_profiles (store_id, provider_type, accepting_patients, admin_queue_enabled, owner_queue_enabled, verification_status, queue_activation_status, created_at, updated_at)
-    VALUES (?, 'clinic', 1, 1, 1, 'verified', 'approved', ?, ?)
-    ON CONFLICT(store_id) DO UPDATE SET
-      provider_type = COALESCE(provider_type, 'clinic'),
-      accepting_patients = 1,
-      admin_queue_enabled = 1,
-      owner_queue_enabled = 1,
-      verification_status = 'verified',
-      queue_activation_status = 'approved',
-      updated_at = ?
-  `).bind(storeId, now, now, now).run().catch(() => {});
-
-  const provider = await db
+  let provider = await db
     .prepare(
       `SELECT s.id, s.name, s.owner_id AS ownerId, s.status AS storeStatus,
         hp.provider_type AS providerType, hp.accepting_patients AS acceptingPatients,
@@ -96,6 +83,48 @@ export async function requireHealthcareStore(storeId: string) {
       queueActivationStatus: string | null;
     }>();
   if (!provider) throw new HttpError(404, "Healthcare provider not found.", "HEALTHCARE_NOT_FOUND");
+
+  if (!provider.providerType) {
+    const now = Math.floor(Date.now() / 1000);
+    await db.prepare(`
+      INSERT INTO healthcare_provider_profiles (store_id, provider_type, accepting_patients, admin_queue_enabled, owner_queue_enabled, verification_status, queue_activation_status, created_at, updated_at)
+      VALUES (?, 'clinic', 1, 1, 1, 'verified', 'approved', ?, ?)
+      ON CONFLICT(store_id) DO UPDATE SET
+        provider_type = COALESCE(provider_type, 'clinic'),
+        accepting_patients = 1,
+        admin_queue_enabled = 1,
+        owner_queue_enabled = 1,
+        verification_status = 'verified',
+        queue_activation_status = 'approved',
+        updated_at = ?
+    `).bind(storeId, now, now, now).run().catch(() => {});
+
+    provider = await db
+      .prepare(
+        `SELECT s.id, s.name, s.owner_id AS ownerId, s.status AS storeStatus,
+          hp.provider_type AS providerType, hp.accepting_patients AS acceptingPatients,
+          hp.admin_queue_enabled AS adminQueueEnabled,
+          hp.owner_queue_enabled AS ownerQueueEnabled, hp.verification_status AS verificationStatus
+          , hp.queue_activation_status AS queueActivationStatus
+         FROM stores s JOIN categories c ON c.id = s.category_id
+         LEFT JOIN healthcare_provider_profiles hp ON hp.store_id = s.id
+         WHERE s.id = ? AND c.module = 'healthcare' LIMIT 1`,
+      )
+      .bind(storeId)
+      .first<{
+        id: string;
+        name: string;
+        ownerId: string | null;
+        storeStatus: string;
+        providerType: HealthcareType | null;
+        acceptingPatients: number | null;
+        adminQueueEnabled: number | null;
+        ownerQueueEnabled: number | null;
+        verificationStatus: string | null;
+        queueActivationStatus: string | null;
+      }>() ?? provider;
+  }
+
   return provider;
 }
 
@@ -104,9 +133,14 @@ export async function requireHealthcareStore(storeId: string) {
  * including each SSE tick, so an active queue is cleaned without an owner or
  * administrator action. The sweep and current-token repair execute atomically in D1.
  */
-export async function expireHealthcareQueueEntries(storeId?: string) {
-  const db = getD1();
+export async function expireHealthcareQueueEntries(storeId?: string, force = false) {
   const now = Math.floor(Date.now() / 1000);
+  if (!storeId && !force && now - lastGlobalSweepAt < 15) {
+    return 0;
+  }
+  if (!storeId) lastGlobalSweepAt = now;
+
+  const db = getD1();
   const scope = storeId ? " AND store_id = ?" : "";
   const values = storeId ? [now, storeId] : [now];
   const result = await db.batch([

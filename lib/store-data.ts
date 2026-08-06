@@ -1,6 +1,7 @@
 import { getD1 } from "@/db/runtime";
 import { ensureSeeded } from "@/db/seed";
 import { d1SearchText } from "@/lib/validation";
+import { microCache } from "@/lib/micro-cache";
 
 const DEFAULT_LATITUDE = 28.7381;
 const DEFAULT_LONGITUDE = 77.2669;
@@ -180,6 +181,10 @@ const storeSelect = `SELECT
  LEFT JOIN healthcare_queue_settings hqs ON hqs.store_id = s.id`;
 
 export async function listCategories(module: "local" | "healthcare" | "all" = "local") {
+  const cacheKey = `categories:${module}`;
+  const cached = microCache.get<any>(cacheKey);
+  if (cached) return cached;
+
   await ensureSeeded();
   const db = getD1();
   const moduleCondition = module === "all" ? "" : "AND c.module = ?";
@@ -218,10 +223,12 @@ export async function listCategories(module: "local" | "healthcare" | "all" = "l
       color: string;
     }>(),
   ]);
-  return (result.results ?? []).map((category) => ({
+  const categories = (result.results ?? []).map((category) => ({
     ...category,
     children: (children.results ?? []).filter((child) => child.parentId === category.id),
   }));
+  microCache.set(cacheKey, categories, 60_000);
+  return categories;
 }
 
 export async function listStores(options: {
@@ -237,6 +244,10 @@ export async function listStores(options: {
   latitude?: number;
   longitude?: number;
 }) {
+  const cacheKey = `stores:${JSON.stringify(options)}`;
+  const cached = microCache.get<any>(cacheKey);
+  if (cached) return cached;
+
   await ensureSeeded();
   const db = getD1();
   const conditions = ["s.status = 'approved'", "c.module = 'local'"];
@@ -283,7 +294,7 @@ export async function listStores(options: {
   const limit = Math.min(24, Math.max(1, Math.floor(options.limit ?? 12)));
   const total = stores.length;
   const start = (page - 1) * limit;
-  return {
+  const storeResult = {
     items: stores.slice(start, start + limit),
     pagination: {
       page,
@@ -293,6 +304,8 @@ export async function listStores(options: {
       hasMore: start + limit < total,
     },
   };
+  microCache.set(cacheKey, storeResult, 15_000);
+  return storeResult;
 }
 
 export async function getStoreBySlug(slug: string) {

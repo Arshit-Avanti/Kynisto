@@ -59,10 +59,13 @@ const modernCleanTechStyles = `
     border-radius: 16px !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     background: rgba(255, 255, 255, 0.05) !important;
-    backdrop-filter: blur(25px) !important;
-    -webkit-backdrop-filter: blur(25px) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
     transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
     color: var(--text-primary) !important;
+    transform: translateZ(0) !important;
+    will-change: transform, opacity !important;
+    contain: layout style paint !important;
   }
   .mode-dark .categoryTile strong, .mode-dark .categoryTile b, .mode-dark .categoryTile span, .mode-dark .storeCard h3, .mode-dark .storeCard b, .mode-dark .storeCard p, .mode-dark .providerGrid h3 {
     color: var(--text-primary) !important;
@@ -92,8 +95,11 @@ const modernCleanTechStyles = `
     border-radius: 16px !important;
     border: 1px solid rgba(0, 0, 0, 0.15) !important;
     background: #ffffff !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
     color: #0f172a !important;
+    transform: translateZ(0) !important;
+    will-change: transform, opacity !important;
+    contain: layout style paint !important;
   }
   .mode-light .categoryTile strong, .mode-light .categoryTile b, .mode-light .categoryTile span, .mode-light .storeCard h3, .mode-light .storeCard b, .mode-light .storeCard p, .mode-light .providerGrid h3 {
     color: #0f172a !important;
@@ -224,7 +230,7 @@ const modernCleanTechStyles = `
     border-radius: inherit;
   }
   .storeCard:hover, .providerGrid article:hover {
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 87, 34, 0.4) !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 87, 34, 0.3) !important;
     border-color: rgba(255, 87, 34, 0.8) !important;
     transform: perspective(1200px) rotateX(6deg) rotateY(-4deg) translateZ(20px) translateY(-10px) !important;
     z-index: 10;
@@ -321,16 +327,19 @@ const modernCleanTechStyles = `
     border-radius: 12px !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     background: rgba(255, 255, 255, 0.05) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
     color: #f8fafc !important;
     overflow: hidden !important;
+    transform: translateZ(0) !important;
+    will-change: transform, opacity !important;
+    contain: layout style paint !important;
   }
   .productGrid article:hover {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.2) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 15px rgba(59, 130, 246, 0.2) !important;
     border-color: rgba(255, 255, 255, 0.2) !important;
-    transform: translateY(-6px) !important;
+    transform: translateY(-6px) translateZ(0) !important;
   }
   .heroBrandCenter {
     display: flex;
@@ -407,21 +416,26 @@ const modernCleanTechStyles = `
   .floatingCardsContainer {
     position: relative; height: 180px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; z-index: 2; margin: 30px 0 40px 0;
     perspective: 1500px;
+    transform: translateZ(0);
+    will-change: transform;
+    contain: layout style;
   }
   .glassCard3D {
     position: relative;
     width: 200px; height: 130px;
     background: rgba(18, 18, 24, 0.8);
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
     display: flex; flex-direction: column; justify-content: center; align-items: center;
     color: #FFFFFF;
     text-decoration: none;
     transform-style: preserve-3d;
     transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, border-color 0.15s ease;
-    will-change: transform, box-shadow, border-color;
+    will-change: transform, box-shadow, border-color, opacity;
+    transform: translateZ(0);
+    contain: layout style paint;
   }
   .glassCard3D::before {
     content: '';
@@ -435,7 +449,7 @@ const modernCleanTechStyles = `
   .mode-light .glassCard3D {
     background: rgba(255, 255, 255, 0.95);
     border: 1px solid rgba(0, 0, 0, 0.12);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
     color: #000000;
   }
   .glassCard3D svg { margin-bottom: 12px; opacity: 0.9; transform: translateZ(20px); transition: transform 0.15s ease; }
@@ -445,7 +459,7 @@ const modernCleanTechStyles = `
   .glassCard3D:hover { 
     cursor: pointer; 
     border-color: rgba(255, 87, 34, 0.8) !important; 
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), 0 0 35px rgba(255, 87, 34, 0.4) !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 87, 34, 0.3) !important;
     transform: perspective(1000px) rotateX(10deg) rotateY(-8deg) translateZ(30px) translateY(-12px);
     z-index: 10;
   }
@@ -499,11 +513,14 @@ const modernCleanTechStyles = `
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 24px;
     padding: 40px 32px;
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
+    transform: translateZ(0);
+    will-change: transform, opacity;
+    contain: layout style paint;
   }
   .mode-light .featureCard {
     background: rgba(0, 0, 0, 0.02);
@@ -521,14 +538,14 @@ const modernCleanTechStyles = `
     opacity: 1;
   }
   .featureCard:hover {
-    transform: translateY(-8px);
+    transform: translateY(-8px) translateZ(0);
     background: rgba(255, 255, 255, 0.06);
     border-color: rgba(255, 87, 34, 0.5);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2), 0 0 30px rgba(255,87,34,0.15);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.18), 0 0 20px rgba(255,87,34,0.12);
   }
   .mode-light .featureCard:hover {
     background: rgba(0, 0, 0, 0.04);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.05), 0 0 30px rgba(255,87,34,0.1);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.05), 0 0 20px rgba(255,87,34,0.1);
   }
   .featureCard h3 {
     font-size: 1.6rem;
@@ -561,11 +578,14 @@ const modernCleanTechStyles = `
   .mode-light .topbar,
   .mode-dark .topbar {
     background: rgba(12, 18, 30, 0.88) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
     color: #ffffff !important;
+    transform: translateX(-50%) translateZ(0) !important;
+    will-change: transform, opacity !important;
+    contain: layout style paint !important;
   }
 
   .mode-light .topbar a,
@@ -688,9 +708,12 @@ const modernCleanTechStyles = `
     border: 1px solid rgba(255, 255, 255, 0.16) !important;
     border-radius: 24px !important;
     padding: 36px 28px !important;
-    backdrop-filter: blur(25px) !important;
-    -webkit-backdrop-filter: blur(25px) !important;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+    transform: translateZ(0) !important;
+    will-change: transform, opacity !important;
+    contain: layout style paint !important;
   }
 
   .featureCard h3,
@@ -843,6 +866,9 @@ const modernCleanTechStyles = `
       border: 1px solid rgba(255, 255, 255, 0.16) !important;
       padding: 24px 20px !important;
       border-radius: 20px !important;
+      transform: translateZ(0) !important;
+      will-change: transform, opacity !important;
+      contain: layout style paint !important;
     }
 
     .featureCard h3,

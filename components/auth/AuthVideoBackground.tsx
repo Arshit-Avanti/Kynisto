@@ -68,8 +68,55 @@ export function AuthVideoBackground() {
       }
     }, 15000);
 
+    // Visibility & IntersectionObserver tracking for zero-lag background performance
+    let isIntersecting = true;
+    let isTabVisible = typeof document !== "undefined" ? !document.hidden : true;
+
+    const syncPlaybackState = () => {
+      const vid = videoRef.current;
+      if (!vid || showPhotoRef.current) return;
+      const shouldPlay = isIntersecting && isTabVisible && (typeof document === "undefined" || !document.hidden);
+      if (shouldPlay) {
+        if (vid.paused && playCountRef.current < 2) {
+          vid.play().catch(() => {});
+        }
+      } else {
+        if (!vid.paused) {
+          vid.pause();
+        }
+      }
+    };
+
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== "undefined") {
+      observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          isIntersecting = entry ? entry.isIntersecting : true;
+          syncPlaybackState();
+        },
+        { threshold: 0.05 }
+      );
+      observer.observe(video);
+    }
+
+    const handleVisibilityChange = () => {
+      isTabVisible = typeof document !== "undefined" ? !document.hidden : true;
+      syncPlaybackState();
+    };
+
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
+
     return () => {
       unsubscribe();
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      }
+      if (observer) {
+        observer.disconnect();
+      }
       if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
       if (unregisterVideoRef.current) {
         unregisterVideoRef.current();

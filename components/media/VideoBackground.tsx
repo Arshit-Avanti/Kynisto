@@ -10,25 +10,72 @@ export function VideoBackground({
   videoSrc = "/videos/drive-hero.mp4",
 }: VideoBackgroundProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const video = videoRef.current;
+    const container = containerRef.current;
     if (!video) return;
 
-    const playVideo = async () => {
-      try {
-        video.muted = true;
-        await video.play();
-      } catch (err) {
-        console.warn("Video background autoplay failed:", err);
+    let isIntersecting = true;
+    let isTabVisible = typeof document !== "undefined" ? !document.hidden : true;
+
+    const syncVideoPlayback = async () => {
+      if (!video) return;
+      const shouldPlay = isIntersecting && isTabVisible && (typeof document === "undefined" || !document.hidden);
+      if (shouldPlay) {
+        if (video.paused) {
+          try {
+            video.muted = true;
+            await video.play();
+          } catch (err) {
+            console.warn("Video background playback resume failed:", err);
+          }
+        }
+      } else {
+        if (!video.paused) {
+          video.pause();
+        }
       }
     };
 
-    void playVideo();
+    let observer: IntersectionObserver | null = null;
+    const target = container || video;
+    if (typeof IntersectionObserver !== "undefined" && target) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          isIntersecting = entry ? entry.isIntersecting : true;
+          void syncVideoPlayback();
+        },
+        { threshold: 0.05 }
+      );
+      observer.observe(target);
+    }
+
+    const handleVisibilityChange = () => {
+      isTabVisible = typeof document !== "undefined" ? !document.hidden : true;
+      void syncVideoPlayback();
+    };
+
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
+
+    void syncVideoPlayback();
+
+    return () => {
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      }
+      if (observer) {
+        observer.disconnect();
+      }
+    };
   }, []);
 
   return (
-    <div className="fixed inset-0 w-screen h-screen overflow-hidden pointer-events-none z-[-1] bg-[#050507]">
+    <div ref={containerRef} className="fixed inset-0 w-screen h-screen overflow-hidden pointer-events-none z-[-1] bg-[#050507]">
       {/* High Performance Native Video Player */}
       <video
         ref={videoRef}

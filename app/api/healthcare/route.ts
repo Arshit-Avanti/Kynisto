@@ -1,14 +1,22 @@
 import { getD1 } from "@/db/runtime";
 import { ensureSeeded } from "@/db/seed";
 import { expireHealthcareQueueEntries, HEALTHCARE_LABELS, HEALTHCARE_TYPES, patientQueueState } from "@/lib/healthcare";
-import { apiError, noStoreJson } from "@/lib/security";
+import { apiError } from "@/lib/security";
 import { d1SearchText } from "@/lib/validation";
+import { microCache, microCacheJson } from "@/lib/micro-cache";
 
 export async function GET(request: Request) {
   try {
+    const url = new URL(request.url);
+    const cacheKey = `healthcare:${url.searchParams.toString()}`;
+    const cached = microCache.get<any>(cacheKey);
+    if (cached) {
+      return microCacheJson(cached, "public, max-age=10, stale-while-revalidate=30");
+    }
+
     await ensureSeeded();
     await expireHealthcareQueueEntries();
-    const params = new URL(request.url).searchParams;
+    const params = url.searchParams;
     const conditions = ["s.status = 'approved'", "c.module = 'healthcare'", "hp.verification_status = 'verified'"];
     const bindings: unknown[] = [];
     const type = params.get("type");
@@ -38,10 +46,12 @@ export async function GET(request: Request) {
        ORDER BY CASE qs.status WHEN 'open' THEN 0 WHEN 'paused' THEN 1 ELSE 2 END,
          s.rating_average DESC, s.rating_count DESC LIMIT 100`,
     ).bind(...bindings).all();
-    return noStoreJson({
+    const data = {
       items: result.results ?? [],
       types: HEALTHCARE_TYPES.map((value) => ({ value, label: HEALTHCARE_LABELS[value] })),
-    });
+    };
+    microCache.set(cacheKey, data, 5_000);
+    return microCacheJson(data, "public, max-age=10, stale-while-revalidate=30");
   } catch (error) { return apiError(error); }
 }
 

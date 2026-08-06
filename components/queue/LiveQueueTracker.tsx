@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo, startTransition } from 'react';
 import { Clock, MapPin, AlertCircle, XCircle, CheckCircle2, Navigation, User, Phone, Bell, ArrowLeft, Search, Building2, Stethoscope, Activity, Sparkles, Filter, ChevronRight, Lock, RefreshCw, AlertTriangle, PartyPopper } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -201,11 +201,20 @@ export default function LiveQueueTracker() {
   const prevEntryStatusRef = useRef<string | null>(null);
   
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
   const [isLate, setIsLate] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isJoining, setIsJoining] = useState(false);
+
+  // Throttled / Debounced search input handler to keep responsiveness < 15ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // 1. Fetch real healthcare provider dataset from backend API
   const fetchHealthcareQueues = useCallback(async () => {
@@ -349,7 +358,7 @@ export default function LiveQueueTracker() {
   }, [view, selectedQueue, myTokenNumber, currentToken, userPosition, entryStatus]);
 
   // Handle Joining Live Queue (Calls REAL D1 Database API)
-  const handleJoinQueue = async (item: HealthcareQueueItem) => {
+  const handleJoinQueue = useCallback(async (item: HealthcareQueueItem) => {
     setErrorMsg(null);
     notifiedTokenRef.current = null;
 
@@ -430,9 +439,9 @@ export default function LiveQueueTracker() {
     } finally {
       setIsJoining(false);
     }
-  };
+  }, [router]);
 
-  const handleRunningLate = async () => {
+  const handleRunningLate = useCallback(async () => {
     setIsLate(true);
     if (selectedQueue) {
       try {
@@ -445,9 +454,9 @@ export default function LiveQueueTracker() {
       }
     }
     setTimeout(() => setIsLate(false), 6000);
-  };
+  }, [selectedQueue]);
 
-  const handleCancelVisit = async () => {
+  const handleCancelVisit = useCallback(async () => {
     if (selectedQueue) {
       try {
         await apiFetch('/api/healthcare/queue', {
@@ -459,20 +468,143 @@ export default function LiveQueueTracker() {
       }
     }
     setIsCancelled(true);
-  };
+  }, [selectedQueue]);
 
-  const filteredQueues = queues.filter((item) => {
-    const matchesSearch =
-      !searchQuery ||
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.subcategory && item.subcategory.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesFilter =
-      activeFilter === 'All' ||
-      item.providerType?.toLowerCase() === activeFilter.toLowerCase() ||
-      item.category?.toLowerCase() === activeFilter.toLowerCase();
-    return matchesSearch && matchesFilter;
-  });
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, []);
+
+  const handleFilterSelect = useCallback((filter: string) => {
+    startTransition(() => {
+      setActiveFilter(filter);
+    });
+  }, []);
+
+  const filteredQueues = useMemo(() => {
+    const q = debouncedSearchQuery.trim().toLowerCase();
+    const filterLower = activeFilter.toLowerCase();
+    return queues.filter((item) => {
+      const matchesSearch =
+        !q ||
+        item.name.toLowerCase().includes(q) ||
+        item.address.toLowerCase().includes(q) ||
+        (item.subcategory && item.subcategory.toLowerCase().includes(q));
+      const matchesFilter =
+        activeFilter === 'All' ||
+        item.providerType?.toLowerCase() === filterLower ||
+        item.category?.toLowerCase() === filterLower;
+      return matchesSearch && matchesFilter;
+    });
+  }, [queues, debouncedSearchQuery, activeFilter]);
+
+  const renderedCategoryFilters = useMemo(() => {
+    return ['All', 'Hospital', 'Clinic', 'Diagnostic', 'Dental'].map((filter) => (
+      <button
+        key={filter}
+        onClick={() => handleFilterSelect(filter)}
+        className={`px-5 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer ${
+          activeFilter === filter
+            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-600/30'
+            : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800'
+        }`}
+      >
+        {filter}
+      </button>
+    ));
+  }, [activeFilter, handleFilterSelect]);
+
+  const renderedQueuesGrid = useMemo(() => {
+    return filteredQueues.map((item) => {
+      const isClosed = item.queueStatus === 'closed';
+      const consultationMins = item.consultationMinutes || 15;
+
+      return (
+        <div
+          key={item.id}
+          className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800/90 hover:border-emerald-500/40 rounded-2xl p-6 transition-all duration-300 shadow-xl flex flex-col justify-between group relative overflow-hidden"
+        >
+          <div>
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="flex items-center space-x-2">
+                <span className="px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs font-extrabold uppercase tracking-wider">
+                  {item.providerType || 'Clinic'}
+                </span>
+                {item.subcategory && (
+                  <span className="px-3 py-1 rounded-lg bg-teal-500/10 border border-teal-500/25 text-teal-300 text-xs font-extrabold uppercase tracking-wider">
+                    {item.subcategory}
+                  </span>
+                )}
+              </div>
+
+              {isClosed ? (
+                <span className="inline-flex items-center text-xs font-black text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-400 mr-2" />
+                  CLOSED
+                </span>
+              ) : (
+                <span className="inline-flex items-center text-xs font-black text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2 animate-pulse" />
+                  OPEN LIVE QUEUE
+                </span>
+              )}
+            </div>
+
+            <h3 className="text-xl font-black text-white group-hover:text-emerald-400 transition-colors mb-2">
+              {item.name}
+            </h3>
+
+            <p className="flex items-center text-slate-300 text-sm font-medium mb-6">
+              <MapPin className="w-4 h-4 mr-2 text-teal-400 shrink-0" />
+              {item.address}
+            </p>
+
+            {/* Queue Stats */}
+            <div className="grid grid-cols-2 gap-3 p-3.5 bg-slate-950/80 rounded-xl border border-slate-800/80 mb-6">
+              <div>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+                  Waiting Patients
+                </span>
+                <span className="text-lg font-black text-white tabular-nums">
+                  {isClosed ? 0 : item.waitingCount} <span className="text-xs font-medium text-slate-400">in queue</span>
+                </span>
+              </div>
+              <div>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+                  Consultation Speed
+                </span>
+                <span className="text-lg font-black text-emerald-400 tabular-nums">
+                  {consultationMins}m <span className="text-xs font-medium text-slate-400">/ patient</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-1">
+            <Link
+              href={`/stores/${item.slug || item.id}`}
+              className="flex-1 py-3 px-4 font-bold text-sm rounded-xl transition-all shadow-md flex items-center justify-center space-x-2 bg-slate-800/90 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 cursor-pointer"
+            >
+              <Building2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Visit Profile</span>
+            </Link>
+
+            <button
+              onClick={() => handleJoinQueue(item)}
+              disabled={isClosed || isJoining}
+              className={`flex-1 py-3 px-4 font-bold text-sm rounded-xl transition-all shadow-lg flex items-center justify-center space-x-2 group/btn cursor-pointer ${
+                isClosed
+                  ? 'bg-slate-800/60 text-slate-400 cursor-not-allowed border border-slate-700/50'
+                  : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-600/25'
+              }`}
+            >
+              <span>{isClosed ? 'Queue Closed' : isJoining ? 'Joining...' : 'Join Live Queue'}</span>
+              {!isClosed && !isJoining && <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />}
+            </button>
+          </div>
+        </div>
+      );
+    });
+  }, [filteredQueues, isJoining, handleJoinQueue]);
 
   const isCompleted = entryStatus === 'completed';
 
@@ -815,7 +947,7 @@ export default function LiveQueueTracker() {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
                 placeholder="Search clinic, doctor, specialty or area..."
                 style={{ paddingLeft: "52px", paddingRight: "16px" }}
                 className="w-full bg-slate-900/90 border border-slate-700/80 rounded-2xl py-3.5 text-white placeholder-slate-400 font-medium focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 transition-all shadow-lg text-sm sm:text-base"
@@ -843,116 +975,14 @@ export default function LiveQueueTracker() {
       <div className="max-w-6xl mx-auto w-full px-6 py-8 flex-1">
         {/* Category Filters */}
         <div className="flex items-center space-x-2 overflow-x-auto pb-4 mb-8 no-scrollbar">
-          {['All', 'Hospital', 'Clinic', 'Diagnostic', 'Dental'].map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={`px-5 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer ${
-                activeFilter === filter
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-600/30'
-                  : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800'
-              }`}
-            >
-              {filter}
-            </button>
-          ))}
+          {renderedCategoryFilters}
         </div>
 
         {/* Queues Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredQueues.map((item) => {
-            const isClosed = item.queueStatus === 'closed';
-            const consultationMins = item.consultationMinutes || 15;
-
-            return (
-              <div
-                key={item.id}
-                className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800/90 hover:border-emerald-500/40 rounded-2xl p-6 transition-all duration-300 shadow-xl flex flex-col justify-between group relative overflow-hidden"
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-4 mb-4">
-                    <div className="flex items-center space-x-2">
-                      <span className="px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs font-extrabold uppercase tracking-wider">
-                        {item.providerType || 'Clinic'}
-                      </span>
-                      {item.subcategory && (
-                        <span className="px-3 py-1 rounded-lg bg-teal-500/10 border border-teal-500/25 text-teal-300 text-xs font-extrabold uppercase tracking-wider">
-                          {item.subcategory}
-                        </span>
-                      )}
-                    </div>
-
-                    {isClosed ? (
-                      <span className="inline-flex items-center text-xs font-black text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">
-                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400 mr-2" />
-                        CLOSED
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center text-xs font-black text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2 animate-pulse" />
-                        OPEN LIVE QUEUE
-                      </span>
-                    )}
-                  </div>
-
-                  <h3 className="text-xl font-black text-white group-hover:text-emerald-400 transition-colors mb-2">
-                    {item.name}
-                  </h3>
-
-                  <p className="flex items-center text-slate-300 text-sm font-medium mb-6">
-                    <MapPin className="w-4 h-4 mr-2 text-teal-400 shrink-0" />
-                    {item.address}
-                  </p>
-
-                  {/* Queue Stats */}
-                  <div className="grid grid-cols-2 gap-3 p-3.5 bg-slate-950/80 rounded-xl border border-slate-800/80 mb-6">
-                    <div>
-                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
-                        Waiting Patients
-                      </span>
-                      <span className="text-lg font-black text-white tabular-nums">
-                        {isClosed ? 0 : item.waitingCount} <span className="text-xs font-medium text-slate-400">in queue</span>
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
-                        Consultation Speed
-                      </span>
-                      <span className="text-lg font-black text-emerald-400 tabular-nums">
-                        {consultationMins}m <span className="text-xs font-medium text-slate-400">/ patient</span>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 pt-1">
-                  <Link
-                    href={`/stores/${item.slug || item.id}`}
-                    className="flex-1 py-3 px-4 font-bold text-sm rounded-xl transition-all shadow-md flex items-center justify-center space-x-2 bg-slate-800/90 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 cursor-pointer"
-                  >
-                    <Building2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Visit Profile</span>
-                  </Link>
-
-                  <button
-                    onClick={() => handleJoinQueue(item)}
-                    disabled={isClosed || isJoining}
-                    className={`flex-1 py-3 px-4 font-bold text-sm rounded-xl transition-all shadow-lg flex items-center justify-center space-x-2 group/btn cursor-pointer ${
-                      isClosed
-                        ? 'bg-slate-800/60 text-slate-400 cursor-not-allowed border border-slate-700/50'
-                        : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-600/25'
-                    }`}
-                  >
-                    <span>{isClosed ? 'Queue Closed' : isJoining ? 'Joining...' : 'Join Live Queue'}</span>
-                    {!isClosed && !isJoining && <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+          {renderedQueuesGrid}
         </div>
       </div>
     </div>
   );
 }
-

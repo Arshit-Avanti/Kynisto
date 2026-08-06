@@ -54,7 +54,11 @@
   border: 1px solid var(--p-line, rgba(255, 255, 255, 0.1));
   border-radius: 16px;
   background: var(--p-panel, rgba(15, 23, 42, 0.6));
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transform: translateZ(0);
+  will-change: transform;
+  contain: layout style paint;
 }
 
 .queueControlBar button {
@@ -104,9 +108,12 @@
   border-radius: 18px;
   background: linear-gradient(135deg, rgba(6, 78, 59, 0.9) 0%, rgba(4, 47, 38, 0.95) 100%);
   border: 1px solid rgba(16, 185, 129, 0.4);
-  box-shadow: 0 12px 35px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.18);
   color: #ffffff;
   flex-wrap: wrap;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  contain: layout style paint;
 }
 
 .calledPatient > span {
@@ -178,6 +185,9 @@
   background: rgba(30, 41, 59, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.06);
   transition: all 0.2s ease;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  contain: layout style paint;
 }
 
 .queueTable article.active {

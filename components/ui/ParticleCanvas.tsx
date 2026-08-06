@@ -43,9 +43,9 @@ export function ParticleCanvas() {
       mouse.active = false;
     };
 
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseleave", handleMouseLeave);
+    window.addEventListener("resize", handleResize, { passive: true });
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("mouseleave", handleMouseLeave, { passive: true });
 
     const colors = ["#22C55E", "#10B981", "#F59E0B", "#34D399", "#EAB308"];
     const particleCount = Math.min(Math.floor((width * height) / 12000), 100);
@@ -63,7 +63,23 @@ export function ParticleCanvas() {
       });
     }
 
+    let animationFrameId: number | null = null;
+    let isIntersecting = true;
+    let isTabVisible = typeof document !== "undefined" ? !document.hidden : true;
+
+    const stopLoop = () => {
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+    };
+
     const render = () => {
+      if (!isIntersecting || !isTabVisible || (typeof document !== "undefined" && document.hidden)) {
+        stopLoop();
+        return;
+      }
+
       ctx.clearRect(0, 0, width, height);
 
       // Draw particle connections
@@ -124,13 +140,55 @@ export function ParticleCanvas() {
       animationFrameId = requestAnimationFrame(render);
     };
 
-    render();
+    const startLoop = () => {
+      if (animationFrameId === null && isIntersecting && isTabVisible && (typeof document === "undefined" || !document.hidden)) {
+        animationFrameId = requestAnimationFrame(render);
+      }
+    };
+
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== "undefined") {
+      observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          isIntersecting = entry ? entry.isIntersecting : true;
+          if (isIntersecting) {
+            startLoop();
+          } else {
+            stopLoop();
+          }
+        },
+        { threshold: 0.01 }
+      );
+      observer.observe(canvas);
+    }
+
+    const handleVisibilityChange = () => {
+      isTabVisible = typeof document !== "undefined" ? !document.hidden : true;
+      if (isTabVisible) {
+        startLoop();
+      } else {
+        stopLoop();
+      }
+    };
+
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
+
+    startLoop();
 
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseleave", handleMouseLeave);
-      cancelAnimationFrame(animationFrameId);
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      }
+      if (observer) {
+        observer.disconnect();
+      }
+      stopLoop();
     };
   }, []);
 

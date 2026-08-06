@@ -132,12 +132,17 @@ export function GeometricMesh3D() {
       canvas.height = height;
       createNodes();
     };
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize, { passive: true });
 
-    let animId: number;
+    let animId = 0;
+    let isVisible = true;
     let time = 0;
 
     const animate = () => {
+      if (!isVisible) {
+        animId = 0;
+        return;
+      }
       animId = requestAnimationFrame(animate);
       time += 0.008;
 
@@ -208,10 +213,24 @@ export function GeometricMesh3D() {
       });
     };
 
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          isVisible = entry.isIntersecting;
+          if (isVisible && !animId) {
+            animate();
+          }
+        });
+      },
+      { threshold: 0.01 }
+    );
+    observer.observe(canvas);
+
     animate();
 
     return () => {
-      cancelAnimationFrame(animId);
+      observer.disconnect();
+      if (animId) cancelAnimationFrame(animId);
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("mousemove", handleMouse);
       window.removeEventListener("resize", handleResize);

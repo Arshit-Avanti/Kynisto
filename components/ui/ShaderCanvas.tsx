@@ -143,12 +143,50 @@ export function ShaderCanvas() {
     const timeLocation = gl.getUniformLocation(program, "u_time");
     const isDarkLocation = gl.getUniformLocation(program, "u_isDark");
 
-    let animationFrameId: number;
+    let animationFrameId: number | null = null;
     const startTime = performance.now();
     let lastFrameTime = 0;
     const isMobileDevice = typeof navigator !== "undefined" && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const targetFps = isMobileDevice ? 20 : 30;
     const targetInterval = 1000 / targetFps;
+
+    let isIntersecting = true;
+    let isTabVisible = typeof document !== "undefined" ? !document.hidden : true;
+
+    const stopLoop = () => {
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+    };
+
+    const render = (now: number) => {
+      if (!isIntersecting || !isTabVisible || (typeof document !== "undefined" && document.hidden)) {
+        stopLoop();
+        return;
+      }
+
+      animationFrameId = requestAnimationFrame(render);
+
+      // Frame throttling: target 30 FPS on Desktop, 20 FPS on Mobile
+      if (now - lastFrameTime < targetInterval) return;
+      lastFrameTime = now;
+
+      const time = (now - startTime) * 0.001;
+      gl.uniform1f(timeLocation, time);
+      
+      const isDark = document.documentElement.classList.contains("mode-dark") || document.documentElement.classList.contains("dark-theme");
+      gl.uniform1f(isDarkLocation, isDark ? 1.0 : 0.0);
+
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    };
+
+    const startLoop = () => {
+      if (animationFrameId === null && isIntersecting && isTabVisible && (typeof document === "undefined" || !document.hidden)) {
+        lastFrameTime = performance.now();
+        animationFrameId = requestAnimationFrame(render);
+      }
+    };
 
     const handleResize = () => {
       // Downscale canvas resolution to dramatically reduce GPU fill rate load (Zero-Lag)
@@ -171,27 +209,49 @@ export function ShaderCanvas() {
     window.addEventListener("resize", handleResize);
     handleResize();
 
-    const render = (now: number) => {
-      animationFrameId = requestAnimationFrame(render);
+    // IntersectionObserver to pause rendering when canvas is off-screen
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== "undefined") {
+      observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          isIntersecting = entry ? entry.isIntersecting : true;
+          if (isIntersecting) {
+            startLoop();
+          } else {
+            stopLoop();
+          }
+        },
+        { threshold: 0.01 }
+      );
+      observer.observe(canvas);
+    }
 
-      // Frame throttling: target 30 FPS on Desktop, 20 FPS on Mobile
-      if (now - lastFrameTime < targetInterval) return;
-      lastFrameTime = now;
-
-      const time = (now - startTime) * 0.001;
-      gl.uniform1f(timeLocation, time);
-      
-      const isDark = document.documentElement.classList.contains("mode-dark") || document.documentElement.classList.contains("dark-theme");
-      gl.uniform1f(isDarkLocation, isDark ? 1.0 : 0.0);
-
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    // Tab visibility change handler
+    const handleVisibilityChange = () => {
+      isTabVisible = typeof document !== "undefined" ? !document.hidden : true;
+      if (isTabVisible) {
+        startLoop();
+      } else {
+        stopLoop();
+      }
     };
 
-    animationFrameId = requestAnimationFrame(render);
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
+
+    startLoop();
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      cancelAnimationFrame(animationFrameId);
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      }
+      if (observer) {
+        observer.disconnect();
+      }
+      stopLoop();
       gl.deleteProgram(program);
       gl.deleteShader(vertexShader);
       gl.deleteShader(fragmentShader);

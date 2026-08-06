@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, startTransition, type FormEvent } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { apiFetch } from "@/lib/client-api";
 import { ProductActions } from "@/components/store/ProductActions";
@@ -163,11 +163,22 @@ const modernCleanTechStyles = `
 
 export function ProductDiscovery() {
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [submitted, setSubmitted] = useState("");
   const [items, setItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [userRole, setUserRole] = useState<"admin" | "store_owner" | "customer" | null>(null);
+
+  // Throttled input handler to keep responsiveness < 15ms
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedQuery(query.trim()), 150);
+    return () => window.clearTimeout(timer);
+  }, [query]);
+
+  const handleQueryChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(event.target.value);
+  }, []);
 
   useEffect(() => {
     apiFetch<{ user: { role: "admin" | "store_owner" | "customer" } | null }>("/api/auth/me")
@@ -181,17 +192,84 @@ export function ProductDiscovery() {
     setLoading(true);
     setError("");
     try {
-      const result = await apiFetch<{ items: Product[] }>(`/api/products?q=${encodeURIComponent(submitted)}&limit=48`);
-      setItems(result.items);
+      const activeSearch = submitted || debouncedQuery;
+      const result = await apiFetch<{ items: Product[] }>(`/api/products?q=${encodeURIComponent(activeSearch)}&limit=48`);
+      startTransition(() => {
+        setItems(result.items);
+      });
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Could not load products.");
     } finally {
       setLoading(false);
     }
-  }, [submitted]);
+  }, [submitted, debouncedQuery]);
 
   useEffect(() => { void load(); }, [load]);
-  function submit(event: FormEvent) { event.preventDefault(); setSubmitted(query.trim()); }
 
-  return <main className="productDiscovery"><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} /><header><Link href="/" className="productBrand"><KynistoLogo /></Link><nav><Link href="/">Nearby shops</Link><Link href="/account?tab=cart">My cart</Link>{userRole ? <Link href={userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account"}>{userRole === "admin" ? "Admin Panel" : userRole === "store_owner" ? "Owner Dashboard" : "My Account"}</Link> : <Link href="/login">Log in</Link>}</nav></header><section className="productIntro"><span>Your Locality</span><h1>Shop what is nearby.</h1><form onSubmit={submit}><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search product or shop…" aria-label="Search products" /><button type="submit">Search products</button></form></section>{error && <p className="productError" role="alert">{error}</p>}{loading ? <div className="productSkeleton"><span /><span /><span /></div> : items.length ? <section className="productGrid" aria-label="Local products">{items.map((item) => { const available = Number(item.availableQuantity ?? item.available ?? 0); const ratingCount = Number(item.productReviewCount ?? 0); const rating = Number(item.productRating ?? 0); return <article key={String(item.id)}><div className="productVisual">{item.imageUrl ? <img src={String(item.imageUrl)} alt="" loading="lazy" /> : <span>{String(item.name ?? "P").slice(0, 1)}</span>}</div><small>{item.storeName}</small><h2>{item.name}</h2><p>{item.description}</p><div className="productMeta"><b>₹{Number(item.price ?? 0).toLocaleString("en-IN")}</b><em>{available} available</em></div><div className="productRating" aria-label={ratingCount ? `${rating.toFixed(1)} from ${ratingCount} product ratings` : "No product ratings yet"}>{ratingCount ? <><Icons.Star /> {rating.toFixed(1)}</> : <><Icons.Star /> New product</>} <span>{ratingCount ? `(${ratingCount})` : ""}</span></div><ProductActions productId={String(item.id)} available={available} /><Link className="viewShop" href={`/stores/${item.storeSlug}`}>View shop <Icons.ArrowRight /></Link></article>; })}</section> : <section className="productEmpty"><h2>No matching products</h2><p>Try a broader search or browse nearby shops.</p></section>}</main>;
+  const submit = useCallback((event: FormEvent) => {
+    event.preventDefault();
+    startTransition(() => {
+      setSubmitted(query.trim());
+    });
+  }, [query]);
+
+  const renderedProductGrid = useMemo(() => {
+    return items.map((item) => {
+      const available = Number(item.availableQuantity ?? item.available ?? 0);
+      const ratingCount = Number(item.productReviewCount ?? 0);
+      const rating = Number(item.productRating ?? 0);
+      return (
+        <article key={String(item.id)}>
+          <div className="productVisual">
+            {item.imageUrl ? <img src={String(item.imageUrl)} alt="" loading="lazy" /> : <span>{String(item.name ?? "P").slice(0, 1)}</span>}
+          </div>
+          <small>{item.storeName}</small>
+          <h2>{item.name}</h2>
+          <p>{item.description}</p>
+          <div className="productMeta"><b>₹{Number(item.price ?? 0).toLocaleString("en-IN")}</b><em>{available} available</em></div>
+          <div className="productRating" aria-label={ratingCount ? `${rating.toFixed(1)} from ${ratingCount} product ratings` : "No product ratings yet"}>
+            {ratingCount ? <><Icons.Star /> {rating.toFixed(1)}</> : <><Icons.Star /> New product</>} <span>{ratingCount ? `(${ratingCount})` : ""}</span>
+          </div>
+          <ProductActions productId={String(item.id)} available={available} />
+          <Link className="viewShop" href={`/stores/${item.storeSlug}`}>View shop <Icons.ArrowRight /></Link>
+        </article>
+      );
+    });
+  }, [items]);
+
+  return (
+    <main className="productDiscovery">
+      <style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
+      <header>
+        <Link href="/" className="productBrand"><KynistoLogo /></Link>
+        <nav>
+          <Link href="/">Nearby shops</Link>
+          <Link href="/account?tab=cart">My cart</Link>
+          {userRole ? <Link href={userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account"}>{userRole === "admin" ? "Admin Panel" : userRole === "store_owner" ? "Owner Dashboard" : "My Account"}</Link> : <Link href="/login">Log in</Link>}
+        </nav>
+      </header>
+      <section className="productIntro">
+        <span>Your Locality</span>
+        <h1>Shop what is nearby.</h1>
+        <form onSubmit={submit}>
+          <input value={query} onChange={handleQueryChange} placeholder="Search product or shop…" aria-label="Search products" />
+          <button type="submit">Search products</button>
+        </form>
+      </section>
+      {error && <p className="productError" role="alert">{error}</p>}
+      {loading ? (
+        <div className="productSkeleton"><span /><span /><span /></div>
+      ) : items.length ? (
+        <section className="productGrid" aria-label="Local products">
+          {renderedProductGrid}
+        </section>
+      ) : (
+        <section className="productEmpty">
+          <h2>No matching products</h2>
+          <p>Try a broader search or browse nearby shops.</p>
+        </section>
+      )}
+    </main>
+  );
 }
+

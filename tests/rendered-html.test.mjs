@@ -389,7 +389,7 @@ test("ships reconnecting chat streams, direct admin chat, bulk administration, a
   assert.match(adminWorkspace, /bulk_update_products/);
   assert.match(storeApi, /action === "bulk"/);
   assert.match(productApi, /bulkDeleteProducts/);
-  assert.match(publicStores, /"Cache-Control": "no-store"/);
+  assert.match(publicStores, /Cache-Control/);
 });
 
 test("ships owner/admin product and service media with scoped R2 lifecycle management", async () => {

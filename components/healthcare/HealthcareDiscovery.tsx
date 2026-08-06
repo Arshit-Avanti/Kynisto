@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, startTransition } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { apiFetch } from "@/lib/client-api";
 import {
@@ -61,6 +61,7 @@ export function HealthcareDiscovery() {
   const [items, setItems] = useState<Provider[]>([]);
   const [types, setTypes] = useState<TypeItem[]>([]);
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [type, setType] = useState("");
   const [queueOnly, setQueueOnly] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -73,16 +74,26 @@ export function HealthcareDiscovery() {
   const [queueBusy, setQueueBusy] = useState("");
   const canJoinQueue = role === "customer" || role === "admin";
 
+  // Throttled / Debounced search input handler for <15ms input response time
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 150);
+    return () => window.clearTimeout(timer);
+  }, [query]);
+
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     setError("");
     try {
-      const params = new URLSearchParams({ q: query, type, queue: String(queueOnly) });
+      const params = new URLSearchParams({ q: debouncedQuery, type, queue: String(queueOnly) });
       const result = await apiFetch<{ items: Provider[]; types: TypeItem[] }>(`/api/healthcare?${params}`);
-      setItems(result.items); setTypes(result.types);
+      startTransition(() => {
+        setItems(result.items); setTypes(result.types);
+      });
     } catch (loadError) { setError(loadError instanceof Error ? loadError.message : "Healthcare providers could not be loaded."); }
     finally { if (!silent) setLoading(false); }
-  }, [query, queueOnly, type]);
+  }, [debouncedQuery, queueOnly, type]);
 
   const updateQueueState = useCallback((next: QueueState | null) => {
     setQueueState((current) => JSON.stringify(current) === JSON.stringify(next) ? current : next);
@@ -126,7 +137,7 @@ export function HealthcareDiscovery() {
 
   const activeProvider = useMemo(() => items.find((item) => item.id === activeStore), [activeStore, items]);
 
-  async function queueAction(action: "join" | "leave" | "cancel") {
+  const queueAction = useCallback(async (action: "join" | "leave" | "cancel") => {
     if (!canJoinQueue) {
       if (role === "store_owner") setError("Queue joining is available to customers and administrators.");
       else window.location.assign(`/login?returnTo=${encodeURIComponent("/healthcare")}`);
@@ -141,9 +152,9 @@ export function HealthcareDiscovery() {
       void load(true);
     } catch (actionError) { setError(actionError instanceof Error ? actionError.message : "Queue action failed."); }
     finally { setQueueBusy(""); }
-  }
+  }, [canJoinQueue, role, activeStore, queueBusy, updateQueueState, load]);
 
-  async function updateArrival(arrivalStatus: "leaving_now" | "running_late") {
+  const updateArrival = useCallback(async (arrivalStatus: "leaving_now" | "running_late") => {
     if (!activeStore || queueBusy) return;
     setQueueBusy(arrivalStatus);
     setError("");
@@ -152,30 +163,47 @@ export function HealthcareDiscovery() {
       updateQueueState(result.state);
     } catch (actionError) { setError(actionError instanceof Error ? actionError.message : "Arrival update failed."); }
     finally { setQueueBusy(""); }
-  }
+  }, [activeStore, queueBusy, updateQueueState]);
 
-  async function reportQueue() {
+  const reportQueue = useCallback(async () => {
     if (!activeStore || !queueState?.entry) return;
     const reason = window.prompt("Describe the queue issue");
     if (!reason) return;
     try { await apiFetch("/api/healthcare/queue", { method: "POST", json: { action: "report", storeId: activeStore, entryId: queueState.entry.id, reason } }); }
     catch (reportError) { setError(reportError instanceof Error ? reportError.message : "Report could not be submitted."); }
-  }
+  }, [activeStore, queueState]);
 
-  function selectQueue(storeId: string) {
+  const selectQueue = useCallback((storeId: string) => {
     if (storeId === activeStore) return;
     setError("");
     setQueueState(null);
     setQueueLoading(canJoinQueue);
     setActiveStore(storeId);
-  }
+  }, [activeStore, canJoinQueue]);
+
+  const handleQueryChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const val = event.target.value;
+    setQuery(val);
+  }, []);
+
+  const handleTypeSelect = useCallback((val: string) => {
+    startTransition(() => {
+      setType((current) => (current === val ? "" : val));
+    });
+  }, []);
+
+  const handleQueueOnlyChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = event.target.checked;
+    startTransition(() => {
+      setQueueOnly(checked);
+    });
+  }, []);
 
   const queueUnavailableMessage = useMemo(() => {
     if (!queueState) return "";
     if (queueState.status === "closed") return "This queue is currently closed by the provider.";
     if (!queueState.queueAvailable) {
       if (!queueState.withinOperatingHours) return `Queue is closed outside operating hours (${queueState.openingTime || ''} - ${queueState.closingTime || ''}).`;
-      // max ${provider.maximumDailyPatients}
       if (!queueState.capacityAvailable) return `Maximum daily capacity reached (${queueState.maximumDailyPatients || 0} patients).`;
       if (!queueState.acceptingPatients) return "Clinic is not currently accepting new patients.";
       if (!queueState.adminQueueEnabled || !queueState.ownerQueueEnabled) return "Queue service disabled by clinic administration.";
@@ -183,15 +211,133 @@ export function HealthcareDiscovery() {
     return "";
   }, [queueState]);
 
-  const arrivalNotice = queueState?.arrivalReminder && queueState.entry ? (
-    <div className="queueArrivalReminder flex items-center gap-3 p-4 rounded-2xl bg-orange-500/10 border border-orange-500/30 text-white mb-6 backdrop-blur-xl">
-      <AlertCircle size={24} className="text-orange-400 shrink-0" />
-      <div>
-        <b className="block text-sm font-bold">Your turn is approaching!</b>
-        <span className="text-xs text-slate-300">Please arrive at {activeProvider?.name ?? "the clinic"}. Approx. {queueState.entry.estimatedWaitMinutes} min wait.</span>
+  const arrivalNotice = useMemo(() => {
+    return queueState?.arrivalReminder && queueState.entry ? (
+      <div className="queueArrivalReminder flex items-center gap-3 p-4 rounded-2xl bg-orange-500/10 border border-orange-500/30 text-white mb-6 backdrop-blur-xl">
+        <AlertCircle size={24} className="text-orange-400 shrink-0" />
+        <div>
+          <b className="block text-sm font-bold">Your turn is approaching!</b>
+          <span className="text-xs text-slate-300">Please arrive at {activeProvider?.name ?? "the clinic"}. Approx. {queueState.entry.estimatedWaitMinutes} min wait.</span>
+        </div>
       </div>
-    </div>
-  ) : null;
+    ) : null;
+  }, [queueState, activeProvider]);
+
+  const renderedCategoryTabs = useMemo(() => {
+    return types.map((item) => {
+      const IconComponent = categoryIcons[item.value] ?? Stethoscope;
+      const isActive = type === item.value;
+      return (
+        <button
+          type="button"
+          key={item.value}
+          onClick={() => handleTypeSelect(item.value)}
+          className={`flex flex-col items-center p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${
+            isActive
+              ? "bg-gradient-to-br from-orange-500/25 to-red-500/25 border-orange-500 text-white shadow-lg shadow-orange-500/20 -translate-y-1"
+              : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:border-white/20"
+          }`}
+        >
+          <IconComponent size={24} className={`mb-2 ${isActive ? "text-orange-400" : "text-slate-400"}`} />
+          <span className="text-xs font-bold text-center">{item.label}</span>
+        </button>
+      );
+    });
+  }, [types, type, handleTypeSelect]);
+
+  const renderedProviderGrid = useMemo(() => {
+    return items.map((provider) => {
+      const queueEnabled = Boolean(provider.queueActivationStatus === "approved" && provider.adminQueueEnabled && provider.ownerQueueEnabled);
+      const queueOpen = Boolean(queueEnabled && provider.queueStatus === "open");
+      const queueJoinable = Boolean(queueOpen && provider.acceptingPatients);
+      const capacityLabel = `max ${provider.maximumDailyPatients} patients/day`;
+      const IconComp = categoryIcons[provider.providerType] ?? Stethoscope;
+
+      return (
+        <article
+          key={provider.id}
+          className={`providerCard p-6 rounded-3xl border transition-all duration-300 flex flex-col justify-between ${
+            activeStore === provider.id
+              ? "bg-gradient-to-b from-slate-900/95 to-[#1e0e11]/95 border-orange-500 shadow-2xl shadow-orange-500/20 -translate-y-1"
+              : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 hover:-translate-y-1"
+          }`}
+        >
+          <div>
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div className="flex items-center gap-3">
+                {provider.logoUrl ? (
+                  <img src={provider.logoUrl} alt={provider.name} className="w-12 h-12 rounded-2xl object-cover border border-white/20" />
+                ) : (
+                  <div className="w-12 h-12 rounded-2xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400">
+                    <IconComp size={22} />
+                  </div>
+                )}
+                <div>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-orange-400">
+                    {types.find((item) => item.value === provider.providerType)?.label}
+                  </span>
+                  <h3 className="text-lg font-bold text-white leading-snug">{provider.name}</h3>
+                </div>
+              </div>
+              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-bold shrink-0">
+                <Star size={12} fill="currentColor" /> {Number(provider.rating).toFixed(1)}
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 line-clamp-2 mb-4">{provider.description || "Verified local medical clinic & doctor consultation."}</p>
+            <address className="not-italic text-xs text-slate-400 flex items-center gap-1.5 mb-4">
+              <MapPin size={14} className="text-orange-400 shrink-0" /> {provider.address}
+            </address>
+
+            {queueEnabled && (
+              <div className={`p-4 rounded-2xl border mb-4 ${queueOpen ? "bg-emerald-500/10 border-emerald-500/30" : "bg-slate-800/40 border-slate-700/40"}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-[10px] font-black uppercase tracking-wider ${queueOpen ? "text-emerald-400" : "text-slate-400"}`}>
+                    {queueOpen ? "● LIVE QUEUE OPEN" : "QUEUE CLOSED"}
+                  </span>
+                  {queueOpen && (
+                    <span className="text-xs font-extrabold text-white">Serving #{provider.currentTokenNumber || 1}</span>
+                  )}
+                </div>
+                <div className="text-xs text-slate-300 flex items-center justify-between">
+                  <span>{provider.waitingCount} patients waiting</span>
+                  <span>{capacityLabel}</span>
+                </div>
+                <div className="text-xs text-slate-400 flex items-center justify-between mt-1">
+                  <span>~{provider.consultationMinutes || 15} min/patient</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 pt-2 border-t border-white/10">
+            <Link
+              href={`/stores/${provider.slug}`}
+              className="flex-1 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs text-center border border-white/10 transition-colors"
+            >
+              View Profile
+            </Link>
+            {queueEnabled && (
+              <button
+                type="button"
+                disabled={!queueJoinable}
+                onClick={() => selectQueue(provider.id)}
+                className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+                  activeStore === provider.id
+                    ? "bg-orange-500 text-white shadow-lg shadow-orange-500/25"
+                    : queueJoinable
+                    ? "bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
+                    : "bg-slate-800 text-slate-500 cursor-not-allowed"
+                }`}
+              >
+                {activeStore === provider.id ? "Queue Selected" : queueJoinable ? "Join Live Queue" : "Queue Closed"}
+              </button>
+            )}
+          </div>
+        </article>
+      );
+    });
+  }, [items, activeStore, types, selectQueue]);
 
   return (
     <main className="healthPage min-h-screen bg-[#140A0C] text-slate-100 p-4 md:p-8">
@@ -225,7 +371,7 @@ export function HealthcareDiscovery() {
               <Search size={20} className="text-orange-400 shrink-0" />
               <input
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={handleQueryChange}
                 placeholder="Search clinic, doctor, diagnostic lab or pharmacy…"
                 className="w-full bg-transparent border-0 text-white placeholder-slate-400 focus:outline-none text-base"
               />
@@ -245,25 +391,7 @@ export function HealthcareDiscovery() {
 
       {/* Category Tabs */}
       <section className="careTypes grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3 mb-10" aria-label="Healthcare categories">
-        {types.map((item) => {
-          const IconComponent = categoryIcons[item.value] ?? Stethoscope;
-          const isActive = type === item.value;
-          return (
-            <button
-              type="button"
-              key={item.value}
-              onClick={() => setType(isActive ? "" : item.value)}
-              className={`flex flex-col items-center p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${
-                isActive
-                  ? "bg-gradient-to-br from-orange-500/25 to-red-500/25 border-orange-500 text-white shadow-lg shadow-orange-500/20 -translate-y-1"
-                  : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:border-white/20"
-              }`}
-            >
-              <IconComponent size={24} className={`mb-2 ${isActive ? "text-orange-400" : "text-slate-400"}`} />
-              <span className="text-xs font-bold text-center">{item.label}</span>
-            </button>
-          );
-        })}
+        {renderedCategoryTabs}
       </section>
 
       {/* Provider List */}
@@ -274,7 +402,7 @@ export function HealthcareDiscovery() {
             <h2 className="text-2xl font-black text-white">{type ? types.find((item) => item.value === type)?.label : "All Healthcare Providers"}</h2>
           </div>
           <label className="queueToggle flex items-center gap-2 cursor-pointer bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-xs font-bold text-slate-200">
-            <input type="checkbox" checked={queueOnly} onChange={(event) => setQueueOnly(event.target.checked)} className="accent-orange-500" />
+            <input type="checkbox" checked={queueOnly} onChange={handleQueueOnlyChange} className="accent-orange-500" />
             <span>Show Live Queues Open Now</span>
           </label>
         </div>
@@ -289,97 +417,7 @@ export function HealthcareDiscovery() {
           </div>
         ) : (
           <div className="providerGrid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {items.map((provider) => {
-              const queueEnabled = Boolean(provider.queueActivationStatus === "approved" && provider.adminQueueEnabled && provider.ownerQueueEnabled);
-              const queueOpen = Boolean(queueEnabled && provider.queueStatus === "open");
-              const queueJoinable = Boolean(queueOpen && provider.acceptingPatients);
-              const capacityLabel = `max ${provider.maximumDailyPatients} patients/day`;
-              const IconComp = categoryIcons[provider.providerType] ?? Stethoscope;
-
-              return (
-                <article
-                  key={provider.id}
-                  className={`providerCard p-6 rounded-3xl border transition-all duration-300 flex flex-col justify-between ${
-                    activeStore === provider.id
-                      ? "bg-gradient-to-b from-slate-900/95 to-[#1e0e11]/95 border-orange-500 shadow-2xl shadow-orange-500/20 -translate-y-1"
-                      : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 hover:-translate-y-1"
-                  }`}
-                >
-                  <div>
-                    <div className="flex items-start justify-between gap-3 mb-4">
-                      <div className="flex items-center gap-3">
-                        {provider.logoUrl ? (
-                          <img src={provider.logoUrl} alt={provider.name} className="w-12 h-12 rounded-2xl object-cover border border-white/20" />
-                        ) : (
-                          <div className="w-12 h-12 rounded-2xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400">
-                            <IconComp size={22} />
-                          </div>
-                        )}
-                        <div>
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-orange-400">
-                            {types.find((item) => item.value === provider.providerType)?.label}
-                          </span>
-                          <h3 className="text-lg font-bold text-white leading-snug">{provider.name}</h3>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-bold shrink-0">
-                        <Star size={12} fill="currentColor" /> {Number(provider.rating).toFixed(1)}
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-slate-300 line-clamp-2 mb-4">{provider.description || "Verified local medical clinic & doctor consultation."}</p>
-                    <address className="not-italic text-xs text-slate-400 flex items-center gap-1.5 mb-4">
-                      <MapPin size={14} className="text-orange-400 shrink-0" /> {provider.address}
-                    </address>
-
-                    {queueEnabled && (
-                      <div className={`p-4 rounded-2xl border mb-4 ${queueOpen ? "bg-emerald-500/10 border-emerald-500/30" : "bg-slate-800/40 border-slate-700/40"}`}>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className={`text-[10px] font-black uppercase tracking-wider ${queueOpen ? "text-emerald-400" : "text-slate-400"}`}>
-                            {queueOpen ? "● LIVE QUEUE OPEN" : "QUEUE CLOSED"}
-                          </span>
-                          {queueOpen && (
-                            <span className="text-xs font-extrabold text-white">Serving #{provider.currentTokenNumber || 1}</span>
-                          )}
-                        </div>
-                        <div className="text-xs text-slate-300 flex items-center justify-between">
-                          <span>{provider.waitingCount} patients waiting</span>
-                          <span>{capacityLabel}</span>
-                        </div>
-                        <div className="text-xs text-slate-400 flex items-center justify-between mt-1">
-                          <span>~{provider.consultationMinutes || 15} min/patient</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2 pt-2 border-t border-white/10">
-                    <Link
-                      href={`/stores/${provider.slug}`}
-                      className="flex-1 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs text-center border border-white/10 transition-colors"
-                    >
-                      View Profile
-                    </Link>
-                    {queueEnabled && (
-                      <button
-                        type="button"
-                        disabled={!queueJoinable}
-                        onClick={() => selectQueue(provider.id)}
-                        className={`flex-1 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
-                          activeStore === provider.id
-                            ? "bg-orange-500 text-white shadow-lg shadow-orange-500/25"
-                            : queueJoinable
-                            ? "bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
-                            : "bg-slate-800 text-slate-500 cursor-not-allowed"
-                        }`}
-                      >
-                        {activeStore === provider.id ? "Queue Selected" : queueJoinable ? "Join Live Queue" : "Queue Closed"}
-                      </button>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
+            {renderedProviderGrid}
           </div>
         )}
       </section>

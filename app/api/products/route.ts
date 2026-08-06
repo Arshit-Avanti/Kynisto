@@ -2,6 +2,7 @@ import { getD1 } from "@/db/runtime";
 import { ensureSeeded } from "@/db/seed";
 import { apiError, HttpError } from "@/lib/security";
 import { cleanText, d1SearchText, numberInput } from "@/lib/validation";
+import { microCache, microCacheJson } from "@/lib/micro-cache";
 
 const SORT_SQL = {
   relevance: "s.rating_average DESC, p.created_at DESC",
@@ -33,8 +34,14 @@ function optionalQueryText(value: string | null, label: string, max: number): st
 /** Public, read-only product catalogue. Only active products from approved stores are exposed. */
 export async function GET(request: Request) {
   try {
-    await ensureSeeded();
     const url = new URL(request.url);
+    const cacheKey = `products:${url.searchParams.toString()}`;
+    const cached = microCache.get<any>(cacheKey);
+    if (cached) {
+      return microCacheJson(cached, "public, max-age=15, stale-while-revalidate=60");
+    }
+
+    await ensureSeeded();
     const query = optionalQueryText(url.searchParams.get("q"), "Search", 100);
     const storeId = optionalQueryText(url.searchParams.get("storeId"), "Store", 80);
     const category = optionalQueryText(url.searchParams.get("category"), "Category", 80);
@@ -124,18 +131,17 @@ export async function GET(request: Request) {
     ]);
 
     const total = Number((countResult.results?.[0] as { total?: number } | undefined)?.total ?? 0);
-    return Response.json(
-      {
-        items: itemResult.results ?? [],
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: total === 0 ? 0 : Math.ceil(total / limit),
-        },
+    const data = {
+      items: itemResult.results ?? [],
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: total === 0 ? 0 : Math.ceil(total / limit),
       },
-      { headers: { "Cache-Control": "public, max-age=30, stale-while-revalidate=120" } },
-    );
+    };
+    microCache.set(cacheKey, data, 15_000);
+    return microCacheJson(data, "public, max-age=15, stale-while-revalidate=60");
   } catch (error) {
     return apiError(error);
   }

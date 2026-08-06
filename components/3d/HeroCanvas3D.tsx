@@ -512,6 +512,7 @@ export function HeroCanvas3D() {
     scene.add(particleSystem);
 
     // -------------------------------------------------------------
+    // -------------------------------------------------------------
     // EVENT LISTENERS & RESIZE
     // -------------------------------------------------------------
     const handleMouseMove = (event: MouseEvent) => {
@@ -519,7 +520,7 @@ export function HeroCanvas3D() {
       mouseRef.current.targetX = (event.clientX / innerWidth - 0.5) * 2;
       mouseRef.current.targetY = (event.clientY / innerHeight - 0.5) * 2;
     };
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
 
     const handleResize = () => {
       if (!container) return;
@@ -540,15 +541,20 @@ export function HeroCanvas3D() {
       camera.updateProjectionMatrix();
       renderer.setSize(container.clientWidth, container.clientHeight);
     };
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize, { passive: true });
 
     // -------------------------------------------------------------
-    // ANIMATION LOOP
+    // ANIMATION LOOP & VIEWPORT OBSERVER
     // -------------------------------------------------------------
-    let animationFrameId: number;
+    let animationFrameId = 0;
+    let isVisible = true;
     const clock = new THREE.Clock();
 
     const animate = () => {
+      if (!isVisible) {
+        animationFrameId = 0;
+        return;
+      }
       animationFrameId = requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
 
@@ -611,13 +617,27 @@ export function HeroCanvas3D() {
       renderer.render(scene, camera);
     };
 
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          isVisible = entry.isIntersecting;
+          if (isVisible && !animationFrameId) {
+            animate();
+          }
+        });
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(container);
+
     animate();
 
     // -------------------------------------------------------------
     // DISPOSAL & CLEANUP
     // -------------------------------------------------------------
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      observer.disconnect();
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", handleResize);
 

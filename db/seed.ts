@@ -119,10 +119,13 @@ async function seedDatabase(): Promise<void> {
   const marker = await db
     .prepare("SELECT value FROM system_settings WHERE key = 'seed_version'")
     .first<{ value: string }>();
-  if (marker?.value === SEED_VERSION || marker?.value?.endsWith(`-${SEED_VERSION}`)) return;
+  if (marker?.value === SEED_VERSION || marker?.value?.endsWith(`-${SEED_VERSION}`)) {
+    databaseSeeded = true;
+    return;
+  }
 
   const now = Math.floor(Date.now() / 1000);
-  const adminPassword = await hashPassword("Arshit1029");
+  const adminPassword = await hashPassword("Arshit1029"); // hashPassword("Arshit")
   const existingAdmin = await db
     .prepare("SELECT id FROM users WHERE email = ? LIMIT 1")
     .bind("nxt.arshit@gmail.com")
@@ -414,12 +417,13 @@ async function seedDatabase(): Promise<void> {
       "INSERT INTO system_settings (key, value, updated_at) VALUES ('seed_version', ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
     ).bind(SEED_VERSION, now),
   ]);
+  databaseSeeded = true;
 }
 
-export async function ensureSeeded(): Promise<void> {
-  await ensureDatabaseReady();
+export function ensureSeeded(): Promise<void> {
+  if (databaseSeeded) return Promise.resolve();
   if (!seedPromise) {
-    seedPromise = seedDatabase().catch((error) => {
+    seedPromise = ensureDatabaseReady().then(() => seedDatabase()).catch((error) => {
       seedPromise = null;
       throw error;
     });

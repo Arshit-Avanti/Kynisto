@@ -12,7 +12,8 @@ export function BackgroundMesh3D() {
     const context = canvas.getContext("2d");
     if (!context) return;
 
-    let animationFrameId: number;
+    let animationFrameId = 0;
+    let isVisible = true;
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
@@ -21,7 +22,7 @@ export function BackgroundMesh3D() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
     };
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize, { passive: true });
 
     const blobs = [
       { x: width * 0.2, y: height * 0.3, r: 350, vx: 0.4, vy: 0.3, color: "rgba(37, 99, 235, 0.06)" },
@@ -32,6 +33,10 @@ export function BackgroundMesh3D() {
     let time = 0;
 
     const render = () => {
+      if (!isVisible) {
+        animationFrameId = 0;
+        return;
+      }
       animationFrameId = requestAnimationFrame(render);
       time += 0.005;
 
@@ -60,10 +65,24 @@ export function BackgroundMesh3D() {
       });
     };
 
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          isVisible = entry.isIntersecting;
+          if (isVisible && !animationFrameId) {
+            render();
+          }
+        });
+      },
+      { threshold: 0.01 }
+    );
+    observer.observe(canvas);
+
     render();
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      observer.disconnect();
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
     };
   }, []);
