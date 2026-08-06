@@ -120,7 +120,16 @@ export default function HealthcareQueueQRPage() {
   const [actionMsg, setActionMsg] = useState("");
   const [actionBusy, setActionBusy] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [wasTicketActive, setWasTicketActive] = useState(false);
   const prevEntryStatus = useRef<string | null>(null);
+
+  // Track if user was actively viewing a ticket during this session
+  useEffect(() => {
+    const status = data?.queueState?.entry?.status;
+    if (status === "waiting" || status === "called") {
+      setWasTicketActive(true);
+    }
+  }, [data]);
 
   // Request notification permission
   useEffect(() => {
@@ -227,7 +236,9 @@ export default function HealthcareQueueQRPage() {
     const searchParams = new URLSearchParams(window.location.search);
     const hasAutoJoinParam = searchParams.get("autoJoin") === "true" || searchParams.get("autojoin") === "true";
 
-    if (data.user && data.queueState?.queueAvailable && !data.queueState?.entry) {
+    const hasActiveEntry = data.queueState?.entry?.status === "waiting" || data.queueState?.entry?.status === "called";
+
+    if (data.user && data.queueState?.queueAvailable && !hasActiveEntry) {
       autoJoinAttempted.current = true;
       void handleJoinQueue(data.user);
     } else if (!data.user && hasAutoJoinParam) {
@@ -302,9 +313,11 @@ export default function HealthcareQueueQRPage() {
 
   const { record, queueState, user } = data;
   const isQueueOpen = queueState?.queueAvailable;
-  const userEntry = queueState?.entry;
+  const rawEntry = queueState?.entry;
+  const activeUserEntry = (rawEntry?.status === "waiting" || rawEntry?.status === "called") ? rawEntry : null;
+  const userEntry = activeUserEntry;
   const isCalled = userEntry?.status === "called";
-  const isCompleted = userEntry?.status === "completed";
+  const isCompleted = rawEntry?.status === "completed" && wasTicketActive;
 
   if (isCompleted && record) {
     return (
@@ -436,6 +449,13 @@ export default function HealthcareQueueQRPage() {
                 </div>
               )}
 
+              {/* Action messages */}
+              {actionMsg && (
+                <div style={{ padding: "0.75rem 1rem", background: "#f0fdf4", border: "1px solid #bbf7d0", color: "#166534", borderRadius: "10px", fontSize: "0.9rem", fontWeight: 600, marginBottom: "0.75rem", textAlign: "center" }}>
+                  {actionMsg}
+                </div>
+              )}
+
               {/* User Ticket */}
               {userEntry && (
                 <div>
@@ -465,13 +485,6 @@ export default function HealthcareQueueQRPage() {
                       </div>
                     )}
                   </div>
-
-                  {/* Action buttons */}
-                  {actionMsg && (
-                    <div style={{ padding: "0.75rem 1rem", background: "#f0fdf4", border: "1px solid #bbf7d0", color: "#166534", borderRadius: "10px", fontSize: "0.9rem", fontWeight: 600, marginBottom: "0.75rem", textAlign: "center" }}>
-                      {actionMsg}
-                    </div>
-                  )}
 
                   {!isCalled && (
                     <div style={{ display: "flex", gap: "0.75rem", flexDirection: "column" }}>

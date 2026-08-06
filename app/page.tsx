@@ -1115,7 +1115,7 @@ export default function Home() {
   const [pinFilter, setPinFilter] = useState("");
   const [businessTypeFilter, setBusinessTypeFilter] = useState("");
   const [currentCoords, setCurrentCoords] = useState({ latitude: 28.7381, longitude: 77.2669 });
-  const [locationLabel, setLocationLabel] = useState("Your Locality");
+  const [locationLabel, setLocationLabel] = useState("DLF Ankur Vihar");
   const [customizing, setCustomizing] = useState(false);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [toast, setToast] = useState("");

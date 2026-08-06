@@ -139,6 +139,10 @@ export async function resolveHealthcareQueueByCode(queueCode: string, userId?: s
   await ensureQrTablesExist();
   await expireHealthcareQueueEntries();
   const db = getD1();
+  if (userId) {
+    await db.prepare("UPDATE healthcare_queue_entries SET active_key = NULL WHERE user_id = ? AND status IN ('completed','cancelled','left','expired','removed') AND active_key IS NOT NULL")
+      .bind(userId).run();
+  }
   const cleanCode = queueCode.trim();
 
   let record = await db

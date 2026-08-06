@@ -29,7 +29,7 @@ export function sites(): Plugin {
       const hostingConfig = resolve(root, ".openai", "hosting.json");
       const drizzleSource = resolve(root, "drizzle");
 
-      await rm(outputDirectory, { recursive: true, force: true });
+      await rm(outputDirectory, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
       await mkdir(outputDirectory, { recursive: true });
 
       if (await exists(hostingConfig)) {
@@ -37,7 +37,6 @@ export function sites(): Plugin {
       }
       if (await exists(drizzleSource)) {
         const drizzleDest = resolve(outputDirectory, "drizzle");
-        await mkdir(drizzleDest, { recursive: true });
         await cp(drizzleSource, drizzleDest, {
           recursive: true,
           force: true,

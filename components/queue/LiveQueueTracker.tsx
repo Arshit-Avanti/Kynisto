@@ -197,6 +197,8 @@ export default function LiveQueueTracker() {
   const [isQueueOpen, setIsQueueOpen] = useState<boolean>(true);
   const [entryStatus, setEntryStatus] = useState<'waiting' | 'called' | 'completed' | 'cancelled' | 'left' | 'expired'>('waiting');
   const [currentEntryId, setCurrentEntryId] = useState<string | null>(null);
+  const [liveCompleted, setLiveCompleted] = useState<boolean>(false);
+  const prevEntryStatusRef = useRef<string | null>(null);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
@@ -221,6 +223,19 @@ export default function LiveQueueTracker() {
     fetchHealthcareQueues();
   }, [fetchHealthcareQueues]);
 
+  // Check URL params for pre-selected store or queue code
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const searchParams = new URLSearchParams(window.location.search);
+    const storeIdParam = searchParams.get('storeId') || searchParams.get('store') || searchParams.get('id');
+    if (storeIdParam && queues.length > 0) {
+      const match = queues.find((q) => String(q.id) === String(storeIdParam) || q.slug === storeIdParam);
+      if (match && !selectedQueue) {
+        setSelectedQueue(match);
+      }
+    }
+  }, [queues, selectedQueue]);
+
   // 2. Fetch exact patient queue state from DB for selected clinic (syncs with Owner Dashboard in real-time)
   const syncPatientStateWithStore = useCallback(async (storeId: string | number) => {
     try {
@@ -232,26 +247,39 @@ export default function LiveQueueTracker() {
         setCurrentToken(curr);
         
         if (state.entry) {
-          setEntryStatus(state.entry.status);
-          setCurrentEntryId(state.entry.id);
-          const pos = state.entry.position || 1;
-          setUserPosition(pos);
-          setMyTokenNumber(state.entry.tokenNumber);
-          setTotalInQueue(Math.max(1, state.waitingCount || pos));
-          const ownerConsultationMins = state.consultationMinutes || 15;
-          setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
-
-          if (state.entry.status === 'completed') {
-            if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-              new Notification("🎉 Consultation Completed!", {
-                body: `Thanks for participating in the queue! We hope you had a smooth experience.`,
-                icon: "/icons/icon-192x192.png",
-              });
+          if (state.entry.status === 'waiting' || state.entry.status === 'called') {
+            setEntryStatus(state.entry.status);
+            setCurrentEntryId(state.entry.id);
+            prevEntryStatusRef.current = state.entry.status;
+            const pos = state.entry.position || 1;
+            setUserPosition(pos);
+            setMyTokenNumber(state.entry.tokenNumber);
+            setTotalInQueue(Math.max(1, state.waitingCount || pos));
+            const ownerConsultationMins = state.consultationMinutes || 15;
+            setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
+          } else if (state.entry.status === 'completed') {
+            const wasActiveTracked = (prevEntryStatusRef.current === 'waiting' || prevEntryStatusRef.current === 'called' || entryStatus === 'called' || entryStatus === 'waiting') && currentEntryId === state.entry.id;
+            if (wasActiveTracked || liveCompleted) {
+              setEntryStatus('completed');
+              setLiveCompleted(true);
+              if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+                new Notification("🎉 Consultation Completed!", {
+                  body: `Thanks for participating in the queue! We hope you had a smooth experience.`,
+                  icon: "/icons/icon-192x192.png",
+                });
+              }
+            } else {
+              // Past completed entry without active session -> do not block UI with completed view!
+              setCurrentEntryId(null);
+              setEntryStatus('waiting');
             }
+          } else {
+            setEntryStatus(state.entry.status);
           }
-        } else if (currentEntryId && !state.entry) {
+        } else if (currentEntryId && (prevEntryStatusRef.current === 'waiting' || prevEntryStatusRef.current === 'called' || entryStatus === 'called' || entryStatus === 'waiting')) {
           // Owner marked completed or removed -> automatically transition to Thanks for Participating screen!
           setEntryStatus('completed');
+          setLiveCompleted(true);
         } else if (selectedQueue) {
           const ownerConsultationMins = state.consultationMinutes || selectedQueue.consultationMinutes || 15;
           setEstimatedWait((userPosition > 1 ? userPosition - 1 : 0) * ownerConsultationMins);
@@ -260,7 +288,7 @@ export default function LiveQueueTracker() {
     } catch {
       // Ignore network failures, retain current snapshot
     }
-  }, [selectedQueue, userPosition, currentEntryId]);
+  }, [selectedQueue, userPosition, currentEntryId, entryStatus, liveCompleted]);
 
   const notifiedTokenRef = useRef<number | null>(null);
 
@@ -355,6 +383,8 @@ export default function LiveQueueTracker() {
         // Ensure that a newly joined/existing entry when joining is treated as 'waiting' if it somehow comes back as 'completed'
         const initialStatus = entry.status === 'completed' ? 'waiting' : entry.status;
         setEntryStatus(initialStatus);
+        prevEntryStatusRef.current = initialStatus;
+        setLiveCompleted(false);
         const pos = entry.position || 1;
         setUserPosition(pos);
         setMyTokenNumber(entry.tokenNumber);
@@ -373,6 +403,8 @@ export default function LiveQueueTracker() {
         setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
         setIsQueueOpen(true);
         setEntryStatus('waiting');
+        prevEntryStatusRef.current = 'waiting';
+        setLiveCompleted(false);
       }
 
       setIsCancelled(false);
@@ -491,6 +523,8 @@ export default function LiveQueueTracker() {
               setMyTokenNumber(0);
               setUserPosition(0);
               setTotalInQueue(0);
+              setLiveCompleted(false);
+              prevEntryStatusRef.current = null;
               setView('list');
             }}
             className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base rounded-2xl shadow-xl transition-all"

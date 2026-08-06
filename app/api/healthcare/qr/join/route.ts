@@ -19,6 +19,10 @@ export async function POST(request: NextRequest) {
       throw new HttpError(400, "Queue code is required.", "MISSING_QUEUE_CODE");
     }
 
+    const db = getD1();
+    await db.prepare("UPDATE healthcare_queue_entries SET active_key = NULL WHERE user_id = ? AND status IN ('completed','cancelled','left','expired','removed') AND active_key IS NOT NULL")
+      .bind(user.id).run();
+
     const { record, queueState } = await resolveHealthcareQueueByCode(body.queueCode, user.id);
 
     if (!queueState || !queueState.queueAvailable) {
@@ -39,7 +43,6 @@ export async function POST(request: NextRequest) {
       throw new HttpError(409, "You are already active in another healthcare queue.", "ACTIVE_QUEUE_EXISTS");
     }
 
-    const db = getD1();
     const now = Math.floor(Date.now() / 1000);
     const today = ((queueState as any)?.serviceDate as string | undefined) || indiaServiceDate();
 

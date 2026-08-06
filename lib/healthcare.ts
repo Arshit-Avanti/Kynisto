@@ -177,6 +177,7 @@ export async function patientQueueState(storeId: string, userId?: string) {
     .first<Record<string, string | number | null>>();
   if (!settings) return null;
   let entry: Record<string, string | number | null> | null = null;
+  let completedEntry: Record<string, string | number | null> | null = null;
   let activeQueue: Record<string, string | number | null> | null = null;
   if (userId) {
     activeQueue = await activeHealthcareQueueForUser(userId);
@@ -191,8 +192,19 @@ export async function patientQueueState(storeId: string, userId?: string) {
             WHERE called.store_id = e.store_id AND called.service_date = e.service_date AND called.status = 'called' AND called.id <> e.id)
           + 1 AS position
          FROM healthcare_queue_entries e
-         WHERE e.store_id = ? AND e.user_id = ? AND e.service_date = ? AND e.status IN ('waiting','called', 'completed')
-         ORDER BY CASE e.status WHEN 'waiting' THEN 0 WHEN 'called' THEN 1 ELSE 2 END, e.joined_at DESC LIMIT 1`,
+         WHERE e.store_id = ? AND e.user_id = ? AND e.service_date = ? AND e.status IN ('waiting','called')
+         ORDER BY CASE e.status WHEN 'waiting' THEN 0 ELSE 1 END, e.joined_at DESC LIMIT 1`,
+      )
+      .bind(storeId, userId, today)
+      .first<Record<string, string | number | null>>();
+
+    completedEntry = await db
+      .prepare(
+        `SELECT e.id, e.token_number AS tokenNumber, e.status, e.arrival_status AS arrivalStatus,
+          e.joined_at AS joinedAt, e.expires_at AS expiresAt, e.reminder_sent_at AS reminderSentAt
+         FROM healthcare_queue_entries e
+         WHERE e.store_id = ? AND e.user_id = ? AND e.service_date = ? AND e.status = 'completed'
+         ORDER BY e.joined_at DESC LIMIT 1`,
       )
       .bind(storeId, userId, today)
       .first<Record<string, string | number | null>>();
@@ -233,5 +245,6 @@ export async function patientQueueState(storeId: string, userId?: string) {
     activeQueue,
     arrivalReminder,
     entry: entry ? { ...entry, estimatedWaitMinutes } : null,
+    completedEntry,
   };
 }
