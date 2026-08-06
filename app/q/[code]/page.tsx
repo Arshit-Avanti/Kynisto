@@ -235,9 +235,9 @@ export default function HealthcareQueueQRPage() {
     void fetchData();
   }, [fetchData]);
 
-  // Auto-refresh every 30 seconds
+  // Auto-refresh every 3 seconds for instant real-time sync with owner actions
   useEffect(() => {
-    const timer = setInterval(() => { void fetchData(); }, 30_000);
+    const timer = setInterval(() => { void fetchData(); }, 3_000);
     return () => clearInterval(timer);
   }, [fetchData]);
 
@@ -326,7 +326,37 @@ export default function HealthcareQueueQRPage() {
   const isQueueOpen = queueState?.queueAvailable;
   const userEntry = queueState?.entry;
   const isCalled = userEntry?.status === "called";
-  const peopleAhead = Math.max(0, (userEntry?.position ?? 1) - 1);
+  const isCompleted = userEntry?.status === "completed";
+
+  if (isCompleted && record) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#0f172a", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem", textAlign: "center", color: "#ffffff", fontFamily: "sans-serif" }}>
+        <div style={{ width: "96px", height: "96px", borderRadius: "50%", background: "rgba(34,197,94,0.2)", border: "4px solid #22c55e", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.5rem", boxShadow: "0 0 50px rgba(34,197,94,0.4)" }}>
+          <PartyPopper size={48} style={{ color: "#4ade80" }} />
+        </div>
+        <h2 style={{ fontSize: "2.25rem", fontWeight: 900, marginBottom: "0.5rem" }}>🎉 Thank You for Participating!</h2>
+        <p style={{ color: "#94a3b8", fontSize: "1.1rem", maxWidth: "480px", marginBottom: "2rem", lineHeight: 1.5 }}>
+          Your consultation at <strong>{record.storeName}</strong> is completed. We hope you had a smooth live queue experience!
+        </p>
+        <Link href="/healthcare" style={{ background: "#2563eb", color: "#ffffff", padding: "1rem 2rem", borderRadius: "12px", fontWeight: 800, textDecoration: "none", fontSize: "1.05rem" }}>
+          Explore Healthcare Hub
+        </Link>
+      </div>
+    );
+  }
+
+  const currentTokenNum = queueState?.currentTokenNumber ?? 0;
+  const userTokenNum = userEntry?.tokenNumber ?? 0;
+  let peopleAhead = 0;
+  if (userEntry && !isCalled && !isCompleted) {
+    if (currentTokenNum === 0) {
+      peopleAhead = Math.max(0, userTokenNum - 1);
+    } else if (userTokenNum > currentTokenNum) {
+      peopleAhead = Math.max(0, userTokenNum - currentTokenNum - 1);
+    } else {
+      peopleAhead = Math.max(0, (userEntry.position ?? 1) - 1);
+    }
+  }
 
   // Status ring animation values
   const progressPercent = Math.max(5, Math.round(((queueState?.waitingCount ?? 1) - peopleAhead) / (queueState?.waitingCount ?? 1) * 100));
