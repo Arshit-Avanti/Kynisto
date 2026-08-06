@@ -232,11 +232,7 @@ export default function LiveQueueTracker() {
         setCurrentToken(curr);
         
         if (state.entry) {
-          if (state.entry.status === 'completed' && state.entry.id !== currentEntryId) {
-            setEntryStatus('waiting');
-          } else {
-            setEntryStatus(state.entry.status);
-          }
+          setEntryStatus(state.entry.status);
           setCurrentEntryId(state.entry.id);
           const pos = state.entry.position || 1;
           setUserPosition(pos);
@@ -244,6 +240,18 @@ export default function LiveQueueTracker() {
           setTotalInQueue(Math.max(1, state.waitingCount || pos));
           const ownerConsultationMins = state.consultationMinutes || 15;
           setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
+
+          if (state.entry.status === 'completed') {
+            if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+              new Notification("🎉 Consultation Completed!", {
+                body: `Thanks for participating in the queue! We hope you had a smooth experience.`,
+                icon: "/icons/icon-192x192.png",
+              });
+            }
+          }
+        } else if (currentEntryId && !state.entry) {
+          // Owner marked completed or removed -> automatically transition to Thanks for Participating screen!
+          setEntryStatus('completed');
         } else if (selectedQueue) {
           const ownerConsultationMins = state.consultationMinutes || selectedQueue.consultationMinutes || 15;
           setEstimatedWait((userPosition > 1 ? userPosition - 1 : 0) * ownerConsultationMins);
@@ -720,22 +728,22 @@ export default function LiveQueueTracker() {
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col font-sans">
       {/* Header Bar */}
-      <div className="bg-slate-900/85 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-40 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center space-x-4">
+      <div className="bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-40 px-4 sm:px-6 py-3.5">
+        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="flex items-center text-slate-300 hover:text-white font-bold text-sm transition-colors bg-slate-800/90 hover:bg-slate-800 px-3.5 py-2 rounded-xl border border-slate-700/80 shadow-sm"
+              className="flex items-center text-slate-300 hover:text-white font-bold text-xs sm:text-sm transition-colors bg-slate-800/90 hover:bg-slate-800 px-3 py-2 rounded-xl border border-slate-700/80 shadow-sm shrink-0"
             >
-              <ArrowLeft className="w-4 h-4 mr-2 text-emerald-400" /> Home
+              <ArrowLeft className="w-4 h-4 mr-1.5 text-emerald-400" /> Home
             </Link>
-            <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 shrink-0">
                 <Activity className="w-5 h-5" />
               </div>
               <div>
-                <h1 className="text-xl font-black text-white tracking-tight">Kynisto Healthcare Hub</h1>
-                <span className="text-xs text-slate-400 font-medium">Verified local care & live queue tracking</span>
+                <h1 className="text-base sm:text-xl font-black text-white tracking-tight leading-snug">Kynisto Healthcare Hub</h1>
+                <span className="text-[11px] sm:text-xs text-slate-400 font-medium block mt-0.5">Verified local care &amp; live queue tracking</span>
               </div>
             </div>
           </div>
@@ -743,9 +751,9 @@ export default function LiveQueueTracker() {
           {selectedQueue && (
             <button
               onClick={() => setView('ticket')}
-              className="flex items-center bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-emerald-600/25 cursor-pointer"
+              className="flex items-center bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm transition-all shadow-lg shadow-emerald-600/25 cursor-pointer"
             >
-              <Sparkles className="w-4 h-4 mr-2" />
+              <Sparkles className="w-4 h-4 mr-1.5" />
               View Active Ticket ({selectedQueue.name.split('–')[0].trim()})
             </button>
           )}
@@ -753,29 +761,30 @@ export default function LiveQueueTracker() {
       </div>
 
       {/* Main Hero Banner */}
-      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-teal-950 py-12 px-6 relative overflow-hidden border-b border-slate-800/80">
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-teal-950 py-10 sm:py-12 px-4 sm:px-6 relative overflow-hidden border-b border-slate-800/80">
         <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="inline-flex items-center px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black uppercase tracking-wider mb-3">
             <Activity className="w-3.5 h-3.5 mr-2" /> Verified Care Network
           </div>
-          <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+          <h2 className="text-2xl sm:text-5xl font-black text-white tracking-tight leading-tight">
             Local care, <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">without the waiting room.</span>
           </h2>
-          <p className="text-slate-300 text-base sm:text-lg font-medium mt-3 max-w-2xl leading-relaxed">
+          <p className="text-slate-300 text-sm sm:text-lg font-medium mt-3 max-w-2xl leading-relaxed">
             Select a verified clinic, OPD, or diagnostic lab near you. Join live queues remotely and arrive right on time.
           </p>
 
           {/* Search Input & Push Alerts */}
-          <div className="mt-8 max-w-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="flex-1 relative">
-              <Search className="w-5 h-5 text-emerald-400 absolute left-4 top-1/2 -translate-y-1/2" />
+          <div className="mt-6 sm:mt-8 max-w-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex-1 relative flex items-center">
+              <Search className="w-5 h-5 text-emerald-400 absolute left-4 z-10 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search clinic, doctor, specialty or area..."
-                className="w-full bg-slate-900/90 border border-slate-700/80 rounded-2xl py-3.5 pl-12 pr-4 text-white placeholder-slate-400 font-medium focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 transition-all shadow-lg"
+                style={{ paddingLeft: "52px", paddingRight: "16px" }}
+                className="w-full bg-slate-900/90 border border-slate-700/80 rounded-2xl py-3.5 text-white placeholder-slate-400 font-medium focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 transition-all shadow-lg text-sm sm:text-base"
               />
             </div>
             <PushNotificationManager />
