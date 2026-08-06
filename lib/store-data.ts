@@ -250,7 +250,7 @@ export async function listStores(options: {
 
   await ensureSeeded();
   const db = getD1();
-  const conditions = ["s.status = 'approved'", "c.module = 'local'"];
+  const conditions = ["s.status = 'approved'", "c.module = 'local'", "c.status = 'active'"];
   const bindings: unknown[] = [];
   const query = options.query?.trim();
   if (query) {
@@ -281,7 +281,19 @@ export async function listStores(options: {
     .all<StoreRow>();
   const latitude = options.latitude ?? DEFAULT_LATITUDE;
   const longitude = options.longitude ?? DEFAULT_LONGITUDE;
-  let stores = (rows.results ?? []).map((row) => toPublicStore(row, latitude, longitude));
+
+  // Deduplicate rows by store ID to guarantee distinct, uncluttered results
+  const seenIds = new Set<string>();
+  const uniqueRows: StoreRow[] = [];
+  for (const row of rows.results ?? []) {
+    const key = String(row.id);
+    if (!seenIds.has(key)) {
+      seenIds.add(key);
+      uniqueRows.push(row);
+    }
+  }
+
+  let stores = uniqueRows.map((row) => toPublicStore(row, latitude, longitude));
   if (options.openNow) stores = stores.filter((store) => store.open);
 
   const sort = options.sort ?? "relevance";

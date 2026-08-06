@@ -1126,9 +1126,9 @@ export default function Home() {
   const [category, setCategory] = useState("All");
   const [sortMode, setSortMode] = useState<SortMode>("all");
   const [saved, setSaved] = useState<Array<string | number>>([]);
-  const [catalogStores, setCatalogStores] = useState<Store[]>(stores.filter((store) => !["Clinic", "Pharmacy", "Pet care"].includes(store.category)));
+  const [catalogStores, setCatalogStores] = useState<Store[]>([]);
   const [catalogCategories, setCatalogCategories] = useState<Category[]>(categories.filter((item) => !["Clinic", "Pharmacy", "Pet care"].includes(item.name)));
-  const [catalogTotal, setCatalogTotal] = useState(stores.length);
+  const [catalogTotal, setCatalogTotal] = useState(0);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [nextPage, setNextPage] = useState(2);
@@ -1141,7 +1141,7 @@ export default function Home() {
   const [pinFilter, setPinFilter] = useState("");
   const [businessTypeFilter, setBusinessTypeFilter] = useState("");
   const [currentCoords, setCurrentCoords] = useState({ latitude: 28.7381, longitude: 77.2669 });
-  const [locationLabel, setLocationLabel] = useState("DLF Ankur Vihar");
+  const [locationLabel, setLocationLabel] = useState("Your Locality");
   const [customizing, setCustomizing] = useState(false);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [toast, setToast] = useState("");
@@ -1224,12 +1224,23 @@ export default function Home() {
           items: Array<Store & { services?: string[] }>;
           pagination: { total: number; hasMore: boolean };
         };
-        setCatalogStores(data.items.map((store) => ({ ...store, services: store.services ?? [] })));
+        const seen = new Set<string | number>();
+        const uniqueItems = data.items.filter((store) => {
+          const key = store.id ?? store.slug;
+          if (!key || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        setCatalogStores(uniqueItems.map((store) => ({ ...store, services: store.services ?? [] })));
         setCatalogTotal(data.pagination.total);
         setHasMore(data.pagination.hasMore);
         setNextPage(2);
       } catch (error) {
-        if (!(error instanceof DOMException && error.name === "AbortError")) setCatalogTotal(stores.length);
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          const fallbackStores = stores.filter((store) => !["Clinic", "Pharmacy", "Pet care"].includes(store.category));
+          setCatalogStores(fallbackStores);
+          setCatalogTotal(fallbackStores.length);
+        }
       } finally {
         if (!controller.signal.aborted) setCatalogLoading(false);
       }
@@ -1261,10 +1272,18 @@ export default function Home() {
   }, []);
 
   const results = useMemo(() => {
+    const seen = new Set<string | number>();
+    const uniqueCatalog = catalogStores.filter((store) => {
+      const key = store.id ?? store.slug;
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
     const normalized = query.trim().toLowerCase();
-    const filtered = catalogStores.filter((store) => {
+    const filtered = uniqueCatalog.filter((store) => {
       const matchesCategory = category === "All" || store.category === category;
-      const haystack = `${store.name} ${store.category} ${store.address} ${store.services.join(" ")}`.toLowerCase();
+      const haystack = `${store.name} ${store.category} ${store.address} ${(store.services || []).join(" ")}`.toLowerCase();
       const matchesQuery = !normalized || haystack.includes(normalized);
       const matchesOpen = sortMode !== "open" || store.open;
       return matchesCategory && matchesQuery && matchesOpen;
@@ -1275,6 +1294,9 @@ export default function Home() {
     }
     if (sortMode === "rated") {
       return [...filtered].sort((a, b) => b.rating - a.rating);
+    }
+    if (sortMode === "newest") {
+      return [...filtered].sort((a, b) => ((b as any).createdAt ?? 0) - ((a as any).createdAt ?? 0));
     }
     return filtered;
   }, [catalogStores, category, query, sortMode]);
@@ -1320,10 +1342,13 @@ export default function Home() {
         items: Array<Store & { services?: string[] }>;
         pagination: { hasMore: boolean };
       }>(`/api/stores?${parameters}`);
-      setCatalogStores((current) => [
-        ...current,
-        ...data.items.map((store) => ({ ...store, services: store.services ?? [] })),
-      ]);
+      setCatalogStores((current) => {
+        const existingKeys = new Set(current.map((s) => String(s.id ?? s.slug)));
+        const newItems = data.items
+          .filter((s) => !existingKeys.has(String(s.id ?? s.slug)))
+          .map((store) => ({ ...store, services: store.services ?? [] }));
+        return [...current, ...newItems];
+      });
       setHasMore(data.pagination.hasMore);
       setNextPage((page) => page + 1);
     } catch (error) {

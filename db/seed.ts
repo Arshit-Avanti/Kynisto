@@ -68,6 +68,7 @@ const businessHours = JSON.stringify({
   sun: { open: "10:00", close: "18:00" },
 });
 
+let databaseSeeded = false;
 let seedPromise: Promise<void> | null = null;
 
 type SeedValue = string | number | null;

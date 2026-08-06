@@ -12,7 +12,7 @@ test("builds the Kynisto discovery experience and social asset", async () => {
     access(new URL("dist/client/og.svg", root)),
   ]);
   assert.match(page, /Kynisto/);
-  assert.match(page, /DLF Ankur Vihar/);
+  assert.match(page, /Your Locality/);
   assert.match(layout, /generateMetadata/);
   assert.match(layout, /Kynisto – Everything Around You, Smarter\./);
   assert.doesNotMatch(page, /Your site is taking shape|Codex is working/);
