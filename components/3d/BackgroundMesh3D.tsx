@@ -14,6 +14,7 @@ export function BackgroundMesh3D() {
 
     let animationFrameId = 0;
     let isVisible = true;
+    let isTabVisible = typeof document !== "undefined" ? !document.hidden : true;
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
@@ -24,6 +25,16 @@ export function BackgroundMesh3D() {
     };
     window.addEventListener("resize", handleResize, { passive: true });
 
+    const handleVisibilityChange = () => {
+      isTabVisible = typeof document !== "undefined" ? !document.hidden : true;
+      if (isTabVisible && isVisible && !animationFrameId) {
+        render();
+      }
+    };
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
+
     const blobs = [
       { x: width * 0.2, y: height * 0.3, r: 350, vx: 0.4, vy: 0.3, color: "rgba(37, 99, 235, 0.06)" },
       { x: width * 0.8, y: height * 0.2, r: 400, vx: -0.3, vy: 0.4, color: "rgba(20, 184, 166, 0.04)" },
@@ -33,7 +44,7 @@ export function BackgroundMesh3D() {
     let time = 0;
 
     const render = () => {
-      if (!isVisible) {
+      if (!isVisible || !isTabVisible || (typeof document !== "undefined" && document.hidden)) {
         animationFrameId = 0;
         return;
       }
@@ -69,7 +80,7 @@ export function BackgroundMesh3D() {
       (entries) => {
         entries.forEach((entry) => {
           isVisible = entry.isIntersecting;
-          if (isVisible && !animationFrameId) {
+          if (isVisible && isTabVisible && !animationFrameId) {
             render();
           }
         });
@@ -82,14 +93,17 @@ export function BackgroundMesh3D() {
 
     return () => {
       observer.disconnect();
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      }
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
     };
   }, []);
 
   return (
-    <div className="bgMeshContainer" aria-hidden="true" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1, pointerEvents: 'none' }}>
-      <canvas ref={canvasRef} className="bgMeshCanvas" style={{ backgroundColor: 'transparent' }} />
+    <div className="bgMeshContainer" aria-hidden="true" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1, pointerEvents: 'none', transform: 'translateZ(0)' }}>
+      <canvas ref={canvasRef} className="bgMeshCanvas" style={{ backgroundColor: 'transparent', transform: 'translateZ(0)', willChange: 'transform' }} />
       <div className="bgNoiseOverlay" />
     </div>
   );

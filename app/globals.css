@@ -2085,37 +2085,50 @@ footer > p { color: var(--muted); font-size: 11px; }
   --portal-text: #0F172A !important;
 }
 
-/* Force Dark Mode High Contrast for Headings, Body, Cards, Badges, Buttons */
-.dark-theme h1, .dark-theme h2, .dark-theme h3, .dark-theme h4, .dark-theme h5, .dark-theme h6,
-.dark-theme p, .dark-theme body, .dark-theme span, .dark-theme div,
-.dark-theme .card, .dark-theme .dashCard, .dark-theme .portalCard, .dark-theme .authCard,
-.dark-theme .badge, .dark-theme .statusBadge, .dark-theme .roleBadge,
-.dark-theme button:not([class*="bg-"]):not([style*="background"]):not(.searchSubmit):not(.customizeButton),
-.mode-dark h1, .mode-dark h2, .mode-dark h3, .mode-dark h4, .mode-dark h5, .mode-dark h6,
-.mode-dark p, .mode-dark body, .mode-dark span, .mode-dark div,
-.mode-dark .card, .mode-dark .dashCard, .mode-dark .portalCard, .mode-dark .authCard,
-.mode-dark .badge, .mode-dark .statusBadge, .mode-dark .roleBadge,
-.mode-dark button:not([class*="bg-"]):not([style*="background"]):not(.searchSubmit):not(.customizeButton) {
+/* Force Dark Mode High Contrast for Headings, Paragraphs, Labels, Table Headers/Cells */
+.dark-theme h1:not([class*="text-"]):not(.kynistoWordmark b),
+.dark-theme h2:not([class*="text-"]),
+.dark-theme h3:not([class*="text-"]),
+.dark-theme h4:not([class*="text-"]),
+.dark-theme h5:not([class*="text-"]),
+.dark-theme h6:not([class*="text-"]),
+.dark-theme p:not([class*="text-"]),
+.dark-theme label:not([class*="text-"]),
+.dark-theme li:not([class*="text-"]),
+.mode-dark h1:not([class*="text-"]):not(.kynistoWordmark b),
+.mode-dark h2:not([class*="text-"]),
+.mode-dark h3:not([class*="text-"]),
+.mode-dark h4:not([class*="text-"]),
+.mode-dark h5:not([class*="text-"]),
+.mode-dark h6:not([class*="text-"]),
+.mode-dark p:not([class*="text-"]),
+.mode-dark label:not([class*="text-"]),
+.mode-dark li:not([class*="text-"]) {
   color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
 }
 
-/* Force Light Mode High Contrast for Headings, Body, Cards, Badges, Buttons */
-.light-theme h1, .light-theme h2, .light-theme h3, .light-theme h4, .light-theme h5, .light-theme h6,
-.light-theme p, .light-theme body, .light-theme span, .light-theme div,
-.light-theme .card, .light-theme .dashCard, .light-theme .portalCard, .light-theme .authCard,
-.light-theme .badge, .light-theme .statusBadge, .light-theme .roleBadge,
-.light-theme button:not([class*="bg-"]):not([style*="background"]):not(.searchSubmit):not(.customizeButton) {
+/* Force Light Mode High Contrast for Headings, Paragraphs, Labels, Table Headers/Cells */
+.light-theme h1:not([class*="text-"]),
+.light-theme h2:not([class*="text-"]),
+.light-theme h3:not([class*="text-"]),
+.light-theme h4:not([class*="text-"]),
+.light-theme h5:not([class*="text-"]),
+.light-theme h6:not([class*="text-"]),
+.light-theme p:not([class*="text-"]),
+.light-theme label:not([class*="text-"]),
+.light-theme li:not([class*="text-"]),
+.mode-light h1:not([class*="text-"]),
+.mode-light h2:not([class*="text-"]),
+.mode-light h3:not([class*="text-"]),
+.mode-light h4:not([class*="text-"]),
+.mode-light h5:not([class*="text-"]),
+.mode-light h6:not([class*="text-"]),
+.mode-light p:not([class*="text-"]),
+.mode-light label:not([class*="text-"]),
+.mode-light li:not([class*="text-"]) {
   color: #0F172A !important;
-}
-
-/* Eliminate Dark Text on Dark Background Rules */
-.dark-theme [style*="color: #0f172a"], .mode-dark [style*="color: #0f172a"],
-.dark-theme [style*="color:#0f172a"], .mode-dark [style*="color:#0f172a"],
-.dark-theme [style*="color: #000"], .mode-dark [style*="color: #000"],
-.dark-theme [class*="text-slate-900"], .mode-dark [class*="text-slate-900"],
-.dark-theme [class*="text-gray-900"], .mode-dark [class*="text-gray-900"],
-.dark-theme [class*="text-black"], .mode-dark [class*="text-black"] {
-  color: #FFFFFF !important;
+  -webkit-text-fill-color: #0F172A !important;
 }
 
 /* Zero-lag GPU CSS keyframes (0.15s instant transitions) */
@@ -2162,7 +2175,7 @@ footer > p { color: var(--muted); font-size: 11px; }
 }
 
 /* ==========================================================================
-   PERFORMANCE & CONTAINER RENDERING OPTIMIZATIONS
+   PERFORMANCE & CONTAINER RENDERING OPTIMIZATIONS (60FPS/120FPS LOCKED)
    ========================================================================== */
 
 .storeGrid > article,
@@ -2170,8 +2183,41 @@ footer > p { color: var(--muted); font-size: 11px; }
 .workspaceList article,
 .tableContainer tbody tr,
 .reviewList article,
-.catalogGrid article {
+.catalogGrid article,
+.gpu-accelerated,
+.gpu-layer,
+.content-visibility-auto,
+.storeCard,
+.serviceCard,
+.productCard,
+.placeCard,
+.placesListCard,
+.queueTrackerCard,
+.liveQueueCard,
+.chatMessageItem,
+.portalTableRow,
+.dashCard,
+.membershipCard,
+.loyaltyCardItem,
+.pricingPlanCard,
+.storeCatalogCard {
   content-visibility: auto;
   contain-intrinsic-size: 1px 220px;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
+
+canvas,
+video,
+.heroCanvas3DWrap,
+.authStoryVideo,
+.bgMeshCanvas,
+.bgMeshContainer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform;
+}
+
 

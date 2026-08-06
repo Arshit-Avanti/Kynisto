@@ -105,6 +105,19 @@ body {
   color: #ffffff;
 }
 
+.light-theme .brand .kynistoWordmark b,
+.light-theme .productBrand .kynistoWordmark b,
+.light-theme .profileBrand .kynistoWordmark b,
+.mode-light .brand .kynistoWordmark b,
+.mode-light .productBrand .kynistoWordmark b,
+.mode-light .profileBrand .kynistoWordmark b,
+.light-theme .kynistoWordmark b,
+.mode-light .kynistoWordmark b {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  text-shadow: none !important;
+}
+
 .portal {
   --p-bg: #140A0C;
   --p-panel: rgba(255, 255, 255, .04);

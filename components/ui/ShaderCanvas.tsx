@@ -263,7 +263,7 @@ export function ShaderCanvas() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-[1]"
-      style={{ width: "100vw", height: "100vh" }}
+      style={{ width: "100vw", height: "100vh", transform: "translateZ(0)", willChange: "transform" }}
     />
   );
 }

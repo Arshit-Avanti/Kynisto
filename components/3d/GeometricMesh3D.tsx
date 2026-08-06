@@ -111,9 +111,16 @@ export function GeometricMesh3D() {
 
     const edges = getTriangleEdges();
 
-    // Scroll listener
+    // Scroll listener with RAF throttling to prevent UI lag
+    let scrollTicking = false;
     const handleScroll = () => {
-      scrollRef.current = window.scrollY / (document.body.scrollHeight - window.innerHeight || 1);
+      if (!scrollTicking) {
+        scrollTicking = true;
+        requestAnimationFrame(() => {
+          scrollRef.current = window.scrollY / (document.body.scrollHeight - window.innerHeight || 1);
+          scrollTicking = false;
+        });
+      }
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
 
@@ -136,10 +143,11 @@ export function GeometricMesh3D() {
 
     let animId = 0;
     let isVisible = true;
+    let isTabVisible = typeof document !== "undefined" ? !document.hidden : true;
     let time = 0;
 
     const animate = () => {
-      if (!isVisible) {
+      if (!isVisible || !isTabVisible || (typeof document !== "undefined" && document.hidden)) {
         animId = 0;
         return;
       }
@@ -213,11 +221,22 @@ export function GeometricMesh3D() {
       });
     };
 
+    const handleVisibilityChange = () => {
+      isTabVisible = typeof document !== "undefined" ? !document.hidden : true;
+      if (isTabVisible && isVisible && !animId) {
+        animate();
+      }
+    };
+
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           isVisible = entry.isIntersecting;
-          if (isVisible && !animId) {
+          if (isVisible && isTabVisible && !animId) {
             animate();
           }
         });
@@ -230,6 +249,9 @@ export function GeometricMesh3D() {
 
     return () => {
       observer.disconnect();
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      }
       if (animId) cancelAnimationFrame(animId);
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("mousemove", handleMouse);
@@ -250,6 +272,8 @@ export function GeometricMesh3D() {
         zIndex: 0,
         pointerEvents: "none",
         opacity: 0.6,
+        transform: "translateZ(0)",
+        willChange: "transform",
       }}
     />
   );

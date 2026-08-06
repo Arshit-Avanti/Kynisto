@@ -248,6 +248,7 @@ export function MagneticButton({
       <canvas
         ref={canvasRef}
         className="absolute inset-0 pointer-events-none z-10"
+        style={{ transform: "translateZ(0)", willChange: "transform" }}
         aria-hidden="true"
       />
 

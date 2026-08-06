@@ -203,6 +203,8 @@ export function ParticleCanvas() {
         height: "100vh",
         pointerEvents: "none",
         zIndex: 1,
+        transform: "translateZ(0)",
+        willChange: "transform",
       }}
     />
   );

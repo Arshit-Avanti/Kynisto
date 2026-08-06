@@ -298,6 +298,145 @@
   font-weight: 600;
 }
 
+/* ==========================================================================
+   HEALTHCARE PORTAL LIGHT & DARK MODE CONTRAST OVERRIDES
+   ========================================================================== */
+
+/* LIGHT THEME OVERRIDES */
+.light-theme .healthcareSetup h2,
+.mode-light .healthcareSetup h2,
+.portalShell.light-theme .healthcareSetup h2 {
+  color: #0f172a !important;
+}
+
+.light-theme .healthcareSetup small,
+.mode-light .healthcareSetup small,
+.portalShell.light-theme .healthcareSetup small {
+  color: #475569 !important;
+}
+
+.light-theme .queueControlBar,
+.mode-light .queueControlBar,
+.portalShell.light-theme .queueControlBar {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+
+.light-theme .queueControlBar button:not(.primary),
+.mode-light .queueControlBar button:not(.primary),
+.portalShell.light-theme .queueControlBar button:not(.primary) {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+.light-theme .queueTable article,
+.mode-light .queueTable article,
+.portalShell.light-theme .queueTable article {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+.light-theme .queueTable article strong,
+.mode-light .queueTable article strong,
+.portalShell.light-theme .queueTable article strong {
+  color: #0f172a !important;
+}
+
+.light-theme .queueTable article > b,
+.mode-light .queueTable article > b,
+.portalShell.light-theme .queueTable article > b {
+  color: #059669 !important;
+}
+
+.light-theme .queueTable small,
+.mode-light .queueTable small,
+.portalShell.light-theme .queueTable small {
+  color: #475569 !important;
+}
+
+.light-theme .queueTable button,
+.mode-light .queueTable button,
+.portalShell.light-theme .queueTable button {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+.light-theme .queueHistory h3,
+.mode-light .queueHistory h3,
+.portalShell.light-theme .queueHistory h3 {
+  color: #0f172a !important;
+}
+
+.light-theme .queueHistory > div,
+.mode-light .queueHistory > div,
+.portalShell.light-theme .queueHistory > div {
+  border-bottom-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+.light-theme .queueHistory small,
+.mode-light .queueHistory small,
+.portalShell.light-theme .queueHistory small {
+  color: #475569 !important;
+}
+
+.light-theme .queueReports article,
+.mode-light .queueReports article,
+.portalShell.light-theme .queueReports article {
+  border-bottom-color: #e2e8f0 !important;
+}
+
+.light-theme .queueReports p,
+.mode-light .queueReports p,
+.portalShell.light-theme .queueReports p {
+  color: #0f172a !important;
+}
+
+.light-theme .queueReports small,
+.mode-light .queueReports small,
+.portalShell.light-theme .queueReports small {
+  color: #475569 !important;
+}
+
+.light-theme .queueReports select,
+.light-theme .portalTable select,
+.mode-light .queueReports select,
+.mode-light .portalTable select,
+.portalShell.light-theme .queueReports select,
+.portalShell.light-theme .portalTable select {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+/* DARK THEME OVERRIDES */
+.dark-theme .queueReports p,
+.mode-dark .queueReports p,
+.portalDark .queueReports p,
+.portalShell.dark-theme .queueReports p {
+  color: #f8fafc !important;
+}
+
+.dark-theme .queueReports small,
+.mode-dark .queueReports small,
+.portalDark .queueReports small,
+.portalShell.dark-theme .queueReports small {
+  color: #94a3b8 !important;
+}
+
+.dark-theme .queueReports select,
+.mode-dark .queueReports select,
+.portalDark .queueReports select,
+.portalShell.dark-theme .queueReports select {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  border-color: #475569 !important;
+}
+
 @media (max-width: 700px) {
   .queueControlBar { flex-direction: column; }
   .queueControlBar button.primary { margin-left: 0; }

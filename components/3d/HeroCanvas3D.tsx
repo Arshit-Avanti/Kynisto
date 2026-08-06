@@ -548,10 +548,11 @@ export function HeroCanvas3D() {
     // -------------------------------------------------------------
     let animationFrameId = 0;
     let isVisible = true;
+    let isTabVisible = typeof document !== "undefined" ? !document.hidden : true;
     const clock = new THREE.Clock();
 
     const animate = () => {
-      if (!isVisible) {
+      if (!isVisible || !isTabVisible || (typeof document !== "undefined" && document.hidden)) {
         animationFrameId = 0;
         return;
       }
@@ -617,11 +618,22 @@ export function HeroCanvas3D() {
       renderer.render(scene, camera);
     };
 
+    const handleVisibilityChange = () => {
+      isTabVisible = typeof document !== "undefined" ? !document.hidden : true;
+      if (isTabVisible && isVisible && !animationFrameId) {
+        animate();
+      }
+    };
+
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           isVisible = entry.isIntersecting;
-          if (isVisible && !animationFrameId) {
+          if (isVisible && isTabVisible && !animationFrameId) {
             animate();
           }
         });
@@ -637,6 +649,9 @@ export function HeroCanvas3D() {
     // -------------------------------------------------------------
     return () => {
       observer.disconnect();
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      }
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", handleResize);
@@ -682,6 +697,8 @@ export function HeroCanvas3D() {
         pointerEvents: "none",
         opacity: 0.85,
         backgroundColor: "transparent",
+        transform: "translateZ(0)",
+        willChange: "transform",
       }}
     >
       <div className="heroCanvasOverlayGlow" />

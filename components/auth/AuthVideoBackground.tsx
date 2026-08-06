@@ -236,6 +236,8 @@ export function AuthVideoBackground() {
           opacity: showPhoto ? 0 : 1,
           transition: "opacity 1s ease-in-out",
           filter: "none",
+          transform: "translateZ(0)",
+          willChange: "transform, opacity",
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
           imageRendering: "crisp-edges",

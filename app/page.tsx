@@ -6,6 +6,7 @@ import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { VideoBackground } from "@/components/media/VideoBackground";
 import { ShaderCanvas } from "@/components/ui/ShaderCanvas";
 import { apiFetch } from "@/lib/client-api";
+import { getSupabaseBrowserClient, syncSupabaseAccessCookie } from "@/lib/supabase-browser";
 
 type Category = {
   name: string;
@@ -1148,8 +1149,15 @@ export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
+    let scrollTicking = false;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      if (!scrollTicking) {
+        scrollTicking = true;
+        requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 20);
+          scrollTicking = false;
+        });
+      }
     };
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -1175,11 +1183,25 @@ export default function Home() {
 
   useEffect(() => {
     let active = true;
-    Promise.all([
-      apiFetch<{ items: Array<{ name: string; icon?: string; storeCount?: number }> }>("/api/categories"),
-      apiFetch<{ user: { role: "admin" | "store_owner" | "customer" } | null }>("/api/auth/me"),
-    ])
-      .then(async ([categoryData, sessionData]) => {
+
+    async function loadSessionAndCategories() {
+      try {
+        const supabase = await getSupabaseBrowserClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          syncSupabaseAccessCookie(session);
+        }
+      } catch {
+        // Continue if Supabase browser client fails to load or initialize
+      }
+
+      if (!active) return;
+
+      try {
+        const [categoryData, sessionData] = await Promise.all([
+          apiFetch<{ items: Array<{ name: string; icon?: string; storeCount?: number }> }>("/api/categories"),
+          apiFetch<{ user: { role: "admin" | "store_owner" | "customer" } | null }>("/api/auth/me"),
+        ]);
         if (!active) return;
         const palette = ["coral", "green", "blue", "yellow", "mint", "peach", "lilac", "sky", "lime", "sand"];
         setCatalogCategories(categoryData.items.map((item, index) => ({
@@ -1193,8 +1215,13 @@ export default function Home() {
           const favoriteData = await apiFetch<{ items: Array<{ storeId: string }> }>("/api/favorites");
           if (active) setSaved(favoriteData.items.map((item) => item.storeId));
         }
-      })
-      .catch(() => undefined);
+      } catch {
+        // Fall back gracefully on request failure
+      }
+    }
+
+    void loadSessionAndCategories();
+
     return () => { active = false; };
   }, []);
 

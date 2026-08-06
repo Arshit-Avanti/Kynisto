@@ -326,8 +326,8 @@
 }
 
 .portalButton.success {
-  background: #10B981;
-  color: #fff;
+  background: #059669;
+  color: #ffffff;
 }
 
 .statsGrid {
@@ -518,7 +518,7 @@
 .statusPill.published,
 .statusPill.resolved {
   background: rgba(16, 185, 129, 0.15);
-  color: #10B981;
+  color: #34d399;
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
@@ -526,7 +526,7 @@
 .statusPill.open,
 .statusPill.reviewing {
   background: rgba(245, 158, 11, 0.15);
-  color: #F59E0B;
+  color: #fbbf24;
   border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
@@ -535,7 +535,7 @@
 .statusPill.hidden,
 .statusPill.disabled {
   background: rgba(239, 68, 68, 0.15);
-  color: #EF4444;
+  color: #f87171;
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
@@ -793,10 +793,56 @@
 .portalDark .adminSecurityRow,
 .portalShell.dark-theme .adminSettingRow,
 .portalShell.dark-theme .adminAuditRow,
-.portalShell.dark-theme .adminSecurityRow {
+.portalShell.dark-theme .adminSecurityRow,
+.portal .adminSettingRow,
+.portal .adminAuditRow,
+.portal .adminSecurityRow {
   background-color: rgba(30, 41, 59, 0.7) !important;
   border: 1px solid #334155 !important;
   box-shadow: none !important;
+}
+
+.dark-theme .adminSettingLabel,
+.dark-theme .adminAuditAction,
+.dark-theme .adminSecurityAction,
+.portalDark .adminSettingLabel,
+.portalDark .adminAuditAction,
+.portalDark .adminSecurityAction,
+.portalShell.dark-theme .adminSettingLabel,
+.portalShell.dark-theme .adminSecurityAction,
+.portal .adminSettingLabel,
+.portal .adminAuditAction,
+.portal .adminSecurityAction {
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
+
+.dark-theme .adminSettingKey,
+.dark-theme .adminAuditDate,
+.dark-theme .adminSecurityDate,
+.portalDark .adminSettingKey,
+.portalDark .adminAuditDate,
+.portalDark .adminSecurityDate,
+.portalShell.dark-theme .adminSettingKey,
+.portalShell.dark-theme .adminSecurityKey,
+.portalShell.dark-theme .adminSecurityDate,
+.portal .adminSettingKey,
+.portal .adminAuditDate,
+.portal .adminSecurityDate {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+}
+
+.dark-theme .adminAuditDetails,
+.dark-theme .adminSecurityDetails,
+.portalDark .adminAuditDetails,
+.portalDark .adminSecurityDetails,
+.portalShell.dark-theme .adminAuditDetails,
+.portalShell.dark-theme .adminSecurityDetails,
+.portal .adminAuditDetails,
+.portal .adminSecurityDetails {
+  color: #cbd5e1 !important;
+  -webkit-text-fill-color: #cbd5e1 !important;
 }
 
 .light-theme .adminSettingRow,

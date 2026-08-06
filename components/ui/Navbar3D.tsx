@@ -288,7 +288,7 @@ export function Navbar3D({
               display: "inline-block",
             }}
           >
-            {userRole ? "Dashboard" : "Log in"}
+            {userRole === "admin" ? "Admin Panel" : userRole === "store_owner" ? "Owner Dashboard" : userRole === "customer" ? "My Account" : "Log in"}
           </Link>
         )}
         
@@ -309,7 +309,7 @@ export function Navbar3D({
         <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "rgba(10, 15, 30, 0.98)", padding: "20px", display: "flex", flexDirection: "column", gap: "18px", borderBottom: "1px solid rgba(255, 255, 255, 0.15)", boxShadow: "0 12px 35px rgba(0, 0, 0, 0.8)", backdropFilter: "blur(20px)" }}>
           <Link href="/" onClick={handleCloseMobile} style={{ color: "#FFFFFF", textDecoration: "none", fontSize: "15px" }}>Homepage</Link>
           <Link href={userRole ? (userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account") : "/login"} onClick={handleCloseMobile} style={{ color: "#FFFFFF", textDecoration: "none", fontWeight: 700, fontSize: "16px" }}>
-            {userRole ? "Dashboard" : "Log in"}
+            {userRole === "admin" ? "Admin Panel" : userRole === "store_owner" ? "Owner Dashboard" : userRole === "customer" ? "My Account" : "Log in"}
           </Link>
           <Link
             href={userRole === "customer" || userRole === "admin" ? "/account?tab=favorites" : "/login?returnTo=%2Faccount%3Ftab%3Dfavorites"}

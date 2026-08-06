@@ -76,9 +76,9 @@ export default function AuthConfirmChoice({ hash, accessToken }: AuthConfirmChoi
     return (
       <div className="authCard" style={{ textAlign: "center", padding: "3rem 1.5rem" }}>
         <div className="googleButtonSpinner" style={{ margin: "0 auto 1.5rem auto", width: "36px", height: "36px" }} />
-        <h2 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#0f172a" }}>{statusText}</h2>
+        <h2 style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--text-primary, #0f172a)" }}>{statusText}</h2>
         {!accessToken && (
-          <p style={{ color: "#64748b", fontSize: "0.95rem", marginTop: "0.5rem" }}>
+          <p style={{ color: "var(--text-secondary, #64748b)", fontSize: "0.95rem", marginTop: "0.5rem" }}>
             Please wait a moment while we set up your workspace.
           </p>
         )}
@@ -90,8 +90,8 @@ export default function AuthConfirmChoice({ hash, accessToken }: AuthConfirmChoi
     return (
       <div className="authCard" style={{ textAlign: "center", padding: "2.5rem 1.5rem", display: "flex", flexDirection: "column", gap: "2rem" }}>
         <div>
-          <h2 style={{ fontSize: "1.75rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.5rem" }}>App not installed on your device.</h2>
-          <p style={{ color: "#64748b", fontSize: "1rem" }}>
+          <h2 style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--text-primary, #0f172a)", marginBottom: "0.5rem" }}>App not installed on your device.</h2>
+          <p style={{ color: "var(--text-secondary, #64748b)", fontSize: "1rem" }}>
             You can download the app or continue using the website.
           </p>
         </div>

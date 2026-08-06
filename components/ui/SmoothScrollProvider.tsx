@@ -6,11 +6,19 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
   const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
+    let scrollTicking = false;
     const handleScroll = () => {
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (totalHeight <= 0) return;
-      const progress = (window.scrollY / totalHeight) * 100;
-      setScrollProgress(progress);
+      if (!scrollTicking) {
+        scrollTicking = true;
+        requestAnimationFrame(() => {
+          const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+          if (totalHeight > 0) {
+            const progress = (window.scrollY / totalHeight) * 100;
+            setScrollProgress(progress);
+          }
+          scrollTicking = false;
+        });
+      }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -48,7 +56,9 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
           height: "3px",
           backgroundColor: "#2563EB",
           zIndex: 9999,
-          transition: "width 0.1s"
+          transition: "width 0.1s",
+          transform: "translateZ(0)",
+          willChange: "width",
         }}
         aria-hidden="true"
       />
