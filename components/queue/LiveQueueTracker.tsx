@@ -1,11 +1,46 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Clock, MapPin, AlertCircle, XCircle, CheckCircle2, Navigation, User, Phone, Bell, ArrowLeft, Search, Building2, Stethoscope, Activity, Sparkles, Filter, ChevronRight, Lock, RefreshCw, AlertTriangle, PartyPopper } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/client-api';
 import { PushNotificationManager } from '@/components/ui/PushNotificationManager';
+
+function playTurnArrivalChime() {
+  if (typeof window === "undefined") return;
+  try {
+    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    
+    // Tone 1: High Bell (E5 - 659.25Hz)
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(659.25, ctx.currentTime);
+    gain1.gain.setValueAtTime(0.5, ctx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(ctx.currentTime);
+    osc1.stop(ctx.currentTime + 0.6);
+
+    // Tone 2: Warm Low Chime (C5 - 523.25Hz)
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(523.25, ctx.currentTime + 0.25);
+    gain2.gain.setValueAtTime(0.6, ctx.currentTime + 0.25);
+    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(ctx.currentTime + 0.25);
+    osc2.stop(ctx.currentTime + 1.2);
+  } catch (e) {
+    console.warn("Audio chime playback notice:", e);
+  }
+}
 
 interface HealthcareQueueItem {
   id: string | number;
@@ -219,6 +254,8 @@ export default function LiveQueueTracker() {
     }
   }, [selectedQueue, userPosition, currentEntryId]);
 
+  const notifiedTokenRef = useRef<number | null>(null);
+
   // Poll server every 3 seconds when viewing ticket to sync with Owner's "Call Next", "Pause", or "End Queue" actions
   useEffect(() => {
     if (view !== 'ticket' || !selectedQueue || isCancelled) return;
@@ -230,6 +267,49 @@ export default function LiveQueueTracker() {
 
     return () => clearInterval(pollInterval);
   }, [view, selectedQueue, isCancelled, syncPatientStateWithStore]);
+
+  // 🔔 Trigger Native Push Notification, Chime Sound, and Vibration when Turn Arrives
+  useEffect(() => {
+    if (view !== 'ticket' || !selectedQueue || !myTokenNumber) return;
+
+    const isTurnHere = entryStatus === 'called' || userPosition === 1 || (currentToken === myTokenNumber && myTokenNumber > 0);
+
+    if (isTurnHere && notifiedTokenRef.current !== myTokenNumber) {
+      notifiedTokenRef.current = myTokenNumber;
+
+      // 1. Play Crisp Bell Chime Tone
+      playTurnArrivalChime();
+
+      // 2. Mobile Device Haptic Vibration
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate([300, 150, 300, 150, 600]);
+      }
+
+      // 3. Trigger Native Desktop/Mobile Push Notification
+      if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+        const title = `🚨 YOUR TURN HAS ARRIVED!`;
+        const options: NotificationOptions = {
+          body: `Token #${myTokenNumber} is up now at ${selectedQueue.name}! Please enter the consultation room immediately.`,
+          icon: "/icons/icon-192x192.png",
+          badge: "/icons/badge-72x72.png",
+          tag: `turn-alert-${myTokenNumber}`,
+          renotify: true,
+          vibrate: [300, 150, 300, 150, 600],
+          requireInteraction: true,
+        };
+
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.ready.then((reg) => {
+            reg.showNotification(title, options);
+          }).catch(() => {
+            new Notification(title, options);
+          });
+        } else {
+          new Notification(title, options);
+        }
+      }
+    }
+  }, [view, selectedQueue, myTokenNumber, currentToken, userPosition, entryStatus]);
 
   // Handle Joining Live Queue (Calls REAL D1 Database API)
   const handleJoinQueue = async (item: HealthcareQueueItem) => {
@@ -481,14 +561,23 @@ export default function LiveQueueTracker() {
 
             {/* TURN ARRIVED BANNER */}
             {isMyTurn && (
-              <div className="mb-8 p-6 bg-emerald-950/80 border-2 border-emerald-500/80 rounded-2xl flex items-start text-emerald-100 shadow-[0_0_40px_rgba(16,185,129,0.3)] animate-pulse">
-                <CheckCircle2 className="w-8 h-8 text-emerald-400 mr-4 mt-0.5 shrink-0" />
-                <div>
-                  <h4 className="text-2xl font-black text-white mb-1">🎉 YOUR TURN HAS ARRIVED!</h4>
-                  <p className="text-base font-bold text-emerald-200">
-                    Token #{myTokenNumber} is currently being called by the doctor! Please enter the consultation room immediately.
-                  </p>
+              <div className="mb-8 p-6 bg-emerald-950/80 border-2 border-emerald-500/80 rounded-2xl flex items-start justify-between text-emerald-100 shadow-[0_0_40px_rgba(16,185,129,0.3)] animate-pulse flex-wrap gap-4">
+                <div className="flex items-start">
+                  <CheckCircle2 className="w-8 h-8 text-emerald-400 mr-4 mt-0.5 shrink-0" />
+                  <div>
+                    <h4 className="text-2xl font-black text-white mb-1">🎉 YOUR TURN HAS ARRIVED!</h4>
+                    <p className="text-base font-bold text-emerald-200">
+                      Token #{myTokenNumber} is currently being called by the doctor! Please enter the consultation room immediately.
+                    </p>
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => playTurnArrivalChime()}
+                  className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md self-center"
+                >
+                  🔔 Play Turn Chime
+                </button>
               </div>
             )}
 
