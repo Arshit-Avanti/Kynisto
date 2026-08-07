@@ -118,7 +118,7 @@ export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "16px" }}>
             {pendingPurchases.map((p) => (
-              <div key={p.id} style={{ background: "rgba(15, 23, 42, 0.9)", border: "1px solid rgba(129, 140, 248, 0.4)", borderRadius: "14px", padding: "16px", display: "flex", flexDirection: "column", justifyBetween: "space-between" }}>
+              <div key={p.id} style={{ background: "rgba(15, 23, 42, 0.9)", border: "1px solid rgba(129, 140, 248, 0.4)", borderRadius: "14px", padding: "16px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                 <div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
                     <span style={{ fontWeight: 800, color: "#FFFFFF", fontSize: "16px" }}>{p.planName}</span>
@@ -127,18 +127,25 @@ export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
                     </span>
                   </div>
 
-                  <div style={{ fontSize: "22px", fontWeight: 900, color: "#4ADE80", marginBottom: "8px" }}>
+                  <div style={{ fontSize: "22px", fontWeight: 900, color: "#4ADE80", marginBottom: "6px" }}>
                     ₹{p.amountPaid}
                   </div>
 
-                  <div style={{ fontSize: "13px", color: "#CBD5E1", marginBottom: "6px" }}>
-                    <b>Customer:</b> {p.customerName} ({p.customerEmail || "No Email"})
+                  {/* EXACT PAYMENT DATE & TIME FOR SHOP OWNER */}
+                  <div style={{ fontSize: "12px", color: "#CBD5E1", marginBottom: "8px", background: "rgba(99, 102, 241, 0.2)", border: "1px solid rgba(129, 140, 248, 0.3)", padding: "6px 10px", borderRadius: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <Clock size={14} style={{ color: "#818CF8" }} />
+                    <span>Paid Date & Time: <b style={{ color: "#FFF" }}>{p.createdAt ? new Date(p.createdAt * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "Recently"}</b></span>
                   </div>
 
-                  <div style={{ background: "rgba(99, 102, 241, 0.15)", border: "1px solid rgba(99, 102, 241, 0.3)", padding: "8px 12px", borderRadius: "8px", marginBottom: "14px" }}>
-                    <div style={{ fontSize: "11px", fontWeight: 800, color: "#818CF8", textTransform: "uppercase" }}>Payment UTR / Reference</div>
-                    <div style={{ fontSize: "15px", fontWeight: 900, color: "#FFF", fontFamily: "monospace", marginTop: "2px" }}>
-                      {p.utr || "Direct Payment Request"}
+                  <div style={{ fontSize: "13px", color: "#CBD5E1", marginBottom: "8px" }}>
+                    <b>Customer Name:</b> {p.customerName} <br />
+                    <span style={{ fontSize: "12px", color: "#94A3B8" }}><b>Email:</b> {p.customerEmail || "No Email Provided"}</span>
+                  </div>
+
+                  <div style={{ background: "rgba(15, 23, 42, 0.8)", border: "1px solid rgba(255, 255, 255, 0.1)", padding: "8px 12px", borderRadius: "8px", marginBottom: "14px" }}>
+                    <div style={{ fontSize: "10px", fontWeight: 800, color: "#818CF8", textTransform: "uppercase" }}>Payment UTR / Reference</div>
+                    <div style={{ fontSize: "14px", fontWeight: 900, color: "#FFF", fontFamily: "monospace", marginTop: "2px" }}>
+                      {p.utr || "Direct Payment Request (No UTR)"}
                     </div>
                   </div>
                 </div>
@@ -166,6 +173,38 @@ export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
           </div>
         )}
       </section>
+
+      {/* ACTIVE & APPROVED STORE VIP MEMBERS SECTION */}
+      {activePurchases.length > 0 && (
+        <section className="portalCard full" style={{ background: "rgba(15, 23, 42, 0.8)", border: "1px solid rgba(16, 185, 129, 0.4)", borderRadius: "16px", padding: "20px" }}>
+          <div className="portalCardHeader" style={{ marginBottom: "16px" }}>
+            <h2 style={{ color: "#4ADE80", display: "flex", alignItems: "center", gap: "10px", fontSize: "18px" }}>
+              <CheckCircle2 size={20} /> Active VIP Store Members ({activePurchases.length})
+            </h2>
+            <small style={{ color: "#94A3B8" }}>Customers currently enjoying VIP privileges at your store.</small>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "14px" }}>
+            {activePurchases.map((m) => (
+              <div key={m.id} style={{ background: "rgba(30, 41, 59, 0.6)", border: "1px solid rgba(255, 255, 255, 0.1)", borderRadius: "12px", padding: "14px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                  <span style={{ fontWeight: 800, color: "#FFF", fontSize: "15px" }}>{m.planName}</span>
+                  <span style={{ background: "rgba(16, 185, 129, 0.2)", color: "#4ADE80", border: "1px solid rgba(16, 185, 129, 0.4)", fontSize: "10px", fontWeight: 800, padding: "2px 8px", borderRadius: "6px" }}>
+                    ACTIVE
+                  </span>
+                </div>
+                <div style={{ fontSize: "13px", color: "#CBD5E1", marginBottom: "6px" }}>
+                  <b>Member:</b> {m.customerName} ({m.customerEmail || "No Email"})
+                </div>
+                <div style={{ fontSize: "11px", color: "#94A3B8", display: "flex", flexDirection: "column", gap: "3px", background: "rgba(0,0,0,0.3)", padding: "8px", borderRadius: "6px" }}>
+                  <div><b>Payment Date & Time:</b> {m.createdAt ? new Date(m.createdAt * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "N/A"}</div>
+                  <div><b>UTR Ref:</b> <code style={{ color: "#818CF8" }}>{m.utr || "Direct Approval"}</code></div>
+                  {m.expiresAt && <div><b>Expires On:</b> <span style={{ color: "#FACC15" }}>{new Date(m.expiresAt * 1000).toLocaleDateStyle("en-IN")}</span></div>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* CREATE / EDIT MEMBERSHIP PLAN SECTION */}
       <section className="portalCard">
