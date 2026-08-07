@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { apiFetch } from "@/lib/client-api";
-import { CheckCircle2, ShieldCheck, Sparkles, Star, Zap, QrCode, CreditCard, Clock, Copy, Check } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Sparkles, Star, Zap, QrCode, CreditCard, Clock, Copy, Check, User, Mail } from "lucide-react";
 
 export function StoreMembershipStorefront({ storeId, storeName }: { storeId: string; storeName: string }) {
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [purchasingPlan, setPurchasingPlan] = useState<any | null>(null);
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
   const [utr, setUtr] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
@@ -19,6 +21,15 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
 
   useEffect(() => {
     loadPlans();
+    // Prefill user info from session if available
+    apiFetch<{ user?: any }>("/api/auth/me")
+      .then((res) => {
+        if (res?.user) {
+          if (res.user.name) setCustomerName(res.user.name);
+          if (res.user.email) setCustomerEmail(res.user.email);
+        }
+      })
+      .catch(() => {});
   }, [storeId]);
 
   useEffect(() => {
@@ -66,7 +77,7 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
         "/api/memberships/purchase",
         {
           method: "POST",
-          json: { storeId, planId: purchasingPlan.id, utr },
+          json: { storeId, planId: purchasingPlan.id, utr, customerName, customerEmail },
         }
       );
       const msg = res.reassuranceBanner || res.message || "Don't panic! The shop owner will verify your payment and activate your membership within 24 hours.";
@@ -195,88 +206,116 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
         ))}
       </div>
 
-      {/* CUSTOMER PAYMENT MODAL WITH QR CODE, UPI ID, COUNTDOWN TIMER & TIMESTAMP */}
+      {/* CUSTOMER PAYMENT MODAL WITH PERFECT SCROLL FIT, QR PHOTO, NAME, GMAIL, TIME, UPI & UTR */}
       {purchasingPlan && (
         <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
-          <div style={{ background: "#0F172A", border: "2px solid #6366F1", borderRadius: "20px", padding: "24px", maxWidth: "480px", width: "100%", color: "#FFF", boxShadow: "0 20px 50px rgba(0,0,0,0.6)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <h3 style={{ fontSize: "18px", fontWeight: 800, color: "#818CF8", margin: 0 }}>
+          <div style={{ background: "#0F172A", border: "2px solid #6366F1", borderRadius: "20px", padding: "20px", maxWidth: "460px", width: "100%", maxHeight: "88vh", overflowY: "auto", color: "#FFF", boxShadow: "0 20px 50px rgba(0,0,0,0.6)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+              <h3 style={{ fontSize: "17px", fontWeight: 800, color: "#818CF8", margin: 0 }}>
                 Scan & Pay: {purchasingPlan.name}
               </h3>
               <button onClick={() => setPurchasingPlan(null)} style={{ background: "none", border: "none", color: "#94A3B8", fontSize: "20px", cursor: "pointer" }}>✕</button>
             </div>
 
-            {/* PAYMENT SESSION TIMER & TIMESTAMP */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(99, 102, 241, 0.15)", border: "1px solid rgba(99, 102, 241, 0.3)", padding: "10px 14px", borderRadius: "10px", marginBottom: "16px" }}>
-              <div style={{ fontSize: "12px", color: "#94A3B8", display: "flex", alignItems: "center", gap: "6px" }}>
-                <Clock size={14} style={{ color: "#818CF8" }} />
-                <span>Time: <b>{currentTimeStr}</b></span>
+            {/* PAYMENT SESSION TIMER & LIVE TIMESTAMP */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(99, 102, 241, 0.15)", border: "1px solid rgba(99, 102, 241, 0.3)", padding: "8px 12px", borderRadius: "10px", marginBottom: "12px" }}>
+              <div style={{ fontSize: "11px", color: "#94A3B8", display: "flex", alignItems: "center", gap: "6px" }}>
+                <Clock size={13} style={{ color: "#818CF8" }} />
+                <span>Time: <b style={{ color: "#FFF" }}>{currentTimeStr}</b></span>
               </div>
-              <div style={{ fontSize: "13px", fontWeight: 900, color: timeLeft < 120 ? "#EF4444" : "#FACC15", background: "rgba(0,0,0,0.4)", padding: "4px 10px", borderRadius: "8px", fontFamily: "monospace" }}>
+              <div style={{ fontSize: "12px", fontWeight: 900, color: timeLeft < 120 ? "#EF4444" : "#FACC15", background: "rgba(0,0,0,0.4)", padding: "3px 8px", borderRadius: "6px", fontFamily: "monospace" }}>
                 Session: {formattedTime}
               </div>
             </div>
 
             {/* REASSURANCE BANNER */}
-            <div style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(16,185,129,0.2) 100%)", border: "1px solid #10B981", borderRadius: "12px", padding: "14px", marginBottom: "18px" }}>
-              <div style={{ fontSize: "13px", fontWeight: 800, color: "#4ADE80", display: "flex", alignItems: "center", gap: "8px" }}>
-                <ShieldCheck size={18} /> Don't panic! The shop owner will verify your payment and activate your membership within 24 hours.
+            <div style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(16,185,129,0.2) 100%)", border: "1px solid #10B981", borderRadius: "12px", padding: "12px", marginBottom: "14px" }}>
+              <div style={{ fontSize: "12px", fontWeight: 800, color: "#4ADE80", display: "flex", alignItems: "center", gap: "8px", lineHeight: "1.4" }}>
+                <ShieldCheck size={18} style={{ flexShrink: 0 }} />
+                <span>Don't panic! The shop owner will verify your payment and activate your membership within 24 hours.</span>
               </div>
             </div>
 
-            {/* SCANNABLE QR CODE & UPI ID */}
-            <div style={{ textAlign: "center", background: "rgba(30,41,59,0.9)", border: "1px solid rgba(255,255,255,0.1)", padding: "16px", borderRadius: "14px", marginBottom: "18px" }}>
-              <div style={{ fontSize: "26px", fontWeight: 900, color: "#4ADE80", marginBottom: "8px" }}>
+            {/* SCANNABLE QR CODE & AMOUNT */}
+            <div style={{ textAlign: "center", background: "rgba(30,41,59,0.9)", border: "1px solid rgba(255,255,255,0.1)", padding: "14px", borderRadius: "14px", marginBottom: "14px" }}>
+              <div style={{ fontSize: "24px", fontWeight: 900, color: "#4ADE80", marginBottom: "4px" }}>
                 ₹{purchasingPlan.price}
               </div>
 
               {/* QR CODE PHOTO */}
-              <div style={{ margin: "12px 0" }}>
+              <div style={{ margin: "8px 0" }}>
                 <img
                   src={purchasingPlan.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=${purchasingPlan.upiId || "store@upi"}&pn=${storeName}&am=${purchasingPlan.price}`)}`}
                   alt="Shop Owner Payment QR Code"
-                  style={{ width: "190px", height: "190px", margin: "0 auto", objectFit: "contain", borderRadius: "12px", border: "2px solid #6366F1", background: "#FFF", padding: "8px" }}
+                  style={{ width: "150px", height: "150px", margin: "0 auto", objectFit: "contain", borderRadius: "10px", border: "2px solid #6366F1", background: "#FFF", padding: "6px" }}
                 />
-                <p style={{ fontSize: "12px", color: "#CBD5E1", marginTop: "8px", fontWeight: 700 }}>
+                <p style={{ fontSize: "11px", color: "#CBD5E1", marginTop: "6px", fontWeight: 700 }}>
                   Scan QR photo using Google Pay, PhonePe, Paytm or any UPI App
                 </p>
               </div>
 
               {/* UPI ID WITH COPY BUTTON */}
-              {purchasingPlan.upiId ? (
-                <div style={{ background: "rgba(99,102,241,0.2)", border: "1px solid #6366F1", padding: "10px 14px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginTop: "12px" }}>
+              {purchasingPlan.upiId && (
+                <div style={{ background: "rgba(99,102,241,0.2)", border: "1px solid #6366F1", padding: "8px 12px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginTop: "8px" }}>
                   <div style={{ textAlign: "left" }}>
-                    <div style={{ fontSize: "10px", color: "#94A3B8", fontWeight: 800, textTransform: "uppercase" }}>Shop Owner UPI ID</div>
-                    <div style={{ fontSize: "15px", fontWeight: 900, color: "#FFF", fontFamily: "monospace" }}>{purchasingPlan.upiId}</div>
+                    <div style={{ fontSize: "9px", color: "#94A3B8", fontWeight: 800, textTransform: "uppercase" }}>Shop Owner UPI ID</div>
+                    <div style={{ fontSize: "14px", fontWeight: 900, color: "#FFF", fontFamily: "monospace" }}>{purchasingPlan.upiId}</div>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleCopyUpi(purchasingPlan.upiId)}
-                    style={{ background: "#6366F1", color: "#FFF", border: "none", padding: "6px 12px", borderRadius: "8px", fontSize: "12px", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
+                    style={{ background: "#6366F1", color: "#FFF", border: "none", padding: "5px 10px", borderRadius: "6px", fontSize: "11px", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
                   >
-                    {copiedUpi ? <Check size={14} /> : <Copy size={14} />}
+                    {copiedUpi ? <Check size={13} /> : <Copy size={13} />}
                     {copiedUpi ? "Copied!" : "Copy UPI"}
                   </button>
-                </div>
-              ) : (
-                <div style={{ background: "rgba(255,255,255,0.05)", padding: "10px", borderRadius: "10px", fontSize: "13px", color: "#94A3B8" }}>
-                  Direct UPI Transfer Available
                 </div>
               )}
             </div>
 
-            {/* UTR INPUT */}
-            <div style={{ marginBottom: "18px" }}>
-              <label style={{ fontSize: "12px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
-                Enter Payment UTR / Transaction Ref No.
-              </label>
-              <input
-                type="text"
-                value={utr}
-                onChange={(e) => setUtr(e.target.value)}
-                placeholder="12-digit UTR or Transaction ID (e.g. 423819203912)"
-                style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "12px", borderRadius: "10px", fontSize: "14px", fontWeight: 700 }}
-              />
+            {/* CUSTOMER DETAILS FORM: NAME, GMAIL & UTR */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "16px" }}>
+              <div>
+                <label style={{ fontSize: "11px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "4px", marginBottom: "4px" }}>
+                  <User size={13} /> Enter Name
+                </label>
+                <input
+                  type="text"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="Your Full Name"
+                  style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "10px 12px", borderRadius: "8px", fontSize: "13px", fontWeight: 700 }}
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: "11px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "4px", marginBottom: "4px" }}>
+                  <Mail size={13} /> Enter Gmail / Email ID
+                </label>
+                <input
+                  type="email"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="name@gmail.com"
+                  style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "10px 12px", borderRadius: "8px", fontSize: "13px", fontWeight: 700 }}
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: "11px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>
+                  Enter Payment UTR / Transaction Ref No.
+                </label>
+                <input
+                  type="text"
+                  value={utr}
+                  onChange={(e) => setUtr(e.target.value)}
+                  placeholder="12-digit UTR or Transaction ID (e.g. 423819203912)"
+                  style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "10px 12px", borderRadius: "8px", fontSize: "13px", fontWeight: 700 }}
+                  required
+                />
+              </div>
             </div>
 
             <button
@@ -288,15 +327,15 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
                 background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
                 color: "#FFFFFF",
                 border: "none",
-                padding: "14px",
-                borderRadius: "12px",
+                padding: "13px",
+                borderRadius: "10px",
                 fontWeight: 900,
-                fontSize: "15px",
+                fontSize: "14px",
                 cursor: "pointer",
                 boxShadow: "0 4px 16px rgba(16, 185, 129, 0.4)",
               }}
             >
-              {isSubmitting ? "Submitting Payment Proof..." : reassuranceMessage !== "" ? "Payment Verification Submitted!" : "Submit Payment & Request Activation"}
+              {isSubmitting ? "Submitting Payment Details..." : reassuranceMessage !== "" ? "Payment Details Submitted!" : "Submit Payment & Request Activation"}
             </button>
           </div>
         </div>

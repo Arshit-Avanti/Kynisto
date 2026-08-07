@@ -9,7 +9,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    const { storeId, planId, utr } = await request.json();
+    const { storeId, planId, utr, customerName, customerEmail } = await request.json();
 
     if (!storeId || !planId) {
       return NextResponse.json({ error: "storeId and planId are required" }, { status: 400 });
@@ -29,6 +29,9 @@ export async function POST(request: Request) {
     const now = Math.floor(Date.now() / 1000);
     const membershipId = `mem_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
+    const finalName = String(customerName || session.user.name || "Customer").trim();
+    const finalEmail = String(customerEmail || session.user.email || "").trim();
+
     await d1.prepare(`
       INSERT INTO customer_store_memberships (
         id, store_id, plan_id, customer_id, customer_name, customer_email,
@@ -36,7 +39,7 @@ export async function POST(request: Request) {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       membershipId, storeId, planId, session.user.id,
-      session.user.name || "Customer", session.user.email || "",
+      finalName, finalEmail,
       plan.name, plan.price, utr ? String(utr).trim() : null,
       "pending_verification", now, now
     ).run();
