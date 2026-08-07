@@ -347,6 +347,7 @@ export function Navbar3D({
           role="dialog"
           aria-modal="true"
           aria-label="Mobile Navigation Drawer"
+          className="mobileNavDrawer"
           style={{
             position: "fixed",
             top: 0,
@@ -364,11 +365,13 @@ export function Navbar3D({
             padding: "20px 20px 32px 20px",
             overflowY: "auto",
             boxSizing: "border-box",
+            color: "#FFFFFF",
+            WebkitTextFillColor: "#FFFFFF",
           }}
         >
           {/* Header row inside mobile drawer */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
-            <Link href="/" onClick={handleCloseMobile} style={{ textDecoration: "none" }}>
+            <Link href="/" onClick={handleCloseMobile} style={{ textDecoration: "none", color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>
               <KynistoLogo showTagline={false} />
             </Link>
             <button
@@ -382,6 +385,7 @@ export function Navbar3D({
                 background: "rgba(255, 255, 255, 0.1)",
                 border: "1px solid rgba(255, 255, 255, 0.2)",
                 color: "#FFFFFF",
+                WebkitTextFillColor: "#FFFFFF",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -403,6 +407,7 @@ export function Navbar3D({
                 onUseLocation();
                 handleCloseMobile();
               }}
+              className="drawerCard"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -415,16 +420,18 @@ export function Navbar3D({
                 cursor: "pointer",
                 textAlign: "left",
                 width: "100%",
+                color: "#FFFFFF",
+                WebkitTextFillColor: "#FFFFFF",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#FF5722", boxShadow: "0 0 10px #FF5722", display: "inline-block" }} />
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                  <span style={{ fontSize: "10px", color: "#FF8A00", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>Locality</span>
-                  <span style={{ fontSize: "14px", color: "#FFFFFF", fontWeight: 700 }}>{locationLabel}</span>
+                  <span style={{ fontSize: "10px", color: "#FF8A00", WebkitTextFillColor: "#FF8A00", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>Locality</span>
+                  <span style={{ fontSize: "14px", color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF", fontWeight: 700 }}>{locationLabel}</span>
                 </div>
               </div>
-              <span style={{ fontSize: "13px", color: "#FF5722", fontWeight: 700 }}>Change 📍</span>
+              <span style={{ fontSize: "13px", color: "#FF5722", WebkitTextFillColor: "#FF5722", fontWeight: 700 }}>Change 📍</span>
             </button>
           )}
 
@@ -433,6 +440,7 @@ export function Navbar3D({
             <Link
               href="/"
               onClick={handleCloseMobile}
+              className="drawerCard drawerLink"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -442,18 +450,20 @@ export function Navbar3D({
                 background: "rgba(255, 255, 255, 0.05)",
                 border: "1px solid rgba(255, 255, 255, 0.1)",
                 color: "#FFFFFF",
+                WebkitTextFillColor: "#FFFFFF",
                 textDecoration: "none",
                 fontSize: "15px",
                 fontWeight: 600,
               }}
             >
-              <span>Homepage</span>
-              <span style={{ opacity: 0.5 }}>→</span>
+              <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Homepage</span>
+              <span style={{ opacity: 0.5, color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>→</span>
             </Link>
 
             <Link
               href="/products"
               onClick={handleCloseMobile}
+              className="drawerCard drawerLink"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -463,18 +473,20 @@ export function Navbar3D({
                 background: "rgba(255, 255, 255, 0.05)",
                 border: "1px solid rgba(255, 255, 255, 0.1)",
                 color: "#FFFFFF",
+                WebkitTextFillColor: "#FFFFFF",
                 textDecoration: "none",
                 fontSize: "15px",
                 fontWeight: 600,
               }}
             >
-              <span>Products</span>
-              <span style={{ opacity: 0.5 }}>→</span>
+              <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Products</span>
+              <span style={{ opacity: 0.5, color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>→</span>
             </Link>
 
             <Link
               href="/healthcare"
               onClick={handleCloseMobile}
+              className="drawerCard drawerLink"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -484,18 +496,20 @@ export function Navbar3D({
                 background: "rgba(255, 255, 255, 0.05)",
                 border: "1px solid rgba(255, 255, 255, 0.1)",
                 color: "#FFFFFF",
+                WebkitTextFillColor: "#FFFFFF",
                 textDecoration: "none",
                 fontSize: "15px",
                 fontWeight: 600,
               }}
             >
-              <span>Healthcare</span>
-              <span style={{ opacity: 0.5 }}>→</span>
+              <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Healthcare</span>
+              <span style={{ opacity: 0.5, color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>→</span>
             </Link>
 
             <Link
               href="/services"
               onClick={handleCloseMobile}
+              className="drawerCard drawerLink"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -505,18 +519,20 @@ export function Navbar3D({
                 background: "rgba(255, 255, 255, 0.05)",
                 border: "1px solid rgba(255, 255, 255, 0.1)",
                 color: "#FFFFFF",
+                WebkitTextFillColor: "#FFFFFF",
                 textDecoration: "none",
                 fontSize: "15px",
                 fontWeight: 600,
               }}
             >
-              <span>Services</span>
-              <span style={{ opacity: 0.5 }}>→</span>
+              <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Services</span>
+              <span style={{ opacity: 0.5, color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>→</span>
             </Link>
 
             <Link
               href="/pricing"
               onClick={handleCloseMobile}
+              className="drawerCard drawerLink"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -525,19 +541,21 @@ export function Navbar3D({
                 borderRadius: "14px",
                 background: "rgba(255, 122, 0, 0.12)",
                 border: "1px solid rgba(255, 122, 0, 0.4)",
-                color: "#FF7A00",
+                color: "#FFFFFF",
+                WebkitTextFillColor: "#FFFFFF",
                 textDecoration: "none",
                 fontSize: "15px",
                 fontWeight: 700,
               }}
             >
-              <span>Pricing &amp; Plans</span>
+              <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Pricing &amp; Plans</span>
               <span>⚡</span>
             </Link>
 
             <Link
               href={userRole ? (userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account") : "/login"}
               onClick={handleCloseMobile}
+              className="drawerCard drawerLink"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -546,6 +564,7 @@ export function Navbar3D({
                 borderRadius: "14px",
                 background: "linear-gradient(135deg, #FF5722 0%, #E53935 100%)",
                 color: "#FFFFFF",
+                WebkitTextFillColor: "#FFFFFF",
                 textDecoration: "none",
                 fontSize: "15px",
                 fontWeight: 700,
@@ -553,7 +572,7 @@ export function Navbar3D({
                 marginTop: "6px",
               }}
             >
-              <span>
+              <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>
                 {userRole === "admin" ? "Admin Panel" : userRole === "store_owner" ? "Owner Dashboard" : userRole === "customer" ? "My Account" : "Dashboard / Log in"}
               </span>
               <span>👤</span>
@@ -565,6 +584,7 @@ export function Navbar3D({
                 handleFavoritesClick();
                 handleCloseMobile();
               }}
+              className="drawerCard drawerLink"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -574,6 +594,7 @@ export function Navbar3D({
                 background: "rgba(255, 255, 255, 0.05)",
                 border: "1px solid rgba(255, 255, 255, 0.1)",
                 color: "#FFFFFF",
+                WebkitTextFillColor: "#FFFFFF",
                 fontSize: "15px",
                 fontWeight: 600,
                 cursor: "pointer",
@@ -581,10 +602,10 @@ export function Navbar3D({
                 width: "100%",
               }}
             >
-              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ color: "#FF5722" }}>♥</span> Saved Places
+              <span style={{ display: "flex", alignItems: "center", gap: "8px", color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>
+                <span style={{ color: "#FF5722", WebkitTextFillColor: "#FF5722" }}>♥</span> Saved Places
               </span>
-              <b style={{ background: "rgba(255, 87, 34, 0.25)", color: "#FF8A00", border: "1px solid rgba(255, 138, 0, 0.4)", padding: "2px 10px", borderRadius: "12px", fontSize: "12px" }}>
+              <b style={{ background: "rgba(255, 87, 34, 0.25)", color: "#FF8A00", WebkitTextFillColor: "#FF8A00", border: "1px solid rgba(255, 138, 0, 0.4)", padding: "2px 10px", borderRadius: "12px", fontSize: "12px" }}>
                 {savedCount}
               </b>
             </button>
@@ -596,6 +617,7 @@ export function Navbar3D({
                   onOpenCustomize();
                   handleCloseMobile();
                 }}
+                className="drawerCard drawerLink"
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -605,6 +627,7 @@ export function Navbar3D({
                   background: "rgba(255, 255, 255, 0.05)",
                   border: "1px solid rgba(255, 255, 255, 0.1)",
                   color: "#FFFFFF",
+                  WebkitTextFillColor: "#FFFFFF",
                   fontSize: "15px",
                   fontWeight: 600,
                   cursor: "pointer",
@@ -612,14 +635,14 @@ export function Navbar3D({
                   width: "100%",
                 }}
               >
-                <span>Customize Appearance</span>
+                <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Customize Appearance</span>
                 <span>⚙️</span>
               </button>
             )}
           </nav>
 
           <div style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid rgba(255, 255, 255, 0.1)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.5)" }}>Kynisto 2.0</span>
+            <span style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.7)", WebkitTextFillColor: "rgba(255, 255, 255, 0.7)" }}>Kynisto 2.0</span>
             <ThemeSwitcher size="sm" />
           </div>
         </div>

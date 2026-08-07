@@ -11,6 +11,191 @@ export interface PlanFeature {
   tooltip?: string;
 }
 
+// -------------------------------------------------------------
+// MARKETPLACE FEATURES & COMBOS TYPES & SEED DATA
+// -------------------------------------------------------------
+export interface MarketplaceFeature {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  category?: string;
+  badge?: string;
+  icon?: string;
+  isActive: boolean;
+  createdAt?: number;
+  updatedAt?: number;
+}
+
+export interface MarketplaceCombo {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  features: string[];
+  badge?: string;
+  isActive: boolean;
+  createdAt?: number;
+  updatedAt?: number;
+}
+
+export const DEFAULT_MARKETPLACE_FEATURES: MarketplaceFeature[] = [
+  {
+    id: "feat_live_queue_pro",
+    name: "Live Queue Pro",
+    slug: "live-queue-pro",
+    description: "Real-time customer queue tracking, live position updates, and estimated wait times.",
+    price: 299,
+    originalPrice: 399,
+    category: "Queue & Operations",
+    badge: "HOT",
+    icon: "Users",
+    isActive: true,
+  },
+  {
+    id: "feat_verified_badge",
+    name: "Verified Badge",
+    slug: "verified-badge",
+    description: "Verified checkmark badge next to your store name to boost customer trust.",
+    price: 49,
+    originalPrice: 99,
+    category: "Branding & Trust",
+    badge: "TRUSTED",
+    icon: "ShieldCheck",
+    isActive: true,
+  },
+  {
+    id: "feat_promotions",
+    name: "Promotions",
+    slug: "promotions",
+    description: "Broadcast discounts, coupons, and push notifications to nearby customers.",
+    price: 199,
+    originalPrice: 299,
+    category: "Marketing",
+    badge: "GROWTH",
+    icon: "Megaphone",
+    isActive: true,
+  },
+  {
+    id: "feat_analytics_pro",
+    name: "Analytics Pro",
+    slug: "analytics-pro",
+    description: "Detailed customer footfall analytics, peak hours reports, and queue history graphs.",
+    price: 149,
+    originalPrice: 249,
+    category: "Insights",
+    badge: "INSIGHTS",
+    icon: "BarChart3",
+    isActive: true,
+  },
+  {
+    id: "feat_top_search_ranking",
+    name: "Top Search Ranking",
+    slug: "top-search-ranking",
+    description: "Priority listing on search results and homepage recommended stores.",
+    price: 99,
+    originalPrice: 199,
+    category: "Visibility",
+    badge: "BOOSTED",
+    icon: "TrendingUp",
+    isActive: true,
+  },
+  {
+    id: "feat_membership_management",
+    name: "Membership Management",
+    slug: "membership-management",
+    description: "Issue custom store memberships, customer loyalty passes, and recurring rewards.",
+    price: 299,
+    originalPrice: 499,
+    category: "Customer Retention",
+    badge: "RETENTION",
+    icon: "CreditCard",
+    isActive: true,
+  },
+  {
+    id: "feat_future_features_pass",
+    name: "Future Features Pass",
+    slug: "future-features-pass",
+    description: "All upcoming AI features, automated SMS alerts, and early access beta tools.",
+    price: 499,
+    originalPrice: 799,
+    category: "VIP Pass",
+    badge: "VIP ACCESS",
+    icon: "Sparkles",
+    isActive: true,
+  },
+];
+
+export const DEFAULT_MARKETPLACE_COMBOS: MarketplaceCombo[] = [
+  {
+    id: "combo_starter_pack",
+    name: "Starter Pack",
+    slug: "starter-pack",
+    description: "Essential setup for new stores combining Verified Badge & Live Queue Pro.",
+    price: 329,
+    originalPrice: 348,
+    features: ["verified-badge", "live-queue-pro"],
+    badge: "STARTER",
+    isActive: true,
+  },
+  {
+    id: "combo_growth_pack",
+    name: "Growth Pack",
+    slug: "growth-pack",
+    description: "Accelerate store revenue with Live Queue Pro, Promotions, and Analytics Pro.",
+    price: 499,
+    originalPrice: 647,
+    features: ["live-queue-pro", "promotions", "analytics-pro"],
+    badge: "POPULAR",
+    isActive: true,
+  },
+  {
+    id: "combo_visibility_pack",
+    name: "Visibility Pack",
+    slug: "visibility-pack",
+    description: "Maximize store discovery with Verified Badge, Top Search Ranking, and Promotions.",
+    price: 299,
+    originalPrice: 347,
+    features: ["verified-badge", "top-search-ranking", "promotions"],
+    badge: "BEST VALUE",
+    isActive: true,
+  },
+  {
+    id: "combo_smart_business_pack",
+    name: "Smart Business Pack",
+    slug: "smart-business-pack",
+    description: "Comprehensive toolkit including Live Queue Pro, Analytics, Top Search, and Memberships.",
+    price: 699,
+    originalPrice: 945,
+    features: ["live-queue-pro", "analytics-pro", "top-search-ranking", "membership-management"],
+    badge: "RECOMMENDED",
+    isActive: true,
+  },
+  {
+    id: "combo_ultimate_business_pack",
+    name: "Ultimate Business Pack",
+    slug: "ultimate-business-pack",
+    description: "Unlock everything! All 7 premium features bundled together at the maximum discount.",
+    price: 999,
+    originalPrice: 1593,
+    features: [
+      "live-queue-pro",
+      "verified-badge",
+      "promotions",
+      "analytics-pro",
+      "top-search-ranking",
+      "membership-management",
+      "future-features-pass",
+    ],
+    badge: "ALL-IN-ONE",
+    isActive: true,
+  },
+];
+
 export interface PlanConfig {
   id: string;
   role: "customer" | "store_owner";
@@ -38,6 +223,28 @@ export interface PlanConfig {
   allowCoupons?: boolean;
   allowStaffAccounts?: boolean;
   allowPromotions?: boolean;
+}
+
+export interface MarketplaceItem {
+  id: string;
+  itemType: "feature" | "plan" | "combo_pack";
+  title: string;
+  description: string;
+  role: "customer" | "store_owner" | "both";
+  priceMonthly: number;
+  priceYearly: number;
+  currency: string;
+  badge?: string;
+  badgeType?: "best_seller" | "best_value" | "popular" | "recommended" | "new" | "custom";
+  status: "active" | "coming_soon" | "inactive";
+  isActive: boolean;
+  isComingSoon: boolean;
+  features: string[];
+  includedItemIds?: string[];
+  metadata?: Record<string, unknown>;
+  sortOrder: number;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export const UPI_PAYMENT_ID = "9315678560@fam";
@@ -430,6 +637,104 @@ export async function ensureSubscriptionTables() {
         created_at INTEGER NOT NULL DEFAULT (unixepoch())
       )
     `).run();
+
+    // 10. Marketplace Features Table
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS marketplace_features (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        slug TEXT NOT NULL UNIQUE,
+        description TEXT,
+        price REAL NOT NULL DEFAULT 0,
+        original_price REAL DEFAULT 0,
+        category TEXT,
+        badge TEXT,
+        icon TEXT,
+        is_active INTEGER NOT NULL DEFAULT 1,
+        created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+        updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+      )
+    `).run();
+
+    // 11. Marketplace Combos Table
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS marketplace_combos (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        slug TEXT NOT NULL UNIQUE,
+        description TEXT,
+        price REAL NOT NULL DEFAULT 0,
+        original_price REAL DEFAULT 0,
+        features TEXT,
+        badge TEXT,
+        is_active INTEGER NOT NULL DEFAULT 1,
+        created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+        updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+      )
+    `).run();
+
+    // Seed initial marketplace features if table is empty
+    try {
+      const featCount = await db
+        .prepare(`SELECT COUNT(*) as count FROM marketplace_features`)
+        .first<{ count: number }>();
+
+      if (!featCount || featCount.count === 0) {
+        for (const feat of DEFAULT_MARKETPLACE_FEATURES) {
+          await db
+            .prepare(
+              `INSERT OR IGNORE INTO marketplace_features (id, name, slug, description, price, original_price, category, badge, icon, is_active)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+            )
+            .bind(
+              feat.id,
+              feat.name,
+              feat.slug,
+              feat.description,
+              feat.price,
+              feat.originalPrice || 0,
+              feat.category || "",
+              feat.badge || "",
+              feat.icon || "",
+              feat.isActive ? 1 : 0
+            )
+            .run();
+        }
+      }
+    } catch (e) {
+      console.error("Error seeding marketplace_features:", e);
+    }
+
+    // Seed initial marketplace combos if table is empty
+    try {
+      const comboCount = await db
+        .prepare(`SELECT COUNT(*) as count FROM marketplace_combos`)
+        .first<{ count: number }>();
+
+      if (!comboCount || comboCount.count === 0) {
+        for (const combo of DEFAULT_MARKETPLACE_COMBOS) {
+          await db
+            .prepare(
+              `INSERT OR IGNORE INTO marketplace_combos (id, name, slug, description, price, original_price, features, badge, is_active)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+            )
+            .bind(
+              combo.id,
+              combo.name,
+              combo.slug,
+              combo.description,
+              combo.price,
+              combo.originalPrice || 0,
+              JSON.stringify(combo.features),
+              combo.badge || "",
+              combo.isActive ? 1 : 0
+            )
+            .run();
+        }
+      }
+    } catch (e) {
+      console.error("Error seeding marketplace_combos:", e);
+    }
   } catch (error) {
     console.error("Subscription table initialization error:", error);
   }
@@ -638,6 +943,169 @@ export function isSubscriptionExpiringSoon(
   if (expiresAt <= now) return false;
   const daysRemaining = calculateDaysRemaining(expiresAt, now);
   return daysRemaining >= 0 && daysRemaining <= 3;
+}
+
+// -------------------------------------------------------------
+// D1 MARKETPLACE CRUD HELPERS
+// -------------------------------------------------------------
+export async function getMarketplaceFeatures(activeOnly: boolean = false): Promise<MarketplaceFeature[]> {
+  try {
+    await ensureSubscriptionTables();
+    const db = getD1();
+    const query = activeOnly
+      ? `SELECT id, name, slug, description, price, original_price AS originalPrice, category, badge, icon, is_active AS isActive, created_at AS createdAt, updated_at AS updatedAt FROM marketplace_features WHERE is_active = 1 ORDER BY price ASC`
+      : `SELECT id, name, slug, description, price, original_price AS originalPrice, category, badge, icon, is_active AS isActive, created_at AS createdAt, updated_at AS updatedAt FROM marketplace_features ORDER BY price ASC`;
+    const res = await db.prepare(query).all<any>();
+    if (res.results && res.results.length > 0) {
+      return res.results.map((r: any) => ({
+        ...r,
+        isActive: Boolean(r.isActive),
+      }));
+    }
+  } catch (err) {
+    console.error("Error fetching marketplace features:", err);
+  }
+  return activeOnly ? DEFAULT_MARKETPLACE_FEATURES.filter((f) => f.isActive) : DEFAULT_MARKETPLACE_FEATURES;
+}
+
+export async function getMarketplaceCombos(activeOnly: boolean = false): Promise<MarketplaceCombo[]> {
+  try {
+    await ensureSubscriptionTables();
+    const db = getD1();
+    const query = activeOnly
+      ? `SELECT id, name, slug, description, price, original_price AS originalPrice, features, badge, is_active AS isActive, created_at AS createdAt, updated_at AS updatedAt FROM marketplace_combos WHERE is_active = 1 ORDER BY price ASC`
+      : `SELECT id, name, slug, description, price, original_price AS originalPrice, features, badge, is_active AS isActive, created_at AS createdAt, updated_at AS updatedAt FROM marketplace_combos ORDER BY price ASC`;
+    const res = await db.prepare(query).all<any>();
+    if (res.results && res.results.length > 0) {
+      return res.results.map((r: any) => {
+        let features: string[] = [];
+        try {
+          features = typeof r.features === "string" ? JSON.parse(r.features) : r.features || [];
+        } catch {
+          features = [];
+        }
+        return {
+          ...r,
+          isActive: Boolean(r.isActive),
+          features,
+        };
+      });
+    }
+  } catch (err) {
+    console.error("Error fetching marketplace combos:", err);
+  }
+  return activeOnly ? DEFAULT_MARKETPLACE_COMBOS.filter((c) => c.isActive) : DEFAULT_MARKETPLACE_COMBOS;
+}
+
+export async function saveMarketplaceFeature(feature: Partial<MarketplaceFeature> & { name: string }): Promise<MarketplaceFeature> {
+  await ensureSubscriptionTables();
+  const db = getD1();
+  const now = Math.floor(Date.now() / 1000);
+  const id = feature.id || `feat_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  const slug = feature.slug || feature.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const name = feature.name;
+  const description = feature.description || "";
+  const price = Number(feature.price) || 0;
+  const originalPrice = Number(feature.originalPrice) || 0;
+  const category = feature.category || "";
+  const badge = feature.badge || "";
+  const icon = feature.icon || "";
+  const isActive = feature.isActive !== undefined ? (feature.isActive ? 1 : 0) : 1;
+
+  await db
+    .prepare(
+      `INSERT INTO marketplace_features (id, name, slug, description, price, original_price, category, badge, icon, is_active, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET
+         name = excluded.name,
+         slug = excluded.slug,
+         description = excluded.description,
+         price = excluded.price,
+         original_price = excluded.original_price,
+         category = excluded.category,
+         badge = excluded.badge,
+         icon = excluded.icon,
+         is_active = excluded.is_active,
+         updated_at = excluded.updated_at`
+    )
+    .bind(id, name, slug, description, price, originalPrice, category, badge, icon, isActive, now, now)
+    .run();
+
+  return {
+    id,
+    name,
+    slug,
+    description,
+    price,
+    originalPrice,
+    category,
+    badge,
+    icon,
+    isActive: Boolean(isActive),
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+export async function saveMarketplaceCombo(combo: Partial<MarketplaceCombo> & { name: string }): Promise<MarketplaceCombo> {
+  await ensureSubscriptionTables();
+  const db = getD1();
+  const now = Math.floor(Date.now() / 1000);
+  const id = combo.id || `combo_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  const slug = combo.slug || combo.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const name = combo.name;
+  const description = combo.description || "";
+  const price = Number(combo.price) || 0;
+  const originalPrice = Number(combo.originalPrice) || 0;
+  const features = JSON.stringify(Array.isArray(combo.features) ? combo.features : []);
+  const badge = combo.badge || "";
+  const isActive = combo.isActive !== undefined ? (combo.isActive ? 1 : 0) : 1;
+
+  await db
+    .prepare(
+      `INSERT INTO marketplace_combos (id, name, slug, description, price, original_price, features, badge, is_active, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET
+         name = excluded.name,
+         slug = excluded.slug,
+         description = excluded.description,
+         price = excluded.price,
+         original_price = excluded.original_price,
+         features = excluded.features,
+         badge = excluded.badge,
+         is_active = excluded.is_active,
+         updated_at = excluded.updated_at`
+    )
+    .bind(id, name, slug, description, price, originalPrice, features, badge, isActive, now, now)
+    .run();
+
+  return {
+    id,
+    name,
+    slug,
+    description,
+    price,
+    originalPrice,
+    features: Array.isArray(combo.features) ? combo.features : [],
+    badge,
+    isActive: Boolean(isActive),
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+export async function deleteMarketplaceFeature(id: string): Promise<boolean> {
+  await ensureSubscriptionTables();
+  const db = getD1();
+  const res = await db.prepare(`DELETE FROM marketplace_features WHERE id = ? OR slug = ?`).bind(id, id).run();
+  return (res.meta?.changes ?? 0) > 0;
+}
+
+export async function deleteMarketplaceCombo(id: string): Promise<boolean> {
+  await ensureSubscriptionTables();
+  const db = getD1();
+  const res = await db.prepare(`DELETE FROM marketplace_combos WHERE id = ? OR slug = ?`).bind(id, id).run();
+  return (res.meta?.changes ?? 0) > 0;
 }
 
 

@@ -2118,26 +2118,91 @@ footer > p { color: var(--muted); font-size: 11px; }
 }
 
 /* Force Light Mode High Contrast for Headings, Paragraphs, Labels, Table Headers/Cells */
-.light-theme h1:not([class*="text-"]),
-.light-theme h2:not([class*="text-"]),
-.light-theme h3:not([class*="text-"]),
-.light-theme h4:not([class*="text-"]),
-.light-theme h5:not([class*="text-"]),
-.light-theme h6:not([class*="text-"]),
-.light-theme p:not([class*="text-"]),
-.light-theme label:not([class*="text-"]),
-.light-theme li:not([class*="text-"]),
-.mode-light h1:not([class*="text-"]),
-.mode-light h2:not([class*="text-"]),
-.mode-light h3:not([class*="text-"]),
-.mode-light h4:not([class*="text-"]),
-.mode-light h5:not([class*="text-"]),
-.mode-light h6:not([class*="text-"]),
-.mode-light p:not([class*="text-"]),
-.mode-light label:not([class*="text-"]),
-.mode-light li:not([class*="text-"]) {
+.light-theme h1:not([class*="text-"]):not(.mobileNavDrawer *),
+.light-theme h2:not([class*="text-"]):not(.mobileNavDrawer *),
+.light-theme h3:not([class*="text-"]):not(.mobileNavDrawer *),
+.light-theme h4:not([class*="text-"]):not(.mobileNavDrawer *),
+.light-theme h5:not([class*="text-"]):not(.mobileNavDrawer *),
+.light-theme h6:not([class*="text-"]):not(.mobileNavDrawer *),
+.light-theme p:not([class*="text-"]):not(.mobileNavDrawer *),
+.light-theme label:not([class*="text-"]):not(.mobileNavDrawer *),
+.light-theme li:not([class*="text-"]):not(.mobileNavDrawer *),
+.mode-light h1:not([class*="text-"]):not(.mobileNavDrawer *),
+.mode-light h2:not([class*="text-"]):not(.mobileNavDrawer *),
+.mode-light h3:not([class*="text-"]):not(.mobileNavDrawer *),
+.mode-light h4:not([class*="text-"]):not(.mobileNavDrawer *),
+.mode-light h5:not([class*="text-"]):not(.mobileNavDrawer *),
+.mode-light h6:not([class*="text-"]):not(.mobileNavDrawer *),
+.mode-light p:not([class*="text-"]):not(.mobileNavDrawer *),
+.mode-light label:not([class*="text-"]):not(.mobileNavDrawer *),
+.mode-light li:not([class*="text-"]):not(.mobileNavDrawer *) {
   color: #0F172A !important;
   -webkit-text-fill-color: #0F172A !important;
+}
+
+/* Mobile Navigation Drawer & Dark Drawer Cards High Contrast Text Enforcement for Light & Dark Modes */
+.mobileNavDrawer,
+.mobileNavDrawer *,
+.mobileNavDrawer a,
+.mobileNavDrawer button,
+.mobileNavDrawer span,
+.mobileNavDrawer div,
+.mobileNavDrawer p,
+.mobileNavDrawer b,
+.mobileNavDrawer label,
+.mobileNavDrawer nav,
+.mobileNavDrawer nav *,
+.drawerCard,
+.drawerCard *,
+.drawerLink,
+.drawerLink *,
+.light-theme .mobileNavDrawer,
+.light-theme .mobileNavDrawer *,
+.light-theme .mobileNavDrawer a,
+.light-theme .mobileNavDrawer button,
+.light-theme .mobileNavDrawer span,
+.light-theme .mobileNavDrawer div,
+.light-theme .mobileNavDrawer p,
+.light-theme .mobileNavDrawer b,
+.light-theme .mobileNavDrawer label,
+.light-theme .mobileNavDrawer nav,
+.light-theme .mobileNavDrawer nav *,
+.light-theme .drawerCard,
+.light-theme .drawerCard *,
+.light-theme .drawerLink,
+.light-theme .drawerLink *,
+.mode-light .mobileNavDrawer,
+.mode-light .mobileNavDrawer *,
+.mode-light .mobileNavDrawer a,
+.mode-light .mobileNavDrawer button,
+.mode-light .mobileNavDrawer span,
+.mode-light .mobileNavDrawer div,
+.mode-light .mobileNavDrawer p,
+.mode-light .mobileNavDrawer b,
+.mode-light .mobileNavDrawer label,
+.mode-light .mobileNavDrawer nav,
+.mode-light .mobileNavDrawer nav *,
+.mode-light .drawerCard,
+.mode-light .drawerCard *,
+.mode-light .drawerLink,
+.mode-light .drawerLink *,
+.dark-theme .mobileNavDrawer,
+.dark-theme .mobileNavDrawer *,
+.mode-dark .mobileNavDrawer,
+.mode-dark .mobileNavDrawer * {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.mobileNavDrawer .kynistoLogo b,
+.light-theme .mobileNavDrawer .kynistoLogo b,
+.mode-light .mobileNavDrawer .kynistoLogo b,
+.dark-theme .mobileNavDrawer .kynistoLogo b,
+.mode-dark .mobileNavDrawer .kynistoLogo b {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
 }
 
 /* Zero-lag GPU CSS keyframes (0.15s instant transitions) */
