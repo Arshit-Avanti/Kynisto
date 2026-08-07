@@ -1636,13 +1636,20 @@ export function AdminMarketplaceControlCenter() {
                     <th style={{ padding: "14px", textAlign: "left", background: "#0F172A", color: "#94A3B8", fontSize: "12px", fontWeight: 800, borderBottom: "2px solid rgba(255,255,255,0.1)", borderRadius: "12px 0 0 0", minWidth: "220px" }}>
                       FEATURE NAME / KEY
                     </th>
-                    {plans.map((plan) => (
+                    {(plans.filter((p) => p.role === "store_owner" || p.role === "business").length > 0
+                      ? plans.filter((p) => p.role === "store_owner" || p.role === "business")
+                      : [
+                          { id: "starter", name: "Starter Business", role: "store_owner", priceMonthly: 299 },
+                          { id: "pro", name: "Pro Business", role: "store_owner", priceMonthly: 499 },
+                          { id: "enterprise", name: "Enterprise Business", role: "store_owner", priceMonthly: 999 },
+                        ]
+                    ).map((plan) => (
                       <th key={plan.id} style={{ padding: "14px 10px", textAlign: "center", background: "#0F172A", borderBottom: "2px solid rgba(255,255,255,0.1)", minWidth: "130px" }}>
-                        <div style={{ fontSize: "13px", fontWeight: 900, color: plan.role === "customer" ? "#60A5FA" : "#4ADE80" }}>
+                        <div style={{ fontSize: "13px", fontWeight: 900, color: "#4ADE80" }}>
                           {plan.name}
                         </div>
-                        <div style={{ fontSize: "10px", color: "#94A3B8", fontWeight: 700, textTransform: "uppercase" }}>
-                          {plan.role === "customer" ? "Customer" : "Store Owner"} · ₹{plan.priceMonthly}/mo
+                        <div style={{ fontSize: "10px", color: "#4ADE80", fontWeight: 700, textTransform: "uppercase" }}>
+                          STORE OWNER · ₹{plan.priceMonthly}/MO
                         </div>
                         <div style={{ display: "flex", justifyContent: "center", gap: "4px", marginTop: "6px" }}>
                           <button
@@ -1674,7 +1681,14 @@ export function AdminMarketplaceControlCenter() {
                         <div style={{ fontSize: "11px", color: "#94A3B8", fontFamily: "monospace" }}>key: {feat.key}</div>
                       </td>
 
-                      {plans.map((plan) => {
+                      {(plans.filter((p) => p.role === "store_owner" || p.role === "business").length > 0
+                        ? plans.filter((p) => p.role === "store_owner" || p.role === "business")
+                        : [
+                            { id: "starter", name: "Starter Business" },
+                            { id: "pro", name: "Pro Business" },
+                            { id: "enterprise", name: "Enterprise Business" },
+                          ]
+                      ).map((plan) => {
                         const isEnabled = Boolean(matrix[plan.id]?.[feat.key]);
                         return (
                           <td key={plan.id} style={{ padding: "12px 10px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>

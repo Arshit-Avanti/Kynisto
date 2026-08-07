@@ -179,6 +179,25 @@ const defaultHealthcareProviders: HealthcareQueueItem[] = [
     acceptingPatients: true,
     ownerQueueEnabled: true,
     adminQueueEnabled: true
+  },
+  {
+    id: 'hosp-6',
+    name: 'Dr. Mehta Orthopedic & Joint Care Clinic',
+    category: 'Healthcare',
+    subcategory: 'Orthopedics',
+    providerType: 'Clinic',
+    address: 'HSR Layout Sector 1, Bangalore',
+    area: 'HSR Layout',
+    city: 'Bangalore',
+    rating: 4.95,
+    reviews: 512,
+    queueStatus: 'no_queue',
+    waitingCount: 0,
+    consultationMinutes: 15,
+    currentTokenNumber: 0,
+    acceptingPatients: true,
+    ownerQueueEnabled: false,
+    adminQueueEnabled: true
   }
 ];
 
@@ -515,6 +534,7 @@ export default function LiveQueueTracker() {
 
   const renderedQueuesGrid = useMemo(() => {
     return filteredQueues.map((item) => {
+      const hasLiveQueue = item.ownerQueueEnabled !== false && item.adminQueueEnabled !== false && item.queueStatus && item.queueStatus !== 'no_queue';
       const isClosed = item.queueStatus === 'closed';
       const consultationMins = item.consultationMinutes || 15;
 
@@ -536,7 +556,12 @@ export default function LiveQueueTracker() {
                 )}
               </div>
 
-              {isClosed ? (
+              {!hasLiveQueue ? (
+                <span className="inline-flex items-center text-xs font-black text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mr-2" />
+                  VERIFIED LISTING
+                </span>
+              ) : isClosed ? (
                 <span className="inline-flex items-center text-xs font-black text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-rose-400 mr-2" />
                   CLOSED
@@ -558,22 +583,24 @@ export default function LiveQueueTracker() {
               {item.address}
             </p>
 
-            {/* Queue Stats */}
+            {/* Queue / Clinic Stats */}
             <div className="grid grid-cols-2 gap-3 p-3.5 bg-slate-950/80 rounded-xl border border-slate-800/80 mb-6">
               <div>
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
-                  Waiting Patients
+                  {hasLiveQueue ? "Waiting Patients" : "Clinic Status"}
                 </span>
                 <span className="text-lg font-black text-white tabular-nums">
-                  {isClosed ? 0 : item.waitingCount} <span className="text-xs font-medium text-slate-400">in queue</span>
+                  {hasLiveQueue ? (isClosed ? 0 : item.waitingCount) : "OPD Listed"}{" "}
+                  {hasLiveQueue && <span className="text-xs font-medium text-slate-400">in queue</span>}
                 </span>
               </div>
               <div>
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
-                  Consultation Speed
+                  {hasLiveQueue ? "Consultation Speed" : "Walk-in Facility"}
                 </span>
                 <span className="text-lg font-black text-emerald-400 tabular-nums">
-                  {consultationMins}m <span className="text-xs font-medium text-slate-400">/ patient</span>
+                  {hasLiveQueue ? `${consultationMins}m` : "Available"}{" "}
+                  {hasLiveQueue && <span className="text-xs font-medium text-slate-400">/ patient</span>}
                 </span>
               </div>
             </div>
@@ -582,24 +609,28 @@ export default function LiveQueueTracker() {
           <div className="flex flex-col sm:flex-row gap-3 pt-1">
             <Link
               href={`/stores/${item.slug || item.id}`}
-              className="flex-1 py-3 px-4 font-bold text-sm rounded-xl transition-all shadow-md flex items-center justify-center space-x-2 bg-slate-800/90 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 cursor-pointer"
+              className={`py-3 px-4 font-bold text-sm rounded-xl transition-all shadow-md flex items-center justify-center space-x-2 bg-slate-800/90 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 cursor-pointer ${
+                hasLiveQueue ? "flex-1" : "w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white border-none shadow-teal-600/25"
+              }`}
             >
-              <Building2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <Building2 className="w-4 h-4 text-emerald-300 shrink-0" />
               <span>Visit Profile</span>
             </Link>
 
-            <button
-              onClick={() => handleJoinQueue(item)}
-              disabled={isClosed || isJoining}
-              className={`flex-1 py-3 px-4 font-bold text-sm rounded-xl transition-all shadow-lg flex items-center justify-center space-x-2 group/btn cursor-pointer ${
-                isClosed
-                  ? 'bg-slate-800/60 text-slate-400 cursor-not-allowed border border-slate-700/50'
-                  : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-600/25'
-              }`}
-            >
-              <span>{isClosed ? 'Queue Closed' : isJoining ? 'Joining...' : 'Join Live Queue'}</span>
-              {!isClosed && !isJoining && <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />}
-            </button>
+            {hasLiveQueue && (
+              <button
+                onClick={() => handleJoinQueue(item)}
+                disabled={isClosed || isJoining}
+                className={`flex-1 py-3 px-4 font-bold text-sm rounded-xl transition-all shadow-lg flex items-center justify-center space-x-2 group/btn cursor-pointer ${
+                  isClosed
+                    ? 'bg-slate-800/60 text-slate-400 cursor-not-allowed border border-slate-700/50'
+                    : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-600/25'
+                }`}
+              >
+                <span>{isClosed ? 'Queue Closed' : isJoining ? 'Joining...' : 'Visit Live Queue'}</span>
+                {!isClosed && !isJoining && <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />}
+              </button>
+            )}
           </div>
         </div>
       );
