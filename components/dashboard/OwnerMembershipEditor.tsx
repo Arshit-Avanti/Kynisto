@@ -198,7 +198,7 @@ export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
                 <div style={{ fontSize: "11px", color: "#94A3B8", display: "flex", flexDirection: "column", gap: "3px", background: "rgba(0,0,0,0.3)", padding: "8px", borderRadius: "6px" }}>
                   <div><b>Payment Date & Time:</b> {m.createdAt ? new Date(m.createdAt * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "N/A"}</div>
                   <div><b>UTR Ref:</b> <code style={{ color: "#818CF8" }}>{m.utr || "Direct Approval"}</code></div>
-                  {m.expiresAt && <div><b>Expires On:</b> <span style={{ color: "#FACC15" }}>{new Date(m.expiresAt * 1000).toLocaleDateStyle("en-IN")}</span></div>}
+                  {m.expiresAt && <div><b>Expires On:</b> <span style={{ color: "#FACC15" }}>{new Date(m.expiresAt * 1000).toLocaleDateString("en-IN")}</span></div>}
                 </div>
               </div>
             ))}
