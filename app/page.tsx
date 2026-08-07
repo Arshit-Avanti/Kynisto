@@ -8,6 +8,7 @@ import { ShaderCanvas } from "@/components/ui/ShaderCanvas";
 import { apiFetch } from "@/lib/client-api";
 import { getSupabaseBrowserClient, syncSupabaseAccessCookie } from "@/lib/supabase-browser";
 import { WelcomeRewardModal } from "@/components/subscription/WelcomeRewardModal";
+import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
 
 type Category = {
   name: string;
@@ -1415,6 +1416,7 @@ export default function Home() {
 
   return (
     <main className={`site theme-${accent} density-${density} mode-${themeMode}`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
+      <SubscriptionExpiryBanner />
       <WelcomeRewardModal userRole={userRole} />
       <VideoBackground />
       <ShaderCanvas />

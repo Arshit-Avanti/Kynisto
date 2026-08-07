@@ -18,6 +18,7 @@ import { OwnerMembershipEditor } from "@/components/dashboard/OwnerMembershipEdi
 import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscriptionDashboard";
 import { FeatureGateNotice } from "@/components/subscription/FeatureGateNotice";
 import { WelcomeRewardModal } from "@/components/subscription/WelcomeRewardModal";
+import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
 
 import { Eye, Star, Navigation, Phone, MessageCircle, BarChart2, CheckCircle2 } from "lucide-react";
 
@@ -110,6 +111,7 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
   const title = tab === "overview" ? "Business overview" : tab === "subscription" ? "Premium & Plans" : tab.charAt(0).toUpperCase()+tab.slice(1);
   return (
     <>
+      <SubscriptionExpiryBanner />
       <div className="portalTitleRow">
         <div>
           <span className="portalEyebrow">Store owner workspace</span>
