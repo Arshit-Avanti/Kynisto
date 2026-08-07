@@ -236,107 +236,104 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
               </div>
             </div>
 
-            {/* SCANNABLE QR CODE & AMOUNT */}
-            <div style={{ textAlign: "center", background: "rgba(30,41,59,0.9)", border: "1px solid rgba(255,255,255,0.1)", padding: "14px", borderRadius: "14px", marginBottom: "14px" }}>
-              <div style={{ fontSize: "24px", fontWeight: 900, color: "#4ADE80", marginBottom: "4px" }}>
+            <div style={{ textAlign: "center", background: "rgba(30,41,59,0.9)", border: "1px solid rgba(255,255,255,0.1)", padding: "10px", borderRadius: "14px", marginBottom: "12px" }}>
+              <div style={{ fontSize: "22px", fontWeight: 900, color: "#4ADE80", marginBottom: "2px" }}>
                 ₹{purchasingPlan.price}
               </div>
 
-              {/* QR CODE PHOTO */}
-              <div style={{ margin: "8px 0" }}>
+              <div style={{ margin: "4px 0" }}>
                 <img
                   src={purchasingPlan.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=${purchasingPlan.upiId || "store@upi"}&pn=${storeName}&am=${purchasingPlan.price}`)}`}
                   alt="Shop Owner Payment QR Code"
-                  style={{ width: "150px", height: "150px", margin: "0 auto", objectFit: "contain", borderRadius: "10px", border: "2px solid #6366F1", background: "#FFF", padding: "6px" }}
+                  style={{ width: "130px", height: "130px", margin: "0 auto", objectFit: "contain", borderRadius: "10px", border: "2px solid #6366F1", background: "#FFF", padding: "4px" }}
                 />
-                <p style={{ fontSize: "11px", color: "#CBD5E1", marginTop: "6px", fontWeight: 700 }}>
+                <p style={{ fontSize: "10px", color: "#CBD5E1", marginTop: "4px", fontWeight: 700 }}>
                   Scan QR photo using Google Pay, PhonePe, Paytm or any UPI App
                 </p>
               </div>
 
-              {/* UPI ID WITH COPY BUTTON */}
               {purchasingPlan.upiId && (
-                <div style={{ background: "rgba(99,102,241,0.2)", border: "1px solid #6366F1", padding: "8px 12px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginTop: "8px" }}>
+                <div style={{ background: "rgba(99,102,241,0.2)", border: "1px solid #6366F1", padding: "6px 10px", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginTop: "6px" }}>
                   <div style={{ textAlign: "left" }}>
                     <div style={{ fontSize: "9px", color: "#94A3B8", fontWeight: 800, textTransform: "uppercase" }}>Shop Owner UPI ID</div>
-                    <div style={{ fontSize: "14px", fontWeight: 900, color: "#FFF", fontFamily: "monospace" }}>{purchasingPlan.upiId}</div>
+                    <div style={{ fontSize: "13px", fontWeight: 900, color: "#FFF", fontFamily: "monospace" }}>{purchasingPlan.upiId}</div>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleCopyUpi(purchasingPlan.upiId)}
-                    style={{ background: "#6366F1", color: "#FFF", border: "none", padding: "5px 10px", borderRadius: "6px", fontSize: "11px", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
+                    style={{ background: "#6366F1", color: "#FFF", border: "none", padding: "4px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
                   >
-                    {copiedUpi ? <Check size={13} /> : <Copy size={13} />}
+                    {copiedUpi ? <Check size={12} /> : <Copy size={12} />}
                     {copiedUpi ? "Copied!" : "Copy UPI"}
                   </button>
                 </div>
               )}
             </div>
 
-            {/* CUSTOMER DETAILS FORM: NAME, GMAIL & UTR */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "16px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "12px" }}>
               <div>
-                <label style={{ fontSize: "11px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "4px", marginBottom: "4px" }}>
-                  <User size={13} /> Enter Name
+                <label style={{ fontSize: "10px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "4px", marginBottom: "3px" }}>
+                  <User size={12} /> Enter Name
                 </label>
                 <input
                   type="text"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                   placeholder="Your Full Name"
-                  style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "10px 12px", borderRadius: "8px", fontSize: "13px", fontWeight: 700 }}
+                  style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "8px 10px", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}
                   required
                 />
               </div>
 
               <div>
-                <label style={{ fontSize: "11px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "4px", marginBottom: "4px" }}>
-                  <Mail size={13} /> Enter Gmail / Email ID
+                <label style={{ fontSize: "10px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "4px", marginBottom: "3px" }}>
+                  <Mail size={12} /> Enter Gmail / Email ID
                 </label>
                 <input
                   type="email"
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
                   placeholder="name@gmail.com"
-                  style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "10px 12px", borderRadius: "8px", fontSize: "13px", fontWeight: 700 }}
+                  style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "8px 10px", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}
                   required
                 />
               </div>
 
               <div>
-                <label style={{ fontSize: "11px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>
-                  Enter Payment UTR / Transaction Ref No.
+                <label style={{ fontSize: "10px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "block", marginBottom: "3px" }}>
+                  Enter Payment UTR / Transaction Ref No. <span style={{ color: "#94A3B8", fontWeight: 500 }}>(Optional)</span>
                 </label>
                 <input
                   type="text"
                   value={utr}
                   onChange={(e) => setUtr(e.target.value)}
-                  placeholder="12-digit UTR or Transaction ID (e.g. 423819203912)"
-                  style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "10px 12px", borderRadius: "8px", fontSize: "13px", fontWeight: 700 }}
-                  required
+                  placeholder="12-digit UTR or Transaction ID (Optional)"
+                  style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "8px 10px", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}
                 />
               </div>
             </div>
 
-            <button
-              type="button"
-              disabled={isSubmitting || reassuranceMessage !== ""}
-              onClick={handleConfirmSubmitPayment}
-              style={{
-                width: "100%",
-                background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
-                color: "#FFFFFF",
-                border: "none",
-                padding: "13px",
-                borderRadius: "10px",
-                fontWeight: 900,
-                fontSize: "14px",
-                cursor: "pointer",
-                boxShadow: "0 4px 16px rgba(16, 185, 129, 0.4)",
-              }}
-            >
-              {isSubmitting ? "Submitting Payment Details..." : reassuranceMessage !== "" ? "Payment Details Submitted!" : "Submit Payment & Request Activation"}
-            </button>
+            <div style={{ position: "sticky", bottom: 0, background: "#0F172A", paddingTop: "8px", borderTop: "1px solid rgba(255,255,255,0.1)", zIndex: 30 }}>
+              <button
+                type="button"
+                disabled={isSubmitting || reassuranceMessage !== ""}
+                onClick={handleConfirmSubmitPayment}
+                style={{
+                  width: "100%",
+                  background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
+                  color: "#FFFFFF",
+                  border: "none",
+                  padding: "12px",
+                  borderRadius: "10px",
+                  fontWeight: 900,
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 16px rgba(16, 185, 129, 0.4)",
+                }}
+              >
+                {isSubmitting ? "Submitting Payment Details..." : reassuranceMessage !== "" ? "Payment Details Submitted!" : "Submit Payment & Request Activation"}
+              </button>
+            </div>
           </div>
         </div>
       )}

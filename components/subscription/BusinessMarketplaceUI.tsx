@@ -436,11 +436,6 @@ export function BusinessMarketplaceUI({
       return;
     }
 
-    if (!utrInput.trim()) {
-      setErrorMessage("Please enter your 12-digit UPI / UTR Transaction Reference Number.");
-      return;
-    }
-
     const price = billingCycle === "yearly" ? checkoutTarget.amountYearly : checkoutTarget.amountMonthly;
 
     setIsSubmitting(true);
@@ -938,14 +933,13 @@ export function BusinessMarketplaceUI({
 
                     <div>
                       <label className="block text-xs font-medium text-slate-300 mb-1">
-                        12-Digit UTR / UPI Transaction Reference <span className="text-rose-400">*</span>
+                        12-Digit UTR / UPI Transaction Reference <span className="text-slate-400 font-normal">(Optional)</span>
                       </label>
                       <input
                         type="text"
-                        required
                         value={utrInput}
                         onChange={(e) => setUtrInput(e.target.value)}
-                        placeholder="e.g. 423891048201"
+                        placeholder="e.g. 423891048201 (Optional)"
                         className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-cyan-500 focus:outline-none text-sm font-mono text-white placeholder-slate-500"
                       />
                     </div>
