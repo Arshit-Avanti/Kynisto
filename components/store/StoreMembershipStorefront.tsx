@@ -165,7 +165,7 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
 
               {plan.description && <p style={{ fontSize: "13px", color: "#CBD5E1", marginBottom: "16px" }}>{plan.description}</p>}
 
-              <div style={{ background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", borderRadius: "10px", padding: "10px 12px", marginBottom: "16px" }}>
+              <div style={{ background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", borderRadius: "10px", padding: "10px 129px", marginBottom: "16px" }}>
                 <div style={{ fontSize: "11px", fontWeight: 800, color: "#10B981", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "6px" }}>
                   <ShieldCheck size={14} /> VIP Benefits Included
                 </div>
@@ -206,114 +206,122 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
         ))}
       </div>
 
-      {/* CUSTOMER PAYMENT MODAL WITH PERFECT SCROLL FIT, QR PHOTO, NAME, GMAIL, TIME, UPI & UTR */}
+      {/* CUSTOMER PAYMENT MODAL PERFECT FIT & ALWAYS-VISIBLE SAVE BUTTON */}
       {purchasingPlan && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
-          <div style={{ background: "#0F172A", border: "2px solid #6366F1", borderRadius: "20px", padding: "20px", maxWidth: "460px", width: "100%", maxHeight: "88vh", overflowY: "auto", color: "#FFF", boxShadow: "0 20px 50px rgba(0,0,0,0.6)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-              <h3 style={{ fontSize: "17px", fontWeight: 800, color: "#818CF8", margin: 0 }}>
+        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "12px", overflowY: "auto" }}>
+          <div style={{ background: "#0F172A", border: "2px solid #6366F1", borderRadius: "18px", padding: "16px", maxWidth: "440px", width: "100%", maxHeight: "90vh", display: "flex", flexDirection: "column", color: "#FFF", boxShadow: "0 20px 50px rgba(0,0,0,0.6)", position: "relative" }}>
+            {/* HEADER */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px", flexShrink: 0 }}>
+              <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#818CF8", margin: 0 }}>
                 Scan & Pay: {purchasingPlan.name}
               </h3>
-              <button onClick={() => setPurchasingPlan(null)} style={{ background: "none", border: "none", color: "#94A3B8", fontSize: "20px", cursor: "pointer" }}>✕</button>
+              <button onClick={() => setPurchasingPlan(null)} style={{ background: "none", border: "none", color: "#94A3B8", fontSize: "20px", cursor: "pointer", padding: "0 4px" }}>✕</button>
             </div>
 
-            {/* PAYMENT SESSION TIMER & LIVE TIMESTAMP */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(99, 102, 241, 0.15)", border: "1px solid rgba(99, 102, 241, 0.3)", padding: "8px 12px", borderRadius: "10px", marginBottom: "12px" }}>
-              <div style={{ fontSize: "11px", color: "#94A3B8", display: "flex", alignItems: "center", gap: "6px" }}>
-                <Clock size={13} style={{ color: "#818CF8" }} />
-                <span>Time: <b style={{ color: "#FFF" }}>{currentTimeStr}</b></span>
-              </div>
-              <div style={{ fontSize: "12px", fontWeight: 900, color: timeLeft < 120 ? "#EF4444" : "#FACC15", background: "rgba(0,0,0,0.4)", padding: "3px 8px", borderRadius: "6px", fontFamily: "monospace" }}>
-                Session: {formattedTime}
-              </div>
-            </div>
-
-            {/* REASSURANCE BANNER */}
-            <div style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(16,185,129,0.2) 100%)", border: "1px solid #10B981", borderRadius: "12px", padding: "12px", marginBottom: "14px" }}>
-              <div style={{ fontSize: "12px", fontWeight: 800, color: "#4ADE80", display: "flex", alignItems: "center", gap: "8px", lineHeight: "1.4" }}>
-                <ShieldCheck size={18} style={{ flexShrink: 0 }} />
-                <span>Don't panic! The shop owner will verify your payment and activate your membership within 24 hours.</span>
-              </div>
-            </div>
-
-            <div style={{ textAlign: "center", background: "rgba(30,41,59,0.9)", border: "1px solid rgba(255,255,255,0.1)", padding: "10px", borderRadius: "14px", marginBottom: "12px" }}>
-              <div style={{ fontSize: "22px", fontWeight: 900, color: "#4ADE80", marginBottom: "2px" }}>
-                ₹{purchasingPlan.price}
-              </div>
-
-              <div style={{ margin: "4px 0" }}>
-                <img
-                  src={purchasingPlan.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=${purchasingPlan.upiId || "store@upi"}&pn=${storeName}&am=${purchasingPlan.price}`)}`}
-                  alt="Shop Owner Payment QR Code"
-                  style={{ width: "130px", height: "130px", margin: "0 auto", objectFit: "contain", borderRadius: "10px", border: "2px solid #6366F1", background: "#FFF", padding: "4px" }}
-                />
-                <p style={{ fontSize: "10px", color: "#CBD5E1", marginTop: "4px", fontWeight: 700 }}>
-                  Scan QR photo using Google Pay, PhonePe, Paytm or any UPI App
-                </p>
-              </div>
-
-              {purchasingPlan.upiId && (
-                <div style={{ background: "rgba(99,102,241,0.2)", border: "1px solid #6366F1", padding: "6px 10px", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginTop: "6px" }}>
-                  <div style={{ textAlign: "left" }}>
-                    <div style={{ fontSize: "9px", color: "#94A3B8", fontWeight: 800, textTransform: "uppercase" }}>Shop Owner UPI ID</div>
-                    <div style={{ fontSize: "13px", fontWeight: 900, color: "#FFF", fontFamily: "monospace" }}>{purchasingPlan.upiId}</div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleCopyUpi(purchasingPlan.upiId)}
-                    style={{ background: "#6366F1", color: "#FFF", border: "none", padding: "4px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
-                  >
-                    {copiedUpi ? <Check size={12} /> : <Copy size={12} />}
-                    {copiedUpi ? "Copied!" : "Copy UPI"}
-                  </button>
+            {/* SCROLLABLE BODY */}
+            <div style={{ overflowY: "auto", flex: 1, paddingRight: "4px", display: "flex", flexDirection: "column", gap: "10px" }}>
+              {/* SESSION TIMER & TIMESTAMP */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(99, 102, 241, 0.15)", border: "1px solid rgba(99, 102, 241, 0.3)", padding: "6px 10px", borderRadius: "8px" }}>
+                <div style={{ fontSize: "11px", color: "#94A3B8", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <Clock size={13} style={{ color: "#818CF8" }} />
+                  <span>Time: <b style={{ color: "#FFF" }}>{currentTimeStr}</b></span>
                 </div>
-              )}
+                <div style={{ fontSize: "12px", fontWeight: 900, color: timeLeft < 120 ? "#EF4444" : "#FACC15", background: "rgba(0,0,0,0.4)", padding: "2px 6px", borderRadius: "6px", fontFamily: "monospace" }}>
+                  Session: {formattedTime}
+                </div>
+              </div>
+
+              {/* REASSURANCE BANNER */}
+              <div style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(16,185,129,0.2) 100%)", border: "1px solid #10B981", borderRadius: "10px", padding: "10px" }}>
+                <div style={{ fontSize: "11px", fontWeight: 800, color: "#4ADE80", display: "flex", alignItems: "center", gap: "6px", lineHeight: "1.4" }}>
+                  <ShieldCheck size={16} style={{ flexShrink: 0 }} />
+                  <span>Don't panic! The shop owner will verify your payment and activate your membership within 24 hours.</span>
+                </div>
+              </div>
+
+              {/* SCANNABLE QR CODE PHOTO & AMOUNT */}
+              <div style={{ textAlign: "center", background: "rgba(30,41,59,0.9)", border: "1px solid rgba(255,255,255,0.1)", padding: "8px", borderRadius: "12px" }}>
+                <div style={{ fontSize: "20px", fontWeight: 900, color: "#4ADE80", marginBottom: "2px" }}>
+                  ₹{purchasingPlan.price}
+                </div>
+
+                <div style={{ margin: "2px 0" }}>
+                  <img
+                    src={purchasingPlan.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`upi://pay?pa=${purchasingPlan.upiId || "store@upi"}&pn=${storeName}&am=${purchasingPlan.price}`)}`}
+                    alt="Shop Owner Payment QR Code"
+                    style={{ width: "110px", height: "110px", margin: "0 auto", objectFit: "contain", borderRadius: "8px", border: "2px solid #6366F1", background: "#FFF", padding: "4px" }}
+                  />
+                  <p style={{ fontSize: "10px", color: "#CBD5E1", marginTop: "3px", fontWeight: 700 }}>
+                    Scan QR photo using Google Pay, PhonePe, Paytm or any UPI App
+                  </p>
+                </div>
+
+                {/* SHOP OWNER UPI ID */}
+                {purchasingPlan.upiId && (
+                  <div style={{ background: "rgba(99,102,241,0.2)", border: "1px solid #6366F1", padding: "4px 8px", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px", marginTop: "4px" }}>
+                    <div style={{ textAlign: "left" }}>
+                      <div style={{ fontSize: "8px", color: "#94A3B8", fontWeight: 800, textTransform: "uppercase" }}>Shop Owner UPI ID</div>
+                      <div style={{ fontSize: "12px", fontWeight: 900, color: "#FFF", fontFamily: "monospace" }}>{purchasingPlan.upiId}</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyUpi(purchasingPlan.upiId)}
+                      style={{ background: "#6366F1", color: "#FFF", border: "none", padding: "3px 6px", borderRadius: "4px", fontSize: "10px", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
+                    >
+                      {copiedUpi ? <Check size={11} /> : <Copy size={11} />}
+                      {copiedUpi ? "Copied!" : "Copy UPI"}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* CUSTOMER DETAILS FORM: ENTER UPI NAME, GMAIL & OPTIONAL UTR */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                <div>
+                  <label style={{ fontSize: "10px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "4px", marginBottom: "2px" }}>
+                    <User size={11} /> Enter UPI Name / Payer Name
+                  </label>
+                  <input
+                    type="text"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    placeholder="UPI Payer Full Name"
+                    style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "6px 8px", borderRadius: "6px", fontSize: "12px", fontWeight: 700 }}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: "10px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "4px", marginBottom: "2px" }}>
+                    <Mail size={11} /> Enter Gmail / Email ID
+                  </label>
+                  <input
+                    type="email"
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    placeholder="name@gmail.com"
+                    style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "6px 8px", borderRadius: "6px", fontSize: "12px", fontWeight: 700 }}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: "10px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "block", marginBottom: "2px" }}>
+                    Enter Payment UTR / Transaction Ref No. <span style={{ color: "#94A3B8", fontWeight: 500 }}>(Optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={utr}
+                    onChange={(e) => setUtr(e.target.value)}
+                    placeholder="12-digit UTR or Transaction ID (Optional)"
+                    style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "6px 8px", borderRadius: "6px", fontSize: "12px", fontWeight: 700 }}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "12px" }}>
-              <div>
-                <label style={{ fontSize: "10px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "4px", marginBottom: "3px" }}>
-                  <User size={12} /> Enter Name
-                </label>
-                <input
-                  type="text"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="Your Full Name"
-                  style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "8px 10px", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: "10px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "4px", marginBottom: "3px" }}>
-                  <Mail size={12} /> Enter Gmail / Email ID
-                </label>
-                <input
-                  type="email"
-                  value={customerEmail}
-                  onChange={(e) => setCustomerEmail(e.target.value)}
-                  placeholder="name@gmail.com"
-                  style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "8px 10px", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: "10px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "block", marginBottom: "3px" }}>
-                  Enter Payment UTR / Transaction Ref No. <span style={{ color: "#94A3B8", fontWeight: 500 }}>(Optional)</span>
-                </label>
-                <input
-                  type="text"
-                  value={utr}
-                  onChange={(e) => setUtr(e.target.value)}
-                  placeholder="12-digit UTR or Transaction ID (Optional)"
-                  style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "8px 10px", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}
-                />
-              </div>
-            </div>
-
-            <div style={{ position: "sticky", bottom: 0, background: "#0F172A", paddingTop: "8px", borderTop: "1px solid rgba(255,255,255,0.1)", zIndex: 30 }}>
+            {/* FIXED STICKY FOOTER SAVE/SUBMIT BUTTON */}
+            <div style={{ flexShrink: 0, paddingTop: "10px", marginTop: "6px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
               <button
                 type="button"
                 disabled={isSubmitting || reassuranceMessage !== ""}
@@ -323,10 +331,10 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
                   background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
                   color: "#FFFFFF",
                   border: "none",
-                  padding: "12px",
-                  borderRadius: "10px",
+                  padding: "11px",
+                  borderRadius: "8px",
                   fontWeight: 900,
-                  fontSize: "14px",
+                  fontSize: "13px",
                   cursor: "pointer",
                   boxShadow: "0 4px 16px rgba(16, 185, 129, 0.4)",
                 }}
