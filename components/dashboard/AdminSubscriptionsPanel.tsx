@@ -226,8 +226,60 @@ export function AdminSubscriptionsPanel() {
 
   return (
     <div style={{ padding: "20px 0" }}>
-      {/* Analytics KPI Cards */}
-      {analytics && (
+      {/* Top Panel Tab Switcher */}
+      <div style={{ display: "flex", gap: "12px", marginBottom: "28px", background: "rgba(15,23,42,0.8)", padding: "6px", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.12)" }}>
+        <button
+          type="button"
+          onClick={() => setPanelTab("marketplace")}
+          style={{
+            flex: 1,
+            padding: "12px 20px",
+            borderRadius: "12px",
+            fontWeight: 850,
+            fontSize: "14px",
+            border: "none",
+            background: panelTab === "marketplace" ? "linear-gradient(135deg, #22C55E 0%, #16A34A 100%)" : "transparent",
+            color: panelTab === "marketplace" ? "#FFF" : "#94A3B8",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+          }}
+        >
+          🛒 Marketplace Control Center (D1)
+        </button>
+        <button
+          type="button"
+          onClick={() => setPanelTab("subscribers")}
+          style={{
+            flex: 1,
+            padding: "12px 20px",
+            borderRadius: "12px",
+            fontWeight: 850,
+            fontSize: "14px",
+            border: "none",
+            background: panelTab === "subscribers" ? "linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)" : "transparent",
+            color: panelTab === "subscribers" ? "#FFF" : "#94A3B8",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+          }}
+        >
+          📊 User Subscriptions &amp; Verifications ({subscriptions.length})
+        </button>
+      </div>
+
+      {panelTab === "marketplace" ? (
+        <AdminMarketplaceControlCenter />
+      ) : (
+        <>
+          {/* Analytics KPI Cards */}
+          {analytics && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginBottom: "32px" }}>
           <div className="argusCard" style={{ padding: "20px", borderRadius: "16px", background: "linear-gradient(135deg, rgba(34,197,94,0.85), rgba(22,163,74,0.9))", border: "1px solid #22C55E", boxShadow: "0 8px 24px rgba(34,197,94,0.25)" }}>
             <div style={{ fontSize: "12px", fontWeight: 800, color: "#dcfce7", letterSpacing: "1px" }}>MONTHLY RECURRING REVENUE (MRR)</div>
@@ -886,6 +938,8 @@ export function AdminSubscriptionsPanel() {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

@@ -15,6 +15,7 @@ import {
   UserManagementTable as UsersTableV2,
 } from "@/components/dashboard/AdminTables";
 import { AdminSubscriptionsPanel } from "@/components/dashboard/AdminSubscriptionsPanel";
+import { AdminMarketplaceControlCenter } from "@/components/dashboard/AdminMarketplaceControlCenter";
 import { AdminNotificationPanel } from "@/components/dashboard/AdminNotificationPanel";
 import { AdminWalletPanel } from "@/components/dashboard/AdminWalletPanel";
 
