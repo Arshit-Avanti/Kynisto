@@ -751,7 +751,7 @@ export function AdminMarketplaceControlCenter() {
         </div>
       </div>
 
-      {/* Main Tabs Navigation (Plans, Features, Combo Packs, Permission Matrix) */}
+      {/* Main Tabs Navigation (Customer Plans, Shop Owner Features, Shop Owner Combos, Shop Owner Permission Matrix) */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px", marginBottom: "24px" }}>
         <div style={{ display: "flex", gap: "8px", background: "rgba(15,23,42,0.8)", padding: "6px", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.1)", flexWrap: "wrap" }}>
           <button
@@ -772,7 +772,7 @@ export function AdminMarketplaceControlCenter() {
               gap: "8px",
             }}
           >
-            <CreditCard size={16} /> Plans ({plans.length})
+            <CreditCard size={16} /> Customer Plans ({plans.length})
           </button>
 
           <button
@@ -793,7 +793,7 @@ export function AdminMarketplaceControlCenter() {
               gap: "8px",
             }}
           >
-            <Tag size={16} /> Features ({features.length})
+            <Tag size={16} /> Shop Owner Features ({features.length})
           </button>
 
           <button
@@ -814,7 +814,7 @@ export function AdminMarketplaceControlCenter() {
               gap: "8px",
             }}
           >
-            <Package size={16} /> Combos ({combos.length})
+            <Package size={16} /> Shop Owner Combos ({combos.length})
           </button>
 
           <button
@@ -835,7 +835,7 @@ export function AdminMarketplaceControlCenter() {
               gap: "8px",
             }}
           >
-            <Grid size={16} /> Permission Matrix
+            <Grid size={16} /> Shop Owner Permission Matrix
           </button>
         </div>
 
@@ -1592,16 +1592,16 @@ export function AdminMarketplaceControlCenter() {
         </>
       )}
 
-      {/* TAB 4: FEATURE-PLAN PERMISSION MATRIX */}
+      {/* TAB 4: SHOP OWNER FEATURE & COMBO PERMISSION MATRIX */}
       {activeTab === "matrix" && (
         <div style={{ background: "rgba(15,23,42,0.95)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: "24px", padding: "28px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px", marginBottom: "20px" }}>
             <div>
               <h3 style={{ fontSize: "22px", fontWeight: 900, color: "#A855F7", margin: "0 0 4px", display: "flex", alignItems: "center", gap: "8px" }}>
-                <Grid size={22} /> Feature-Plan Permission Matrix
+                <Grid size={22} /> Shop Owner Feature & Combo Permission Matrix
               </h3>
               <p style={{ color: "#94A3B8", fontSize: "13px", margin: 0, maxWidth: "750px" }}>
-                Control exactly which features are enabled for each subscription plan. Toggle switches persist immediately to D1 database and enforce API feature flags in real-time.
+                Control feature permissions specifically for Shop Owner modular add-ons and combo packages. Toggle switches persist immediately to D1 database and enforce API feature flags in real-time. (Customers remain on standard Kynisto Premium plans).
               </p>
             </div>
 
