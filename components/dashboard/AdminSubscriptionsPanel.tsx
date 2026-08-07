@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { ALL_PLANS, CUSTOMER_PLANS, SHOP_OWNER_PLANS, getPlanConfig } from "@/lib/subscriptions";
+import { AdminMarketplaceControlCenter } from "@/components/dashboard/AdminMarketplaceControlCenter";
 
 interface AdminSubscription {
   id: string;
@@ -48,6 +49,7 @@ interface PendingMessage {
 }
 
 export function AdminSubscriptionsPanel() {
+  const [panelTab, setPanelTab] = useState<"marketplace" | "subscribers">("marketplace");
   const [subscriptions, setSubscriptions] = useState<AdminSubscription[]>([]);
   const [pendingMessages, setPendingMessages] = useState<PendingMessage[]>([]);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
