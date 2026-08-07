@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { apiFetch } from "@/lib/client-api";
-import { CheckCircle2, ShieldCheck, Sparkles, Star, Zap, QrCode, CreditCard, AlertCircle, Clock } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Sparkles, Star, Zap, QrCode, CreditCard, Clock, Copy, Check } from "lucide-react";
 
 export function StoreMembershipStorefront({ storeId, storeName }: { storeId: string; storeName: string }) {
   const [plans, setPlans] = useState<any[]>([]);
@@ -10,13 +10,24 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
   const [purchasingPlan, setPurchasingPlan] = useState<any | null>(null);
   const [utr, setUtr] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copiedUpi, setCopiedUpi] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(600); // 10 minute countdown timer
   const [toast, setToast] = useState("");
   const [reassuranceMessage, setReassuranceMessage] = useState("");
   const [error, setError] = useState("");
+  const [currentTimeStr, setCurrentTimeStr] = useState("");
 
   useEffect(() => {
     loadPlans();
   }, [storeId]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (purchasingPlan && timeLeft > 0) {
+      timer = setInterval(() => setTimeLeft((t) => Math.max(0, t - 1)), 1000);
+    }
+    return () => clearInterval(timer);
+  }, [purchasingPlan, timeLeft]);
 
   async function loadPlans() {
     try {
@@ -34,6 +45,16 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
     setUtr("");
     setError("");
     setReassuranceMessage("");
+    setCopiedUpi(false);
+    setTimeLeft(600); // Reset to 10 mins
+    setCurrentTimeStr(new Date().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }));
+  }
+
+  function handleCopyUpi(upiText: string) {
+    if (!upiText) return;
+    navigator.clipboard.writeText(upiText);
+    setCopiedUpi(true);
+    setTimeout(() => setCopiedUpi(false), 2500);
   }
 
   async function handleConfirmSubmitPayment() {
@@ -57,6 +78,10 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
       setIsSubmitting(false);
     }
   }
+
+  const mins = Math.floor(timeLeft / 60);
+  const secs = timeLeft % 60;
+  const formattedTime = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 
   if (loading) return null;
   if (!plans.length) return null;
@@ -170,15 +195,26 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
         ))}
       </div>
 
-      {/* CUSTOMER PAYMENT & REASSURANCE MODAL */}
+      {/* CUSTOMER PAYMENT MODAL WITH QR CODE, UPI ID, COUNTDOWN TIMER & TIMESTAMP */}
       {purchasingPlan && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyCenter: "center", padding: "16px" }}>
+        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
           <div style={{ background: "#0F172A", border: "2px solid #6366F1", borderRadius: "20px", padding: "24px", maxWidth: "480px", width: "100%", color: "#FFF", boxShadow: "0 20px 50px rgba(0,0,0,0.6)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <h3 style={{ fontSize: "18px", fontWeight: 800, color: "#818CF8", margin: 0 }}>
                 Scan & Pay: {purchasingPlan.name}
               </h3>
               <button onClick={() => setPurchasingPlan(null)} style={{ background: "none", border: "none", color: "#94A3B8", fontSize: "20px", cursor: "pointer" }}>✕</button>
+            </div>
+
+            {/* PAYMENT SESSION TIMER & TIMESTAMP */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(99, 102, 241, 0.15)", border: "1px solid rgba(99, 102, 241, 0.3)", padding: "10px 14px", borderRadius: "10px", marginBottom: "16px" }}>
+              <div style={{ fontSize: "12px", color: "#94A3B8", display: "flex", alignItems: "center", gap: "6px" }}>
+                <Clock size={14} style={{ color: "#818CF8" }} />
+                <span>Time: <b>{currentTimeStr}</b></span>
+              </div>
+              <div style={{ fontSize: "13px", fontWeight: 900, color: timeLeft < 120 ? "#EF4444" : "#FACC15", background: "rgba(0,0,0,0.4)", padding: "4px 10px", borderRadius: "8px", fontFamily: "monospace" }}>
+                Session: {formattedTime}
+              </div>
             </div>
 
             {/* REASSURANCE BANNER */}
@@ -188,27 +224,43 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
               </div>
             </div>
 
-            {/* PAYMENT DETAILS */}
-            <div style={{ textAlign: "center", background: "rgba(30,41,59,0.8)", padding: "16px", borderRadius: "14px", marginBottom: "18px" }}>
-              <div style={{ fontSize: "26px", fontWeight: 900, color: "#FFF", marginBottom: "8px" }}>
+            {/* SCANNABLE QR CODE & UPI ID */}
+            <div style={{ textAlign: "center", background: "rgba(30,41,59,0.9)", border: "1px solid rgba(255,255,255,0.1)", padding: "16px", borderRadius: "14px", marginBottom: "18px" }}>
+              <div style={{ fontSize: "26px", fontWeight: 900, color: "#4ADE80", marginBottom: "8px" }}>
                 ₹{purchasingPlan.price}
               </div>
 
-              {purchasingPlan.qrCodeUrl ? (
-                <div style={{ margin: "12px 0" }}>
-                  <img src={purchasingPlan.qrCodeUrl} alt="Shop Owner Payment QR Code" style={{ width: "180px", height: "180px", margin: "0 auto", objectFit: "contain", borderRadius: "12px", border: "2px solid #6366F1", background: "#FFF", padding: "8px" }} />
-                  <p style={{ fontSize: "12px", color: "#94A3B8", marginTop: "6px" }}>Scan QR code using Google Pay, PhonePe, Paytm or UPI App</p>
+              {/* QR CODE PHOTO */}
+              <div style={{ margin: "12px 0" }}>
+                <img
+                  src={purchasingPlan.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=${purchasingPlan.upiId || "store@upi"}&pn=${storeName}&am=${purchasingPlan.price}`)}`}
+                  alt="Shop Owner Payment QR Code"
+                  style={{ width: "190px", height: "190px", margin: "0 auto", objectFit: "contain", borderRadius: "12px", border: "2px solid #6366F1", background: "#FFF", padding: "8px" }}
+                />
+                <p style={{ fontSize: "12px", color: "#CBD5E1", marginTop: "8px", fontWeight: 700 }}>
+                  Scan QR photo using Google Pay, PhonePe, Paytm or any UPI App
+                </p>
+              </div>
+
+              {/* UPI ID WITH COPY BUTTON */}
+              {purchasingPlan.upiId ? (
+                <div style={{ background: "rgba(99,102,241,0.2)", border: "1px solid #6366F1", padding: "10px 14px", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginTop: "12px" }}>
+                  <div style={{ textAlign: "left" }}>
+                    <div style={{ fontSize: "10px", color: "#94A3B8", fontWeight: 800, textTransform: "uppercase" }}>Shop Owner UPI ID</div>
+                    <div style={{ fontSize: "15px", fontWeight: 900, color: "#FFF", fontFamily: "monospace" }}>{purchasingPlan.upiId}</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyUpi(purchasingPlan.upiId)}
+                    style={{ background: "#6366F1", color: "#FFF", border: "none", padding: "6px 12px", borderRadius: "8px", fontSize: "12px", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
+                  >
+                    {copiedUpi ? <Check size={14} /> : <Copy size={14} />}
+                    {copiedUpi ? "Copied!" : "Copy UPI"}
+                  </button>
                 </div>
               ) : (
-                <div style={{ padding: "12px", background: "rgba(255,255,255,0.05)", borderRadius: "10px", margin: "12px 0", fontSize: "13px", color: "#CBD5E1" }}>
-                  <QrCode style={{ margin: "0 auto 6px auto", color: "#818CF8" }} size={32} />
-                  Shop Owner UPI Payment
-                </div>
-              )}
-
-              {purchasingPlan.upiId && (
-                <div style={{ background: "rgba(99,102,241,0.2)", border: "1px solid #6366F1", padding: "10px", borderRadius: "10px", fontSize: "14px", fontWeight: 800, color: "#818CF8" }}>
-                  UPI ID: {purchasingPlan.upiId}
+                <div style={{ background: "rgba(255,255,255,0.05)", padding: "10px", borderRadius: "10px", fontSize: "13px", color: "#94A3B8" }}>
+                  Direct UPI Transfer Available
                 </div>
               )}
             </div>

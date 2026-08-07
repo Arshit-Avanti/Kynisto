@@ -347,46 +347,44 @@ function MembershipForm({
       
       <label className="full">Description <textarea name="description" defaultValue={plan?.description} required placeholder="Describe exclusive VIP perks for customers..." /></label>
 
-      {/* SHOP OWNER PAYMENT CONFIG: UPI ID & QR CODE PHOTO */}
-      <div className="full" style={{ background: "rgba(99, 102, 241, 0.08)", padding: "16px", borderRadius: "12px", border: "1px solid rgba(99, 102, 241, 0.3)", display: "flex", flexDirection: "column", gap: "12px" }}>
-        <h4 style={{ margin: 0, color: "#818CF8", display: "flex", alignItems: "center", gap: "8px" }}>
-          <CreditCard size={18} /> Shop Owner Payment Details (UPI & QR Code)
-        </h4>
-        
-        <label className="full">
-          UPI ID (For Customer Scan & Pay)
+      {/* UPI ID & PAYMENT QR CODE PHOTO INPUTS */}
+      <label>
+        UPI ID (For Customer Scan & Pay)
+        <input 
+          type="text" 
+          name="upiId"
+          value={upiId} 
+          onChange={(e) => setUpiId(e.target.value)} 
+          placeholder="e.g. yourname@upi"
+        />
+      </label>
+
+      <label>
+        Payment QR Code Photo
+        <div style={{ display: "flex", gap: "8px" }}>
           <input 
             type="text" 
-            value={upiId} 
-            onChange={(e) => setUpiId(e.target.value)} 
-            placeholder="e.g. yourname@upi or store@okicici"
+            name="qrCodeUrl"
+            value={qrCodeUrl} 
+            onChange={(e) => setQrCodeUrl(e.target.value)} 
+            placeholder="QR Photo URL or Upload"
+            style={{ flex: 1 }}
           />
-        </label>
+          <label className="portalButton secondary" style={{ margin: 0, padding: "8px 12px", display: "flex", alignItems: "center", gap: "4px", cursor: "pointer", fontSize: "12px", whiteSpace: "nowrap" }}>
+            <Upload size={14} /> {uploadingQr ? "Uploading..." : "Upload QR"}
+            <input type="file" accept="image/*" onChange={handleFileUpload} style={{ display: "none" }} />
+          </label>
+        </div>
+      </label>
 
-        <label className="full">
-          Payment QR Code Photo (Scan to Pay Image)
-          <div style={{ display: "flex", gap: "10px", marginTop: "4px" }}>
-            <input 
-              type="text" 
-              value={qrCodeUrl} 
-              onChange={(e) => setQrCodeUrl(e.target.value)} 
-              placeholder="QR Code Image URL or upload image below"
-              style={{ flex: 1 }}
-            />
-            <label className="portalButton secondary" style={{ margin: 0, display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
-              <Upload size={16} /> {uploadingQr ? "Uploading..." : "Upload Photo"}
-              <input type="file" accept="image/*" onChange={handleFileUpload} style={{ display: "none" }} />
-            </label>
+      {qrCodeUrl && (
+        <div className="full" style={{ background: "rgba(74, 222, 128, 0.1)", border: "1px solid rgba(74, 222, 128, 0.3)", padding: "10px 14px", borderRadius: "10px", display: "flex", alignItems: "center", gap: "12px" }}>
+          <img src={qrCodeUrl} alt="UPI Payment QR Code" style={{ width: "60px", height: "60px", objectFit: "contain", borderRadius: "6px", background: "#FFF" }} />
+          <div style={{ fontSize: "12px", color: "#4ADE80", fontWeight: 700 }}>
+            ✓ Payment QR Code photo attached & ready for customers
           </div>
-        </label>
-
-        {qrCodeUrl && (
-          <div style={{ marginTop: "4px", display: "flex", alignItems: "center", gap: "12px" }}>
-            <img src={qrCodeUrl} alt="Payment QR Code Preview" style={{ width: "80px", height: "80px", objectFit: "contain", borderRadius: "8px", border: "1px solid #6366F1" }} />
-            <span style={{ fontSize: "12px", color: "#4ADE80", fontWeight: 700 }}>✓ Payment QR Code photo preview loaded</span>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* STORE COUPONS LOYALTY REWARDS LINKING */}
       <div className="full" style={{ background: "rgba(251, 191, 36, 0.08)", padding: "16px", borderRadius: "12px", border: "1px solid rgba(251, 191, 36, 0.3)", display: "flex", flexDirection: "column", gap: "10px" }}>
