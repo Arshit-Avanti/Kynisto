@@ -26,7 +26,6 @@ export function Navbar3D({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
 
   const headerRef = useRef<HTMLElement | null>(null);
 
@@ -46,7 +45,7 @@ export function Navbar3D({
     let currentRx = 0;
     let currentRy = 0;
 
-    // Smooth animation loop for 3D tilt interpolation & position updating
+    // Smooth animation loop for 3D tilt interpolation directly on DOM element for lag-free performance (<20ms)
     const updateLoop = () => {
       if (!isIntersecting || !isTabVisible || (typeof document !== "undefined" && document.hidden)) {
         stopAnimation();
@@ -59,12 +58,16 @@ export function Navbar3D({
       if (Math.abs(diffX) > 0.005 || Math.abs(diffY) > 0.005) {
         currentRx += diffX * 0.12;
         currentRy += diffY * 0.12;
-        setTilt({ rx: currentRx, ry: currentRy });
+        if (headerRef.current) {
+          headerRef.current.style.transform = `translateX(-50%) perspective(1000px) rotateX(${currentRx.toFixed(2)}deg) rotateY(${currentRy.toFixed(2)}deg) translateZ(0)`;
+        }
         animFrameId = requestAnimationFrame(updateLoop);
       } else {
         currentRx = targetRx;
         currentRy = targetRy;
-        setTilt({ rx: currentRx, ry: currentRy });
+        if (headerRef.current) {
+          headerRef.current.style.transform = `translateX(-50%) perspective(1000px) rotateX(${currentRx.toFixed(2)}deg) rotateY(${currentRy.toFixed(2)}deg) translateZ(0)`;
+        }
         stopAnimation();
       }
     };
@@ -232,8 +235,7 @@ export function Navbar3D({
       ref={headerRef}
       className={`floating-nav-container ${isScrolled ? "is-scrolled" : ""}`}
       style={{
-        transform: `translateX(-50%) perspective(1000px) rotateX(${tilt.rx.toFixed(2)}deg) rotateY(${tilt.ry.toFixed(2)}deg) translateZ(0)`,
-        transition: tilt.rx === 0 && tilt.ry === 0 ? "transform 0.4s ease-out, background 0.3s ease, box-shadow 0.3s ease" : "background 0.3s ease, box-shadow 0.3s ease",
+        transform: "translateX(-50%) perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0)",
         willChange: "transform",
       }}
     >

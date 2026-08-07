@@ -33,12 +33,12 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
   }, [storeId]);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (purchasingPlan && timeLeft > 0) {
-      timer = setInterval(() => setTimeLeft((t) => Math.max(0, t - 1)), 1000);
-    }
+    if (!purchasingPlan) return;
+    const timer = setInterval(() => {
+      setTimeLeft((t) => (t > 0 ? t - 1 : 0));
+    }, 1000);
     return () => clearInterval(timer);
-  }, [purchasingPlan, timeLeft]);
+  }, [purchasingPlan]);
 
   async function loadPlans() {
     try {
