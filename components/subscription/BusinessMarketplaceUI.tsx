@@ -29,103 +29,99 @@ import {
 } from "lucide-react";
 import { UPI_PAYMENT_ID, PAYMENT_QR_IMAGE } from "@/lib/subscriptions";
 
-interface ModularAddon {
+export interface ModularAddon {
   id: string;
   name: string;
-  category: "capacity" | "engagement" | "intelligence" | "support";
+  category: "capacity" | "engagement" | "intelligence" | "support" | "trust" | "queue";
   icon: any;
   monthlyPrice: number;
   description: string;
   type: "toggle" | "quantity";
   unitName?: string;
   maxQuantity?: number;
+  badge?: string;
 }
 
-const ADDON_CATALOG: ModularAddon[] = [
+export const INITIAL_ADDON_CATALOG: ModularAddon[] = [
   {
-    id: "extra_stores",
-    name: "Extra Store Locations",
-    category: "capacity",
-    icon: Store,
-    monthlyPrice: 149,
-    description: "Sync queues, staff, and analytics across additional branch locations.",
-    type: "quantity",
-    unitName: "store",
-    maxQuantity: 10,
-  },
-  {
-    id: "extra_staff",
-    name: "Extra Staff Seats",
-    category: "capacity",
-    icon: Users,
+    id: "verified_badge",
+    name: "Verified Trust Badge",
+    category: "trust",
+    icon: ShieldCheck,
     monthlyPrice: 49,
-    description: "Grant individual staff logins for counter management and teller operations.",
-    type: "quantity",
-    unitName: "seat",
-    maxQuantity: 20,
-  },
-  {
-    id: "whatsapp_alerts",
-    name: "WhatsApp Automated Alerts & SMS",
-    category: "engagement",
-    icon: MessageSquare,
-    monthlyPrice: 99,
-    description: "Send live WhatsApp queue updates and instant booking confirmations to customers.",
+    description: "Official checkmark badge next to your store name to boost customer trust.",
     type: "toggle",
+    badge: "TRUSTED",
   },
   {
-    id: "ai_analytics",
-    name: "AI Queue & Demand Forecast Engine",
+    id: "qr_queue",
+    name: "QR Scan Queue",
+    category: "queue",
+    icon: Zap,
+    monthlyPrice: 99,
+    description: "Contactless QR code display for instant customer self-registration into queues.",
+    type: "toggle",
+    badge: "ESSENTIAL",
+  },
+  {
+    id: "promotions",
+    name: "Promotions & Featured Listing",
+    category: "engagement",
+    icon: Flame,
+    monthlyPrice: 199,
+    description: "Homepage promotion, featured category listing & sponsored business cards.",
+    type: "toggle",
+    badge: "BOOSTED",
+  },
+  {
+    id: "live_queue_pro",
+    name: "Live Queue Pro",
+    category: "queue",
+    icon: Clock,
+    monthlyPrice: 299,
+    description: "Unlimited smart queues, live wait time, queue notifications & delay alerts.",
+    type: "toggle",
+    badge: "RECOMMENDED",
+  },
+  {
+    id: "business_analytics",
+    name: "Business Analytics Pro",
+    category: "intelligence",
+    icon: TrendingUp,
+    monthlyPrice: 149,
+    description: "Customer insights, visitor statistics, peak rush hours & monthly performance reports.",
+    type: "toggle",
+    badge: "REPORTS",
+  },
+  {
+    id: "top_search_ranking",
+    name: "Top Search Ranking",
+    category: "engagement",
+    icon: Star,
+    monthlyPrice: 99,
+    description: "Appear above competitors in local search results with priority placement.",
+    type: "toggle",
+    badge: "HIGH VISIBILITY",
+  },
+  {
+    id: "membership_management",
+    name: "Membership Management",
+    category: "engagement",
+    icon: Users,
+    monthlyPrice: 299,
+    description: "Sell custom digital memberships to your own customers with QR verification.",
+    type: "toggle",
+    badge: "NEW",
+  },
+  {
+    id: "future_pass",
+    name: "Future Features Pass",
     category: "intelligence",
     icon: Sparkles,
-    monthlyPrice: 199,
-    description: "Predict peak rush hours, optimize wait-times, and receive AI staffing suggestions.",
+    monthlyPrice: 499,
+    description: "Automatically unlock every premium feature released by Kynisto in the future.",
     type: "toggle",
-  },
-  {
-    id: "custom_branding",
-    name: "Custom Branding & White Labeling",
-    category: "engagement",
-    icon: Palette,
-    monthlyPrice: 149,
-    description: "Remove Kynisto logo, add custom store branding, domain, and branded receipts.",
-    type: "toggle",
-  },
-  {
-    id: "marketing_coupons",
-    name: "Marketing Coupons & Broadcasts",
-    category: "engagement",
-    icon: Tag,
-    monthlyPrice: 129,
-    description: "Broadcast promo codes, flash sales, and targeted SMS offers to nearby shoppers.",
-    type: "toggle",
-  },
-  {
-    id: "reports_export",
-    name: "Advanced Reports & CSV Export",
-    category: "intelligence",
-    icon: FileText,
-    monthlyPrice: 79,
-    description: "Export full financial logs, peak customer traffic, and staff efficiency metrics.",
-    type: "toggle",
-  },
-  {
-    id: "pos_integration",
-    name: "POS & Billing API Suite",
-    category: "capacity",
-    icon: Plug,
-    monthlyPrice: 199,
-    description: "Direct API webhooks and integration with Tally, Square, and Razorpay.",
-    type: "toggle",
-  },
-  {
-    id: "vip_support",
-    name: "24/7 VIP Dedicated Account Manager",
-    category: "support",
-    icon: Headphones,
-    monthlyPrice: 249,
-    description: "Direct phone line to dedicated technical support & priority 1-on-1 setup.",
-    type: "toggle",
+    badge: "VIP PASS",
   },
 ];
 
@@ -240,7 +236,61 @@ export function BusinessMarketplaceUI({
   const BASE_PRICE_MONTHLY = 199;
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [selectedAddons, setSelectedAddons] = useState<Record<string, number | boolean>>({});
+  const [addonCatalog, setAddonCatalog] = useState<ModularAddon[]>(INITIAL_ADDON_CATALOG);
+  const [combosCatalog, setCombosCatalog] = useState<ComboPack[]>(PREMIUM_COMBOS);
   
+  React.useEffect(() => {
+    let isMounted = true;
+    async function loadMarketplace() {
+      try {
+        const res = await fetch("/api/subscriptions/marketplace", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!isMounted) return;
+
+        if (Array.isArray(data.features) && data.features.length > 0) {
+          const mappedFeatures: ModularAddon[] = data.features
+            .filter((f: any) => f.isActive !== false)
+            .map((f: any) => ({
+              id: f.id,
+              name: f.name,
+              category: f.category || "engagement",
+              icon: f.id.includes("badge") || f.id.includes("trust") ? ShieldCheck : f.id.includes("queue") ? Zap : f.id.includes("promo") ? Flame : f.id.includes("analytics") ? TrendingUp : Star,
+              monthlyPrice: Number(f.monthlyPrice ?? f.price ?? 49),
+              description: f.description || f.name,
+              type: "toggle" as const,
+              badge: f.badge || f.badgeText || undefined,
+            }));
+          setAddonCatalog(mappedFeatures);
+        }
+
+        if (Array.isArray(data.combos) && data.combos.length > 0) {
+          const mappedCombos: ComboPack[] = data.combos
+            .filter((c: any) => c.isActive !== false)
+            .map((c: any) => ({
+              id: c.id,
+              name: c.name,
+              badge: c.badge || "RECOMMENDED",
+              badgeColor: c.isPopular ? "bg-amber-500/20 text-amber-300 border-amber-500/40" : "bg-blue-500/20 text-blue-300 border-blue-500/40",
+              discountBadge: c.discountBadge || `Save ₹${c.savings || 48}/mo`,
+              isPopular: Boolean(c.isPopular),
+              monthlyPrice: Number(c.monthlyPrice ?? c.price ?? 299),
+              yearlyPrice: Number(c.yearlyPrice ?? (c.monthlyPrice ? c.monthlyPrice * 10 : 2999)),
+              originalPriceMonthly: Number(c.originalPriceMonthly ?? (c.monthlyPrice ? c.monthlyPrice + 50 : 348)),
+              description: c.description || c.name,
+              features: Array.isArray(c.features) ? c.features : [],
+              addonSelections: {},
+            }));
+          setCombosCatalog(mappedCombos);
+        }
+      } catch (err) {
+        // Fall back gracefully to initial defaults
+      }
+    }
+    loadMarketplace();
+    return () => { isMounted = false; };
+  }, []);
+
   // Active modal/checkout state
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [checkoutTarget, setCheckoutTarget] = useState<{
@@ -285,7 +335,7 @@ export function BusinessMarketplaceUI({
   // Calculate live custom total
   const customCalculatedMonthly = useMemo(() => {
     let total = BASE_PRICE_MONTHLY;
-    ADDON_CATALOG.forEach((addon) => {
+    addonCatalog.forEach((addon) => {
       const val = selectedAddons[addon.id];
       if (addon.type === "toggle" && val === true) {
         total += addon.monthlyPrice;
@@ -294,7 +344,7 @@ export function BusinessMarketplaceUI({
       }
     });
     return total;
-  }, [selectedAddons]);
+  }, [selectedAddons, addonCatalog]);
 
   const customCalculatedYearly = useMemo(() => {
     // 20% discount on yearly billing
@@ -324,7 +374,7 @@ export function BusinessMarketplaceUI({
 
   const handleOpenCustomCheckout = () => {
     const itemizedList: string[] = ["Base Core Platform (1 Store, 50 Daily Bookings)"];
-    ADDON_CATALOG.forEach((addon) => {
+    addonCatalog.forEach((addon) => {
       const val = selectedAddons[addon.id];
       if (addon.type === "toggle" && val === true) {
         itemizedList.push(`${addon.name} (₹${addon.monthlyPrice}/mo)`);
@@ -489,7 +539,7 @@ export function BusinessMarketplaceUI({
 
             {/* Modular Add-on Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {ADDON_CATALOG.map((addon) => {
+              {addonCatalog.map((addon) => {
                 const IconComponent = addon.icon;
                 const isSelected =
                   addon.type === "toggle"
@@ -614,7 +664,7 @@ export function BusinessMarketplaceUI({
                   <span className="font-semibold text-white">₹{BASE_PRICE_MONTHLY}/mo</span>
                 </div>
 
-                {ADDON_CATALOG.map((addon) => {
+                {addonCatalog.map((addon) => {
                   const val = selectedAddons[addon.id];
                   if (addon.type === "toggle" && val === true) {
                     return (
@@ -689,7 +739,7 @@ export function BusinessMarketplaceUI({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {PREMIUM_COMBOS.map((combo) => (
+          {combosCatalog.map((combo) => (
             <div
               key={combo.id}
               className={`relative rounded-3xl p-7 bg-slate-900/90 border backdrop-blur-xl flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 ${

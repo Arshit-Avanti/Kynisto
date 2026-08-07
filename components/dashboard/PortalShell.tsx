@@ -52,7 +52,6 @@ const navByRole: Record<UserRole, NavItem[]> = {
   admin: [
     { label: "Dashboard", icon: LayoutDashboard, tab: "overview" },
     { label: "Premium & Plans", icon: Crown, tab: "subscriptions" },
-    { label: "Marketplace Control", icon: Store, tab: "subscription-marketplace" },
     { label: "Users", icon: Users, tab: "users" },
     { label: "Shop owners", icon: Store, tab: "owners" },
     { label: "Customers", icon: UserCheck, tab: "customers" },
