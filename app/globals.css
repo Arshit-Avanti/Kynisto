@@ -1832,7 +1832,7 @@ footer > p { color: var(--muted); font-size: 11px; }
   .headerActions > .accountButton,
   .headerActions > .savedButton,
   .headerActions > .customizeButton { display: none; }
-  .mobileNav { display: block; position: relative; }
+  .mobileNav { display: block; position: relative; z-index: 99999; }
   .mobileNav summary {
     width: 42px;
     height: 42px;

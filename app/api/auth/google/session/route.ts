@@ -45,7 +45,7 @@ export async function POST(request: Request) {
         role: identity.role,
         isSuperAdmin: false,
       },
-      redirectTo: profile?.role ? dashboardForRole(identity.role) : "/onboarding",
+      redirectTo: "/",
     });
   } catch (error) {
     return apiError(error);

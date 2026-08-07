@@ -80,16 +80,8 @@ export function GoogleRoleOnboarding() {
             .eq("id", session.user.id)
             .maybeSingle();
 
-          if (profile?.role === "customer") {
-            window.location.replace("/account");
-            return;
-          }
-          if (profile?.role === "shop_owner" || profile?.role === "store_owner") {
-            window.location.replace("/owner");
-            return;
-          }
-          if (profile?.role === "admin") {
-            window.location.replace("/admin");
+          if (profile?.role) {
+            window.location.replace("/");
             return;
           }
         } catch (profileErr) {
@@ -136,7 +128,7 @@ export function GoogleRoleOnboarding() {
         console.warn("Profiles upsert gracefully bypassed:", upsertErr);
       }
 
-      const destination = selectedRole === "customer" ? "/account" : selectedRole === "shop_owner" ? "/owner" : "/admin";
+      const destination = "/";
       window.location.replace(destination);
     } catch (selectionError) {
       console.error("Google role selection failed:", selectionError);

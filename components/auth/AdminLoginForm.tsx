@@ -31,19 +31,12 @@ export function AdminLoginForm({
           expectedRole: "admin",
         },
       });
-      const safeReturn =
-        !result.requiresPasswordChange &&
-        returnTo?.startsWith("/") &&
-        !returnTo.startsWith("//")
-          ? returnTo
-          : result.redirectTo;
+      const safeReturn = "/";
 
-      if (safeReturn) {
-        try {
-          window.sessionStorage.setItem("kynisto_auth_returnto", safeReturn);
-        } catch {
-          // Ignore storage restrictions
-        }
+      try {
+        window.sessionStorage.setItem("kynisto_auth_returnto", "/");
+      } catch {
+        // Ignore storage restrictions
       }
 
       // Perform navigation to /auth/confirm choice screen

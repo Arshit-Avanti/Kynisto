@@ -10,9 +10,9 @@ import { useSearchParams } from "next/navigation";
 const PENDING_KEY = "kynisto-google-auth-pending";
 const RETURNTO_KEY = "kynisto_auth_returnto";
 
-export function GoogleSignIn({ returnTo: propReturnTo }: { returnTo?: string } = {}) {
+export function GoogleSignIn({ returnTo: _propReturnTo }: { returnTo?: string } = {}) {
   const searchParams = useSearchParams();
-  const returnTo = propReturnTo || searchParams.get("returnTo") || "";
+  const returnTo = "/";
   const starting = useRef(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -30,9 +30,7 @@ export function GoogleSignIn({ returnTo: propReturnTo }: { returnTo?: string } =
           : "https://kynisto.nxt-arshit.workers.dev/auth/confirm";
       try {
         window.sessionStorage.setItem(PENDING_KEY, "1");
-        if (returnTo) {
-          window.sessionStorage.setItem(RETURNTO_KEY, returnTo);
-        }
+        window.sessionStorage.setItem(RETURNTO_KEY, "/");
       } catch {
         // Ignore storage restriction errors
       }

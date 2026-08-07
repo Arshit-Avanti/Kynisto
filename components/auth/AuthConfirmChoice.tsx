@@ -28,31 +28,26 @@ export default function AuthConfirmChoice({ hash, accessToken }: AuthConfirmChoi
       // Ignore storage restrictions
     }
 
-    const getTargetUrl = (role?: string) => {
-      if (savedReturnTo) return savedReturnTo;
-      return role === "admin" ? "/admin" : role === "store_owner" ? "/owner" : "/account";
-    };
+    const getTargetUrl = () => "/";
 
     if (accessToken) {
       apiFetch<{ user: { role: string } | null }>("/api/auth/google/session", {
         method: "POST",
         json: { access_token: accessToken },
       })
-        .then((res) => {
-          const target = getTargetUrl(res?.user?.role);
-          window.location.replace(target);
+        .then(() => {
+          window.location.replace("/");
         })
         .catch(() => {
-          window.location.replace(savedReturnTo || "/account");
+          window.location.replace("/");
         });
     } else {
       apiFetch<{ user: { role: string } | null }>("/api/auth/me")
-        .then((res) => {
-          const target = getTargetUrl(res?.user?.role);
-          window.location.replace(target);
+        .then(() => {
+          window.location.replace("/");
         })
         .catch(() => {
-          window.location.replace(savedReturnTo || "/account");
+          window.location.replace("/");
         });
     }
   };

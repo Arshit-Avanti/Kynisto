@@ -111,7 +111,7 @@ export async function POST(request: Request) {
     return Response.json({
       user: { id: user.id, name: user.name, email: user.email, role: user.role, isSuperAdmin: Boolean(user.isSuperAdmin) },
       requiresPasswordChange,
-      redirectTo: requiresPasswordChange ? "/change-password" : dashboardForRole(user.role),
+      redirectTo: requiresPasswordChange ? "/change-password" : "/",
     });
   } catch (error) {
     return apiError(error);

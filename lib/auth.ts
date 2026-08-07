@@ -49,10 +49,8 @@ function cookieOptions(request: Request, maxAge: number = 30 * DAY) {
   };
 }
 
-export function dashboardForRole(role: UserRole): string {
-  if (role === "admin") return "/admin";
-  if (role === "store_owner") return "/owner";
-  return "/account";
+export function dashboardForRole(_role: UserRole): string {
+  return "/";
 }
 
 export async function createSession(
@@ -306,7 +304,7 @@ export async function requirePageRole(
 
 export async function redirectAuthenticatedUser(): Promise<void> {
   const session = await getSessionUser();
-  if (session) redirect(session.user.mustChangePassword ? "/change-password" : dashboardForRole(session.user.role));
+  if (session) redirect(session.user.mustChangePassword ? "/change-password" : "/");
 }
 
 export async function destroySession(request: Request): Promise<void> {

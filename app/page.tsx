@@ -1150,6 +1150,18 @@ export default function Home() {
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [toast, setToast] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   useEffect(() => {
     let scrollTicking = false;
@@ -1463,39 +1475,362 @@ export default function Home() {
             <span className="sliders" aria-hidden="true">☷</span>
             Customize
           </button>
-          <details className="mobileNav">
-            <summary aria-label="Open Kynisto navigation">
-              <span aria-hidden="true" />
-              <span aria-hidden="true" />
-              <span aria-hidden="true" />
-            </summary>
-            <nav aria-label="Mobile navigation">
-              <Link href={userRole ? (userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account") : "/login"}>
-                {userRole === "admin" ? "Admin Panel" : userRole === "store_owner" ? "Owner Dashboard" : userRole === "customer" ? "My Account" : "Log in"}
-              </Link>
-              <Link href="/products">Products</Link>
-              <Link href="/healthcare">Healthcare</Link>
-              <Link href="/services">Services</Link>
-              <Link href={userRole === "customer" || userRole === "admin" ? "/account?tab=favorites" : "/login?returnTo=%2Faccount%3Ftab%3Dfavorites"}>
-                Saved places
-              </Link>
-              <button type="button" onClick={() => setCustomizing(true)}>Customize appearance</button>
-              {userRole && (
-                <button
-                  type="button"
-                  style={{ color: "#ef4444", textAlign: "left" }}
-                  onClick={async () => {
-                    await apiFetch("/api/auth/logout", { method: "POST" });
-                    window.location.href = "/";
-                  }}
-                >
-                  Sign out
-                </button>
+          <div className="mobileNav" style={{ display: "inline-block" }}>
+            <button
+              type="button"
+              className="mobileNavBtn"
+              aria-label="Open Kynisto navigation"
+              aria-expanded={mobileOpen}
+              onClick={() => setMobileOpen((prev) => !prev)}
+              style={{
+                position: "relative",
+                zIndex: 99999,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "4px",
+                width: "42px",
+                height: "42px",
+                padding: "8px",
+                background: "rgba(255, 255, 255, 0.12)",
+                border: "1px solid rgba(255, 255, 255, 0.25)",
+                borderRadius: "12px",
+                cursor: "pointer",
+                color: "#FFFFFF",
+                backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)",
+                boxShadow: "0 4px 14px rgba(0, 0, 0, 0.25)",
+                pointerEvents: "auto",
+              }}
+            >
+              {mobileOpen ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              ) : (
+                <>
+                  <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
+                  <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
+                  <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
+                </>
               )}
-            </nav>
-          </details>
+            </button>
+          </div>
         </div>
       </header>
+
+      {mobileOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile Navigation Drawer"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: "100vw",
+            height: "100vh",
+            zIndex: 99999,
+            background: "rgba(10, 15, 30, 0.98)",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            display: "flex",
+            flexDirection: "column",
+            padding: "20px 20px 32px 20px",
+            overflowY: "auto",
+            boxSizing: "border-box",
+          }}
+        >
+          {/* Top header row inside mobile drawer */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
+            <Link href="/" onClick={() => setMobileOpen(false)} style={{ textDecoration: "none" }}>
+              <KynistoLogo showTagline={false} />
+            </Link>
+            <button
+              type="button"
+              aria-label="Close navigation menu"
+              onClick={() => setMobileOpen(false)}
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                background: "rgba(255, 255, 255, 0.1)",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                color: "#FFFFFF",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          {/* Locality Selector Pill in Drawer */}
+          <button
+            type="button"
+            onClick={() => {
+              useCurrentLocation();
+              setMobileOpen(false);
+            }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              background: "linear-gradient(135deg, rgba(255, 87, 34, 0.16) 0%, rgba(255, 138, 0, 0.12) 100%)",
+              border: "1px solid rgba(255, 87, 34, 0.4)",
+              borderRadius: "16px",
+              padding: "12px 16px",
+              marginBottom: "20px",
+              cursor: "pointer",
+              textAlign: "left",
+              width: "100%",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#FF5722", boxShadow: "0 0 10px #FF5722", display: "inline-block" }} />
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span style={{ fontSize: "10px", color: "#FF8A00", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>Locality</span>
+                <span style={{ fontSize: "14px", color: "#FFFFFF", fontWeight: 700 }}>{locationLabel}</span>
+              </div>
+            </div>
+            <span style={{ fontSize: "13px", color: "#FF5722", fontWeight: 700 }}>Change 📍</span>
+          </button>
+
+          {/* Navigation Links list */}
+          <nav aria-label="Mobile navigation" style={{ display: "flex", flexDirection: "column", gap: "10px", flex: 1 }}>
+            <Link
+              href="/"
+              onClick={() => setMobileOpen(false)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 16px",
+                borderRadius: "14px",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                color: "#FFFFFF",
+                textDecoration: "none",
+                fontSize: "15px",
+                fontWeight: 600,
+              }}
+            >
+              <span>Homepage</span>
+              <span style={{ opacity: 0.5 }}>→</span>
+            </Link>
+
+            <Link
+              href="/products"
+              onClick={() => setMobileOpen(false)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 16px",
+                borderRadius: "14px",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                color: "#FFFFFF",
+                textDecoration: "none",
+                fontSize: "15px",
+                fontWeight: 600,
+              }}
+            >
+              <span>Products</span>
+              <span style={{ opacity: 0.5 }}>→</span>
+            </Link>
+
+            <Link
+              href="/healthcare"
+              onClick={() => setMobileOpen(false)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 16px",
+                borderRadius: "14px",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                color: "#FFFFFF",
+                textDecoration: "none",
+                fontSize: "15px",
+                fontWeight: 600,
+              }}
+            >
+              <span>Healthcare</span>
+              <span style={{ opacity: 0.5 }}>→</span>
+            </Link>
+
+            <Link
+              href="/services"
+              onClick={() => setMobileOpen(false)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 16px",
+                borderRadius: "14px",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                color: "#FFFFFF",
+                textDecoration: "none",
+                fontSize: "15px",
+                fontWeight: 600,
+              }}
+            >
+              <span>Services</span>
+              <span style={{ opacity: 0.5 }}>→</span>
+            </Link>
+
+            <Link
+              href="/pricing"
+              onClick={() => setMobileOpen(false)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 16px",
+                borderRadius: "14px",
+                background: "rgba(255, 122, 0, 0.12)",
+                border: "1px solid rgba(255, 122, 0, 0.4)",
+                color: "#FF7A00",
+                textDecoration: "none",
+                fontSize: "15px",
+                fontWeight: 700,
+              }}
+            >
+              <span>Pricing &amp; Plans</span>
+              <span>⚡</span>
+            </Link>
+
+            <Link
+              href={userRole ? (userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account") : "/login"}
+              onClick={() => setMobileOpen(false)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 16px",
+                borderRadius: "14px",
+                background: "linear-gradient(135deg, #FF5722 0%, #E53935 100%)",
+                color: "#FFFFFF",
+                textDecoration: "none",
+                fontSize: "15px",
+                fontWeight: 700,
+                boxShadow: "0 4px 16px rgba(255, 87, 34, 0.4)",
+                marginTop: "6px",
+              }}
+            >
+              <span>
+                {userRole === "admin" ? "Admin Panel" : userRole === "store_owner" ? "Owner Dashboard" : userRole === "customer" ? "My Account" : "Dashboard / Log in"}
+              </span>
+              <span>👤</span>
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (userRole !== "customer" && userRole !== "admin") {
+                  window.location.assign("/login?returnTo=%2Faccount%3Ftab%3Dfavorites");
+                  return;
+                }
+                setCategory("All");
+                setQuery("");
+                setSortMode("all");
+                document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
+                setToast(saved.length ? `${saved.length} saved place${saved.length === 1 ? "" : "s"}` : "No saved places yet");
+                setMobileOpen(false);
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 16px",
+                borderRadius: "14px",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                color: "#FFFFFF",
+                fontSize: "15px",
+                fontWeight: 600,
+                cursor: "pointer",
+                textAlign: "left",
+                width: "100%",
+              }}
+            >
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ color: "#FF5722" }}>♥</span> Saved Places
+              </span>
+              <b style={{ background: "rgba(255, 87, 34, 0.25)", color: "#FF8A00", border: "1px solid rgba(255, 138, 0, 0.4)", padding: "2px 10px", borderRadius: "12px", fontSize: "12px" }}>
+                {saved.length}
+              </b>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setCustomizing(true);
+                setMobileOpen(false);
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 16px",
+                borderRadius: "14px",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                color: "#FFFFFF",
+                fontSize: "15px",
+                fontWeight: 600,
+                cursor: "pointer",
+                textAlign: "left",
+                width: "100%",
+              }}
+            >
+              <span>Customize Appearance</span>
+              <span>⚙️</span>
+            </button>
+
+            {userRole && (
+              <button
+                type="button"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "14px 16px",
+                  borderRadius: "14px",
+                  background: "rgba(239, 68, 68, 0.1)",
+                  border: "1px solid rgba(239, 68, 68, 0.3)",
+                  color: "#ef4444",
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  textAlign: "left",
+                  width: "100%",
+                  marginTop: "6px",
+                }}
+                onClick={async () => {
+                  await apiFetch("/api/auth/logout", { method: "POST" });
+                  window.location.href = "/";
+                }}
+              >
+                <span>Sign Out</span>
+                <span>🚪</span>
+              </button>
+            )}
+          </nav>
+        </div>
+      )}
 
       <section className="hero" id="top" style={{ textAlign: "center", padding: "120px 20px 40px 20px", display: "flex", flexDirection: "column", alignItems: "center", position: "relative", minHeight: "90vh", justifyContent: "center" }}>
         <div className="ambientMesh" />

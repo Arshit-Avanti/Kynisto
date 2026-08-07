@@ -4,18 +4,13 @@ import { redirectAuthenticatedUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ returnTo?: string }>;
-}) {
+export default async function LoginPage() {
   await redirectAuthenticatedUser();
-  const { returnTo } = await searchParams;
   return (
     <div className="authCard">
-      <GoogleSignIn returnTo={returnTo} />
+      <GoogleSignIn returnTo="/" />
       <div className="authDivider"><span>or</span></div>
-      <AdminLoginForm returnTo={returnTo} />
+      <AdminLoginForm returnTo="/" />
       <section className="androidDownload" aria-labelledby="android-download-title">
         <span className="androidDownloadIcon" aria-hidden="true">K</span>
         <div>

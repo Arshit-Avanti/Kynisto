@@ -300,29 +300,328 @@ export function Navbar3D({
         {isMobile && (
           <button
             type="button"
-            aria-label="Toggle navigation menu"
+            className="mobileNavBtn"
+            aria-label="Open Kynisto navigation"
             aria-expanded={mobileOpen}
             onClick={handleToggleMobile}
-            style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "26px", color: "#FFFFFF", padding: "4px" }}
+            style={{
+              position: "relative",
+              zIndex: 99999,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "4px",
+              width: "42px",
+              height: "42px",
+              padding: "8px",
+              background: "rgba(255, 255, 255, 0.12)",
+              border: "1px solid rgba(255, 255, 255, 0.25)",
+              borderRadius: "12px",
+              cursor: "pointer",
+              color: "#FFFFFF",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              boxShadow: "0 4px 14px rgba(0, 0, 0, 0.3)",
+              pointerEvents: "auto",
+            }}
           >
-            ☰
+            {mobileOpen ? (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            ) : (
+              <>
+                <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
+                <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
+                <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
+              </>
+            )}
           </button>
         )}
       </div>
 
       {isMobile && mobileOpen && (
-        <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "rgba(10, 15, 30, 0.98)", padding: "20px", display: "flex", flexDirection: "column", gap: "18px", borderBottom: "1px solid rgba(255, 255, 255, 0.15)", boxShadow: "0 12px 35px rgba(0, 0, 0, 0.8)", backdropFilter: "blur(20px)" }}>
-          <Link href="/" onClick={handleCloseMobile} style={{ color: "#FFFFFF", textDecoration: "none", fontSize: "15px" }}>Homepage</Link>
-          <Link href={userRole ? (userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account") : "/login"} onClick={handleCloseMobile} style={{ color: "#FFFFFF", textDecoration: "none", fontWeight: 700, fontSize: "16px" }}>
-            {userRole === "admin" ? "Admin Panel" : userRole === "store_owner" ? "Owner Dashboard" : userRole === "customer" ? "My Account" : "Log in"}
-          </Link>
-          <Link
-            href={userRole === "customer" || userRole === "admin" ? "/account?tab=favorites" : "/login?returnTo=%2Faccount%3Ftab%3Dfavorites"}
-            onClick={handleCloseMobile}
-            style={{ color: "#FFFFFF", textDecoration: "none", fontSize: "15px" }}
-          >
-            Saved ({savedCount})
-          </Link>
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile Navigation Drawer"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: "100vw",
+            height: "100vh",
+            zIndex: 99999,
+            background: "rgba(10, 15, 30, 0.98)",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            display: "flex",
+            flexDirection: "column",
+            padding: "20px 20px 32px 20px",
+            overflowY: "auto",
+            boxSizing: "border-box",
+          }}
+        >
+          {/* Header row inside mobile drawer */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
+            <Link href="/" onClick={handleCloseMobile} style={{ textDecoration: "none" }}>
+              <KynistoLogo showTagline={false} />
+            </Link>
+            <button
+              type="button"
+              aria-label="Close navigation menu"
+              onClick={handleCloseMobile}
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                background: "rgba(255, 255, 255, 0.1)",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                color: "#FFFFFF",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          {/* Locality Selector Pill in Drawer */}
+          {onUseLocation && (
+            <button
+              type="button"
+              onClick={() => {
+                onUseLocation();
+                handleCloseMobile();
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                background: "linear-gradient(135deg, rgba(255, 87, 34, 0.16) 0%, rgba(255, 138, 0, 0.12) 100%)",
+                border: "1px solid rgba(255, 87, 34, 0.4)",
+                borderRadius: "16px",
+                padding: "12px 16px",
+                marginBottom: "20px",
+                cursor: "pointer",
+                textAlign: "left",
+                width: "100%",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#FF5722", boxShadow: "0 0 10px #FF5722", display: "inline-block" }} />
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <span style={{ fontSize: "10px", color: "#FF8A00", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>Locality</span>
+                  <span style={{ fontSize: "14px", color: "#FFFFFF", fontWeight: 700 }}>{locationLabel}</span>
+                </div>
+              </div>
+              <span style={{ fontSize: "13px", color: "#FF5722", fontWeight: 700 }}>Change 📍</span>
+            </button>
+          )}
+
+          {/* Navigation Links list */}
+          <nav style={{ display: "flex", flexDirection: "column", gap: "10px", flex: 1 }}>
+            <Link
+              href="/"
+              onClick={handleCloseMobile}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 16px",
+                borderRadius: "14px",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                color: "#FFFFFF",
+                textDecoration: "none",
+                fontSize: "15px",
+                fontWeight: 600,
+              }}
+            >
+              <span>Homepage</span>
+              <span style={{ opacity: 0.5 }}>→</span>
+            </Link>
+
+            <Link
+              href="/products"
+              onClick={handleCloseMobile}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 16px",
+                borderRadius: "14px",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                color: "#FFFFFF",
+                textDecoration: "none",
+                fontSize: "15px",
+                fontWeight: 600,
+              }}
+            >
+              <span>Products</span>
+              <span style={{ opacity: 0.5 }}>→</span>
+            </Link>
+
+            <Link
+              href="/healthcare"
+              onClick={handleCloseMobile}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 16px",
+                borderRadius: "14px",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                color: "#FFFFFF",
+                textDecoration: "none",
+                fontSize: "15px",
+                fontWeight: 600,
+              }}
+            >
+              <span>Healthcare</span>
+              <span style={{ opacity: 0.5 }}>→</span>
+            </Link>
+
+            <Link
+              href="/services"
+              onClick={handleCloseMobile}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 16px",
+                borderRadius: "14px",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                color: "#FFFFFF",
+                textDecoration: "none",
+                fontSize: "15px",
+                fontWeight: 600,
+              }}
+            >
+              <span>Services</span>
+              <span style={{ opacity: 0.5 }}>→</span>
+            </Link>
+
+            <Link
+              href="/pricing"
+              onClick={handleCloseMobile}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 16px",
+                borderRadius: "14px",
+                background: "rgba(255, 122, 0, 0.12)",
+                border: "1px solid rgba(255, 122, 0, 0.4)",
+                color: "#FF7A00",
+                textDecoration: "none",
+                fontSize: "15px",
+                fontWeight: 700,
+              }}
+            >
+              <span>Pricing &amp; Plans</span>
+              <span>⚡</span>
+            </Link>
+
+            <Link
+              href={userRole ? (userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account") : "/login"}
+              onClick={handleCloseMobile}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 16px",
+                borderRadius: "14px",
+                background: "linear-gradient(135deg, #FF5722 0%, #E53935 100%)",
+                color: "#FFFFFF",
+                textDecoration: "none",
+                fontSize: "15px",
+                fontWeight: 700,
+                boxShadow: "0 4px 16px rgba(255, 87, 34, 0.4)",
+                marginTop: "6px",
+              }}
+            >
+              <span>
+                {userRole === "admin" ? "Admin Panel" : userRole === "store_owner" ? "Owner Dashboard" : userRole === "customer" ? "My Account" : "Dashboard / Log in"}
+              </span>
+              <span>👤</span>
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => {
+                handleFavoritesClick();
+                handleCloseMobile();
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "14px 16px",
+                borderRadius: "14px",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                color: "#FFFFFF",
+                fontSize: "15px",
+                fontWeight: 600,
+                cursor: "pointer",
+                textAlign: "left",
+                width: "100%",
+              }}
+            >
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ color: "#FF5722" }}>♥</span> Saved Places
+              </span>
+              <b style={{ background: "rgba(255, 87, 34, 0.25)", color: "#FF8A00", border: "1px solid rgba(255, 138, 0, 0.4)", padding: "2px 10px", borderRadius: "12px", fontSize: "12px" }}>
+                {savedCount}
+              </b>
+            </button>
+
+            {onOpenCustomize && (
+              <button
+                type="button"
+                onClick={() => {
+                  onOpenCustomize();
+                  handleCloseMobile();
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "14px 16px",
+                  borderRadius: "14px",
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  color: "#FFFFFF",
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  textAlign: "left",
+                  width: "100%",
+                }}
+              >
+                <span>Customize Appearance</span>
+                <span>⚙️</span>
+              </button>
+            )}
+          </nav>
+
+          <div style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid rgba(255, 255, 255, 0.1)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: "12px", color: "rgba(255, 255, 255, 0.5)" }}>Kynisto 2.0</span>
+            <ThemeSwitcher size="sm" />
+          </div>
         </div>
       )}
     </header>
