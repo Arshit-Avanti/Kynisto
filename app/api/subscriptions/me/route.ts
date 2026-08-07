@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { getD1 } from "@/db/runtime";
-import { ensureSubscriptionTables, getPlanConfig, grantWelcomeSubscriptionReward } from "@/lib/subscriptions";
+import {
+  ensureSubscriptionTables,
+  getPlanConfig,
+  grantWelcomeSubscriptionReward,
+  calculateDaysRemaining,
+  isSubscriptionExpiringSoon,
+} from "@/lib/subscriptions";
 
 export const dynamic = "force-dynamic";
 
@@ -62,12 +68,17 @@ export async function GET() {
     .bind(session.user.id)
     .all();
 
+  const daysRemaining = sub ? calculateDaysRemaining(sub.expiresAt, now) : 365;
+  const expiringSoon = sub ? isSubscriptionExpiringSoon(sub.expiresAt, sub.status, now) : false;
+
   return NextResponse.json({
     subscription: sub
       ? {
           ...sub,
           autoRenew: Boolean(sub.autoRenew),
           isExpired: sub.expiresAt <= now,
+          daysRemaining,
+          isExpiringSoon: expiringSoon,
         }
       : {
           id: `sub_default_${session.user.id}`,
@@ -84,6 +95,8 @@ export async function GET() {
           receiptNumber: `RCP-KYN-FREE`,
           createdAt: now,
           isExpired: false,
+          daysRemaining: 365,
+          isExpiringSoon: false,
         },
     plan: activePlan,
     transactions: txnsResult.results || [],

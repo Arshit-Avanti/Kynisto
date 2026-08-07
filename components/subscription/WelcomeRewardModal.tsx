@@ -84,6 +84,59 @@ export function WelcomeRewardModal({
           0%, 100% { box-shadow: 0 0 25px rgba(255, 87, 34, 0.4); }
           50% { box-shadow: 0 0 45px rgba(255, 138, 0, 0.7); }
         }
+
+        .welcome-reward-card h1,
+        .welcome-reward-card h2,
+        .welcome-reward-card h3,
+        .welcome-reward-card h4,
+        .welcome-reward-card h5,
+        .welcome-reward-card h6,
+        .welcome-reward-card p,
+        .welcome-reward-card p *,
+        .welcome-reward-card ul,
+        .welcome-reward-card ol,
+        .welcome-reward-card li,
+        .welcome-reward-card li * {
+          color: #FFFFFF !important;
+          -webkit-text-fill-color: #FFFFFF !important;
+        }
+
+        @media (max-width: 600px) {
+          .welcome-reward-overlay {
+            padding: 12px !important;
+          }
+          .welcome-reward-card {
+            max-height: 90vh !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            padding: 24px 18px 20px 18px !important;
+            border-radius: 24px !important;
+          }
+          .welcome-reward-grid {
+            grid-template-columns: 1fr !important;
+            gap: 16px !important;
+            padding: 16px !important;
+          }
+          .welcome-reward-card h1,
+          .welcome-reward-card h2,
+          .welcome-reward-card h3,
+          .welcome-reward-card h4,
+          .welcome-reward-card h5,
+          .welcome-reward-card h6,
+          .welcome-reward-card p,
+          .welcome-reward-card p *,
+          .welcome-reward-card ul,
+          .welcome-reward-card ol,
+          .welcome-reward-card li,
+          .welcome-reward-card li * {
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+          }
+          .welcome-reward-actions {
+            flex-direction: column !important;
+            gap: 10px !important;
+          }
+        }
       `,
         }}
       />
@@ -94,6 +147,9 @@ export function WelcomeRewardModal({
           position: "relative",
           width: "100%",
           maxWidth: "680px",
+          maxHeight: "90vh",
+          overflowY: "auto",
+          WebkitOverflowScrolling: "touch",
           background: "linear-gradient(145deg, rgba(22, 30, 48, 0.94) 0%, rgba(12, 18, 32, 0.98) 100%)",
           border: "1px solid rgba(255, 255, 255, 0.16)",
           borderRadius: "32px",
@@ -101,7 +157,6 @@ export function WelcomeRewardModal({
           boxShadow: "0 30px 90px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15)",
           color: "#FFFFFF",
           fontFamily: "system-ui, -apple-system, sans-serif",
-          overflow: "hidden",
         }}
       >
         {/* Glowing Ambient Orbs */}
@@ -171,6 +226,7 @@ export function WelcomeRewardModal({
 
         {/* Content Layout: Features List & Card Graphic */}
         <div
+          className="welcome-reward-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 220px",
@@ -236,7 +292,10 @@ export function WelcomeRewardModal({
         </div>
 
         {/* Action Buttons */}
-        <div style={{ display: "flex", gap: "14px", marginBottom: "20px" }}>
+        <div
+          className="welcome-reward-actions"
+          style={{ display: "flex", gap: "14px", marginBottom: "20px" }}
+        >
           <button
             type="button"
             onClick={handleClose}

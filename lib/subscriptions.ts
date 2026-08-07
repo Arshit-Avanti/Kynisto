@@ -620,4 +620,25 @@ export async function grantWelcomeSubscriptionReward(
   }
 }
 
+export function calculateDaysRemaining(
+  expiresAt: number,
+  now: number = Math.floor(Date.now() / 1000)
+): number {
+  const secondsRemaining = expiresAt - now;
+  if (secondsRemaining <= 0) return 0;
+  return Math.floor(secondsRemaining / 86400);
+}
+
+export function isSubscriptionExpiringSoon(
+  expiresAt: number,
+  status: string = "active",
+  now: number = Math.floor(Date.now() / 1000)
+): boolean {
+  if (status !== "active") return false;
+  if (expiresAt <= now) return false;
+  const daysRemaining = calculateDaysRemaining(expiresAt, now);
+  return daysRemaining >= 0 && daysRemaining <= 3;
+}
+
+
 
