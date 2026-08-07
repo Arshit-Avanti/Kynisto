@@ -145,21 +145,13 @@ export function HomeServicesDiscovery() {
 
       {/* Hero Header */}
       <section className="services-hero">
-        <div className="services-hero-kicker">
-          <span>⚡ INSTANT LOCAL BOOKING</span>
-        </div>
-        <h1 className="services-hero-title">
-          Book Trusted Local Professionals in Minutes.
-        </h1>
-        <p className="services-hero-subtitle">
-          Verified plumbers, electricians, technicians & home experts near {locationLabel}. 100% upfront pricing & 30–60 min arrival guarantee.
-        </p>
-
-        {/* Real-time Proof Badges */}
-        <div className="services-proof-badges">
-          <div className="proof-chip">⚡ 30-60 Min Express Arrival</div>
-          <div className="proof-chip">🛡️ 100% Background Verified</div>
-          <div className="proof-chip">💰 Upfront Prices · No Hidden Fees</div>
+        <div className="services-hero-card" style={{ background: "rgba(10, 15, 30, 0.78)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.15)", borderRadius: "28px", padding: "40px 24px 32px 24px", marginBottom: "28px", boxShadow: "0 20px 50px rgba(0,0,0,0.6)" }}>
+          <h1 className="services-hero-title" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF", textShadow: "0 2px 14px rgba(0,0,0,0.9)", margin: "0 0 14px 0", fontSize: "clamp(2.2rem, 5.5vw, 3.8rem)", fontWeight: 900 }}>
+            Book Trusted Local Professionals in Minutes.
+          </h1>
+          <p className="services-hero-subtitle" style={{ color: "#F1F5F9", WebkitTextFillColor: "#F1F5F9", textShadow: "0 2px 8px rgba(0,0,0,0.8)", margin: "0 auto", fontSize: "1.1rem", fontWeight: 600, maxWidth: "700px" }}>
+            Verified plumbers, electricians, technicians &amp; home experts near {locationLabel}. 100% upfront pricing &amp; 30–60 min arrival guarantee.
+          </p>
         </div>
 
         {/* Search Bar */}

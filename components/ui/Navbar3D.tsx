@@ -196,19 +196,20 @@ export function Navbar3D({
 
   const desktopNav = useMemo(() => {
     if (isMobile) return null;
+    const navColor = isRestrictedMode ? "#FFFFFF" : "var(--text-primary)";
     return (
-      <nav aria-label="Main Navigation" style={{ display: "flex", alignItems: "center", gap: "24px", fontSize: "14px", fontWeight: 700, color: "var(--text-primary)" }}>
-        <Link href="/" style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s" }}>Homepage</Link>
-        {!isRestrictedMode && <Link href="/products" style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s" }}>Products</Link>}
-        {!isRestrictedMode && <Link href="/healthcare" style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s" }}>Healthcare</Link>}
-        {!isRestrictedMode && <Link href="/services" style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s" }}>Services</Link>}
+      <nav aria-label="Main Navigation" style={{ display: "flex", alignItems: "center", gap: "24px", fontSize: "14px", fontWeight: 700, color: navColor }}>
+        <Link href="/" style={{ color: navColor, WebkitTextFillColor: navColor, textDecoration: "none", transition: "all 0.15s" }}>Homepage</Link>
+        {!isRestrictedMode && <Link href="/products" style={{ color: navColor, WebkitTextFillColor: navColor, textDecoration: "none", transition: "all 0.15s" }}>Products</Link>}
+        {!isRestrictedMode && <Link href="/healthcare" style={{ color: navColor, WebkitTextFillColor: navColor, textDecoration: "none", transition: "all 0.15s" }}>Healthcare</Link>}
+        {!isRestrictedMode && <Link href="/services" style={{ color: navColor, WebkitTextFillColor: navColor, textDecoration: "none", transition: "all 0.15s" }}>Services</Link>}
         {!isRestrictedMode && <Link href="/pricing" style={{ color: "#FF7A00", WebkitTextFillColor: "#FF7A00", textDecoration: "none", transition: "all 0.15s", fontWeight: 700 }}>Pricing &amp; Plans</Link>}
         
         {(!isPricingMode) && (
           <button
             type="button"
             onClick={handleFavoritesClick}
-            style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 700, padding: 0 }}
+            style={{ color: navColor, WebkitTextFillColor: navColor, textDecoration: "none", transition: "all 0.15s", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 700, padding: 0 }}
           >
             <span aria-hidden="true" style={{ color: "#FF5722", marginRight: "4px" }}>♥</span>
             Saved <b style={{ background: "rgba(255, 87, 34, 0.25)", color: "#FF8A00", WebkitTextFillColor: "#FF8A00", border: "1px solid rgba(255, 138, 0, 0.4)", padding: "2px 8px", borderRadius: "10px", fontSize: "12px", marginLeft: "4px" }}>{savedCount}</b>
@@ -216,7 +217,7 @@ export function Navbar3D({
         )}
 
         {!isRestrictedMode && onOpenCustomize && (
-          <button type="button" onClick={onOpenCustomize} style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 700, padding: 0 }}>
+          <button type="button" onClick={onOpenCustomize} style={{ color: navColor, WebkitTextFillColor: navColor, textDecoration: "none", transition: "all 0.15s", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 700, padding: 0 }}>
             <span aria-hidden="true" style={{ marginRight: "4px" }}>≡</span>
             Customize
           </button>
