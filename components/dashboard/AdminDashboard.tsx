@@ -44,7 +44,7 @@ export function AdminDashboard({ user }: { user: SessionUser }) {
     setLoading(true);
     setError("");
     try {
-      if (ADMIN_WORKSPACE_TABS.has(tab) || tab === "wallet" || tab === "chat" || tab === "healthcare" || tab === "subscriptions" || tab === "subscription" || tab === "notifications") {
+      if (ADMIN_WORKSPACE_TABS.has(tab) || tab === "wallet" || tab === "chat" || tab === "healthcare" || tab === "subscriptions" || tab === "subscription" || tab === "subscription-marketplace" || tab === "marketplace" || tab === "notifications") {
         setLoading(false);
         return;
       }
@@ -85,7 +85,7 @@ export function AdminDashboard({ user }: { user: SessionUser }) {
   if (loading) return <div className="portalSkeleton"><span /><span /><span /><span /></div>;
 
   const items = (data.items as Item[] | undefined) ?? [];
-  const title = tab === "overview" ? "Platform overview" : tab === "subscriptions" ? "Premium & Plans Control" : tab.charAt(0).toUpperCase() + tab.slice(1);
+  const title = tab === "overview" ? "Platform overview" : (tab === "subscription-marketplace" || tab === "marketplace") ? "Subscription Marketplace Control Center" : tab === "subscriptions" ? "Premium & Plans Control" : tab.charAt(0).toUpperCase() + tab.slice(1);
 
   return (
     <>
@@ -96,11 +96,12 @@ export function AdminDashboard({ user }: { user: SessionUser }) {
       {tab === "analytics" && <Analytics data={data} />}
       {tab === "chat" && <ChatCenter user={user} />}
       {tab === "healthcare" && <AdminHealthcarePanel />}
+      {(tab === "subscription-marketplace" || tab === "marketplace") && <AdminMarketplaceControlCenter />}
       {(tab === "subscriptions" || tab === "subscription") && <AdminSubscriptionsPanel />}
       {tab === "notifications" && <AdminNotificationPanel />}
       {tab === "wallet" && <AdminWalletPanel />}
       {tab === "services" && <AdminServicesPanel mutate={mutate} />}
-      {tab !== "overview" && tab !== "analytics" && tab !== "chat" && tab !== "healthcare" && tab !== "subscriptions" && tab !== "subscription" && tab !== "notifications" && tab !== "wallet" && tab !== "services" && !ADMIN_WORKSPACE_TABS.has(tab) && (
+      {tab !== "overview" && tab !== "analytics" && tab !== "chat" && tab !== "healthcare" && tab !== "subscriptions" && tab !== "subscription" && tab !== "subscription-marketplace" && tab !== "marketplace" && tab !== "notifications" && tab !== "wallet" && tab !== "services" && !ADMIN_WORKSPACE_TABS.has(tab) && (
         <>
           <form className="portalToolbar" onSubmit={(event) => { event.preventDefault(); void load(); }}>
             {tab !== "categories" && <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Search ${tab}…`} />}

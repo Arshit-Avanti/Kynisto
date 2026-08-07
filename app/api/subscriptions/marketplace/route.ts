@@ -3,14 +3,11 @@ import { getMarketplaceFeatures, getMarketplaceCombos } from "@/lib/subscription
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const includeInactive = searchParams.get("includeInactive") === "true";
-
     const [features, combos] = await Promise.all([
-      getMarketplaceFeatures(!includeInactive),
-      getMarketplaceCombos(!includeInactive),
+      getMarketplaceFeatures(true),
+      getMarketplaceCombos(true),
     ]);
 
     return NextResponse.json({
@@ -19,9 +16,9 @@ export async function GET(request: Request) {
       combos,
     });
   } catch (error: any) {
-    console.error("Marketplace fetch error:", error);
+    console.error("Public marketplace fetch error:", error);
     return NextResponse.json(
-      { success: false, error: error.message || "Failed to load marketplace items" },
+      { success: false, error: error.message || "Failed to fetch marketplace items" },
       { status: 500 }
     );
   }
