@@ -249,42 +249,66 @@ export function BusinessMarketplaceUI({
         if (!isMounted) return;
 
         if (Array.isArray(data.features) && data.features.length > 0) {
+          const getFeatureIcon = (idStr: string) => {
+            const lower = idStr.toLowerCase();
+            if (lower.includes("badge") || lower.includes("trust") || lower.includes("verified")) return ShieldCheck;
+            if (lower.includes("qr") || lower.includes("queue")) return Zap;
+            if (lower.includes("promo") || lower.includes("deal") || lower.includes("marketing")) return Flame;
+            if (lower.includes("analytic") || lower.includes("insight")) return TrendingUp;
+            if (lower.includes("rank") || lower.includes("search") || lower.includes("boost")) return Star;
+            if (lower.includes("member")) return Users;
+            if (lower.includes("whatsapp") || lower.includes("message")) return MessageSquare;
+            if (lower.includes("brand") || lower.includes("white")) return Palette;
+            if (lower.includes("ai") || lower.includes("bot")) return Sparkles;
+            if (lower.includes("inventory") || lower.includes("catalog") || lower.includes("stock")) return Package;
+            if (lower.includes("report") || lower.includes("export") || lower.includes("file")) return FileText;
+            return Star;
+          };
+
           const mappedFeatures: ModularAddon[] = data.features
             .filter((f: any) => f.isActive !== false)
-            .map((f: any) => ({
-              id: f.id,
-              name: f.name,
-              category: f.category || "engagement",
-              icon: f.id.includes("badge") || f.id.includes("trust") ? ShieldCheck : f.id.includes("queue") ? Zap : f.id.includes("promo") ? Flame : f.id.includes("analytics") ? TrendingUp : Star,
-              monthlyPrice: Number(f.monthlyPrice ?? f.price ?? 49),
-              description: f.description || f.name,
-              type: "toggle" as const,
-              badge: f.badge || f.badgeText || undefined,
-            }));
+            .map((f: any) => {
+              const featId = String(f.id || f.slug || f.key || "");
+              return {
+                id: featId,
+                name: String(f.name || featId),
+                category: (f.category || "engagement") as any,
+                icon: getFeatureIcon(featId + " " + (f.name || "")),
+                monthlyPrice: Number(f.price ?? f.monthlyPrice ?? 49),
+                description: String(f.description || f.name || ""),
+                type: "toggle" as const,
+                badge: f.badge || f.badgeText || undefined,
+              };
+            });
           setAddonCatalog(mappedFeatures);
         }
 
         if (Array.isArray(data.combos) && data.combos.length > 0) {
           const mappedCombos: ComboPack[] = data.combos
             .filter((c: any) => c.isActive !== false)
-            .map((c: any) => ({
-              id: c.id,
-              name: c.name,
-              badge: c.badge || "RECOMMENDED",
-              badgeColor: c.isPopular ? "bg-amber-500/20 text-amber-300 border-amber-500/40" : "bg-blue-500/20 text-blue-300 border-blue-500/40",
-              discountBadge: c.discountBadge || `Save ₹${c.savings || 48}/mo`,
-              isPopular: Boolean(c.isPopular),
-              monthlyPrice: Number(c.monthlyPrice ?? c.price ?? 299),
-              yearlyPrice: Number(c.yearlyPrice ?? (c.monthlyPrice ? c.monthlyPrice * 10 : 2999)),
-              originalPriceMonthly: Number(c.originalPriceMonthly ?? (c.monthlyPrice ? c.monthlyPrice + 50 : 348)),
-              description: c.description || c.name,
-              features: Array.isArray(c.features) ? c.features : [],
-              addonSelections: {},
-            }));
+            .map((c: any) => {
+              const comboPrice = Number(c.price ?? c.monthlyPrice ?? 299);
+              const origPrice = Number(c.originalPrice ?? c.originalPriceMonthly ?? comboPrice + 50);
+              const savings = origPrice > comboPrice ? origPrice - comboPrice : 48;
+              return {
+                id: String(c.id || c.slug || ""),
+                name: String(c.name || "Combo Pack"),
+                badge: String(c.badge || "RECOMMENDED"),
+                badgeColor: c.isPopular ? "bg-amber-500/20 text-amber-300 border-amber-400/40" : "bg-blue-500/20 text-blue-300 border-blue-500/40",
+                discountBadge: String(c.discountBadge || `Save ₹${savings}/mo`),
+                isPopular: Boolean(c.isPopular),
+                monthlyPrice: comboPrice,
+                yearlyPrice: Number(c.yearlyPrice ?? Math.round(comboPrice * 10)),
+                originalPriceMonthly: origPrice,
+                description: String(c.description || c.name || ""),
+                features: Array.isArray(c.features) ? c.features.map(String) : [],
+                addonSelections: {},
+              };
+            });
           setCombosCatalog(mappedCombos);
         }
       } catch (err) {
-        // Fall back gracefully to initial defaults
+        // Fall back gracefully
       }
     }
     loadMarketplace();
