@@ -4,7 +4,7 @@ import { isQueueEligibleHealthcareType, requireHealthcareStore } from "@/lib/hea
 import { healthcareQueueDashboard, isQueueOperation, operateHealthcareQueue } from "@/lib/healthcare-queue-management";
 import { requireOwnedStore, writeAudit } from "@/lib/ownership";
 import { apiError, HttpError, noStoreJson } from "@/lib/security";
-import { getOwnerActivePlan } from "@/lib/subscriptions";
+import { getOwnerActivePlan, requireFeaturePermission } from "@/lib/subscriptions";
 import { cleanText, numberInput, booleanInput, safeJson } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +18,7 @@ async function ownerContext(ownerId: string, storeId: string) {
 export async function GET(request: Request) {
   try {
     const session = await requireApiPermission(request, "queue.manage_own");
+    await requireFeaturePermission(session.user.id, "healthcare");
     const storeId = cleanText(new URL(request.url).searchParams.get("storeId"), "Provider", { max: 80 });
     await ownerContext(session.user.id, storeId);
     return noStoreJson(await healthcareQueueDashboard(storeId));
@@ -27,6 +28,7 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const session = await requireApiPermission(request, "queue.manage_own", { csrf: true });
+    await requireFeaturePermission(session.user.id, "healthcare");
     const body = await safeJson(request);
     const storeId = cleanText(body.storeId, "Provider", { max: 80 });
     const provider = await ownerContext(session.user.id, storeId);

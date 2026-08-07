@@ -3,6 +3,7 @@ import { requireApiPermission } from "@/lib/auth";
 import { requireOwnedStore, writeAudit } from "@/lib/ownership";
 import { apiError, HttpError } from "@/lib/security";
 import { systemCurrency } from "@/lib/settings";
+import { requireFeaturePermission } from "@/lib/subscriptions";
 import { cleanText, numberInput, safeJson, slugify } from "@/lib/validation";
 
 type Resource = "products" | "services" | "offers";
@@ -21,6 +22,7 @@ function resourceStatusInput(resource: Resource, value: unknown): string {
 export async function GET(request: Request) {
   try {
     const session = await requireApiPermission(request, "products.manage_own");
+    await requireFeaturePermission(session.user.id, "catalog");
     const url = new URL(request.url);
     const resource = resourceInput(url.searchParams.get("resource"));
     const storeId = cleanText(url.searchParams.get("storeId"), "Store", { max: 80 });
@@ -38,6 +40,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const session = await requireApiPermission(request, "products.manage_own", { csrf: true });
+    await requireFeaturePermission(session.user.id, "catalog");
     const body = await safeJson(request);
     const resource = resourceInput(body.resource);
     const storeId = cleanText(body.storeId, "Store", { max: 80 });
@@ -85,6 +88,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const session = await requireApiPermission(request, "products.manage_own", { csrf: true });
+    await requireFeaturePermission(session.user.id, "catalog");
     const body = await safeJson(request);
     const resource = resourceInput(body.resource);
     const storeId = cleanText(body.storeId, "Store", { max: 80 });
@@ -118,6 +122,7 @@ export async function PATCH(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const session = await requireApiPermission(request, "products.manage_own", { csrf: true });
+    await requireFeaturePermission(session.user.id, "catalog");
     const body = await safeJson(request);
     const resource = resourceInput(body.resource);
     const storeId = cleanText(body.storeId, "Store", { max: 80 });

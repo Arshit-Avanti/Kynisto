@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireApiSession } from "@/lib/auth";
+import { apiError, PaymentRequiredError } from "@/lib/security";
+import { requireFeaturePermission } from "@/lib/subscriptions";
 import { getDb } from "@/db";
 import { stores, storeMembershipPlans } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -10,6 +12,7 @@ export async function GET(req: Request) {
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    await requireFeaturePermission(session.user.id, "memberships");
 
     const url = new URL(req.url);
     let storeId = url.searchParams.get("storeId");
@@ -65,6 +68,9 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ plans, storeId });
   } catch (err: any) {
+    if (err instanceof PaymentRequiredError || err?.status === 402) {
+      return apiError(err);
+    }
     console.error("GET /api/owner/memberships error:", err);
     return NextResponse.json({ plans: [] });
   }
@@ -76,6 +82,7 @@ export async function POST(req: Request) {
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    await requireFeaturePermission(session.user.id, "memberships");
 
     const body = await req.json();
     let { storeId, name, price, durationDays, description, badgeColor, planIcon, isActive, maxMembers, termsAndConditions, benefits, commissionAcknowledged } = body;
@@ -144,6 +151,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, plan: newPlan });
   } catch (err: any) {
+    if (err instanceof PaymentRequiredError || err?.status === 402) {
+      return apiError(err);
+    }
     console.error("POST /api/owner/memberships error:", err);
     return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to save plan" }, { status: 400 });
   }

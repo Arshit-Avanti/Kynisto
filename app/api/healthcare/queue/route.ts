@@ -2,11 +2,13 @@ import { getD1 } from "@/db/runtime";
 import { requireApiPermission } from "@/lib/auth";
 import { activeHealthcareQueueForUser, indiaServiceDate, patientQueueState, QUEUE_ENTRY_TTL_SECONDS, requireHealthcareStore } from "@/lib/healthcare";
 import { apiError, enforceRateLimit, HttpError, noStoreJson } from "@/lib/security";
+import { requireFeaturePermission } from "@/lib/subscriptions";
 import { cleanText, safeJson } from "@/lib/validation";
 
 export async function GET(request: Request) {
   try {
     const session = await requireApiPermission(request, "queue.join");
+    await requireFeaturePermission(session.user.id, "queue");
     let storeId = cleanText(new URL(request.url).searchParams.get("storeId"), "Provider", { max: 80, required: false });
     if (!storeId) {
       const active = await activeHealthcareQueueForUser(session.user.id);
@@ -21,6 +23,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const session = await requireApiPermission(request, "queue.join", { csrf: true });
+    await requireFeaturePermission(session.user.id, "queue");
     await enforceRateLimit(request, `queue:${session.user.id}`, 20, 300);
     const body = await safeJson(request);
     const action = cleanText(body.action, "Action", { max: 20 });

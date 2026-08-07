@@ -8,6 +8,7 @@ import {
   unreadConversationCount,
 } from "@/lib/chat";
 import { enforceRateLimit, apiError, HttpError, noStoreJson } from "@/lib/security";
+import { requireFeaturePermission } from "@/lib/subscriptions";
 import { cleanText, safeJson } from "@/lib/validation";
 
 const nowSeconds = () => Math.floor(Date.now() / 1000);
@@ -15,6 +16,7 @@ const nowSeconds = () => Math.floor(Date.now() / 1000);
 export async function GET(request: Request) {
   try {
     const session = await requireApiSession(request);
+    await requireFeaturePermission(session.user.id, "chat");
     const params = new URL(request.url).searchParams;
     if (params.get("view") === "badge") {
       return noStoreJson({ unreadConversations: await unreadConversationCount(session.user) });
@@ -39,6 +41,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const session = await requireApiSession(request, { csrf: true });
+    await requireFeaturePermission(session.user.id, "chat");
     await enforceRateLimit(request, `chat:${session.user.id}`, 60, 60);
     const body = await safeJson(request);
     const action = cleanText(body.action, "Action", { max: 30 });
