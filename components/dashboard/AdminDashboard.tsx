@@ -18,6 +18,7 @@ import { AdminSubscriptionsPanel } from "@/components/dashboard/AdminSubscriptio
 import { AdminMarketplaceControlCenter } from "@/components/dashboard/AdminMarketplaceControlCenter";
 import { AdminNotificationPanel } from "@/components/dashboard/AdminNotificationPanel";
 import { AdminWalletPanel } from "@/components/dashboard/AdminWalletPanel";
+import { AdminLoyaltyPanel } from "@/components/dashboard/AdminLoyaltyPanel";
 
 type Item = Record<string, string | number | null | undefined>;
 type Data = Record<string, unknown>;
@@ -100,6 +101,7 @@ export function AdminDashboard({ user }: { user: SessionUser }) {
       {(tab === "subscriptions" || tab === "subscription") && <AdminSubscriptionsPanel />}
       {tab === "notifications" && <AdminNotificationPanel />}
       {tab === "wallet" && <AdminWalletPanel />}
+      {tab === "loyalty" && <AdminLoyaltyPanel />}
       {tab === "services" && <AdminServicesPanel mutate={mutate} />}
       {tab !== "overview" && tab !== "analytics" && tab !== "chat" && tab !== "healthcare" && tab !== "subscriptions" && tab !== "subscription" && tab !== "subscription-marketplace" && tab !== "marketplace" && tab !== "notifications" && tab !== "wallet" && tab !== "services" && !ADMIN_WORKSPACE_TABS.has(tab) && (
         <>

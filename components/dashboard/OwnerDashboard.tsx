@@ -14,6 +14,7 @@ import {
 } from "@/components/dashboard/OwnerWorkspacePanel";
 import { OwnerStoreQRCard } from "@/components/dashboard/OwnerStoreQRCard";
 import { OwnerMembershipEditor } from "@/components/dashboard/OwnerMembershipEditor";
+import { OwnerLoyaltyManager } from "@/components/dashboard/OwnerLoyaltyManager";
 
 import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscriptionDashboard";
 import { FeatureGateNotice } from "@/components/subscription/FeatureGateNotice";
@@ -216,6 +217,7 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
               <OwnerMembershipEditor storeId={String(selected.id)} />
             </SubscriptionGate>
           )}
+          {tab === "loyalty" && selected && <OwnerLoyaltyManager storeId={String(selected.id)} />}
           {tab === "reviews" && selected && <ReviewsPanel items={storeReviews} storeId={String(selected.id)} mutate={mutate} pagination={reviewPagination} onPageChange={setReviewPage} />}
           {tab === "analytics" && (
             <SubscriptionGate

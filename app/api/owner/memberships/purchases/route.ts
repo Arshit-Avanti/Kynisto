@@ -140,31 +140,7 @@ export async function POST(req: Request) {
         WHERE id = ?
       `).bind(startsAt, expiresAt, now, purchaseId).run();
 
-      // Award 250 bonus points to customer
-      try {
-        const db = getDb();
-        const [wallet] = await db.select().from(kynistoWallets).where(eq(kynistoWallets.userId, existing.customer_id));
-        const currentPoints = wallet?.kynistoPoints ?? 0;
-        const newPoints = currentPoints + 250;
-
-        if (wallet) {
-          await db.update(kynistoWallets).set({ kynistoPoints: newPoints, updatedAt: now }).where(eq(kynistoWallets.userId, existing.customer_id));
-        } else {
-          await db.insert(kynistoWallets).values({ userId: existing.customer_id, kynistoPoints: newPoints, updatedAt: now });
-        }
-
-        await db.insert(kynistoPointTransactions).values({
-          id: `tx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-          userId: existing.customer_id,
-          type: "earned",
-          points: 250,
-          source: "membership_activation",
-          description: `Bonus Kynisto Points for activating ${existing.plan_name}`,
-          createdAt: now,
-        });
-      } catch (e) {
-        console.warn("Wallet point credit notice:", e);
-      }
+        // Note: Points are strictly awarded ONLY via store QR code scan per system policy.
 
       // Unlock linked store coupons as loyalty rewards
       if (Array.isArray(linkedCouponIds) && linkedCouponIds.length > 0) {

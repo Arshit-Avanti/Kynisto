@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Gift, Wallet, Award, Download, Clock, Store, Crown, Loader2, CheckCircle2, Star, Sparkles } from 'lucide-react';
+import { Gift, Wallet, Award, Download, Clock, Store, Crown, Loader2, CheckCircle2, Star, Sparkles, QrCode, ShieldCheck, X, ArrowRight } from 'lucide-react';
 import { apiFetch } from '@/lib/client-api';
 
 interface KynistoPointsHistory {
@@ -37,10 +37,12 @@ interface Membership {
 interface WalletData {
   kynistoPoints: {
     total: number;
+    maxCap: number;
     progress: number;
     history: KynistoPointsHistory[];
   };
   loyaltyPoints: LoyaltyPoint[];
+  scanLogs?: any[];
   memberships: {
     active: Membership[];
     expired: Membership[];
@@ -48,8 +50,9 @@ interface WalletData {
 }
 
 const defaultWalletData: WalletData = {
-  kynistoPoints: { total: 0, progress: 0, history: [] },
+  kynistoPoints: { total: 0, maxCap: 1000, progress: 0, history: [] },
   loyaltyPoints: [],
+  scanLogs: [],
   memberships: { active: [], expired: [] },
 };
 
@@ -58,11 +61,10 @@ const AnimatedNumber = ({ value }: { value: number }) => {
 
   useEffect(() => {
     let startTimestamp: number | null = null;
-    const duration = 1500;
+    const duration = 1200;
     const step = (timestamp: number) => {
       if (!startTimestamp) startTimestamp = timestamp;
       const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-      // Smooth lerp inertial tracking easing (easeOutQuart)
       const easeProgress = 1 - Math.pow(1 - progress, 4);
       setDisplayValue(Math.floor(easeProgress * value));
       if (progress < 1) {
@@ -80,7 +82,7 @@ const AnimatedNumber = ({ value }: { value: number }) => {
 const ProgressRing = ({ progress, max = 1000 }: { progress: number, max?: number }) => {
   const radius = 28;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (progress / max) * circumference;
+  const strokeDashoffset = circumference - (Math.min(progress, max) / max) * circumference;
 
   return (
     <div className="relative inline-flex items-center justify-center">
@@ -95,24 +97,29 @@ const ProgressRing = ({ progress, max = 1000 }: { progress: number, max?: number
           fill="transparent" 
           strokeDasharray={circumference} 
           strokeDashoffset={strokeDashoffset} 
-          className="text-indigo-600 dark:text-indigo-400 transition-all duration-0 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]" 
+          className="text-indigo-600 dark:text-indigo-400 transition-all duration-300 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]" 
           strokeLinecap="round"
         />
       </svg>
       <div className="absolute flex flex-col items-center justify-center">
-        <span className="text-xs font-black text-black dark:text-white">{Math.round((progress/max)*100)}%</span>
+        <span className="text-xs font-black text-black dark:text-white">{Math.round((Math.min(progress, max) / max) * 100)}%</span>
       </div>
     </div>
   );
 };
 
 export default function KynistoWalletView() {
-  const [activeTab, setActiveTab] = useState<'kynisto' | 'loyalty' | 'memberships'>('kynisto');
+  const [activeTab, setActiveTab] = useState<'kynisto' | 'loyalty' | 'memberships' | 'history'>('kynisto');
   const [walletData, setWalletData] = useState<WalletData>(defaultWalletData);
   const [loading, setLoading] = useState(true);
   const [redeeming, setRedeeming] = useState(false);
   const [redeemResult, setRedeemResult] = useState<{reward?: string; coupon?: string; error?: string} | null>(null);
-  const [activeCardIndex, setActiveCardIndex] = useState(0);
+
+  // QR Scan Modal State
+  const [showScanModal, setShowScanModal] = useState(false);
+  const [qrInputToken, setQrInputToken] = useState("");
+  const [scanning, setScanning] = useState(false);
+  const [scanResult, setScanResult] = useState<{ success?: boolean; message?: string; error?: string; kynistoPointsEarned?: number; storePointsEarned?: number; storeName?: string } | null>(null);
 
   useEffect(() => {
     fetchWalletData();
@@ -125,6 +132,7 @@ export default function KynistoWalletView() {
         setWalletData({
           kynistoPoints: data.kynistoPoints || defaultWalletData.kynistoPoints,
           loyaltyPoints: Array.isArray(data.loyaltyPoints) ? data.loyaltyPoints : [],
+          scanLogs: Array.isArray(data.scanLogs) ? data.scanLogs : [],
           memberships: {
             active: Array.isArray(data.memberships?.active) ? data.memberships.active : [],
             expired: Array.isArray(data.memberships?.expired) ? data.memberships.expired : [],
@@ -135,6 +143,41 @@ export default function KynistoWalletView() {
       console.error('Failed to fetch wallet data', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleProcessQrScan = async (overrideToken?: string) => {
+    const tokenToUse = overrideToken || qrInputToken.trim();
+    if (!tokenToUse) {
+      setScanResult({ error: "Please enter or scan a valid Kynisto Store QR Token." });
+      return;
+    }
+
+    setScanning(true);
+    setScanResult(null);
+    try {
+      const res = await apiFetch<any>('/api/wallet/scan-qr', {
+        method: 'POST',
+        json: { qrCodeToken: tokenToUse },
+      });
+
+      if (res && res.success) {
+        setScanResult({
+          success: true,
+          message: res.message,
+          kynistoPointsEarned: res.kynistoPointsEarned,
+          storePointsEarned: res.storePointsEarned,
+          storeName: res.storeName,
+        });
+        setQrInputToken("");
+        await fetchWalletData();
+      } else {
+        setScanResult({ error: res?.error || 'Scan verification failed' });
+      }
+    } catch (err: any) {
+      setScanResult({ error: err instanceof Error ? err.message : 'Scan verification failed' });
+    } finally {
+      setScanning(false);
     }
   };
 
@@ -186,7 +229,7 @@ export default function KynistoWalletView() {
     );
   }
 
-  const { kynistoPoints, loyaltyPoints, memberships } = walletData;
+  const { kynistoPoints, loyaltyPoints, memberships, scanLogs = [] } = walletData;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 relative">
@@ -196,7 +239,7 @@ export default function KynistoWalletView() {
       </div>
 
       {/* Header */}
-      <div className="overflow-hidden rounded-3xl bg-white dark:bg-black p-6 border border-gray-200 dark:border-gray-800 shadow-[0_0_40px_rgba(99,102,241,0.15)] relative">
+      <div className="overflow-hidden rounded-3xl bg-white dark:bg-black p-6 border border-gray-200 dark:border-gray-800 shadow-[0_0_40px_rgba(99,102,241,0.15)] relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[radial-gradient(circle_at_center,_rgba(99,102,241,0.15)_0%,_rgba(168,85,247,0.08)_50%,_transparent_80%)] blur-[80px] pointer-events-none" />
         <div className="flex items-center space-x-4 relative z-10">
           <div className="rounded-full bg-gradient-to-br from-indigo-600 to-purple-700 p-4 shadow-lg text-white">
@@ -204,9 +247,18 @@ export default function KynistoWalletView() {
           </div>
           <div>
             <h1 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">My Wallet</h1>
-            <p className="text-gray-700 dark:text-gray-300 font-bold">Manage points, loyalty, and memberships</p>
+            <p className="text-gray-700 dark:text-gray-300 font-bold">Earn points exclusively by scanning store Kynisto QR Codes</p>
           </div>
         </div>
+
+        {/* SCAN STORE QR CODE BUTTON */}
+        <button
+          onClick={() => { setShowScanModal(true); setScanResult(null); }}
+          className="relative z-10 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-600 to-indigo-600 px-5 py-3 text-sm font-black text-white shadow-xl hover:scale-105 active:scale-95 transition-all cursor-pointer border border-emerald-400/30"
+        >
+          <QrCode className="h-5 w-5 animate-pulse" />
+          <span>Scan Store QR Code</span>
+        </button>
       </div>
 
       {/* Tabs */}
@@ -215,11 +267,12 @@ export default function KynistoWalletView() {
           { id: 'kynisto', label: 'Kynisto Points', icon: Award },
           { id: 'loyalty', label: 'Store Loyalty', icon: Store },
           { id: 'memberships', label: 'Memberships', icon: Crown },
+          { id: 'history', label: 'Scan Audit History', icon: Clock },
         ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => { setActiveTab(tab.id as any); setRedeemResult(null); }}
-            className={`flex flex-1 items-center justify-center space-x-2 rounded-xl py-3 px-4 text-sm font-extrabold transition-all ${
+            className={`flex flex-1 items-center justify-center space-x-2 rounded-xl py-3 px-4 text-sm font-extrabold transition-all cursor-pointer ${
               activeTab === tab.id
                 ? 'bg-gradient-to-r from-indigo-600 to-purple-700 text-white shadow-md'
                 : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
@@ -243,7 +296,7 @@ export default function KynistoWalletView() {
               <div className="relative z-10">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8">
                   <div>
-                    <h2 className="text-xl font-extrabold text-black dark:text-white mb-2">Total Balance</h2>
+                    <h2 className="text-xl font-extrabold text-black dark:text-white mb-2">Global Kynisto Points</h2>
                     <div className="text-6xl font-black text-black dark:text-white">
                       <AnimatedNumber value={kynistoPoints.total} />
                     </div>
@@ -251,194 +304,120 @@ export default function KynistoWalletView() {
                   
                   <div className="mt-6 sm:mt-0 text-left sm:text-right">
                     <p className="text-sm font-bold text-black dark:text-white mb-3">
-                      <span className="text-black dark:text-white">{kynistoPoints.progress}</span> / 1000 to next reward
+                      <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">{kynistoPoints.total}</span> / 1000 Points Cap
                     </p>
                     <button
                       onClick={handleRedeemKynistoPoints}
                       disabled={kynistoPoints.total < 1000 || redeeming}
-                      className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-purple-700 px-6 py-3 text-sm font-extrabold text-white shadow-lg transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                      className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-purple-700 px-6 py-3 text-sm font-extrabold text-white shadow-lg transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer"
                     >
-                      {redeeming ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Gift className="mr-2 h-5 w-5" />}
-                      Redeem 1000 Pts
+                      {redeeming ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Gift className="h-4 w-4 mr-2" />}
+                      Redeem 1000 Points Reward
                     </button>
                   </div>
                 </div>
 
-                <div className="h-4 w-full rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden shadow-inner relative">
-                  <div 
-                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-[1500ms] ease-[cubic-bezier(0.22,1,0.36,1)] shadow-[0_0_25px_rgba(99,102,241,0.8)]"
-                    style={{ width: `${(kynistoPoints.progress / 1000) * 100}%` }}
-                  ></div>
+                {/* Progress Bar & Cap Notice */}
+                <div className="flex items-center space-x-6 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                  <ProgressRing progress={kynistoPoints.total} max={1000} />
+                  <div className="flex-1">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs font-black uppercase text-gray-500 dark:text-gray-400">1000 Points Maximum Balance Cap</span>
+                      <span className="text-xs font-black text-indigo-600 dark:text-indigo-400">{Math.min(100, Math.round((kynistoPoints.total / 1000) * 100))}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-3 overflow-hidden">
+                      <div className="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full transition-all duration-500 rounded-full" style={{ width: `${Math.min(100, (kynistoPoints.total / 1000) * 100)}%` }} />
+                    </div>
+                    {kynistoPoints.total >= 1000 && (
+                      <p className="text-xs font-bold text-amber-500 mt-2 flex items-center gap-1">
+                        <Sparkles className="h-3.5 w-3.5" /> Maximum 1,000 points balance reached! Redeem points to start earning global Kynisto points again.
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Redeem Result Celebration */}
+            {/* Exclusive Scan Notice */}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-indigo-500/10 border border-emerald-500/30 text-emerald-400 text-sm font-bold flex items-center gap-3">
+              <ShieldCheck className="h-6 w-6 flex-shrink-0 text-emerald-400" />
+              <span>
+                <b>Strict System Policy:</b> Both Kynisto Points and Store Loyalty Points are awarded <b>ONLY via scanning a participating store&apos;s Kynisto QR Code</b>. No other action awards points.
+              </span>
+            </div>
+
+            {/* Redeem Result Notification */}
             {redeemResult && (
-              <div className={`rounded-3xl p-6 border shadow-xl flex items-center gap-4 animate-in zoom-in-95 ${
-                redeemResult.error 
-                  ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50 text-red-900 dark:text-red-200' 
-                  : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800/50 text-green-900 dark:text-green-200 relative overflow-hidden'
-              }`}>
-                {!redeemResult.error && (
-                  <div className="absolute inset-0 pointer-events-none flex justify-around opacity-50">
-                    <Sparkles className="h-16 w-16 text-yellow-400 animate-pulse" />
-                    <Sparkles className="h-16 w-16 text-indigo-400 animate-pulse delay-150" />
-                  </div>
-                )}
-                <div className="relative z-10 flex items-center w-full">
-                  {redeemResult.error ? <AlertTriangle className="mr-3 h-8 w-8" /> : <CheckCircle2 className="mr-3 h-8 w-8 text-green-600 dark:text-green-400" />}
-                  <div className="flex-1">
-                    <h3 className="font-extrabold text-lg text-black dark:text-white">
-                      {redeemResult.error ? 'Redemption Failed' : 'Reward Unlocked!'}
-                    </h3>
-                    <p className="font-semibold text-sm opacity-100 mt-1 text-black dark:text-white">
-                      {redeemResult.error || `You have successfully received: ${redeemResult.reward}`}
-                    </p>
-                  </div>
-                </div>
+              <div className={`p-4 rounded-2xl font-bold text-sm ${redeemResult.error ? 'bg-rose-500/10 border border-rose-500/30 text-rose-400' : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'}`}>
+                {redeemResult.error ? redeemResult.error : `🎉 Reward Redeemed Successfully! Your reward: ${redeemResult.reward || redeemResult.coupon}`}
               </div>
             )}
 
-            {/* History */}
-            <div className="rounded-3xl bg-white dark:bg-black border border-gray-200 dark:border-gray-800 shadow-xl overflow-hidden">
-              <div className="border-b border-gray-200 dark:border-gray-800 p-6 bg-gray-50 dark:bg-gray-900/50">
-                <h3 className="text-xl font-extrabold text-gray-900 dark:text-white">Transaction History</h3>
-              </div>
-              <div className="divide-y divide-gray-200 dark:divide-gray-800">
-                {kynistoPoints.history.map((tx) => (
-                  <div key={tx.id} className="flex items-center justify-between p-6 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
-                    <div className="flex items-center space-x-4">
-                      <div className={`rounded-2xl p-3 shadow-sm ${tx.type === 'earned' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'}`}>
-                        {tx.type === 'earned' ? <Award className="h-6 w-6" /> : <Gift className="h-6 w-6" />}
-                      </div>
+            {/* Recent Point Activity */}
+            <div className="rounded-3xl bg-white dark:bg-black p-6 border border-gray-200 dark:border-gray-800 shadow-xl">
+              <h3 className="text-lg font-black text-black dark:text-white mb-4">Points Activity History</h3>
+              {kynistoPoints.history.length === 0 ? (
+                <p className="text-sm font-bold text-gray-500 dark:text-gray-400 text-center py-6">No points history recorded yet. Scan a store QR code to earn your first points!</p>
+              ) : (
+                <div className="space-y-3">
+                  {kynistoPoints.history.map((tx) => (
+                    <div key={tx.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
                       <div>
-                        <p className="font-extrabold text-gray-900 dark:text-white">{tx.description}</p>
-                        <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mt-1">{tx.date}</p>
+                        <div className="font-extrabold text-sm text-black dark:text-white">{tx.description}</div>
+                        <div className="text-xs font-bold text-gray-500 dark:text-gray-400">{tx.date}</div>
+                      </div>
+                      <div className={`font-black text-sm ${tx.type === 'earned' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        {tx.type === 'earned' ? '+' : ''}{tx.points} Points
                       </div>
                     </div>
-                    <div className={`text-xl font-black ${tx.type === 'earned' ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
-                      {tx.type === 'earned' ? '+' : ''}{tx.points}
-                    </div>
-                  </div>
-                ))}
-                {kynistoPoints.history.length === 0 && (
-                   <div className="p-8 text-center text-gray-600 dark:text-gray-400 font-semibold">No transactions yet.</div>
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Loyalty Points Tab - Stacked Interactive Cards */}
+        {/* Store Loyalty Tab */}
         {activeTab === 'loyalty' && (
-          <div className="animate-in fade-in duration-500 space-y-8 relative">
-            
-            {redeemResult?.coupon && (
-              <div className="rounded-3xl p-8 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/50 text-green-900 dark:text-green-200 flex flex-col items-center shadow-xl mb-8 relative overflow-hidden">
-                 <div className="absolute top-0 left-1/4 animate-bounce">
-                    <Star className="text-yellow-400 w-12 h-12" fill="currentColor" />
-                 </div>
-                 <div className="absolute bottom-0 right-1/4 animate-bounce delay-100">
-                    <Star className="text-yellow-400 w-8 h-8" fill="currentColor" />
-                 </div>
-                <CheckCircle2 className="h-12 w-12 mb-3 text-green-600 dark:text-green-400" />
-                <p className="font-extrabold text-2xl text-center z-10 text-black dark:text-white">Discount Coupon Unlocked!</p>
-                <div className="mt-4 rounded-xl bg-white dark:bg-black border-2 border-dashed border-green-400 px-6 py-3 font-mono text-3xl font-black tracking-widest shadow-inner z-10 text-black dark:text-white">
-                  {redeemResult.coupon}
+          <div className="space-y-6 animate-in fade-in duration-500">
+            <div className="rounded-3xl bg-white dark:bg-black p-6 border border-gray-200 dark:border-gray-800 shadow-xl">
+              <h2 className="text-xl font-extrabold text-black dark:text-white mb-2">Store-Specific Loyalty Balances</h2>
+              <p className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-6">Each store has its own independent loyalty points balance earned by scanning that store&apos;s Kynisto QR Code.</p>
+
+              {loyaltyPoints.length === 0 ? (
+                <div className="text-center py-10 space-y-3">
+                  <Store className="h-12 w-12 mx-auto text-gray-400" />
+                  <p className="text-base font-black text-gray-700 dark:text-gray-300">No store loyalty points yet!</p>
+                  <p className="text-sm font-bold text-gray-500 max-w-md mx-auto">Visit any participating store and scan their Kynisto QR Code to earn 50–100 Store Loyalty Points per scan.</p>
                 </div>
-              </div>
-            )}
-            
-            {redeemResult?.error && (
-              <div className="rounded-2xl p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-red-900 dark:text-red-200 font-bold shadow-md mb-8">
-                {redeemResult.error}
-              </div>
-            )}
-
-            {/* Stacked Cards Container */}
-            <div className="relative pt-4 pb-[300px]">
-              {loyaltyPoints.map((store, index) => {
-                const isActive = activeCardIndex === index;
-                const offset = index - activeCardIndex;
-                const isVisible = offset >= 0 && offset < 3; // Show top 3 cards
-
-                if (!isVisible && !isActive) return null;
-
-                return (
-                  <div 
-                    key={store.storeId} 
-                    onClick={() => setActiveCardIndex(index)}
-                    className={`absolute w-full rounded-3xl p-6 md:p-8 border shadow-2xl transition-all duration-[800ms] ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer ${
-                      isActive 
-                        ? 'bg-gradient-to-br from-gray-900 to-black text-white dark:from-white dark:to-gray-100 dark:text-black border-gray-700 dark:border-gray-300 z-30 transform-none' 
-                        : 'bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700'
-                    }`}
-                    style={{
-                      top: isActive ? 0 : `${offset * 20 + 20}px`,
-                      scale: isActive ? 1 : 1 - (offset * 0.05),
-                      zIndex: 30 - offset,
-                      opacity: isActive ? 1 : 1 - (offset * 0.2),
-                    }}
-                  >
-                    <div className="flex items-center justify-between mb-8">
-                      <div className="flex items-center space-x-4">
-                        <img src={store.logoUrl} alt={store.storeName} className="h-16 w-16 rounded-2xl shadow-lg border-2 border-white dark:border-gray-800 bg-white" />
-                        <div>
-                          <h3 className={`font-black text-2xl ${isActive ? 'text-white dark:text-black' : 'text-black dark:text-white'}`}>{store.storeName}</h3>
-                          <p className={`text-sm font-bold flex items-center mt-1 ${isActive ? 'text-white dark:text-black' : 'text-black dark:text-white'}`}>
-                            <Clock className="mr-1.5 h-4 w-4" /> Last visit: {store.lastVisit}
-                          </p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {loyaltyPoints.map((lp) => (
+                    <div key={lp.storeId} className="p-5 rounded-2xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 flex flex-col justify-between space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <img src={lp.logoUrl} alt={lp.storeName} className="h-10 w-10 rounded-xl object-cover border border-gray-200 dark:border-gray-800" />
+                          <div>
+                            <div className="font-extrabold text-black dark:text-white">{lp.storeName}</div>
+                            <div className="text-xs font-bold text-gray-500">Last visited: {lp.lastVisit}</div>
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className={`text-4xl font-black ${isActive ? 'text-white dark:text-black' : 'text-black dark:text-white'}`}>
-                           {isActive ? <AnimatedNumber value={store.points} /> : store.points}
-                        </div>
-                        <div className={`text-sm font-extrabold mt-1 ${isActive ? 'text-white dark:text-black' : 'text-black dark:text-white'}`}>Points</div>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center justify-between gap-6 mb-8">
-                      <div className="flex-1">
-                        <div className={`flex justify-between text-sm font-extrabold mb-3 ${isActive ? 'text-white dark:text-black' : 'text-black dark:text-white'}`}>
-                          <span>{store.progress} / 1000 Pts</span>
-                          <span>₹100 Off Reward</span>
-                        </div>
-                        <div className={`h-3 w-full rounded-full overflow-hidden shadow-inner ${isActive ? 'bg-gray-700 dark:bg-gray-300' : 'bg-gray-300 dark:bg-gray-700'}`}>
-                          <div 
-                            className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-[1500ms] ease-[cubic-bezier(0.22,1,0.36,1)] shadow-[0_0_25px_rgba(99,102,241,0.8)]"
-                            style={{ width: `${(store.progress / 1000) * 100}%` }}
-                          ></div>
-                        </div>
+                      <div className="flex items-baseline justify-between border-t border-gray-200 dark:border-gray-800 pt-3">
+                        <span className="text-xs font-black uppercase text-gray-500">Loyalty Balance</span>
+                        <span className="text-2xl font-black text-emerald-500">+{lp.points} Points</span>
                       </div>
-                      
-                      {/* Progress Ring */}
-                      <div className="flex-shrink-0">
-                         <ProgressRing progress={store.progress} max={1000} />
-                      </div>
-                    </div>
 
-                    {isActive && (
                       <button
-                        onClick={(e) => { e.stopPropagation(); handleRedeemLoyalty(store.storeId); }}
-                        disabled={!store.canRedeemDiscount || redeeming}
-                        className={`w-full py-4 rounded-xl font-black text-lg transition-all shadow-xl focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed ${
-                          store.canRedeemDiscount 
-                            ? 'bg-indigo-600 text-white hover:bg-indigo-700 hover:scale-[1.02] dark:bg-indigo-500 dark:hover:bg-indigo-600' 
-                            : 'bg-gray-800 text-gray-500 dark:bg-gray-200 dark:text-gray-500'
-                        }`}
+                        onClick={() => handleRedeemLoyalty(lp.storeId)}
+                        disabled={!lp.canRedeemDiscount || redeeming}
+                        className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-extrabold text-xs transition-all cursor-pointer"
                       >
-                        {redeeming ? <Loader2 className="mx-auto h-6 w-6 animate-spin" /> : store.canRedeemDiscount ? 'Claim ₹100 Discount' : 'Earn more points to unlock'}
+                        Redeem Store Discount (Min 100 Points)
                       </button>
-                    )}
-                  </div>
-                );
-              })}
-              {loyaltyPoints.length === 0 && (
-                <div className="p-12 text-center bg-gray-50 dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-gray-800">
-                  <Store className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                  <p className="text-xl font-extrabold text-gray-900 dark:text-white">No loyalty cards yet.</p>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -447,82 +426,133 @@ export default function KynistoWalletView() {
 
         {/* Memberships Tab */}
         {activeTab === 'memberships' && (
-          <div className="space-y-10 animate-in fade-in duration-500">
-            
-            {/* Active Memberships */}
-            <div>
-              <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-6 flex items-center">
-                <Crown className="mr-3 h-6 w-6 text-indigo-600 dark:text-indigo-400" /> Active Memberships
-              </h2>
-              <div className="grid gap-6 md:grid-cols-2">
-                {memberships.active.map((membership) => (
-                  <div key={membership.id} className="relative overflow-hidden rounded-3xl bg-white dark:bg-black p-8 border border-gray-200 dark:border-gray-800 shadow-xl transition-transform hover:scale-[1.02]">
-                    {membership.isKynistoPremium && (
-                      <div className="absolute top-0 right-0 rounded-bl-3xl bg-gradient-to-r from-yellow-500 to-amber-600 px-6 py-2 shadow-lg">
-                        <span className="flex items-center text-xs font-black text-white tracking-widest">
-                          <Crown className="mr-1.5 h-4 w-4" /> PREMIUM
-                        </span>
+          <div className="space-y-6 animate-in fade-in duration-500">
+            <div className="rounded-3xl bg-white dark:bg-black p-6 border border-gray-200 dark:border-gray-800 shadow-xl">
+              <h2 className="text-xl font-extrabold text-black dark:text-white mb-2">My Active VIP Store Memberships</h2>
+              {memberships.active.length === 0 ? (
+                <p className="text-sm font-bold text-gray-500 text-center py-8">No active store memberships. Browse storefronts to purchase VIP passes!</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {memberships.active.map((mem) => (
+                    <div key={mem.id} className="p-5 rounded-2xl bg-gradient-to-br from-indigo-900/40 to-slate-900 border border-indigo-500/30 text-white">
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="font-black text-lg">{mem.type}</span>
+                        <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-black px-2.5 py-1 rounded-full">ACTIVE</span>
                       </div>
-                    )}
-                    <div className="mb-6">
-                      <h3 className="font-black text-2xl text-gray-900 dark:text-white mb-1 pr-24">{membership.storeName}</h3>
-                      <p className="text-sm font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">{membership.type} Plan</p>
-                    </div>
-                    
-                    <div className="mt-8 flex items-end justify-between border-t border-gray-200 dark:border-gray-800 pt-6">
-                      <div>
-                        <p className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">Valid until</p>
-                        <p className="text-lg font-black text-gray-900 dark:text-white">{membership.validUntil}</p>
-                      </div>
-                      <a href={membership.invoiceUrl} className="flex items-center rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 px-4 py-2.5 text-sm font-extrabold text-gray-900 dark:text-white transition-colors">
-                        <Download className="mr-2 h-4 w-4" /> Invoice
-                      </a>
-                    </div>
-                  </div>
-                ))}
-                {memberships.active.length === 0 && (
-                  <div className="col-span-full p-8 text-center rounded-3xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-                     <p className="text-lg font-bold text-gray-600 dark:text-gray-400">No active memberships.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Expired Memberships */}
-            {memberships.expired.length > 0 && (
-              <div>
-                <h2 className="text-2xl font-black text-gray-500 dark:text-gray-400 mb-6 flex items-center">
-                  <Clock className="mr-3 h-6 w-6" /> Expired
-                </h2>
-                <div className="grid gap-6 md:grid-cols-2">
-                  {memberships.expired.map((membership) => (
-                    <div key={membership.id} className="rounded-3xl bg-gray-50 dark:bg-gray-900/50 p-8 border border-gray-200 dark:border-gray-800 opacity-80 grayscale transition-all hover:grayscale-0 hover:opacity-100">
-                      <div className="flex items-start justify-between mb-6">
-                        <div>
-                          <h3 className="font-black text-xl text-gray-800 dark:text-gray-200">{membership.storeName}</h3>
-                          <p className="text-sm font-bold text-gray-600 dark:text-gray-400 mt-1">{membership.type} Plan</p>
-                        </div>
-                        <span className="rounded-xl bg-red-100 dark:bg-red-900/30 px-3 py-1 text-xs font-black text-red-700 dark:text-red-400 uppercase tracking-wider">
-                          Expired
-                        </span>
-                      </div>
-                      <div className="mt-6 flex items-center justify-between border-t border-gray-200 dark:border-gray-800 pt-6">
-                        <div>
-                          <p className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">Expired on</p>
-                          <p className="text-base font-black text-gray-700 dark:text-gray-300">{membership.validUntil}</p>
-                        </div>
-                        <button className="text-sm font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors uppercase tracking-wide">
-                          Renew Plan
-                        </button>
-                      </div>
+                      <div className="text-sm font-bold text-indigo-200 mb-4">{mem.storeName}</div>
+                      <div className="text-xs font-bold text-gray-400 mb-2">Valid Until: {mem.validUntil}</div>
+                      <ul className="text-xs space-y-1 text-gray-300">
+                        {mem.benefits?.map((b, idx) => (
+                          <li key={idx}>✓ {b}</li>
+                        ))}
+                      </ul>
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Scan History Tab */}
+        {activeTab === 'history' && (
+          <div className="space-y-6 animate-in fade-in duration-500">
+            <div className="rounded-3xl bg-white dark:bg-black p-6 border border-gray-200 dark:border-gray-800 shadow-xl">
+              <h2 className="text-xl font-extrabold text-black dark:text-white mb-4">My QR Scan Audit Logs</h2>
+              {scanLogs.length === 0 ? (
+                <p className="text-sm font-bold text-gray-500 text-center py-8">No QR scan history recorded yet.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs font-bold">
+                    <thead>
+                      <tr className="border-b border-gray-200 dark:border-gray-800 text-gray-500">
+                        <th className="py-3 px-2">Date & Time</th>
+                        <th className="py-3 px-2">Store</th>
+                        <th className="py-3 px-2">Kynisto Points</th>
+                        <th className="py-3 px-2">Store Points</th>
+                        <th className="py-3 px-2">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                      {scanLogs.map((log: any) => (
+                        <tr key={log.id}>
+                          <td className="py-3 px-2 text-gray-400">{new Date(log.scanned_at * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</td>
+                          <td className="py-3 px-2 text-black dark:text-white font-extrabold">{log.store_name || "Partner Store"}</td>
+                          <td className="py-3 px-2 text-indigo-500 font-extrabold">+{log.kynisto_points_earned}</td>
+                          <td className="py-3 px-2 text-emerald-500 font-extrabold">+{log.store_points_earned}</td>
+                          <td className="py-3 px-2">
+                            <span className={`px-2 py-1 rounded-md text-[10px] font-black ${
+                              log.status === "success" || log.status === "capped_kynisto" ? "bg-emerald-500/20 text-emerald-400" : "bg-rose-500/20 text-rose-400"
+                            }`}>
+                              {log.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
+
+      {/* CUSTOMER INTERACTIVE QR SCANNER MODAL */}
+      {showScanModal && (
+        <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border-2 border-emerald-500 rounded-3xl p-6 maxWidth-md w-full max-w-md text-white shadow-2xl relative animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-black text-emerald-400 flex items-center gap-2">
+                <QrCode className="h-5 w-5" /> Scan Store Kynisto QR Code
+              </h3>
+              <button onClick={() => setShowScanModal(false)} className="text-gray-400 hover:text-white text-xl cursor-pointer">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            {scanResult?.success && (
+              <div className="mb-4 p-4 rounded-2xl bg-emerald-500/20 border border-emerald-500 text-emerald-300 font-bold text-sm space-y-2">
+                <div className="flex items-center gap-2 text-base font-black text-emerald-400">
+                  <CheckCircle2 className="h-6 w-6" /> {scanResult.storeName} Scan Verified!
+                </div>
+                <div className="bg-slate-950/60 p-3 rounded-xl space-y-1 text-xs font-extrabold">
+                  <div className="text-indigo-400">✨ +{scanResult.kynistoPointsEarned} Kynisto Points</div>
+                  <div className="text-emerald-400">🏪 +{scanResult.storePointsEarned} Store Loyalty Points</div>
+                </div>
+              </div>
+            )}
+
+            {scanResult?.error && (
+              <div className="mb-4 p-4 rounded-2xl bg-rose-500/20 border border-rose-500 text-rose-300 font-bold text-xs">
+                ⚠️ {scanResult.error}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
+                <div className="text-xs font-bold text-gray-400">Point your camera or enter the store&apos;s unique Kynisto QR Token:</div>
+                <input
+                  type="text"
+                  value={qrInputToken}
+                  onChange={(e) => setQrInputToken(e.target.value)}
+                  placeholder="e.g. KYNISTO_LOYALTY_store_id"
+                  className="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl font-mono text-center text-sm font-bold focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              <button
+                disabled={scanning}
+                onClick={() => handleProcessQrScan()}
+                className="w-full py-3.5 px-6 rounded-xl font-black bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
+              >
+                {scanning ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShieldCheck className="h-5 w-5" />}
+                <span>Verify QR Scan & Claim Points</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

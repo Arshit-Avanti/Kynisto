@@ -1106,6 +1106,37 @@ export const storeLoyaltyTransactions = sqliteTable("store_loyalty_transactions"
   createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
 }, (table) => [index("store_loyalty_tx_user_store_idx").on(table.userId, table.storeId, table.createdAt)]);
 
+export const storeLoyaltySettings = sqliteTable("store_loyalty_settings", {
+  storeId: text("store_id").primaryKey().references(() => stores.id, { onDelete: "cascade" }),
+  isLoyaltyEnabled: integer("is_loyalty_enabled", { mode: "boolean" }).notNull().default(true),
+  rewardPointsPerScan: integer("reward_points_per_scan").notNull().default(50),
+  qrCodeToken: text("qr_code_token").notNull().unique(),
+  scanCooldownHours: integer("scan_cooldown_hours").notNull().default(24),
+  createdAt: integer("created_at").notNull().default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at").notNull().default(sql`(unixepoch())`),
+});
+
+export const qrScanLogs = sqliteTable("qr_scan_logs", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  storeId: text("store_id").notNull().references(() => stores.id, { onDelete: "cascade" }),
+  qrToken: text("qr_token").notNull(),
+  kynistoPointsEarned: integer("kynisto_points_earned").notNull().default(0),
+  storePointsEarned: integer("store_points_earned").notNull().default(0),
+  status: text("status").notNull(), // 'success' | 'cooldown_active' | 'store_disabled' | 'invalid_qr' | 'capped_kynisto'
+  scannedAt: integer("scanned_at").notNull().default(sql`(unixepoch())`),
+}, (table) => [
+  index("qr_scan_logs_user_idx").on(table.userId, table.scannedAt),
+  index("qr_scan_logs_store_idx").on(table.storeId, table.scannedAt),
+]);
+
+export const systemLoyaltyConfig = sqliteTable("system_loyalty_config", {
+  id: text("id").primaryKey().default("global"),
+  kynistoPointsPerScan: integer("kynisto_points_per_scan").notNull().default(10),
+  maxKynistoBalanceCap: integer("max_kynisto_balance_cap").notNull().default(1000),
+  updatedAt: integer("updated_at").notNull().default(sql`(unixepoch())`),
+});
+
 export const storeMembershipPlans = sqliteTable("store_membership_plans", {
   id: text("id").primaryKey(),
   storeId: text("store_id").notNull().references(() => stores.id, { onDelete: "cascade" }),
@@ -1290,4 +1321,13 @@ export const customerMembershipsRelations = relations(customerMemberships, ({ on
   user: one(users, { fields: [customerMemberships.userId], references: [users.id] }),
   store: one(stores, { fields: [customerMemberships.storeId], references: [stores.id] }),
   plan: one(storeMembershipPlans, { fields: [customerMemberships.planId], references: [storeMembershipPlans.id] }),
+}));
+
+export const storeLoyaltySettingsRelations = relations(storeLoyaltySettings, ({ one }) => ({
+  store: one(stores, { fields: [storeLoyaltySettings.storeId], references: [stores.id] }),
+}));
+
+export const qrScanLogsRelations = relations(qrScanLogs, ({ one }) => ({
+  user: one(users, { fields: [qrScanLogs.userId], references: [users.id] }),
+  store: one(stores, { fields: [qrScanLogs.storeId], references: [stores.id] }),
 }));
