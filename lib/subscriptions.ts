@@ -955,11 +955,21 @@ export async function getMarketplaceFeatures(activeOnly: boolean = false): Promi
     const query = activeOnly
       ? `SELECT id, name, slug, description, price, original_price AS originalPrice, category, badge, icon, is_active AS isActive, created_at AS createdAt, updated_at AS updatedAt FROM marketplace_features WHERE is_active = 1 ORDER BY price ASC`
       : `SELECT id, name, slug, description, price, original_price AS originalPrice, category, badge, icon, is_active AS isActive, created_at AS createdAt, updated_at AS updatedAt FROM marketplace_features ORDER BY price ASC`;
-    const res = await db.prepare(query).all<any>();
+    const res = await db.prepare(query).all<Record<string, unknown>>();
     if (res.results && res.results.length > 0) {
-      return res.results.map((r: any) => ({
-        ...r,
+      return res.results.map((r: Record<string, unknown>) => ({
+        id: String(r.id),
+        name: String(r.name),
+        slug: String(r.slug),
+        description: String(r.description || ""),
+        price: Number(r.price || 0),
+        originalPrice: Number(r.originalPrice || 0),
+        category: String(r.category || ""),
+        badge: String(r.badge || ""),
+        icon: String(r.icon || ""),
         isActive: Boolean(r.isActive),
+        createdAt: Number(r.createdAt || 0),
+        updatedAt: Number(r.updatedAt || 0),
       }));
     }
   } catch (err) {
@@ -975,19 +985,27 @@ export async function getMarketplaceCombos(activeOnly: boolean = false): Promise
     const query = activeOnly
       ? `SELECT id, name, slug, description, price, original_price AS originalPrice, features, badge, is_active AS isActive, created_at AS createdAt, updated_at AS updatedAt FROM marketplace_combos WHERE is_active = 1 ORDER BY price ASC`
       : `SELECT id, name, slug, description, price, original_price AS originalPrice, features, badge, is_active AS isActive, created_at AS createdAt, updated_at AS updatedAt FROM marketplace_combos ORDER BY price ASC`;
-    const res = await db.prepare(query).all<any>();
+    const res = await db.prepare(query).all<Record<string, unknown>>();
     if (res.results && res.results.length > 0) {
-      return res.results.map((r: any) => {
+      return res.results.map((r: Record<string, unknown>) => {
         let features: string[] = [];
         try {
-          features = typeof r.features === "string" ? JSON.parse(r.features) : r.features || [];
+          features = typeof r.features === "string" ? JSON.parse(r.features) : (Array.isArray(r.features) ? r.features as string[] : []);
         } catch {
           features = [];
         }
         return {
-          ...r,
+          id: String(r.id),
+          name: String(r.name),
+          slug: String(r.slug),
+          description: String(r.description || ""),
+          price: Number(r.price || 0),
+          originalPrice: Number(r.originalPrice || 0),
+          badge: String(r.badge || ""),
           isActive: Boolean(r.isActive),
           features,
+          createdAt: Number(r.createdAt || 0),
+          updatedAt: Number(r.updatedAt || 0),
         };
       });
     }
