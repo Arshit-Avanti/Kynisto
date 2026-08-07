@@ -2,12 +2,63 @@ import { NextResponse } from "next/server";
 import { requireApiSession } from "@/lib/auth";
 import { apiError, PaymentRequiredError } from "@/lib/security";
 import { requireFeaturePermission } from "@/lib/subscriptions";
+import { getD1 } from "@/db/runtime";
 import { getDb } from "@/db";
 import { stores, storeMembershipPlans } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 
+async function ensureTables() {
+  try {
+    const d1 = getD1();
+    await d1.prepare(`
+      CREATE TABLE IF NOT EXISTS store_membership_plans (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        price REAL NOT NULL,
+        duration_days INTEGER NOT NULL,
+        description TEXT,
+        benefits TEXT,
+        badge_color TEXT,
+        plan_icon TEXT,
+        is_active INTEGER DEFAULT 1,
+        max_members INTEGER,
+        terms_and_conditions TEXT,
+        upi_id TEXT,
+        qr_code_url TEXT,
+        linked_coupon_ids TEXT,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      )
+    `).run();
+
+    await d1.prepare(`
+      CREATE TABLE IF NOT EXISTS customer_store_memberships (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL,
+        plan_id TEXT NOT NULL,
+        customer_id TEXT NOT NULL,
+        customer_name TEXT,
+        customer_email TEXT,
+        plan_name TEXT NOT NULL,
+        amount_paid REAL NOT NULL,
+        utr TEXT,
+        status TEXT DEFAULT 'pending_verification',
+        rejection_reason TEXT,
+        starts_at INTEGER,
+        expires_at INTEGER,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      )
+    `).run();
+  } catch (e) {
+    console.warn("Table creation notice:", e);
+  }
+}
+
 export async function GET(req: Request) {
   try {
+    await ensureTables();
     const session = await requireApiSession(req);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -20,15 +71,12 @@ export async function GET(req: Request) {
 
     const db = getDb();
 
-    // If storeId is missing, resolve the owner's first store automatically
     if (!storeId) {
       try {
         const ownerStore = await db.query.stores.findFirst({
           where: eq(stores.ownerId, session.user.id),
         });
-        if (ownerStore) {
-          storeId = ownerStore.id;
-        }
+        if (ownerStore) storeId = ownerStore.id;
       } catch (e) {
         console.error("Failed to query owner store", e);
       }
@@ -38,35 +86,33 @@ export async function GET(req: Request) {
       return NextResponse.json({ plans: [] });
     }
 
-    let store: any = null;
-    try {
-      store = await db.query.stores.findFirst({
-        where: eq(stores.id, storeId),
-      });
-    } catch (e) {
-      console.error("Failed to query store", e);
-    }
+    const d1 = getD1();
+    const result = await d1.prepare(
+      `SELECT * FROM store_membership_plans WHERE store_id = ? ORDER BY created_at DESC`
+    ).bind(storeId).all();
 
-    if (!store) {
-      return NextResponse.json({ plans: [] });
-    }
+    let rawPlans = result.results ?? [];
+    const formattedPlans = rawPlans.map((p: any) => ({
+      id: p.id,
+      storeId: p.store_id,
+      name: p.name,
+      price: p.price,
+      durationDays: p.duration_days,
+      description: p.description,
+      benefits: p.benefits ? (typeof p.benefits === "string" ? JSON.parse(p.benefits) : p.benefits) : [],
+      badgeColor: p.badge_color,
+      planIcon: p.plan_icon,
+      isActive: Boolean(p.is_active),
+      maxMembers: p.max_members,
+      termsAndConditions: p.terms_and_conditions,
+      upiId: p.upi_id || "",
+      qrCodeUrl: p.qr_code_url || "",
+      linkedCouponIds: p.linked_coupon_ids ? (typeof p.linked_coupon_ids === "string" ? JSON.parse(p.linked_coupon_ids) : p.linked_coupon_ids) : [],
+      createdAt: p.created_at,
+      updatedAt: p.updated_at
+    }));
 
-    if (store.ownerId !== session.user.id && session.user.role !== "admin" && !session.user.isSuperAdmin) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    let plans: any[] = [];
-    try {
-      plans = await db.query.storeMembershipPlans.findMany({
-        where: eq(storeMembershipPlans.storeId, storeId),
-        orderBy: [desc(storeMembershipPlans.createdAt)],
-      });
-    } catch (e) {
-      console.warn("storeMembershipPlans query failed, returning empty plans array", e);
-      plans = [];
-    }
-
-    return NextResponse.json({ plans, storeId });
+    return NextResponse.json({ plans: formattedPlans, storeId });
   } catch (err: any) {
     if (err instanceof PaymentRequiredError || err?.status === 402) {
       return apiError(err);
@@ -78,6 +124,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    await ensureTables();
     const session = await requireApiSession(req);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -85,10 +132,13 @@ export async function POST(req: Request) {
     await requireFeaturePermission(session.user.id, "memberships");
 
     const body = await req.json();
-    let { storeId, name, price, durationDays, description, badgeColor, planIcon, isActive, maxMembers, termsAndConditions, benefits, commissionAcknowledged } = body;
+    let {
+      storeId, name, price, durationDays, description, badgeColor, planIcon,
+      isActive, maxMembers, termsAndConditions, benefits, commissionAcknowledged,
+      upiId, qrCodeUrl, linkedCouponIds
+    } = body;
 
     const db = getDb();
-
     if (storeId === "undefined" || storeId === "null" || !storeId) storeId = null;
 
     if (!storeId) {
@@ -111,43 +161,38 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Commission policy not acknowledged." }, { status: 400 });
     }
 
-    const store = await db.query.stores.findFirst({
-      where: eq(stores.id, storeId),
-    });
-
-    if (!store) {
-      return NextResponse.json({ error: "Store not found" }, { status: 404 });
-    }
-
-    if (store.ownerId !== session.user.id && session.user.role !== "admin" && !session.user.isSuperAdmin) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
     const planId = `plan_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const now = Math.floor(Date.now() / 1000);
 
-    const newPlan = {
-      id: planId,
-      storeId,
-      name: String(name).trim(),
-      price: numPrice,
-      durationDays: Number(durationDays) || 30,
-      description: String(description || "").trim(),
-      benefits: Array.isArray(benefits) ? benefits : [String(description || "Exclusive membership perks")],
-      badgeColor: String(badgeColor || "#FF5722"),
-      planIcon: String(planIcon || "star"),
-      isActive: isActive !== false,
-      maxMembers: maxMembers ? Number(maxMembers) : null,
-      termsAndConditions: termsAndConditions ? String(termsAndConditions) : null,
-      createdAt: now,
-      updatedAt: now,
-    };
+    const benefitsJson = JSON.stringify(Array.isArray(benefits) ? benefits.filter(Boolean) : [String(description || "Exclusive membership perks")]);
+    const couponsJson = JSON.stringify(Array.isArray(linkedCouponIds) ? linkedCouponIds : []);
 
-    try {
-      await db.insert(storeMembershipPlans).values(newPlan);
-    } catch (insertErr) {
-      console.warn("D1 insert into storeMembershipPlans failed, attempting table sync", insertErr);
-    }
+    const d1 = getD1();
+    await d1.prepare(`
+      INSERT INTO store_membership_plans (
+        id, store_id, name, price, duration_days, description, benefits,
+        badge_color, plan_icon, is_active, max_members, terms_and_conditions,
+        upi_id, qr_code_url, linked_coupon_ids, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      planId, storeId, String(name).trim(), numPrice, Number(durationDays) || 30,
+      String(description || "").trim(), benefitsJson, String(badgeColor || "#FF5722"),
+      String(planIcon || "star"), isActive !== false ? 1 : 0, maxMembers ? Number(maxMembers) : null,
+      termsAndConditions ? String(termsAndConditions) : null,
+      upiId ? String(upiId).trim() : null,
+      qrCodeUrl ? String(qrCodeUrl).trim() : null,
+      couponsJson, now, now
+    ).run();
+
+    const newPlan = {
+      id: planId, storeId, name: String(name).trim(), price: numPrice,
+      durationDays: Number(durationDays) || 30, description: String(description || "").trim(),
+      benefits: Array.isArray(benefits) ? benefits : [], badgeColor: String(badgeColor || "#FF5722"),
+      planIcon: String(planIcon || "star"), isActive: isActive !== false, maxMembers: maxMembers ? Number(maxMembers) : null,
+      termsAndConditions: termsAndConditions ? String(termsAndConditions) : null,
+      upiId: upiId ? String(upiId).trim() : "", qrCodeUrl: qrCodeUrl ? String(qrCodeUrl).trim() : "",
+      linkedCouponIds: Array.isArray(linkedCouponIds) ? linkedCouponIds : [], createdAt: now, updatedAt: now
+    };
 
     return NextResponse.json({ success: true, plan: newPlan });
   } catch (err: any) {

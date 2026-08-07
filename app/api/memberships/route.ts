@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDb } from "@/db";
-import { storeMembershipPlans } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { getD1 } from "@/db/runtime";
 
 export async function GET(request: Request) {
   try {
@@ -9,16 +7,35 @@ export async function GET(request: Request) {
     const storeId = searchParams.get("storeId");
     if (!storeId) return NextResponse.json({ error: "storeId is required" }, { status: 400 });
 
-    const db = getDb();
-    const plans = await db.select().from(storeMembershipPlans).where(
-      and(
-        eq(storeMembershipPlans.storeId, storeId),
-        eq(storeMembershipPlans.isActive, true)
-      )
-    );
+    const d1 = getD1();
+    const result = await d1.prepare(`
+      SELECT * FROM store_membership_plans
+      WHERE store_id = ? AND is_active = 1
+      ORDER BY price ASC
+    `).bind(storeId).all();
+
+    const plans = (result.results ?? []).map((p: any) => ({
+      id: p.id,
+      storeId: p.store_id,
+      name: p.name,
+      price: p.price,
+      durationDays: p.duration_days,
+      description: p.description,
+      benefits: p.benefits ? (typeof p.benefits === "string" ? JSON.parse(p.benefits) : p.benefits) : [],
+      badgeColor: p.badge_color,
+      planIcon: p.plan_icon,
+      isActive: Boolean(p.is_active),
+      maxMembers: p.max_members,
+      termsAndConditions: p.terms_and_conditions,
+      upiId: p.upi_id || "",
+      qrCodeUrl: p.qr_code_url || "",
+      linkedCouponIds: p.linked_coupon_ids ? (typeof p.linked_coupon_ids === "string" ? JSON.parse(p.linked_coupon_ids) : p.linked_coupon_ids) : [],
+      createdAt: p.created_at,
+      updatedAt: p.updated_at
+    }));
 
     return NextResponse.json({ plans });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Failed to fetch membership plans" }, { status: 500 });
+    return NextResponse.json({ plans: [] });
   }
 }

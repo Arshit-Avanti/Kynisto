@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { apiFetch } from "@/lib/client-api";
-import { CheckCircle2, ShieldCheck, Sparkles, Star, Zap } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Sparkles, Star, Zap, QrCode, CreditCard, AlertCircle, Clock } from "lucide-react";
 
 export function StoreMembershipStorefront({ storeId, storeName }: { storeId: string; storeName: string }) {
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [purchasingId, setPurchasingId] = useState<string | null>(null);
+  const [purchasingPlan, setPurchasingPlan] = useState<any | null>(null);
+  const [utr, setUtr] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState("");
+  const [reassuranceMessage, setReassuranceMessage] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -26,20 +29,32 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
     }
   }
 
-  async function handlePurchase(plan: any) {
-    if (!window.confirm(`Confirm purchase of ${plan.name} for ₹${plan.price}?`)) return;
-    setPurchasingId(plan.id);
+  function handleOpenPaymentModal(plan: any) {
+    setPurchasingPlan(plan);
+    setUtr("");
+    setError("");
+    setReassuranceMessage("");
+  }
+
+  async function handleConfirmSubmitPayment() {
+    if (!purchasingPlan) return;
+    setIsSubmitting(true);
     setError("");
     try {
-      await apiFetch("/api/memberships/purchase", {
-        method: "POST",
-        json: { storeId, planId: plan.id },
-      });
-      setToast(`Successfully subscribed to ${plan.name}! Includes Kynisto Premium.`);
+      const res = await apiFetch<{ success: boolean; reassuranceBanner?: string; message?: string }>(
+        "/api/memberships/purchase",
+        {
+          method: "POST",
+          json: { storeId, planId: purchasingPlan.id, utr },
+        }
+      );
+      const msg = res.reassuranceBanner || res.message || "Don't panic! The shop owner will verify your payment and activate your membership within 24 hours.";
+      setReassuranceMessage(msg);
+      setToast(msg);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to complete purchase.");
+      setError(e instanceof Error ? e.message : "Failed to submit payment verification.");
     } finally {
-      setPurchasingId(null);
+      setIsSubmitting(false);
     }
   }
 
@@ -47,13 +62,25 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
   if (!plans.length) return null;
 
   return (
-    <section className="portalCard" style={{ marginTop: "24px", background: "linear-gradient(135deg, rgba(15,23,42,0.92) 0%, rgba(30,41,59,0.95) 100%)", border: "1px solid rgba(255, 87, 34, 0.4)", borderRadius: "16px", padding: "24px", boxShadow: "0 10px 30px rgba(0,0,0,0.3)" }}>
+    <section
+      className="portalCard"
+      style={{
+        marginTop: "24px",
+        background: "linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.98) 100%)",
+        border: "1px solid rgba(255, 87, 34, 0.4)",
+        borderRadius: "16px",
+        padding: "24px",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+      }}
+    >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
         <div>
           <h3 style={{ fontSize: "20px", fontWeight: 800, color: "#FFFFFF", display: "flex", alignItems: "center", gap: "8px" }}>
-            <Star style={{ color: "#FF5722" }} /> {storeName} Membership Plans
+            <Star style={{ color: "#FF5722" }} /> {storeName} VIP Membership Plans
           </h3>
-          <p style={{ fontSize: "13px", color: "#94A3B8", marginTop: "4px" }}>Unlock exclusive VIP benefits, priority queuing, and discounts.</p>
+          <p style={{ fontSize: "13px", color: "#94A3B8", marginTop: "4px" }}>
+            Unlock exclusive VIP benefits, priority live queue, and store coupon loyalty rewards.
+          </p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg, rgba(255,87,34,0.2) 0%, rgba(229,57,53,0.2) 100%)", border: "1px solid rgba(255,87,34,0.4)", padding: "6px 14px", borderRadius: "20px" }}>
           <Sparkles size={14} style={{ color: "#FF8A00" }} />
@@ -61,8 +88,17 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
         </div>
       </div>
 
-      {toast && <div className="portalToast" style={{ background: "#10B981", color: "#FFFFFF", padding: "12px 16px", borderRadius: "10px", marginBottom: "16px", fontWeight: 700 }}><CheckCircle2 size={18} /> {toast}</div>}
-      {error && <div className="authError" style={{ color: "#EF4444", marginBottom: "16px", fontWeight: 700 }}>{error}</div>}
+      {toast && (
+        <div style={{ background: "rgba(16,185,129,0.2)", border: "1px solid #10B981", color: "#4ADE80", padding: "14px 18px", borderRadius: "12px", marginBottom: "18px", fontWeight: 800, fontSize: "14px", display: "flex", alignItems: "center", gap: "10px" }}>
+          <CheckCircle2 size={20} /> {toast}
+        </div>
+      )}
+
+      {error && (
+        <div style={{ background: "rgba(239,68,68,0.2)", border: "1px solid #EF4444", color: "#F87171", padding: "14px 18px", borderRadius: "12px", marginBottom: "18px", fontWeight: 800, fontSize: "14px" }}>
+          {error}
+        </div>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "16px" }}>
         {plans.map((plan) => (
@@ -95,10 +131,10 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
 
               <div style={{ background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", borderRadius: "10px", padding: "10px 12px", marginBottom: "16px" }}>
                 <div style={{ fontSize: "11px", fontWeight: 800, color: "#10B981", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "6px" }}>
-                  <ShieldCheck size={14} /> Bonus Included
+                  <ShieldCheck size={14} /> VIP Benefits Included
                 </div>
                 <div style={{ fontSize: "12px", color: "#FFFFFF", fontWeight: 700, marginTop: "2px" }}>
-                  Kynisto Subscription & Points Rewards
+                  Kynisto Subscription, Priority Queue & Loyalty Rewards
                 </div>
               </div>
 
@@ -114,8 +150,7 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
 
             <button
               type="button"
-              disabled={purchasingId === plan.id}
-              onClick={() => handlePurchase(plan)}
+              onClick={() => handleOpenPaymentModal(plan)}
               style={{
                 width: "100%",
                 background: `linear-gradient(135deg, ${plan.badgeColor || "#FF5722"} 0%, #E53935 100%)`,
@@ -129,11 +164,91 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
                 boxShadow: "0 4px 14px rgba(255, 87, 34, 0.3)",
               }}
             >
-              {purchasingId === plan.id ? "Processing..." : "Purchase Membership"}
+              Purchase VIP Membership
             </button>
           </div>
         ))}
       </div>
+
+      {/* CUSTOMER PAYMENT & REASSURANCE MODAL */}
+      {purchasingPlan && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyCenter: "center", padding: "16px" }}>
+          <div style={{ background: "#0F172A", border: "2px solid #6366F1", borderRadius: "20px", padding: "24px", maxWidth: "480px", width: "100%", color: "#FFF", boxShadow: "0 20px 50px rgba(0,0,0,0.6)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: 800, color: "#818CF8", margin: 0 }}>
+                Scan & Pay: {purchasingPlan.name}
+              </h3>
+              <button onClick={() => setPurchasingPlan(null)} style={{ background: "none", border: "none", color: "#94A3B8", fontSize: "20px", cursor: "pointer" }}>✕</button>
+            </div>
+
+            {/* REASSURANCE BANNER */}
+            <div style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(16,185,129,0.2) 100%)", border: "1px solid #10B981", borderRadius: "12px", padding: "14px", marginBottom: "18px" }}>
+              <div style={{ fontSize: "13px", fontWeight: 800, color: "#4ADE80", display: "flex", alignItems: "center", gap: "8px" }}>
+                <ShieldCheck size={18} /> Don't panic! The shop owner will verify your payment and activate your membership within 24 hours.
+              </div>
+            </div>
+
+            {/* PAYMENT DETAILS */}
+            <div style={{ textAlign: "center", background: "rgba(30,41,59,0.8)", padding: "16px", borderRadius: "14px", marginBottom: "18px" }}>
+              <div style={{ fontSize: "26px", fontWeight: 900, color: "#FFF", marginBottom: "8px" }}>
+                ₹{purchasingPlan.price}
+              </div>
+
+              {purchasingPlan.qrCodeUrl ? (
+                <div style={{ margin: "12px 0" }}>
+                  <img src={purchasingPlan.qrCodeUrl} alt="Shop Owner Payment QR Code" style={{ width: "180px", height: "180px", margin: "0 auto", objectFit: "contain", borderRadius: "12px", border: "2px solid #6366F1", background: "#FFF", padding: "8px" }} />
+                  <p style={{ fontSize: "12px", color: "#94A3B8", marginTop: "6px" }}>Scan QR code using Google Pay, PhonePe, Paytm or UPI App</p>
+                </div>
+              ) : (
+                <div style={{ padding: "12px", background: "rgba(255,255,255,0.05)", borderRadius: "10px", margin: "12px 0", fontSize: "13px", color: "#CBD5E1" }}>
+                  <QrCode style={{ margin: "0 auto 6px auto", color: "#818CF8" }} size={32} />
+                  Shop Owner UPI Payment
+                </div>
+              )}
+
+              {purchasingPlan.upiId && (
+                <div style={{ background: "rgba(99,102,241,0.2)", border: "1px solid #6366F1", padding: "10px", borderRadius: "10px", fontSize: "14px", fontWeight: 800, color: "#818CF8" }}>
+                  UPI ID: {purchasingPlan.upiId}
+                </div>
+              )}
+            </div>
+
+            {/* UTR INPUT */}
+            <div style={{ marginBottom: "18px" }}>
+              <label style={{ fontSize: "12px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
+                Enter Payment UTR / Transaction Ref No.
+              </label>
+              <input
+                type="text"
+                value={utr}
+                onChange={(e) => setUtr(e.target.value)}
+                placeholder="12-digit UTR or Transaction ID (e.g. 423819203912)"
+                style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "12px", borderRadius: "10px", fontSize: "14px", fontWeight: 700 }}
+              />
+            </div>
+
+            <button
+              type="button"
+              disabled={isSubmitting || reassuranceMessage !== ""}
+              onClick={handleConfirmSubmitPayment}
+              style={{
+                width: "100%",
+                background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
+                color: "#FFFFFF",
+                border: "none",
+                padding: "14px",
+                borderRadius: "12px",
+                fontWeight: 900,
+                fontSize: "15px",
+                cursor: "pointer",
+                boxShadow: "0 4px 16px rgba(16, 185, 129, 0.4)",
+              }}
+            >
+              {isSubmitting ? "Submitting Payment Proof..." : reassuranceMessage !== "" ? "Payment Verification Submitted!" : "Submit Payment & Request Activation"}
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
