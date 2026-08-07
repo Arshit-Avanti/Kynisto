@@ -168,6 +168,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const session = await requireApiSession(request, { csrf: true });
+    await requireFeaturePermission(session.user.id, "chat");
     const body = await safeJson(request);
     const action = cleanText(body.action, "Action", { max: 30 });
     const conversationId = cleanText(body.conversationId, "Conversation", { max: 80 });
