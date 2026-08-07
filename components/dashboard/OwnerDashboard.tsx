@@ -17,7 +17,6 @@ import { OwnerMembershipEditor } from "@/components/dashboard/OwnerMembershipEdi
 
 import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscriptionDashboard";
 import { FeatureGateNotice } from "@/components/subscription/FeatureGateNotice";
-import { WelcomeRewardModal } from "@/components/subscription/WelcomeRewardModal";
 import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
 
 import { Eye, Star, Navigation, Phone, MessageCircle, BarChart2, CheckCircle2 } from "lucide-react";
@@ -126,8 +125,6 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
           </select>
         )}
       </div>
-
-      <WelcomeRewardModal userRole={user.role} userId={user.id} />
 
       {error && <p className="authError" role="alert">{error}</p>}
 

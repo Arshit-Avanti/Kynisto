@@ -23,12 +23,13 @@ export function WelcomeRewardModal({
   } | null>(null);
 
   useEffect(() => {
-    if (!userRole || userRole === "admin") return;
+    if (!userRole || userRole === "admin" || !userId) return;
 
-    const storageKey = `kynisto_welcome_reward_dismissed_${userId || userRole}`;
-    const isDismissed = localStorage.getItem(storageKey);
+    const storageKey = "kynisto_welcome_reward_seen_" + userId;
+    const isSeen = localStorage.getItem(storageKey);
 
-    if (!isDismissed) {
+    if (!isSeen) {
+      localStorage.setItem(storageKey, "true");
       const isOwner = userRole === "store_owner";
       setRewardData({
         planName: isOwner ? "Pro" : "Premium",
@@ -42,8 +43,8 @@ export function WelcomeRewardModal({
   const isOpen = externalIsOpen ?? internalOpen;
 
   const handleClose = () => {
-    if (userId || userRole) {
-      const storageKey = `kynisto_welcome_reward_dismissed_${userId || userRole}`;
+    if (userId) {
+      const storageKey = "kynisto_welcome_reward_seen_" + userId;
       localStorage.setItem(storageKey, "true");
     }
     setInternalOpen(false);
@@ -99,6 +100,7 @@ export function WelcomeRewardModal({
         .welcome-reward-card li * {
           color: #FFFFFF !important;
           -webkit-text-fill-color: #FFFFFF !important;
+          text-shadow: 0 2px 10px rgba(0,0,0,0.9) !important;
         }
 
         @media (max-width: 600px) {
@@ -131,6 +133,7 @@ export function WelcomeRewardModal({
           .welcome-reward-card li * {
             color: #FFFFFF !important;
             -webkit-text-fill-color: #FFFFFF !important;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.9) !important;
           }
           .welcome-reward-actions {
             flex-direction: column !important;
@@ -204,6 +207,8 @@ export function WelcomeRewardModal({
             textAlign: "center",
             margin: "0 0 10px 0",
             color: "#FFFFFF",
+            WebkitTextFillColor: "#FFFFFF",
+            textShadow: "0 2px 10px rgba(0,0,0,0.9)",
             letterSpacing: "-0.03em",
           }}
         >
@@ -214,14 +219,17 @@ export function WelcomeRewardModal({
         <p
           style={{
             fontSize: "1.15rem",
-            color: "#CBD5E1",
+            fontWeight: 700,
+            color: "#FFFFFF",
+            WebkitTextFillColor: "#FFFFFF",
+            textShadow: "0 2px 10px rgba(0,0,0,0.9)",
             textAlign: "center",
             margin: "0 auto 32px auto",
             maxWidth: "540px",
             lineHeight: 1.5,
           }}
         >
-          Your <strong style={{ color: "#FF7A00", fontWeight: 800 }}>{rewardData.planName}</strong> membership (worth ₹{rewardData.worth}) has been unlocked <span style={{ color: "#10B981", fontWeight: 800 }}>FREE</span> for 1 month.
+          Your <strong style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF", textShadow: "0 2px 10px rgba(0,0,0,0.9)", fontWeight: 800 }}>{rewardData.planName}</strong> membership (worth ₹{rewardData.worth}) has been unlocked <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF", textShadow: "0 2px 10px rgba(0,0,0,0.9)", fontWeight: 800 }}>FREE</span> for 1 month.
         </p>
 
         {/* Content Layout: Features List & Card Graphic */}

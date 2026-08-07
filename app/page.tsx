@@ -1137,6 +1137,7 @@ export default function Home() {
   const [nextPage, setNextPage] = useState(2);
   const [hasMore, setHasMore] = useState(false);
   const [userRole, setUserRole] = useState<"admin" | "store_owner" | "customer" | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [accent, setAccent] = useState<Accent>("royal");
   const [density, setDensity] = useState<Density>("comfortable");
   const [themeMode, setThemeMode] = useState<ThemeMode>("light");
@@ -1202,7 +1203,7 @@ export default function Home() {
       try {
         const [categoryData, sessionData] = await Promise.all([
           apiFetch<{ items: Array<{ name: string; icon?: string; storeCount?: number }> }>("/api/categories"),
-          apiFetch<{ user: { role: "admin" | "store_owner" | "customer" } | null }>("/api/auth/me"),
+          apiFetch<{ user: { id: string; role: "admin" | "store_owner" | "customer" } | null }>("/api/auth/me"),
         ]);
         if (!active) return;
         const palette = ["coral", "green", "blue", "yellow", "mint", "peach", "lilac", "sky", "lime", "sand"];
@@ -1213,6 +1214,7 @@ export default function Home() {
           storeCount: Number(item.storeCount ?? 0),
         })));
         setUserRole(sessionData.user?.role ?? null);
+        setUserId(sessionData.user?.id ?? null);
         if (sessionData.user?.role === "customer" || sessionData.user?.role === "admin") {
           const favoriteData = await apiFetch<{ items: Array<{ storeId: string }> }>("/api/favorites");
           if (active) setSaved(favoriteData.items.map((item) => item.storeId));
@@ -1417,7 +1419,7 @@ export default function Home() {
   return (
     <main className={`site theme-${accent} density-${density} mode-${themeMode}`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
       <SubscriptionExpiryBanner />
-      <WelcomeRewardModal userRole={userRole} />
+      <WelcomeRewardModal userRole={userRole} userId={userId} />
       <VideoBackground />
       <ShaderCanvas />
       <header className={`topbar ${isScrolled ? "topbarScrolled" : ""}`}>
