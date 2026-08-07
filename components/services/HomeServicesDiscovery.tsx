@@ -145,17 +145,9 @@ export function HomeServicesDiscovery() {
 
       {/* Hero Header */}
       <section className="services-hero">
-        <div className="services-hero-kicker" style={{ background: "rgba(255, 138, 0, 0.2)", color: "#FF8A00", WebkitTextFillColor: "#FF8A00", border: "1px solid rgba(255, 138, 0, 0.45)", borderRadius: "9999px", padding: "6px 20px", fontSize: "12px", fontWeight: 800, letterSpacing: "0.08em", display: "inline-block", marginBottom: "18px", textTransform: "uppercase" }}>
+        <div className="services-hero-kicker" style={{ background: "rgba(255, 138, 0, 0.2)", color: "#FF8A00", WebkitTextFillColor: "#FF8A00", border: "1px solid rgba(255, 138, 0, 0.45)", borderRadius: "9999px", padding: "8px 24px", fontSize: "14px", fontWeight: 800, letterSpacing: "0.08em", display: "inline-block", marginBottom: "24px", textTransform: "uppercase", boxShadow: "0 4px 20px rgba(255, 138, 0, 0.3)" }}>
           ⚡ services are faster with kynisto
         </div>
-
-        <h1 className="services-hero-title force-white-text" style={{ color: "#FFFFFF !important", WebkitTextFillColor: "#FFFFFF !important", textShadow: "0 2px 20px rgba(0,0,0,0.95), 0 4px 30px rgba(0,0,0,0.9)", margin: "0 0 16px 0", fontSize: "clamp(2.4rem, 6vw, 4.2rem)", fontWeight: 900, letterSpacing: "-0.03em" }}>
-          Book Trusted Local Professionals in Minutes.
-        </h1>
-
-        <p className="services-hero-subtitle force-white-text" style={{ color: "#F8FAFC !important", WebkitTextFillColor: "#F8FAFC !important", textShadow: "0 2px 14px rgba(0,0,0,0.95), 0 2px 20px rgba(0,0,0,0.85)", margin: "0 auto 32px auto", fontSize: "1.15rem", fontWeight: 600, maxWidth: "750px", lineHeight: 1.6 }}>
-          Verified plumbers, electricians, technicians &amp; home experts near {locationLabel}. 100% upfront pricing &amp; 30–60 min arrival guarantee.
-        </p>
 
         {/* Search Bar */}
         <div className="services-search-wrapper">
