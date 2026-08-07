@@ -561,10 +561,12 @@ const servicesCustomCss = `
 }
 
 .services-hero {
-  max-width: 1200px;
-  margin: 110px auto 40px auto;
-  padding: 0 20px;
+  position: relative;
   text-align: center;
+  padding: 140px 20px 60px 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  z-index: 2;
 }
 
 .services-hero-kicker {
@@ -572,12 +574,38 @@ const servicesCustomCss = `
   padding: 6px 16px;
   border-radius: 9999px;
   background: rgba(255, 87, 34, 0.15);
-  border: 1px solid rgba(255, 87, 34, 0.35);
-  color: #FF8A00;
-  font-size: 12px;
+  border: 1px solid rgba(255, 87, 34, 0.4);
+  color: #FF7A00 !important;
+  -webkit-text-fill-color: #FF7A00 !important;
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   margin-bottom: 16px;
+}
+
+.services-page-shell.mode-light h1,
+.services-page-shell.mode-light h2,
+.services-page-shell.mode-light h3,
+.services-page-shell.mode-light p,
+.mode-light .services-hero-title,
+.mode-light .services-hero-subtitle,
+.mode-light .section-header h2,
+.mode-light .sub-note,
+h1.services-hero-title,
+p.services-hero-subtitle,
+.section-header h2 {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.95), 0 0 30px rgba(0, 0, 0, 0.9) !important;
+}
+
+.mode-light .services-hero-subtitle,
+.mode-light .sub-note,
+p.services-hero-subtitle,
+.sub-note {
+  color: #E2E8F0 !important;
+  -webkit-text-fill-color: #E2E8F0 !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9) !important;
 }
 
 .services-hero-title {
@@ -587,14 +615,15 @@ const servicesCustomCss = `
   letter-spacing: -0.03em;
   color: #FFFFFF !important;
   -webkit-text-fill-color: #FFFFFF !important;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.95), 0 0 30px rgba(0, 0, 0, 0.9) !important;
   margin-bottom: 16px;
 }
 
 .services-hero-subtitle {
   font-size: 1.15rem;
-  color: #CBD5E1 !important;
-  -webkit-text-fill-color: #CBD5E1 !important;
+  color: #E2E8F0 !important;
+  -webkit-text-fill-color: #E2E8F0 !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9) !important;
   max-width: 750px;
   margin: 0 auto 28px auto;
   line-height: 1.6;

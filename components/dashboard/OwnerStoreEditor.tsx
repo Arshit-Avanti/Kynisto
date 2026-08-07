@@ -450,6 +450,11 @@ export function OwnerStoreEditor({
   const hours = firstHours(store?.businessHours);
   const text = (key: string, fallback = "") => String(store?.[key] ?? fallback);
 
+  const homePrice = String(store?.startingPrice ?? store?.priceFrom ?? store?.price_from ?? "299");
+  const homeArrival = String(store?.estimatedArrival ?? store?.estimated_arrival ?? "30–60 min Arrival");
+  const homeHours = typeof store?.businessHours === "string" && !store.businessHours.startsWith("{") ? store.businessHours : "09:00 AM - 08:00 PM";
+  const homeAddress = text("address") === "Doorstep / Mobile Service" ? "" : text("address");
+
   // Photo upload state
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);

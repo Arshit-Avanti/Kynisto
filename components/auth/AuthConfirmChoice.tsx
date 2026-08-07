@@ -155,8 +155,8 @@ export default function AuthConfirmChoice({ hash, accessToken }: AuthConfirmChoi
   return (
     <div className="authCard" style={{ textAlign: "center", padding: "2.5rem 1.5rem", display: "flex", flexDirection: "column", gap: "2rem" }}>
       <div>
-        <h2 style={{ fontSize: "1.75rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.5rem" }}>Login Successful!</h2>
-        <p style={{ color: "#64748b", fontSize: "1rem" }}>
+        <h2 style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--text-primary, #0f172a)", marginBottom: "0.5rem" }}>Login Successful!</h2>
+        <p style={{ color: "var(--text-secondary, #64748b)", fontSize: "1rem" }}>
           Where would you like to continue?
         </p>
       </div>

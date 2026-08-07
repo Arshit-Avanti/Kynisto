@@ -144,15 +144,16 @@ export async function expireHealthcareQueueEntries(storeId?: string, force = fal
   const scope = storeId ? " AND store_id = ?" : "";
   const values = storeId ? [now, storeId] : [now];
   const result = await db.batch([
+    db.prepare("UPDATE healthcare_queue_entries SET active_key = NULL WHERE status NOT IN ('waiting','called') AND active_key IS NOT NULL"),
     db.prepare(`INSERT INTO healthcare_queue_events (id, store_id, entry_id, actor_id, event_type, metadata, created_at)
       SELECT lower(hex(randomblob(16))), store_id, id, NULL, 'expired',
         json_object('tokenNumber', token_number, 'reason', 'three_hour_timeout'), ?
       FROM healthcare_queue_entries
-      WHERE active_key IS NOT NULL AND status IN ('waiting','called') AND expires_at IS NOT NULL AND expires_at <= ?${scope}`)
+      WHERE status IN ('waiting','called') AND expires_at IS NOT NULL AND expires_at <= ?${scope}`)
       .bind(now, ...values),
     db.prepare(`UPDATE healthcare_queue_entries SET status = 'expired', active_key = NULL,
       left_at = ?, updated_at = ?
-      WHERE active_key IS NOT NULL AND status IN ('waiting','called') AND expires_at IS NOT NULL AND expires_at <= ?${scope}`)
+      WHERE status IN ('waiting','called') AND expires_at IS NOT NULL AND expires_at <= ?${scope}`)
       .bind(now, now, ...values),
     db.prepare(`UPDATE healthcare_queue_settings SET current_token_number = 0, updated_at = ?
       WHERE current_token_number <> 0
@@ -160,7 +161,7 @@ export async function expireHealthcareQueueEntries(storeId?: string, force = fal
         WHERE called.store_id = healthcare_queue_settings.store_id AND called.service_date = healthcare_queue_settings.service_date AND called.status = 'called')${storeId ? " AND store_id = ?" : ""}`)
       .bind(now, ...(storeId ? [storeId] : [])),
   ]);
-  return Number(result[1]?.meta?.changes ?? 0);
+  return Number(result[2]?.meta?.changes ?? 0);
 }
 
 export async function activeHealthcareQueueForUser(userId: string, sweep = true) {
@@ -176,11 +177,16 @@ export async function resetQueueForNewDay(storeId: string) {
   const db = getD1();
   await expireHealthcareQueueEntries(storeId);
   const today = indiaServiceDate();
+  const now = Math.floor(Date.now() / 1000);
+
   const settings = await db.prepare("SELECT service_date AS serviceDate FROM healthcare_queue_settings WHERE store_id = ?").bind(storeId).first<{ serviceDate: string }>();
-  if (settings && settings.serviceDate !== today) {
-    const now = Math.floor(Date.now() / 1000);
+  if (!settings) {
+    await db.prepare(`INSERT OR IGNORE INTO healthcare_queue_settings
+      (store_id, status, consultation_minutes, current_token_number, next_token_number, service_date, opening_time, closing_time, maximum_daily_patients, updated_at)
+      VALUES (?, 'closed', 15, 0, 1, ?, '09:00', '18:00', 100, ?)`).bind(storeId, today, now).run().catch(() => {});
+  } else if (settings.serviceDate !== today) {
     await db.batch([
-      db.prepare("UPDATE healthcare_queue_entries SET status = 'cancelled', active_key = NULL, left_at = ?, updated_at = ? WHERE store_id = ? AND active_key IS NOT NULL").bind(now, now, storeId),
+      db.prepare("UPDATE healthcare_queue_entries SET status = 'cancelled', active_key = NULL, left_at = ?, updated_at = ? WHERE store_id = ? AND service_date < ? AND status IN ('waiting','called')").bind(now, now, storeId, today),
       db.prepare("UPDATE healthcare_queue_settings SET status = 'closed', current_token_number = 0, next_token_number = 1, service_date = ?, opened_at = NULL, closed_at = ?, updated_at = ? WHERE store_id = ?").bind(today, now, now, storeId),
     ]);
   }

@@ -126,7 +126,7 @@ export function AdminWalletPanel() {
                 onChange={(e) => setSettings({ ...settings, fixedCommissionAmount: Number(e.target.value) })}
                 required
               />
-              <small style={{ color: "#94A3B8" }}>Fixed fee charged per store membership plan sold (Default: ₹50)</small>
+              <small style={{ color: "var(--portal-muted, #64748b)" }}>Fixed fee charged per store membership plan sold (Default: ₹50)</small>
             </label>
 
             <label>
@@ -138,7 +138,7 @@ export function AdminWalletPanel() {
                 onChange={(e) => setSettings({ ...settings, minimumPlanPrice: Number(e.target.value) })}
                 required
               />
-              <small style={{ color: "#94A3B8" }}>Minimum floor price for store owners (Default: ₹80)</small>
+              <small style={{ color: "var(--portal-muted, #64748b)" }}>Minimum floor price for store owners (Default: ₹80)</small>
             </label>
           </div>
 
@@ -189,7 +189,7 @@ export function AdminWalletPanel() {
                 <form onSubmit={handleAddCoupon} style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "20px" }}>
           <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "flex-end" }}>
             <label style={{ flex: 1 }}>
-              <small style={{ color: "#cbd5e1", fontWeight: 600 }}>Coupon Code</small>
+              <small style={{ color: "var(--portal-muted, #475569)", fontWeight: 600 }}>Coupon Code</small>
               <input
                 placeholder="e.g. FESTIVE200"
                 value={newCoupon.code}
@@ -200,7 +200,7 @@ export function AdminWalletPanel() {
             </label>
             <div style={{ display: "flex", gap: "16px" }}>
               <label style={{ width: "130px" }}>
-                <small style={{ color: "#cbd5e1", fontWeight: 600 }}>Discount (₹)</small>
+                <small style={{ color: "var(--portal-muted, #475569)", fontWeight: 600 }}>Discount (₹)</small>
                 <input
                   type="number"
                   min={10}
@@ -211,7 +211,7 @@ export function AdminWalletPanel() {
                 />
               </label>
               <label style={{ width: "130px" }}>
-                <small style={{ color: "#cbd5e1", fontWeight: 600 }}>Usage Limit</small>
+                <small style={{ color: "var(--portal-muted, #475569)", fontWeight: 600 }}>Usage Limit</small>
                 <input
                   type="number"
                   min={1}
@@ -233,7 +233,7 @@ export function AdminWalletPanel() {
             <article key={coupon.code} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderRadius: "10px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
               <div>
                 <b style={{ color: "#38bdf8", fontSize: "1.05rem" }}>{coupon.code}</b>
-                <p style={{ margin: "2px 0 0 0", fontSize: "0.9rem", color: "#cbd5e1" }}>
+                <p style={{ margin: "2px 0 0 0", fontSize: "0.9rem", color: "var(--text-secondary, #475569)" }}>
                   ₹{coupon.discount} Discount · {coupon.used} / {coupon.limit} Used
                 </p>
               </div>
@@ -256,7 +256,7 @@ export function AdminWalletPanel() {
               </div>
             </article>
           ))}
-          {settings.coupons.length === 0 && <p style={{ color: "#94a3b8", padding: "12px" }}>No coupons created yet.</p>}
+          {settings.coupons.length === 0 && <p style={{ color: "var(--portal-muted, #64748b)", padding: "12px" }}>No coupons created yet.</p>}
         </div>
       </section>
     </div>

@@ -107,7 +107,8 @@ export async function PATCH(request: Request) {
     const currentStore = await requireOwnedStore(session.user.id, storeId);
     const input = parseStoreInput(body);
     await verifyCategories(input.categoryId, input.subcategoryId);
-    await getD1()
+    const db = getD1();
+    await db
       .prepare(
         `UPDATE stores SET category_id = ?, subcategory_id = ?, name = ?, description = ?, business_type = ?,
           address = ?, area = ?, city = ?, state = ?, country = ?, postal_code = ?, latitude = ?, longitude = ?,
@@ -145,9 +146,35 @@ export async function PATCH(request: Request) {
         session.user.id,
       )
       .run();
-    const resubmitted = currentStore.status === "approved" || currentStore.status === "rejected";
-    await writeAudit(request, session.user.id, resubmitted ? "store.resubmitted" : "store.updated", "store", storeId, { status: resubmitted ? "pending" : currentStore.status });
-    return Response.json({ ok: true, status: resubmitted ? "pending" : currentStore.status });
+
+    if (input.businessType === "Home Service Business") {
+      const priceFrom = Number(body.startingPrice ?? body.priceFrom ?? 299);
+      const estimatedArrival = cleanText(body.estimatedArrival ?? "30–60 min Arrival", "Estimated Arrival", { required: false }) || "30–60 min Arrival";
+
+      const categoryRow = await db.prepare("SELECT name FROM categories WHERE id = ?").bind(input.categoryId).first<{ name: string }>();
+      const categoryName = categoryRow?.name || "General Service";
+
+      const existingService = await db.prepare("SELECT id FROM services WHERE store_id = ?").bind(storeId).first<{ id: string }>();
+      const now = Math.floor(Date.now() / 1000);
+
+      if (existingService) {
+        await db.prepare(
+          `UPDATE services SET name = ?, category_name = ?, description = ?, price_from = ?, estimated_arrival = ?, updated_at = ? WHERE id = ? AND store_id = ?`
+        ).bind(input.name, categoryName, input.description || "Professional home service", priceFrom, estimatedArrival, now, existingService.id, storeId).run().catch(() => {});
+      } else {
+        const serviceId = crypto.randomUUID();
+        const serviceSlug = `${slugify(input.name)}-${crypto.randomUUID().slice(0, 6)}`;
+        await db.prepare(
+          `INSERT INTO services (id, store_id, name, category_name, slug, description, price_from, estimated_arrival, status, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)`
+        ).bind(serviceId, storeId, input.name, categoryName, serviceSlug, input.description || "Professional home service", priceFrom, estimatedArrival, now, now).run().catch(() => {});
+      }
+    }
+
+    const isRejected = currentStore.status === "rejected";
+    const nextStatus = isRejected ? "pending" : currentStore.status;
+    await writeAudit(request, session.user.id, isRejected ? "store.resubmitted" : "store.updated", "store", storeId, { status: nextStatus });
+    return Response.json({ ok: true, status: nextStatus });
   } catch (error) {
     return apiError(error);
   }

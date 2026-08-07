@@ -227,22 +227,22 @@ export function AdminSubscriptionsPanel() {
       {/* Analytics KPI Cards */}
       {analytics && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginBottom: "32px" }}>
-          <div className="argusCard" style={{ padding: "20px", borderRadius: "16px", background: "rgba(34,197,94,0.1)", border: "1px solid #22C55E" }}>
-            <div style={{ fontSize: "12px", fontWeight: 800, color: "#22C55E", letterSpacing: "1px" }}>MONTHLY RECURRING REVENUE (MRR)</div>
+          <div className="argusCard" style={{ padding: "20px", borderRadius: "16px", background: "linear-gradient(135deg, rgba(34,197,94,0.85), rgba(22,163,74,0.9))", border: "1px solid #22C55E", boxShadow: "0 8px 24px rgba(34,197,94,0.25)" }}>
+            <div style={{ fontSize: "12px", fontWeight: 800, color: "#dcfce7", letterSpacing: "1px" }}>MONTHLY RECURRING REVENUE (MRR)</div>
             <div style={{ fontSize: "32px", fontWeight: 900, margin: "6px 0", color: "#FFF" }}>₹{analytics.mrr.toLocaleString()}</div>
-            <div style={{ fontSize: "12px", color: "#94A3B8" }}>Normalized monthly revenue</div>
+            <div style={{ fontSize: "12px", color: "#e2e8f0" }}>Normalized monthly revenue</div>
           </div>
 
-          <div className="argusCard" style={{ padding: "20px", borderRadius: "16px", background: "rgba(245,158,11,0.1)", border: "1px solid #F59E0B" }}>
-            <div style={{ fontSize: "12px", fontWeight: 800, color: "#F59E0B", letterSpacing: "1px" }}>TOTAL REVENUE</div>
+          <div className="argusCard" style={{ padding: "20px", borderRadius: "16px", background: "linear-gradient(135deg, rgba(245,158,11,0.85), rgba(217,119,6,0.9))", border: "1px solid #F59E0B", boxShadow: "0 8px 24px rgba(245,158,11,0.25)" }}>
+            <div style={{ fontSize: "12px", fontWeight: 800, color: "#fef3c7", letterSpacing: "1px" }}>TOTAL REVENUE</div>
             <div style={{ fontSize: "32px", fontWeight: 900, margin: "6px 0", color: "#FFF" }}>₹{analytics.totalRevenue.toLocaleString()}</div>
-            <div style={{ fontSize: "12px", color: "#94A3B8" }}>Cumulative payments received</div>
+            <div style={{ fontSize: "12px", color: "#e2e8f0" }}>Cumulative payments received</div>
           </div>
 
-          <div className="argusCard" style={{ padding: "20px", borderRadius: "16px", background: "rgba(59,130,246,0.1)", border: "1px solid #3B82F6" }}>
-            <div style={{ fontSize: "12px", fontWeight: 800, color: "#3B82F6", letterSpacing: "1px" }}>ACTIVE SUBSCRIBERS</div>
+          <div className="argusCard" style={{ padding: "20px", borderRadius: "16px", background: "linear-gradient(135deg, rgba(59,130,246,0.85), rgba(37,99,235,0.9))", border: "1px solid #3B82F6", boxShadow: "0 8px 24px rgba(59,130,246,0.25)" }}>
+            <div style={{ fontSize: "12px", fontWeight: 800, color: "#dbeafe", letterSpacing: "1px" }}>ACTIVE SUBSCRIBERS</div>
             <div style={{ fontSize: "32px", fontWeight: 900, margin: "6px 0", color: "#FFF" }}>{analytics.activeSubscribersTotal}</div>
-            <div style={{ fontSize: "12px", color: "#94A3B8" }}>
+            <div style={{ fontSize: "12px", color: "#e2e8f0" }}>
               {analytics.activeCustomerCount} Customers · {analytics.activeShopOwnerCount} Shop Owners
             </div>
           </div>
@@ -252,10 +252,10 @@ export function AdminSubscriptionsPanel() {
       {/* Plan-wise Breakdown Bar */}
       {analytics?.planBreakdown && (
         <div style={{ marginBottom: "32px" }}>
-          <h4 style={{ fontSize: "14px", fontWeight: 800, color: "#94A3B8", marginBottom: "12px" }}>ACTIVE PLAN DISTRIBUTION</h4>
+          <h4 style={{ fontSize: "14px", fontWeight: 800, color: "var(--text-secondary, #94A3B8)", marginBottom: "12px" }}>ACTIVE PLAN DISTRIBUTION</h4>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "10px" }}>
             {Object.entries(analytics.planBreakdown).map(([planKey, info]) => (
-              <div key={planKey} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", padding: "12px", borderRadius: "12px", fontSize: "12px" }}>
+              <div key={planKey} style={{ background: "rgba(15,23,42,0.85)", border: "1px solid rgba(255,255,255,0.15)", padding: "12px", borderRadius: "12px", fontSize: "12px" }}>
                 <div style={{ fontWeight: 800, color: "#FFF" }}>{getPlanConfig(planKey).name}</div>
                 <div style={{ color: "#22C55E", fontSize: "16px", fontWeight: 900, margin: "2px 0" }}>{info.count} active</div>
                 <div style={{ color: "#94A3B8" }}>₹{info.revenue} total</div>

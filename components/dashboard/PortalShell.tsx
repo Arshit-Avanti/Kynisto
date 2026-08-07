@@ -146,6 +146,17 @@ export function PortalShell({
     return () => { mounted = false; window.clearInterval(timer); };
   }, [active]);
 
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   function toggleTheme() {
     setDark((current) => {
       window.localStorage.setItem("kynisto_theme", current ? "light" : "dark");
@@ -165,7 +176,7 @@ export function PortalShell({
 
   return (
     <div className={`portal portalShell ${dark ? "dark-theme" : "light-theme"}`} style={{ background: dark ? "linear-gradient(135deg, #020617 0%, #0f172a 100%)" : "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)" }}>
-      <aside className={`portalSidebar ${open ? "isOpen" : ""}`} style={{ overflowY: "auto", background: dark ? "rgba(15, 23, 42, 0.6)" : "rgba(255, 255, 255, 0.6)", backdropFilter: "blur(20px)", borderRight: dark ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid rgba(0, 0, 0, 0.05)", boxShadow: "0 0 30px rgba(0,0,0,0.1)" }}>
+      <aside className={`portalSidebar ${open ? "isOpen" : ""}`} style={{ overflowY: "auto", background: dark ? "rgba(15, 23, 42, 0.88)" : "rgba(255, 255, 255, 0.95)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderRight: dark ? "1px solid rgba(0, 240, 255, 0.15)" : "1px solid #e2e8f0", boxShadow: "0 0 30px rgba(0,0,0,0.15)" }}>
         <Link className="portalBrand" href="/" style={{ filter: dark ? "drop-shadow(0 0 10px rgba(255,255,255,0.2))" : "none" }}><KynistoLogo /></Link>
         <div className="portalRole" style={{ background: dark ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.03)", borderRadius: "12px", margin: "0 1rem" }}><small style={{ color: dark ? "#94a3b8" : "#64748b" }}>Workspace</small><strong style={{ color: dark ? "#e2e8f0" : "#0f172a", textShadow: dark ? "0 0 10px rgba(255,255,255,0.2)" : "none" }}>{activeWorkspaceRole === "admin" ? (user.isSuperAdmin ? "Super Administration" : "Administration") : activeWorkspaceRole === "store_owner" ? `${user.role === "admin" ? "Admin · " : ""}Shop owner` : `${user.role === "admin" ? "Admin · " : ""}Customer account`}</strong></div>
         <nav style={{ padding: "0 1rem" }}>
@@ -189,9 +200,9 @@ export function PortalShell({
           <button type="button" onClick={logout} style={{ color: dark ? "#fca5a5" : "#ef4444" }}><span className="mr-2"><LogOut size={18} /></span> Log out</button>
         </div>
       </aside>
-      {open && <button className="portalBackdrop" type="button" aria-label="Close navigation" onClick={() => setOpen(false)} style={{ backdropFilter: "blur(4px)" }} />}
+      {open && <button className="portalBackdrop" type="button" aria-label="Close navigation" onClick={() => setOpen(false)} style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }} />}
       <section className="portalMain">
-        <header className="portalHeader" style={{ background: dark ? "rgba(15, 23, 42, 0.6)" : "rgba(255, 255, 255, 0.6)", backdropFilter: "blur(20px)", borderBottom: dark ? "1px solid rgba(255, 255, 255, 0.05)" : "1px solid rgba(0, 0, 0, 0.05)", boxShadow: "0 4px 30px rgba(0,0,0,0.05)" }}>
+        <header className="portalHeader" style={{ background: dark ? "rgba(15, 23, 42, 0.85)" : "rgba(255, 255, 255, 0.92)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: dark ? "1px solid rgba(0, 240, 255, 0.18)" : "1px solid rgba(226, 232, 240, 0.9)", boxShadow: dark ? "0 4px 20px rgba(0,0,0,0.3), inset 0 -1px 0 rgba(255,255,255,0.08)" : "0 4px 20px rgba(0,0,0,0.04), inset 0 -1px 0 rgba(0,0,0,0.05)" }}>
           <button className="mobileMenu" type="button" aria-label="Open navigation" onClick={() => setOpen(true)} style={{ color: dark ? "#f8fafc" : "#0f172a" }}><Menu size={24} /></button>
           <div><small style={{ color: dark ? "#94a3b8" : "#64748b" }}>Your Locality · Kynisto</small><strong style={{ color: dark ? "#f8fafc" : "#0f172a" }}>{nav.find((item) => item.tab === active)?.label ?? "Dashboard"}</strong></div>
           <div className="portalHeaderActions">

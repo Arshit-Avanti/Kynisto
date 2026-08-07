@@ -47,7 +47,7 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
   if (!plans.length) return null;
 
   return (
-    <section className="portalCard" style={{ marginTop: "24px", background: "rgba(255, 87, 34, 0.04)", border: "1px solid rgba(255, 87, 34, 0.25)", borderRadius: "16px", padding: "24px" }}>
+    <section className="portalCard" style={{ marginTop: "24px", background: "linear-gradient(135deg, rgba(15,23,42,0.92) 0%, rgba(30,41,59,0.95) 100%)", border: "1px solid rgba(255, 87, 34, 0.4)", borderRadius: "16px", padding: "24px", boxShadow: "0 10px 30px rgba(0,0,0,0.3)" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
         <div>
           <h3 style={{ fontSize: "20px", fontWeight: 800, color: "#FFFFFF", display: "flex", alignItems: "center", gap: "8px" }}>

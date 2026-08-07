@@ -12,7 +12,7 @@ interface Navbar3DProps {
   locationLabel?: string;
   onUseLocation?: () => void;
   onOpenCustomize?: () => void;
-  mode?: "default" | "services";
+  mode?: "default" | "services" | "pricing";
 }
 
 export function Navbar3D({
@@ -171,6 +171,8 @@ export function Navbar3D({
   }, [isMobile]);
 
   const isServicesMode = mode === "services";
+  const isPricingMode = mode === "pricing";
+  const isRestrictedMode = isServicesMode || isPricingMode;
 
   const handleFavoritesClick = useCallback(() => {
     if (userRole !== "customer" && userRole !== "admin") {
@@ -197,21 +199,23 @@ export function Navbar3D({
     return (
       <nav aria-label="Main Navigation" style={{ display: "flex", alignItems: "center", gap: "24px", fontSize: "14px", fontWeight: 700, color: "var(--text-primary)" }}>
         <Link href="/" style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s" }}>Homepage</Link>
-        {!isServicesMode && <Link href="/products" style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s" }}>Products</Link>}
-        {!isServicesMode && <Link href="/healthcare" style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s" }}>Healthcare</Link>}
-        {!isServicesMode && <Link href="/services" style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s" }}>Services</Link>}
-        {!isServicesMode && <Link href="/pricing" style={{ color: "#FF7A00", WebkitTextFillColor: "#FF7A00", textDecoration: "none", transition: "all 0.15s", fontWeight: 700 }}>Pricing &amp; Plans</Link>}
+        {!isRestrictedMode && <Link href="/products" style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s" }}>Products</Link>}
+        {!isRestrictedMode && <Link href="/healthcare" style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s" }}>Healthcare</Link>}
+        {!isRestrictedMode && <Link href="/services" style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s" }}>Services</Link>}
+        {!isRestrictedMode && <Link href="/pricing" style={{ color: "#FF7A00", WebkitTextFillColor: "#FF7A00", textDecoration: "none", transition: "all 0.15s", fontWeight: 700 }}>Pricing &amp; Plans</Link>}
         
-        <button
-          type="button"
-          onClick={handleFavoritesClick}
-          style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 700, padding: 0 }}
-        >
-          <span aria-hidden="true" style={{ color: "#FF5722", marginRight: "4px" }}>♥</span>
-          Saved <b style={{ background: "rgba(255, 87, 34, 0.25)", color: "#FF8A00", WebkitTextFillColor: "#FF8A00", border: "1px solid rgba(255, 138, 0, 0.4)", padding: "2px 8px", borderRadius: "10px", fontSize: "12px", marginLeft: "4px" }}>{savedCount}</b>
-        </button>
+        {(!isPricingMode) && (
+          <button
+            type="button"
+            onClick={handleFavoritesClick}
+            style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 700, padding: 0 }}
+          >
+            <span aria-hidden="true" style={{ color: "#FF5722", marginRight: "4px" }}>♥</span>
+            Saved <b style={{ background: "rgba(255, 87, 34, 0.25)", color: "#FF8A00", WebkitTextFillColor: "#FF8A00", border: "1px solid rgba(255, 138, 0, 0.4)", padding: "2px 8px", borderRadius: "10px", fontSize: "12px", marginLeft: "4px" }}>{savedCount}</b>
+          </button>
+        )}
 
-        {!isServicesMode && onOpenCustomize && (
+        {!isRestrictedMode && onOpenCustomize && (
           <button type="button" onClick={onOpenCustomize} style={{ color: "var(--text-primary)", WebkitTextFillColor: "var(--text-primary)", textDecoration: "none", transition: "all 0.15s", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 700, padding: 0 }}>
             <span aria-hidden="true" style={{ marginRight: "4px" }}>≡</span>
             Customize
@@ -220,7 +224,7 @@ export function Navbar3D({
         <ThemeSwitcher size="sm" />
       </nav>
     );
-  }, [isMobile, isServicesMode, savedCount, onOpenCustomize, handleFavoritesClick]);
+  }, [isMobile, isRestrictedMode, isPricingMode, savedCount, onOpenCustomize, handleFavoritesClick]);
 
   return (
     <header
@@ -241,7 +245,7 @@ export function Navbar3D({
         <Link href="/" aria-label="Kynisto Home" style={{ textDecoration: "none", display: "flex" }}>
           <KynistoLogo showTagline={false} />
         </Link>
-        {!isServicesMode && onUseLocation && (
+        {!isRestrictedMode && onUseLocation && (
           <button
             type="button"
             aria-label="Use current location"

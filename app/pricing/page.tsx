@@ -33,9 +33,7 @@ export default function PricingPage() {
       <Navbar3D
         userRole={currentUserRole}
         savedCount={0}
-        locationLabel="Your Locality"
-        onUseLocation={() => {}}
-        onOpenCustomize={() => {}}
+        mode="pricing"
       />
 
       <div style={{ paddingTop: "100px" }}>
