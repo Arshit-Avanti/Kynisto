@@ -7,6 +7,7 @@ import { VideoBackground } from "@/components/media/VideoBackground";
 import { ShaderCanvas } from "@/components/ui/ShaderCanvas";
 import { apiFetch } from "@/lib/client-api";
 import { getSupabaseBrowserClient, syncSupabaseAccessCookie } from "@/lib/supabase-browser";
+import { WelcomeRewardModal } from "@/components/subscription/WelcomeRewardModal";
 
 type Category = {
   name: string;
@@ -1414,6 +1415,7 @@ export default function Home() {
 
   return (
     <main className={`site theme-${accent} density-${density} mode-${themeMode}`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
+      <WelcomeRewardModal userRole={userRole} />
       <VideoBackground />
       <ShaderCanvas />
       <header className={`topbar ${isScrolled ? "topbarScrolled" : ""}`}>

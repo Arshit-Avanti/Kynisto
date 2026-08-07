@@ -536,4 +536,88 @@ export async function getOwnerActivePlan(ownerId: string): Promise<PlanConfig> {
   return SHOP_OWNER_PLANS.free;
 }
 
+export async function grantWelcomeSubscriptionReward(
+  userId: string,
+  userRole: "admin" | "store_owner" | "customer"
+): Promise<{
+  granted: boolean;
+  isNewlyGranted: boolean;
+  planId: string;
+  planName: string;
+  worth: number;
+  expiresAt: number;
+}> {
+  const db = getD1();
+  const now = Math.floor(Date.now() / 1000);
+  const thirtyDaysInSeconds = 30 * 86400; // 1 month
+  const expiresAt = now + thirtyDaysInSeconds;
+
+  await ensureSubscriptionTables();
+
+  const isOwner = userRole === "store_owner";
+  const planId = isOwner ? "pro" : "premium";
+  const planName = isOwner ? "Pro" : "Premium";
+  const worth = isOwner ? 499 : 49;
+
+  try {
+    // Check existing active or past subscriptions
+    const existing = await db
+      .prepare(
+        `SELECT id, plan_id AS planId, expires_at AS expiresAt FROM subscriptions WHERE user_id = ? ORDER BY expires_at DESC LIMIT 1`
+      )
+      .bind(userId)
+      .first<{ id: string; planId: string; expiresAt: number }>();
+
+    if (!existing) {
+      const subId = `sub_welcome_${userId}`;
+      const receiptNo = `RCP-WELCOME-${Math.floor(100000 + Math.random() * 900000)}`;
+
+      await db
+        .prepare(
+          `INSERT OR IGNORE INTO subscriptions (id, user_id, user_role, plan_id, billing_cycle, amount, status, auto_renew, starts_at, expires_at, payment_method, receipt_number, created_at, updated_at)
+           VALUES (?, ?, ?, ?, 'monthly', ?, 'active', 0, ?, ?, 'welcome_reward', ?, ?, ?)`
+        )
+        .bind(subId, userId, userRole, planId, worth, now, expiresAt, receiptNo, now, now)
+        .run();
+
+      const table = isOwner ? "owner_subscriptions" : "customer_subscriptions";
+      await db
+        .prepare(
+          `INSERT OR IGNORE INTO ${table} (id, user_id, role, plan, price, billing_cycle, status, start_date, expiry_date, trial, auto_renew, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, 'monthly', 'active', ?, ?, 1, 0, ?, ?)`
+        )
+        .bind(subId, userId, userRole, planId, worth, now, expiresAt, now, now)
+        .run();
+
+      return {
+        granted: true,
+        isNewlyGranted: true,
+        planId,
+        planName,
+        worth,
+        expiresAt,
+      };
+    }
+
+    return {
+      granted: true,
+      isNewlyGranted: false,
+      planId: existing.planId,
+      planName: existing.planId === "pro" ? "Pro" : existing.planId === "premium" ? "Premium" : existing.planId,
+      worth: existing.planId === "pro" ? 499 : existing.planId === "premium" ? 49 : 0,
+      expiresAt: existing.expiresAt,
+    };
+  } catch (err) {
+    console.error("Error granting welcome reward:", err);
+    return {
+      granted: false,
+      isNewlyGranted: false,
+      planId,
+      planName,
+      worth,
+      expiresAt,
+    };
+  }
+}
+
 

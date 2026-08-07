@@ -7,6 +7,7 @@ import { apiFetch } from "@/lib/client-api";
 import type { SessionUser } from "@/lib/auth";
 import { ChatCenter } from "@/components/dashboard/ChatCenter";
 import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscriptionDashboard";
+import { WelcomeRewardModal } from "@/components/subscription/WelcomeRewardModal";
 import KynistoWalletView from "@/components/wallet/KynistoWalletView";
 import { Heart, MessageSquare, ShoppingCart, MapPin, Package, Calendar, Ticket, CheckCircle2, ArrowRight, Store, Star, Wallet } from "lucide-react";
 
@@ -132,6 +133,7 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
   const items = (data.items as Item[] | undefined) ?? [];
 
   return <>
+    <WelcomeRewardModal userRole={user.role} userId={user.id} />
     <div className="portalTitleRow">
       <div>
         <span className="portalEyebrow">MY ACCOUNT</span>

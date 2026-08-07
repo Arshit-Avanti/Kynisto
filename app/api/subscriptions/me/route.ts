@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { getD1 } from "@/db/runtime";
-import { ensureSubscriptionTables, getPlanConfig } from "@/lib/subscriptions";
+import { ensureSubscriptionTables, getPlanConfig, grantWelcomeSubscriptionReward } from "@/lib/subscriptions";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +12,8 @@ export async function GET() {
   }
 
   await ensureSubscriptionTables();
+  const welcomeReward = await grantWelcomeSubscriptionReward(session.user.id, session.user.role);
+
   const db = getD1();
   const now = Math.floor(Date.now() / 1000);
 
@@ -44,8 +46,7 @@ export async function GET() {
       createdAt: number;
     }>();
 
-  // If no active subscription exists, assign default free plan (free for customer, starter for shop_owner)
-  const defaultPlanId = session.user.role === "store_owner" ? "starter" : "free";
+  const defaultPlanId = session.user.role === "store_owner" ? "pro" : "premium";
   const planId = sub && sub.expiresAt > now ? sub.planId : defaultPlanId;
   const activePlan = getPlanConfig(planId);
 
