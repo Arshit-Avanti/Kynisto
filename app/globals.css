@@ -52,22 +52,31 @@
 }
 
 /* Light mode: ensure readable dark text on content elements only.
-   Exclude elements with explicit background colors (badges, status, buttons) */
-.mode-light h1:not([class*="text-"]),
-.mode-light h2:not([class*="text-"]),
-.mode-light h3:not([class*="text-"]),
-.mode-light h4:not([class*="text-"]),
-.mode-light p:not([class*="text-"]),
-.mode-light label:not([class*="text-"]),
-.light-theme h1:not([class*="text-"]),
-.light-theme h2:not([class*="text-"]),
-.light-theme h3:not([class*="text-"]),
-.light-theme h4:not([class*="text-"]),
-.light-theme p:not([class*="text-"]),
-.light-theme label:not([class*="text-"]) {
+   Exclude elements with explicit background colors (badges, status, buttons) and forced white text elements */
+.mode-light h1:not([class*="text-"]):not(.services-hero-title):not(.force-white-text),
+.mode-light h2:not([class*="text-"]):not(.force-white-text),
+.mode-light h3:not([class*="text-"]):not(.force-white-text),
+.mode-light h4:not([class*="text-"]):not(.force-white-text),
+.mode-light p:not([class*="text-"]):not(.services-hero-subtitle):not(.force-white-text),
+.mode-light label:not([class*="text-"]):not(.force-white-text),
+.light-theme h1:not([class*="text-"]):not(.services-hero-title):not(.force-white-text),
+.light-theme h2:not([class*="text-"]):not(.force-white-text),
+.light-theme h3:not([class*="text-"]):not(.force-white-text),
+.light-theme h4:not([class*="text-"]):not(.force-white-text),
+.light-theme p:not([class*="text-"]):not(.services-hero-subtitle):not(.force-white-text),
+.light-theme label:not([class*="text-"]):not(.force-white-text) {
   color: #0f172a;
   -webkit-text-fill-color: #0f172a;
   text-shadow: none;
+}
+
+/* Explicit reset for forced white text elements on dark media backdrops */
+.force-white-text,
+.services-hero-title,
+.services-hero-subtitle,
+.services-page-shell h1,
+.services-page-shell h2 {
+  -webkit-text-fill-color: initial !important;
 }
 
 /* Dark mode: ensure readable white text on content elements only */

@@ -145,14 +145,17 @@ export function HomeServicesDiscovery() {
 
       {/* Hero Header */}
       <section className="services-hero">
-        <div className="services-hero-card" style={{ background: "rgba(10, 15, 30, 0.78)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.15)", borderRadius: "28px", padding: "40px 24px 32px 24px", marginBottom: "28px", boxShadow: "0 20px 50px rgba(0,0,0,0.6)" }}>
-          <h1 className="services-hero-title" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF", textShadow: "0 2px 14px rgba(0,0,0,0.9)", margin: "0 0 14px 0", fontSize: "clamp(2.2rem, 5.5vw, 3.8rem)", fontWeight: 900 }}>
-            Book Trusted Local Professionals in Minutes.
-          </h1>
-          <p className="services-hero-subtitle" style={{ color: "#F1F5F9", WebkitTextFillColor: "#F1F5F9", textShadow: "0 2px 8px rgba(0,0,0,0.8)", margin: "0 auto", fontSize: "1.1rem", fontWeight: 600, maxWidth: "700px" }}>
-            Verified plumbers, electricians, technicians &amp; home experts near {locationLabel}. 100% upfront pricing &amp; 30–60 min arrival guarantee.
-          </p>
+        <div className="services-hero-kicker" style={{ background: "rgba(255, 138, 0, 0.2)", color: "#FF8A00", WebkitTextFillColor: "#FF8A00", border: "1px solid rgba(255, 138, 0, 0.45)", borderRadius: "9999px", padding: "6px 20px", fontSize: "12px", fontWeight: 800, letterSpacing: "0.08em", display: "inline-block", marginBottom: "18px", textTransform: "uppercase" }}>
+          ⚡ services are faster with kynisto
         </div>
+
+        <h1 className="services-hero-title force-white-text" style={{ color: "#FFFFFF !important", WebkitTextFillColor: "#FFFFFF !important", textShadow: "0 2px 20px rgba(0,0,0,0.95), 0 4px 30px rgba(0,0,0,0.9)", margin: "0 0 16px 0", fontSize: "clamp(2.4rem, 6vw, 4.2rem)", fontWeight: 900, letterSpacing: "-0.03em" }}>
+          Book Trusted Local Professionals in Minutes.
+        </h1>
+
+        <p className="services-hero-subtitle force-white-text" style={{ color: "#F8FAFC !important", WebkitTextFillColor: "#F8FAFC !important", textShadow: "0 2px 14px rgba(0,0,0,0.95), 0 2px 20px rgba(0,0,0,0.85)", margin: "0 auto 32px auto", fontSize: "1.15rem", fontWeight: 600, maxWidth: "750px", lineHeight: 1.6 }}>
+          Verified plumbers, electricians, technicians &amp; home experts near {locationLabel}. 100% upfront pricing &amp; 30–60 min arrival guarantee.
+        </p>
 
         {/* Search Bar */}
         <div className="services-search-wrapper">
