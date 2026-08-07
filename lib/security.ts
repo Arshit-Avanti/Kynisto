@@ -80,8 +80,52 @@ export async function enforceRateLimit(
   }
 }
 
+export class PaymentRequiredError extends HttpError {
+  requiredFeature: string;
+  featureName: string;
+  availablePlans: any[];
+
+  constructor(
+    requiredFeature: string,
+    featureName: string,
+    availablePlans: any[],
+    message = "Payment required to access this feature."
+  ) {
+    super(402, message, "PAYMENT_REQUIRED");
+    this.name = "PaymentRequiredError";
+    this.requiredFeature = requiredFeature;
+    this.featureName = featureName;
+    this.availablePlans = availablePlans;
+  }
+}
+
 export function apiError(error: unknown): Response {
+  if (error instanceof PaymentRequiredError) {
+    return Response.json(
+      {
+        error: "Payment Required",
+        code: error.code,
+        message: error.message,
+        requiredFeature: error.requiredFeature,
+        featureKey: error.requiredFeature,
+        featureName: error.featureName,
+        availablePlans: error.availablePlans,
+        plans: error.availablePlans,
+      },
+      { status: 402, headers: { "Cache-Control": "no-store" } }
+    );
+  }
   if (error instanceof HttpError) {
+    if (error.status === 402) {
+      return Response.json(
+        {
+          error: "Payment Required",
+          code: error.code,
+          message: error.message,
+        },
+        { status: 402, headers: { "Cache-Control": "no-store" } }
+      );
+    }
     return Response.json(
       { error: { code: error.code, message: error.message } },
       { status: error.status, headers: { "Cache-Control": "no-store" } },

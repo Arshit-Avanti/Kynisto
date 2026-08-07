@@ -17,6 +17,7 @@ import { OwnerMembershipEditor } from "@/components/dashboard/OwnerMembershipEdi
 
 import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscriptionDashboard";
 import { FeatureGateNotice } from "@/components/subscription/FeatureGateNotice";
+import { SubscriptionGate } from "@/components/subscription/SubscriptionGate";
 import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
 
 import { Eye, Star, Navigation, Phone, MessageCircle, BarChart2, CheckCircle2 } from "lucide-react";
@@ -88,24 +89,29 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
   if (tab === "chat") return <ChatCenter user={user} />;
   if (tab === "subscription") return <UserSubscriptionDashboard />;
   if (tab === "healthcare") {
-    if (subPlan.id === "free" || !subPlan.allowQueueManagement) {
-      return (
-        <FeatureGateNotice
-          featureName="Live Real-Time Queue Management"
-          requiredPlan="STARTER or PRO"
-          priceTag="From ₹299/month"
-          description="Free accounts are limited to basic storefront visibility. Upgrade to STARTER or PRO to enable digital tokens, real-time wait estimation, audio alerts, and QR code queue entry!"
-          benefits={[
-            "Unlimited Daily Queue Tokens",
-            "Real-Time Estimated Wait Time Ring",
-            "Audio Chime Notifications on Token Updates",
-            "QR Code Entry for Walk-in Customers",
-            "Business Dashboard & Reports",
-          ]}
-        />
-      );
-    }
-    if (selected) return <OwnerHealthcarePanel storeId={String(selected.id)} />;
+    return (
+      <SubscriptionGate
+        plan={subPlan}
+        feature="allowQueueManagement"
+        featureName="Live Real-Time Queue Management"
+        includedPlans={["STARTER", "PRO", "ENTERPRISE"]}
+        priceTag="From ₹299/month"
+        description="Free accounts are limited to basic storefront visibility. Upgrade to STARTER or PRO to enable digital tokens, real-time wait estimation, audio alerts, and QR code queue entry!"
+        benefits={[
+          "Unlimited Daily Queue Tokens",
+          "Real-Time Estimated Wait Time Ring",
+          "Audio Chime Notifications on Token Updates",
+          "QR Code Entry for Walk-in Customers",
+          "Business Dashboard & Reports",
+        ]}
+      >
+        {selected ? (
+          <OwnerHealthcarePanel storeId={String(selected.id)} />
+        ) : (
+          <p className="profileEmpty">No store selected.</p>
+        )}
+      </SubscriptionGate>
+    );
   }
   const title = tab === "overview" ? "Business overview" : tab === "subscription" ? "Premium & Plans" : tab.charAt(0).toUpperCase()+tab.slice(1);
   return (
@@ -173,11 +179,101 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
             </div>
           )}
           {tab === "media" && selected && <MediaPanel store={selected} items={media} onChanged={async () => { const result = await apiFetch<{ items: Item[] }>(`/api/media?storeId=${selected.id}`); setMedia(result.items); setToast("Media updated"); }} onError={setError} />}
-          {["products", "services", "offers"].includes(tab) && selected && <CatalogPanel resource={tab as "products" | "services" | "offers"} storeId={String(selected.id)} items={catalog} mutate={mutate} onChanged={async (message) => { const result = await apiFetch<{ items: Item[] }>(`/api/owner/catalog?resource=${tab}&storeId=${selected.id}`); setCatalog(result.items); setToast(message); }} onError={setError} />}
-          {tab === "memberships" && selected && <OwnerMembershipEditor storeId={String(selected.id)} />}
+          {["products", "services"].includes(tab) && selected && <CatalogPanel resource={tab as "products" | "services"} storeId={String(selected.id)} items={catalog} mutate={mutate} onChanged={async (message) => { const result = await apiFetch<{ items: Item[] }>(`/api/owner/catalog?resource=${tab}&storeId=${selected.id}`); setCatalog(result.items); setToast(message); }} onError={setError} />}
+          {tab === "offers" && selected && (
+            <SubscriptionGate
+              plan={subPlan}
+              feature="allowPromotions"
+              featureName="Store Offers & Promotional Broadcasts"
+              includedPlans={["PRO", "ENTERPRISE"]}
+              priceTag="From ₹499/month"
+              description="This feature isn't included in your current subscription. Upgrade your plan to unlock promotional broadcasts, deal banners, and featured store placement."
+              benefits={[
+                "Broadcast Promotions to Nearby Customers",
+                "Create Special Promotional Deals",
+                "Featured Store Banner Placement",
+                "High-Visibility Search Boosting",
+              ]}
+            >
+              <CatalogPanel resource="offers" storeId={String(selected.id)} items={catalog} mutate={mutate} onChanged={async (message) => { const result = await apiFetch<{ items: Item[] }>(`/api/owner/catalog?resource=offers&storeId=${selected.id}`); setCatalog(result.items); setToast(message); }} onError={setError} />
+            </SubscriptionGate>
+          )}
+          {tab === "memberships" && selected && (
+            <SubscriptionGate
+              plan={subPlan}
+              feature="allowCustomBranding"
+              featureName="Membership & Customer Loyalty Plans"
+              includedPlans={["PRO", "ENTERPRISE"]}
+              priceTag="From ₹499/month"
+              description="This feature isn't included in your current subscription. Upgrade your plan to unlock store membership passes, customer loyalty cards, and recurring benefits."
+              benefits={[
+                "Create Custom Store VIP Memberships",
+                "Issue Digital Customer Loyalty Passes",
+                "Reward Tier Management",
+                "Recurring Customer Analytics & Pass Tracking",
+              ]}
+            >
+              <OwnerMembershipEditor storeId={String(selected.id)} />
+            </SubscriptionGate>
+          )}
           {tab === "reviews" && selected && <ReviewsPanel items={storeReviews} storeId={String(selected.id)} mutate={mutate} pagination={reviewPagination} onPageChange={setReviewPage} />}
-          {tab === "analytics" && <OwnerAnalytics items={analytics} />}
-          {isOwnerWorkspaceView(tab) && selected && <OwnerWorkspacePanel key={tab + "-" + String(selected.id)} view={tab} storeId={String(selected.id)} onToast={setToast} onError={setError} />}
+          {tab === "analytics" && (
+            <SubscriptionGate
+              plan={subPlan}
+              feature="allowAnalytics"
+              featureName="Advanced Store Analytics & Footfall Insights"
+              includedPlans={["STARTER", "PRO", "ENTERPRISE"]}
+              priceTag="From ₹299/month"
+              description="This feature isn't included in your current subscription. Upgrade your plan to unlock footfall analytics, customer view heatmaps, and performance trends."
+              benefits={[
+                "30-Day Store Views & Engagement Heatmap",
+                "Direction Tap & Call Conversion Tracking",
+                "Peak Customer Traffic Hours Analysis",
+                "Exportable PDF & CSV Analytics Reports",
+              ]}
+            >
+              <OwnerAnalytics items={analytics} />
+            </SubscriptionGate>
+          )}
+          {isOwnerWorkspaceView(tab) && selected && (
+            tab === "sales" ? (
+              <SubscriptionGate
+                plan={subPlan}
+                feature="allowAnalytics"
+                featureName="Sales Analytics & Revenue Reports"
+                includedPlans={["STARTER", "PRO", "ENTERPRISE"]}
+                priceTag="From ₹299/month"
+                description="This feature isn't included in your current subscription. Upgrade your plan to unlock revenue graphs, order breakdown, and delivered sales metrics."
+                benefits={[
+                  "Delivered Revenue & Order Value Insights",
+                  "Product Sales Ranking",
+                  "Customer Order History Graphs",
+                  "Financial Reporting",
+                ]}
+              >
+                <OwnerWorkspacePanel key={tab + "-" + String(selected.id)} view={tab} storeId={String(selected.id)} onToast={setToast} onError={setError} />
+              </SubscriptionGate>
+            ) : tab === "coupons" ? (
+              <SubscriptionGate
+                plan={subPlan}
+                feature="allowPromotions"
+                featureName="Customer Discount Coupons"
+                includedPlans={["PRO", "ENTERPRISE"]}
+                priceTag="From ₹499/month"
+                description="This feature isn't included in your current subscription. Upgrade your plan to unlock custom store promo codes, discount coupons, and redemption limits."
+                benefits={[
+                  "Create Custom Discount Codes & Coupons",
+                  "Percentage & Fixed Amount Off Rules",
+                  "Minimum Order Value & Usage Limits",
+                  "Real-time Coupon Redemption Tracking",
+                ]}
+              >
+                <OwnerWorkspacePanel key={tab + "-" + String(selected.id)} view={tab} storeId={String(selected.id)} onToast={setToast} onError={setError} />
+              </SubscriptionGate>
+            ) : (
+              <OwnerWorkspacePanel key={tab + "-" + String(selected.id)} view={tab} storeId={String(selected.id)} onToast={setToast} onError={setError} />
+            )
+          )}
         </>
       )}
 

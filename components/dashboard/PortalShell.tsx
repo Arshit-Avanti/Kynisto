@@ -130,8 +130,19 @@ export function PortalShell({
   const [dark, setDark] = useState(false);
   const [open, setOpen] = useState(false);
   const [chatUnread, setChatUnread] = useState(0);
+  const [subPlan, setSubPlan] = useState<Record<string, any>>({ id: "free" });
   const activeWorkspaceRole = workspaceRole ?? user.role;
   const nav = useMemo(() => navByRole[activeWorkspaceRole], [activeWorkspaceRole]);
+
+  useEffect(() => {
+    if (activeWorkspaceRole === "store_owner") {
+      apiFetch<{ plan: Record<string, any> }>("/api/subscriptions/me")
+        .then((result) => {
+          if (result?.plan) setSubPlan(result.plan);
+        })
+        .catch(() => undefined);
+    }
+  }, [activeWorkspaceRole]);
 
   useEffect(() => {
     setDark(window.localStorage.getItem("kynisto_theme") !== "light");
@@ -175,6 +186,27 @@ export function PortalShell({
     }
   }
 
+  function isOwnerTabLocked(tab: string | undefined): boolean {
+    if (!tab) return false;
+    const planId = String(subPlan.id ?? "free").toLowerCase();
+    if (planId === "enterprise" || planId === "admin" || user.role === "admin") return false;
+
+    switch (tab) {
+      case "healthcare":
+        return !subPlan.allowQueueManagement && !["starter", "pro", "enterprise"].includes(planId);
+      case "analytics":
+      case "sales":
+        return !subPlan.allowAnalytics && !["starter", "pro", "enterprise"].includes(planId);
+      case "offers":
+      case "coupons":
+        return !subPlan.allowPromotions && !["pro", "enterprise"].includes(planId);
+      case "memberships":
+        return !subPlan.allowCustomBranding && !["pro", "enterprise"].includes(planId);
+      default:
+        return false;
+    }
+  }
+
   return (
     <div className={`portal portalShell ${dark ? "dark-theme" : "light-theme"}`} style={{ background: dark ? "linear-gradient(135deg, #020617 0%, #0f172a 100%)" : "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)" }}>
       <aside className={`portalSidebar ${open ? "isOpen" : ""}`} style={{ overflowY: "auto", background: dark ? "rgba(15, 23, 42, 0.88)" : "rgba(255, 255, 255, 0.95)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderRight: dark ? "1px solid rgba(0, 240, 255, 0.15)" : "1px solid #e2e8f0", boxShadow: "0 0 30px rgba(0,0,0,0.15)" }}>
@@ -184,9 +216,10 @@ export function PortalShell({
           {nav.map((item) => {
             const Icon = item.icon;
             const isActive = active === item.tab;
+            const isLocked = activeWorkspaceRole === "store_owner" && isOwnerTabLocked(item.tab);
             return (
               <Link key={item.tab} href={`${pathname}?tab=${item.tab}`} className={isActive ? "active" : ""} onClick={() => setOpen(false)} style={isActive ? { background: dark ? "rgba(59, 130, 246, 0.15)" : "rgba(59, 130, 246, 0.1)", color: dark ? "#60a5fa" : "#2563eb", borderRadius: "12px", border: dark ? "1px solid rgba(59, 130, 246, 0.3)" : "1px solid rgba(59, 130, 246, 0.2)", boxShadow: dark ? "0 0 15px rgba(59, 130, 246, 0.2), inset 0 0 10px rgba(59, 130, 246, 0.1)" : "none", textShadow: dark ? "0 0 8px rgba(96, 165, 250, 0.5)" : "none" } : { color: dark ? "#cbd5e1" : "#475569" }}>
-                <span aria-hidden="true" className="mr-2"><Icon size={18} style={{ filter: isActive && dark ? "drop-shadow(0 0 5px rgba(96, 165, 250, 0.8))" : "none" }} /></span>{item.label}{item.badge === "chat" && chatUnread > 0 && <i className="navBadge" style={{ background: "#ef4444", boxShadow: "0 0 10px #ef4444" }}>{chatUnread > 99 ? "99+" : chatUnread}</i>}
+                <span aria-hidden="true" className="mr-2"><Icon size={18} style={{ filter: isActive && dark ? "drop-shadow(0 0 5px rgba(96, 165, 250, 0.8))" : "none" }} /></span><span style={{ flex: 1 }}>{item.label}</span>{isLocked && <span style={{ marginLeft: "auto", fontSize: "14px" }} title="🔒 Premium Feature - Upgrade Required">🔒</span>}{item.badge === "chat" && chatUnread > 0 && <i className="navBadge" style={{ background: "#ef4444", boxShadow: "0 0 10px #ef4444" }}>{chatUnread > 99 ? "99+" : chatUnread}</i>}
               </Link>
             );
           })}

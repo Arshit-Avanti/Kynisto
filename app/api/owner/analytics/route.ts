@@ -1,10 +1,12 @@
 import { getD1 } from "@/db/runtime";
 import { requireApiPermission } from "@/lib/auth";
 import { apiError, noStoreJson } from "@/lib/security";
+import { requireFeaturePermission } from "@/lib/subscriptions";
 
 export async function GET(request: Request) {
   try {
     const session = await requireApiPermission(request, "analytics.view_own");
+    await requireFeaturePermission(session.user.id, "analytics");
     const result = await getD1()
       .prepare(
         `SELECT date(ae.occurred_at, 'unixepoch') AS day, ae.event_type AS eventType, COUNT(*) AS total
