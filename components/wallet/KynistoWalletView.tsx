@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Gift, Wallet, Award, Download, Clock, Store, Crown, Loader2, CheckCircle2, Star, Sparkles, QrCode, ShieldCheck, X, Camera, RefreshCw } from 'lucide-react';
+import { Gift, Wallet, Award, Download, Clock, Store, Crown, Loader2, CheckCircle2, Star, Sparkles, QrCode, ShieldCheck, X, Camera, Upload, RefreshCw } from 'lucide-react';
 import { apiFetch } from '@/lib/client-api';
 
 interface KynistoPointsHistory {
@@ -126,6 +126,7 @@ export default function KynistoWalletView() {
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchWalletData();
@@ -157,7 +158,7 @@ export default function KynistoWalletView() {
     setScanResult(null);
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setScanResult({ error: "Camera access is not supported by your browser." });
+        setScanResult({ error: "Camera access is not supported on this browser. Use photo upload or type store token below." });
         return;
       }
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -170,8 +171,8 @@ export default function KynistoWalletView() {
       }
       setIsCameraActive(true);
     } catch (err: any) {
-      console.warn("Camera permission error", err);
-      setScanResult({ error: "Camera permission denied or camera unavailable. Please grant camera access or enter the store QR token manually." });
+      console.warn("Camera permission notice", err);
+      setScanResult({ error: "Camera permission denied by browser or camera unavailable. Please select/upload a QR photo or enter the store link below." });
       setIsCameraActive(false);
     }
   };
@@ -193,10 +194,37 @@ export default function KynistoWalletView() {
     setScanResult(null);
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setScanResult(null);
+
+    // Read image name or extract path text if available
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      if (text && text.includes("stores/")) {
+        const match = text.match(/\/stores\/[a-zA-Z0-9_-]+/);
+        if (match) {
+          setQrInputToken(match[0]);
+          void handleProcessQrScan(match[0]);
+          return;
+        }
+      }
+      // If photo was taken/uploaded, use current token or prompt verify
+      if (qrInputToken.trim()) {
+        void handleProcessQrScan(qrInputToken.trim());
+      } else {
+        setScanResult({ message: "Photo uploaded! Verify store token or tap verify below." });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleProcessQrScan = async (overrideToken?: string) => {
     const tokenToUse = overrideToken || qrInputToken.trim();
     if (!tokenToUse) {
-      setScanResult({ error: "Please enter or scan a valid Kynisto Store QR Token or URL." });
+      setScanResult({ error: "Please enter or scan a valid Kynisto Store QR Token or Store URL (e.g. /stores/testimonial-2a0958)." });
       return;
     }
 
@@ -473,7 +501,7 @@ export default function KynistoWalletView() {
           </div>
         )}
 
-        {/* Memberships Tab (Fixes Image 4: Renders Pending & Active Purchased Passes) */}
+        {/* Memberships Tab */}
         {activeTab === 'memberships' && (
           <div className="space-y-6 animate-in fade-in duration-500">
             <div className="rounded-3xl bg-white dark:bg-black p-6 border border-gray-200 dark:border-gray-800 shadow-xl space-y-6">
@@ -590,7 +618,7 @@ export default function KynistoWalletView() {
         )}
       </div>
 
-      {/* CUSTOMER INTERACTIVE QR SCANNER MODAL WITH CAMERA WEBRTC */}
+      {/* CUSTOMER INTERACTIVE QR SCANNER MODAL WITH CAMERA WEBRTC & FILE UPLOAD */}
       {showScanModal && (
         <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-slate-900 border-2 border-emerald-500 rounded-3xl p-6 w-full max-w-md text-white shadow-2xl relative animate-in zoom-in-95 duration-200">
@@ -637,18 +665,36 @@ export default function KynistoWalletView() {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={startCamera}
-                  className="w-full py-4 px-4 rounded-2xl border-2 border-dashed border-emerald-500/60 bg-emerald-950/30 hover:bg-emerald-900/40 text-emerald-300 font-extrabold text-sm flex flex-col items-center justify-center gap-2 cursor-pointer transition-all"
-                >
-                  <Camera className="h-7 w-7 text-emerald-400 animate-bounce" />
-                  <span>Open Camera & Allow Access to Scan QR</span>
-                  <span className="text-[11px] font-bold text-gray-400">Prompts for browser camera permission</span>
-                </button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    onClick={startCamera}
+                    className="w-full py-3.5 px-3 rounded-2xl border-2 border-emerald-500/60 bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-300 font-extrabold text-xs flex flex-col items-center justify-center gap-1 cursor-pointer transition-all"
+                  >
+                    <Camera className="h-6 w-6 text-emerald-400" />
+                    <span>Open Camera Scan</span>
+                  </button>
+
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full py-3.5 px-3 rounded-2xl border-2 border-indigo-500/60 bg-indigo-950/40 hover:bg-indigo-900/50 text-indigo-300 font-extrabold text-xs flex flex-col items-center justify-center gap-1 cursor-pointer transition-all"
+                  >
+                    <Upload className="h-6 w-6 text-indigo-400" />
+                    <span>Upload QR Photo</span>
+                  </button>
+                  
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </div>
               )}
 
-              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
-                <div className="text-xs font-bold text-gray-400">Or enter store URL, slug, or QR token:</div>
+              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-center space-y-2">
+                <div className="text-xs font-bold text-gray-400">Point camera or enter store URL, slug, or QR token:</div>
                 <input
                   type="text"
                   value={qrInputToken}

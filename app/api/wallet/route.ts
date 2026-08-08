@@ -9,6 +9,7 @@ export async function GET(request: Request) {
   try {
     const session = await requireApiSession(request);
     const userId = session.user.id;
+    const userEmail = session.user.email ? session.user.email.toLowerCase().trim() : "";
     const db = getDb();
     const d1 = getD1();
 
@@ -78,24 +79,30 @@ export async function GET(request: Request) {
       canRedeemDiscount: (row.points ?? 0) >= 100,
     }));
 
-    // 5. Fetch Real Customer Memberships from customer_store_memberships table
+    // 5. Fetch Real Customer Memberships (matching user_id or customer_email)
     let active: any[] = [];
     let pending: any[] = [];
     let expired: any[] = [];
 
+    const seenMembershipIds = new Set<string>();
+
     try {
+      const nowSec = Math.floor(Date.now() / 1000);
+
+      // Query customer_store_memberships
       const storeMembershipsResult = await d1.prepare(`
         SELECT csm.*, s.name as store_name, smp.benefits
         FROM customer_store_memberships csm
         LEFT JOIN stores s ON s.id = csm.store_id
         LEFT JOIN store_membership_plans smp ON smp.id = csm.plan_id
-        WHERE csm.customer_id = ?
+        WHERE csm.customer_id = ? OR (csm.customer_email IS NOT NULL AND csm.customer_email != '' AND LOWER(csm.customer_email) = ?)
         ORDER BY csm.created_at DESC
-      `).bind(userId).all();
-
-      const nowSec = Math.floor(Date.now() / 1000);
+      `).bind(userId, userEmail).all();
 
       (storeMembershipsResult.results ?? []).forEach((item: any) => {
+        if (!item.id || seenMembershipIds.has(item.id)) return;
+        seenMembershipIds.add(item.id);
+
         const isExpired = (item.expires_at && item.expires_at < nowSec) || item.status === "expired";
         let parsedBenefits = ["Priority Queue Access", "VIP Store Discounts", "Loyalty Rewards"];
         if (item.benefits) {
@@ -128,8 +135,54 @@ export async function GET(request: Request) {
           active.push(formatted);
         }
       });
+
+      // Fallback query for customer_memberships table
+      const legacyMembershipsResult = await d1.prepare(`
+        SELECT cm.*, s.name as store_name, smp.benefits, smp.name as plan_name
+        FROM customer_memberships cm
+        LEFT JOIN stores s ON s.id = cm.store_id
+        LEFT JOIN store_membership_plans smp ON smp.id = cm.plan_id
+        WHERE cm.user_id = ?
+        ORDER BY cm.created_at DESC
+      `).bind(userId).all();
+
+      (legacyMembershipsResult.results ?? []).forEach((item: any) => {
+        if (!item.id || seenMembershipIds.has(item.id)) return;
+        seenMembershipIds.add(item.id);
+
+        const isExpired = (item.expires_at && item.expires_at < nowSec) || item.status === "expired";
+        let parsedBenefits = ["Priority Queue Access", "VIP Store Discounts", "Loyalty Rewards"];
+        if (item.benefits) {
+          try {
+            parsedBenefits = typeof item.benefits === "string" ? JSON.parse(item.benefits) : item.benefits;
+          } catch {
+            // fallback
+          }
+        }
+
+        const formatted = {
+          id: item.id,
+          storeId: item.store_id,
+          storeName: item.store_name ?? "Local Business",
+          type: item.plan_name ?? "VIP Membership Pass",
+          status: item.status || "active",
+          validUntil: item.expires_at ? new Date(item.expires_at * 1000).toISOString().split("T")[0] : "Active VIP Pass",
+          pricePaid: item.price_paid || item.amount_paid,
+          createdAt: item.created_at,
+          benefits: parsedBenefits,
+          invoiceUrl: `/api/memberships/invoice/${item.id}`,
+        };
+
+        if (item.status === "pending_verification") {
+          pending.push(formatted);
+        } else if (isExpired || item.status === "rejected") {
+          expired.push(formatted);
+        } else {
+          active.push(formatted);
+        }
+      });
     } catch (e) {
-      console.warn("Failed to fetch customer_store_memberships", e);
+      console.warn("Failed to fetch customer memberships", e);
     }
 
     return NextResponse.json({

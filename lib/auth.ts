@@ -49,8 +49,10 @@ function cookieOptions(request: Request, maxAge: number = 30 * DAY) {
   };
 }
 
-export function dashboardForRole(_role: UserRole): string {
-  return "/";
+export function dashboardForRole(role: UserRole): string {
+  if (role === "admin") return "/admin";
+  if (role === "owner") return "/owner";
+  return "/account";
 }
 
 export async function createSession(
