@@ -242,10 +242,12 @@ export async function GET(request: Request) {
           storeName: item.store_name ?? "Local Business",
           type: item.plan_name ?? "VIP Membership Pass",
           status: item.status || "pending_verification",
+          rejectionReason: item.rejection_reason || "Cancelled by store owner",
           validUntil: item.expires_at ? new Date(item.expires_at * 1000).toISOString().split("T")[0] : (item.fixed_expiry_date || "Active VIP Pass"),
           pricePaid: item.amount_paid,
           utr: item.utr,
           createdAt: item.created_at,
+          updatedAt: item.updated_at,
           benefits: parsedBenefits,
           rewardScheduleDates: parsedSchedule,
           memberOffers: parsedOffers,
@@ -257,7 +259,7 @@ export async function GET(request: Request) {
 
         if (item.status === "pending_verification") {
           pending.push(formatted);
-        } else if (isExpired || item.status === "rejected") {
+        } else if (isExpired || item.status === "rejected" || item.status === "cancelled_by_owner") {
           expired.push(formatted);
         } else {
           active.push(formatted);

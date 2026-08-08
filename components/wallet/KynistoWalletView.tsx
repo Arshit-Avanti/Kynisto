@@ -599,20 +599,30 @@ export default function KynistoWalletView() {
                           <span>Valid Until: <b className="text-amber-400">{mem.validUntil}</b></span>
                         </div>
 
-                        {/* SCHEDULED REWARD DROP DATES TIMELINE */}
+                        {/* SCHEDULED REWARD DROP DATES & SPECIFIC REWARDS TIMELINE */}
                         {Array.isArray(mem.rewardScheduleDates) && mem.rewardScheduleDates.length > 0 && (
                           <div className="bg-emerald-950/40 border border-emerald-500/30 p-4 rounded-2xl space-y-2">
                             <div className="text-xs font-black text-emerald-300 flex items-center gap-1.5 uppercase tracking-wide">
                               <Clock className="h-4 w-4" /> Reward Schedule & Upcoming Drop Dates
                             </div>
-                            <p className="text-[11px] text-gray-400 font-bold">You will be rewarded automatically on these scheduled dates:</p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                              {mem.rewardScheduleDates.map((dateStr: string, idx: number) => (
-                                <div key={idx} className="bg-slate-900/90 border border-emerald-500/20 px-3 py-2 rounded-xl text-xs font-black text-emerald-200 flex items-center gap-2">
-                                  <Gift className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-                                  <span>{dateStr}</span>
-                                </div>
-                              ))}
+                            <p className="text-[11px] text-gray-400 font-bold">You will be granted specific rewards on these scheduled dates:</p>
+                            <div className="grid grid-cols-1 gap-2 pt-1">
+                              {mem.rewardScheduleDates.map((schedItem: any, idx: number) => {
+                                const schedDate = typeof schedItem === "object" ? schedItem.date : String(schedItem);
+                                const schedReward = typeof schedItem === "object" ? schedItem.reward : "Exclusive VIP Member Perk & Reward";
+                                return (
+                                  <div key={idx} className="bg-slate-900/90 border border-emerald-500/30 p-3 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2 text-xs font-black text-emerald-300">
+                                      <Clock className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                                      <span>📅 {schedDate}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-xs font-extrabold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-lg">
+                                      <Gift className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+                                      <span>🎁 {schedReward}</span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
                         )}
@@ -666,6 +676,34 @@ export default function KynistoWalletView() {
                   </div>
                 )}
               </div>
+
+              {/* CANCELLED / EXPIRED MEMBERSHIPS */}
+              {memberships.expired && memberships.expired.length > 0 && (
+                <div className="space-y-3 border-t border-gray-800 pt-6">
+                  <h3 className="text-sm font-black text-rose-400 flex items-center gap-2 uppercase tracking-wide">
+                    <X className="h-4 w-4" /> Cancelled or Expired Memberships ({memberships.expired.length})
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {memberships.expired.map((mem: any) => (
+                      <div key={mem.id} className="p-5 rounded-2xl bg-rose-950/20 border border-rose-500/40 text-white flex flex-col justify-between space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="font-black text-base text-rose-300">{mem.type}</span>
+                          <span className="bg-rose-500/20 text-rose-400 border border-rose-500/40 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
+                            {mem.status === "cancelled_by_owner" ? "CANCELLED BY OWNER" : "EXPIRED"}
+                          </span>
+                        </div>
+                        <div className="text-xs font-bold text-gray-300">{mem.storeName}</div>
+                        <div className="bg-slate-950/80 p-3 rounded-xl text-xs space-y-1 text-rose-200 border border-rose-500/30">
+                          <div className="font-black flex items-center gap-1.5 text-rose-400">
+                            🛑 {mem.status === "cancelled_by_owner" ? "Membership Cancelled by Store Owner" : "Pass Expired"}
+                          </div>
+                          <div>Reason / Notice: <b>{mem.rejectionReason || "Cancelled or expired"}</b></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -70,18 +70,28 @@ export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
     }
   }
 
-  async function handleApprovePurchase(purchaseId: string, action: "accept" | "reject") {
+  async function handleApprovePurchase(purchaseId: string, action: "accept" | "reject" | "revoke" | "delete") {
     setActionId(purchaseId);
     setError("");
     try {
+      let rejectionReason = "";
+      if (action === "revoke") {
+        rejectionReason = window.prompt("Reason for revoking/cancelling customer membership (will be displayed to customer in wallet):", "Membership cancelled by store owner.") || "Cancelled by store owner";
+      } else if (action === "delete") {
+        if (!window.confirm("Are you sure you want to permanently delete this customer's membership record?")) {
+          setActionId(null);
+          return;
+        }
+      }
+
       const res = await apiFetch<{ success: boolean; message: string }>(`/api/owner/memberships/purchases`, {
         method: "POST",
-        json: { purchaseId, action }
+        json: { purchaseId, action, rejectionReason }
       });
-      setToast(res.message || (action === "accept" ? "Membership accepted & activated!" : "Membership request rejected."));
+      setToast(res.message || "Membership status updated.");
       loadData();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to process membership approval.");
+      setError(e instanceof Error ? e.message : "Failed to process membership request.");
     } finally {
       setActionId(null);
     }
@@ -91,6 +101,7 @@ export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
 
   const pendingPurchases = purchases.filter((p) => p.status === "pending_verification");
   const activePurchases = purchases.filter((p) => p.status === "active");
+  const cancelledPurchases = purchases.filter((p) => p.status === "cancelled_by_owner" || p.status === "rejected");
 
   return (
     <div className="portalGrid">
@@ -181,24 +192,45 @@ export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
             <h2 style={{ color: "#4ADE80", display: "flex", alignItems: "center", gap: "10px", fontSize: "18px" }}>
               <CheckCircle2 size={20} /> Active VIP Store Members ({activePurchases.length})
             </h2>
-            <small style={{ color: "#94A3B8" }}>Customers currently enjoying VIP privileges at your store.</small>
+            <small style={{ color: "#94A3B8" }}>Customers currently enjoying VIP privileges at your store. You can cancel/revoke or delete any member here.</small>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "14px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "14px" }}>
             {activePurchases.map((m) => (
-              <div key={m.id} style={{ background: "rgba(30, 41, 59, 0.6)", border: "1px solid rgba(255, 255, 255, 0.1)", borderRadius: "12px", padding: "14px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                  <span style={{ fontWeight: 800, color: "#FFF", fontSize: "15px" }}>{m.planName}</span>
-                  <span style={{ background: "rgba(16, 185, 129, 0.2)", color: "#4ADE80", border: "1px solid rgba(16, 185, 129, 0.4)", fontSize: "10px", fontWeight: 800, padding: "2px 8px", borderRadius: "6px" }}>
-                    ACTIVE
-                  </span>
+              <div key={m.id} style={{ background: "rgba(30, 41, 59, 0.6)", border: "1px solid rgba(255, 255, 255, 0.1)", borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                    <span style={{ fontWeight: 800, color: "#FFF", fontSize: "15px" }}>{m.planName}</span>
+                    <span style={{ background: "rgba(16, 185, 129, 0.2)", color: "#4ADE80", border: "1px solid rgba(16, 185, 129, 0.4)", fontSize: "10px", fontWeight: 800, padding: "2px 8px", borderRadius: "6px" }}>
+                      ACTIVE
+                    </span>
+                  </div>
+                  <div style={{ fontSize: "13px", color: "#CBD5E1", marginBottom: "6px" }}>
+                    <b>Member:</b> {m.customerName} ({m.customerEmail || "No Email"})
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#94A3B8", display: "flex", flexDirection: "column", gap: "3px", background: "rgba(0,0,0,0.3)", padding: "8px", borderRadius: "6px", marginBottom: "12px" }}>
+                    <div><b>Payment Date & Time:</b> {m.createdAt ? new Date(m.createdAt * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "N/A"}</div>
+                    <div><b>UTR Ref:</b> <code style={{ color: "#818CF8" }}>{m.utr || "Direct Approval"}</code></div>
+                    {m.expiresAt && <div><b>Expires On:</b> <span style={{ color: "#FACC15" }}>{new Date(m.expiresAt * 1000).toLocaleDateString("en-IN")}</span></div>}
+                  </div>
                 </div>
-                <div style={{ fontSize: "13px", color: "#CBD5E1", marginBottom: "6px" }}>
-                  <b>Member:</b> {m.customerName} ({m.customerEmail || "No Email"})
-                </div>
-                <div style={{ fontSize: "11px", color: "#94A3B8", display: "flex", flexDirection: "column", gap: "3px", background: "rgba(0,0,0,0.3)", padding: "8px", borderRadius: "6px" }}>
-                  <div><b>Payment Date & Time:</b> {m.createdAt ? new Date(m.createdAt * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "N/A"}</div>
-                  <div><b>UTR Ref:</b> <code style={{ color: "#818CF8" }}>{m.utr || "Direct Approval"}</code></div>
-                  {m.expiresAt && <div><b>Expires On:</b> <span style={{ color: "#FACC15" }}>{new Date(m.expiresAt * 1000).toLocaleDateString("en-IN")}</span></div>}
+
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button
+                    type="button"
+                    disabled={actionId === m.id}
+                    onClick={() => handleApprovePurchase(m.id, "revoke")}
+                    style={{ flex: 1, background: "rgba(239, 68, 68, 0.2)", color: "#F87171", border: "1px solid rgba(239, 68, 68, 0.4)", padding: "8px", borderRadius: "8px", fontWeight: 800, cursor: "pointer", fontSize: "12px" }}
+                  >
+                    {actionId === m.id ? "Processing..." : "Revoke / Cancel Pass"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={actionId === m.id}
+                    onClick={() => handleApprovePurchase(m.id, "delete")}
+                    style={{ background: "rgba(255, 255, 255, 0.1)", color: "#CBD5E1", border: "1px solid rgba(255, 255, 255, 0.2)", padding: "8px 12px", borderRadius: "8px", fontWeight: 700, cursor: "pointer", fontSize: "12px" }}
+                  >
+                    Delete Record
+                  </button>
                 </div>
               </div>
             ))}
@@ -286,8 +318,27 @@ function MembershipForm({
   const [hasFreeTrial, setHasFreeTrial] = useState<boolean>(Boolean(plan?.hasFreeTrial));
   const [freeTrialDays, setFreeTrialDays] = useState<number>(plan?.freeTrialDays ?? 7);
   const [fixedExpiryDate, setFixedExpiryDate] = useState<string>(plan?.fixedExpiryDate ?? "");
-  const [rewardSchedules, setRewardSchedules] = useState<string[]>(
-    plan?.rewardScheduleDates?.length ? plan.rewardScheduleDates : ["1st of Every Month", "15th Mid-Month Special Perk"]
+  const normalizeSchedules = (raw: any[]) => {
+    if (!Array.isArray(raw) || raw.length === 0) {
+      return [
+        { date: "1st of Every Month", reward: "Free Coffee + 10% Off Coupon" },
+        { date: "15th Mid-Month Perk", reward: "₹100 Store Voucher Drop" }
+      ];
+    }
+    return raw.map((item) => {
+      if (typeof item === "string") {
+        const parts = item.split("=>");
+        return { date: parts[0]?.trim() || item, reward: parts[1]?.trim() || "Exclusive Member Perk & Coupon" };
+      }
+      if (typeof item === "object" && item !== null) {
+        return { date: item.date || item.title || "", reward: item.reward || item.detail || "Exclusive Member Perk" };
+      }
+      return { date: String(item), reward: "Exclusive Member Perk" };
+    });
+  };
+
+  const [rewardSchedules, setRewardSchedules] = useState<any[]>(
+    normalizeSchedules(plan?.rewardScheduleDates)
   );
   const [memberOffers, setMemberOffers] = useState<any[]>(
     plan?.memberOffers?.length ? plan.memberOffers : [
@@ -306,7 +357,7 @@ function MembershipForm({
     setHasFreeTrial(Boolean(plan?.hasFreeTrial));
     setFreeTrialDays(plan?.freeTrialDays ?? 7);
     setFixedExpiryDate(plan?.fixedExpiryDate ?? "");
-    setRewardSchedules(plan?.rewardScheduleDates?.length ? plan.rewardScheduleDates : ["1st of Every Month", "15th Mid-Month Special Perk"]);
+    setRewardSchedules(normalizeSchedules(plan?.rewardScheduleDates));
     setMemberOffers(plan?.memberOffers?.length ? plan.memberOffers : [{ title: "Member VIP Discount", code: "VIP10", detail: "Extra 10% Off on All Orders" }]);
     setIsUpgradeOption(Boolean(plan?.isUpgradeOption));
     setCommissionAcknowledged(false);
@@ -366,7 +417,7 @@ function MembershipForm({
       hasFreeTrial,
       freeTrialDays,
       fixedExpiryDate,
-      rewardScheduleDates: rewardSchedules.filter((s) => s.trim() !== ""),
+      rewardScheduleDates: rewardSchedules.filter((s) => s.date && s.date.trim() !== ""),
       memberOffers: memberOffers.filter((o) => o.title && o.title.trim() !== ""),
       isUpgradeOption,
       commissionAcknowledged
@@ -440,26 +491,34 @@ function MembershipForm({
       
       <label className="full">Description <textarea name="description" defaultValue={plan?.description} required placeholder="Describe exclusive VIP perks for customers..." /></label>
 
-      {/* REWARD SCHEDULE DATES BUILDER */}
+      {/* REWARD SCHEDULE DATES & SPECIFIC REWARDS BUILDER */}
       <div className="full" style={{ background: "rgba(16, 185, 129, 0.08)", border: "1px solid rgba(16, 185, 129, 0.3)", padding: "14px", borderRadius: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
         <h4 style={{ margin: 0, color: "#34D399", display: "flex", alignItems: "center", gap: "6px", fontSize: "14px" }}>
-          <Clock size={16} /> Scheduled Reward Drop Dates (Shown in Customer Wallet)
+          <Clock size={16} /> Scheduled Reward Drop Dates & Specific Rewards Granted
         </h4>
         <p style={{ margin: 0, fontSize: "11px", color: "#CBD5E1" }}>
-          Add recurring or specific calendar dates when members receive their exclusive rewards/perks.
+          Define the exact dates and the specific reward/perk granted to members on each drop date.
         </p>
 
         {rewardSchedules.map((sched, idx) => (
-          <div key={idx} style={{ display: "flex", gap: "6px" }}>
+          <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr auto", gap: "6px", alignItems: "center" }}>
             <input 
-              value={sched} 
+              value={sched.date || ""} 
               onChange={(e) => {
                 const updated = [...rewardSchedules];
-                updated[idx] = e.target.value;
+                updated[idx] = { ...updated[idx], date: e.target.value };
                 setRewardSchedules(updated);
               }}
-              placeholder="e.g. 1st of Every Month / 25th Dec Gift Drop"
-              style={{ flex: 1 }}
+              placeholder="Date / Schedule (e.g. 1st of Every Month)"
+            />
+            <input 
+              value={sched.reward || ""} 
+              onChange={(e) => {
+                const updated = [...rewardSchedules];
+                updated[idx] = { ...updated[idx], reward: e.target.value };
+                setRewardSchedules(updated);
+              }}
+              placeholder="Reward Granted (e.g. Free Coffee + ₹100 Off)"
             />
             <button type="button" className="portalButton secondary" onClick={() => {
               const updated = [...rewardSchedules];
@@ -471,8 +530,8 @@ function MembershipForm({
           </div>
         ))}
 
-        <button type="button" className="portalButton secondary" onClick={() => setRewardSchedules([...rewardSchedules, ""])} style={{ alignSelf: "flex-start", fontSize: "12px" }}>
-          + Add Reward Date
+        <button type="button" className="portalButton secondary" onClick={() => setRewardSchedules([...rewardSchedules, { date: "", reward: "" }])} style={{ alignSelf: "flex-start", fontSize: "12px" }}>
+          + Add Reward Date & Perk
         </button>
       </div>
 

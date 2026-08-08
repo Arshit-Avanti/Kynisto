@@ -188,6 +188,39 @@ export async function POST(req: Request) {
       `).bind(rejectionReason ? String(rejectionReason) : "Verification failed", now, purchaseId).run();
 
       return NextResponse.json({ success: true, status: "rejected", message: "Membership request rejected." });
+    } else if (action === "revoke" || action === "cancel") {
+      const reason = rejectionReason ? String(rejectionReason) : "Cancelled by store owner";
+      await d1.prepare(`
+        UPDATE customer_store_memberships
+        SET status = 'cancelled_by_owner', rejection_reason = ?, updated_at = ?
+        WHERE id = ?
+      `).bind(reason, now, purchaseId).run();
+
+      try {
+        await d1.prepare(`
+          UPDATE customer_memberships
+          SET status = 'cancelled_by_owner', updated_at = ?
+          WHERE id = ?
+        `).bind(now, purchaseId).run();
+      } catch (e) {
+        console.warn("Notice updating legacy memberships:", e);
+      }
+
+      return NextResponse.json({ success: true, status: "cancelled_by_owner", message: "Customer membership cancelled/revoked. User has been informed in their wallet." });
+    } else if (action === "delete") {
+      await d1.prepare(`
+        DELETE FROM customer_store_memberships WHERE id = ?
+      `).bind(purchaseId).run();
+
+      try {
+        await d1.prepare(`
+          DELETE FROM customer_memberships WHERE id = ?
+        `).bind(purchaseId).run();
+      } catch {
+        // ignore
+      }
+
+      return NextResponse.json({ success: true, status: "deleted", message: "Customer membership record permanently deleted." });
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
