@@ -151,27 +151,27 @@ export default async function StoreProfilePage({ params }: RouteProps) {
       `}} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       
-      <header className="glass-section" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 24px", position: "sticky", top: 0, zIndex: 50, borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+      <header className="glass-section" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", position: "sticky", top: 0, zIndex: 50, borderBottom: "1px solid rgba(255,255,255,0.08)", flexWrap: "wrap", gap: "10px" }}>
         <Link href="/" style={{ display: "flex", alignItems: "center" }}><KynistoLogo /></Link>
-        <nav aria-label="Business profile navigation" style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+        <nav aria-label="Business profile navigation" style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
           <BackButton
             fallback="/"
             label="Back"
             className="glass-button"
             style={{
               borderRadius: "8px",
-              fontSize: "13px",
+              fontSize: "12px",
               fontWeight: 600,
-              padding: "8px 12px",
+              padding: "6px 10px",
             }}
           />
-          <Link href="/" style={{ fontSize: "14px", fontWeight: 500, color: "#cbd5e1", textDecoration: "none" }}>Explore</Link>
-          <Link href="/healthcare" style={{ fontSize: "14px", fontWeight: 500, color: "#cbd5e1", textDecoration: "none" }}>Healthcare</Link>
-          <Link href="/dashboard" style={{ fontSize: "14px", fontWeight: 500, color: "#cbd5e1", textDecoration: "none" }}>Dashboard</Link>
+          <Link href="/" style={{ fontSize: "13px", fontWeight: 500, color: "#cbd5e1", textDecoration: "none" }}>Explore</Link>
+          <Link href="/healthcare" style={{ fontSize: "13px", fontWeight: 500, color: "#cbd5e1", textDecoration: "none" }}>Healthcare</Link>
+          <Link href="/dashboard" style={{ fontSize: "13px", fontWeight: 500, color: "#cbd5e1", textDecoration: "none" }}>Dashboard</Link>
         </nav>
       </header>
 
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "24px" }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "16px" }}>
         <section className="glass-section" style={{ borderRadius: "16px", overflow: "hidden", marginBottom: "24px" }}>
           <div style={{ height: "240px", position: "relative", backgroundColor: "#1e293b", backgroundImage: store.bannerUrl ? `url(${store.bannerUrl})` : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #0B0F17 0%, transparent 80%)" }} />
@@ -213,7 +213,23 @@ export default async function StoreProfilePage({ params }: RouteProps) {
           </div>
         </section>
 
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)", gap: "24px", alignItems: "start" }}>
+        <style dangerouslySetInnerHTML={{ __html: `
+          .storefrontResponsiveLayout {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            width: 100%;
+          }
+          @media (min-width: 768px) {
+            .storefrontResponsiveLayout {
+              display: grid;
+              grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+              align-items: start;
+            }
+          }
+        `}} />
+
+        <div className="storefrontResponsiveLayout">
           <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
             <div id="membership-plans">
               <StoreMembershipStorefront storeId={store.id} storeName={store.name} />

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireApiSession } from "@/lib/auth";
 import { getDb } from "@/db";
 import { getD1 } from "@/db/runtime";
-import { kynistoWallets, kynistoPointTransactions, storeLoyaltyPoints, customerMemberships } from "@/db/schema";
+import { kynistoWallets, kynistoPointTransactions, storeLoyaltyPoints } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 
 export async function GET(request: Request) {
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       const now = Math.floor(Date.now() / 1000);
       await db.insert(kynistoWallets).values({
         userId,
-        kynistoPoints: 0, // Starts at 0, points ONLY earned via store QR scans!
+        kynistoPoints: 0,
         updatedAt: now,
       }).onConflictDoNothing();
 
@@ -78,40 +78,59 @@ export async function GET(request: Request) {
       canRedeemDiscount: (row.points ?? 0) >= 100,
     }));
 
-    // 5. Fetch Real Customer Memberships
-    const activeMembershipsRows = await db.query.customerMemberships.findMany({
-      where: eq(customerMemberships.userId, userId),
-      with: {
-        store: true,
-        plan: true,
-      },
-      orderBy: [desc(customerMemberships.createdAt)],
-    });
+    // 5. Fetch Real Customer Memberships from customer_store_memberships table
+    let active: any[] = [];
+    let pending: any[] = [];
+    let expired: any[] = [];
 
-    const nowSec = Math.floor(Date.now() / 1000);
-    const active: any[] = [];
-    const expired: any[] = [];
+    try {
+      const storeMembershipsResult = await d1.prepare(`
+        SELECT csm.*, s.name as store_name, smp.benefits
+        FROM customer_store_memberships csm
+        LEFT JOIN stores s ON s.id = csm.store_id
+        LEFT JOIN store_membership_plans smp ON smp.id = csm.plan_id
+        WHERE csm.customer_id = ?
+        ORDER BY csm.created_at DESC
+      `).bind(userId).all();
 
-    activeMembershipsRows.forEach((item: any) => {
-      const isExpired = item.expiresAt < nowSec || item.status === "expired";
-      const formatted = {
-        id: item.id,
-        storeId: item.storeId,
-        storeName: item.store?.name ?? "Local Business",
-        type: item.plan?.name ?? "Membership Plan",
-        validUntil: new Date((item.expiresAt ?? nowSec) * 1000).toISOString().split("T")[0],
-        isKynistoPremium: item.includesKynistoPremium ?? true,
-        pricePaid: item.pricePaid,
-        benefits: (item.plan?.benefits as string[] | undefined) ?? ["Priority Queue Access", "Exclusive Discounts"],
-        invoiceUrl: `/api/memberships/invoice/${item.id}`,
-      };
+      const nowSec = Math.floor(Date.now() / 1000);
 
-      if (isExpired) {
-        expired.push(formatted);
-      } else {
-        active.push(formatted);
-      }
-    });
+      (storeMembershipsResult.results ?? []).forEach((item: any) => {
+        const isExpired = (item.expires_at && item.expires_at < nowSec) || item.status === "expired";
+        let parsedBenefits = ["Priority Queue Access", "VIP Store Discounts", "Loyalty Rewards"];
+        if (item.benefits) {
+          try {
+            parsedBenefits = typeof item.benefits === "string" ? JSON.parse(item.benefits) : item.benefits;
+          } catch {
+            // fallback
+          }
+        }
+
+        const formatted = {
+          id: item.id,
+          storeId: item.store_id,
+          storeName: item.store_name ?? "Local Business",
+          type: item.plan_name ?? "VIP Membership Pass",
+          status: item.status || "pending_verification",
+          validUntil: item.expires_at ? new Date(item.expires_at * 1000).toISOString().split("T")[0] : "Pending Owner Verification",
+          pricePaid: item.amount_paid,
+          utr: item.utr,
+          createdAt: item.created_at,
+          benefits: parsedBenefits,
+          invoiceUrl: `/api/memberships/invoice/${item.id}`,
+        };
+
+        if (item.status === "pending_verification") {
+          pending.push(formatted);
+        } else if (isExpired || item.status === "rejected") {
+          expired.push(formatted);
+        } else {
+          active.push(formatted);
+        }
+      });
+    } catch (e) {
+      console.warn("Failed to fetch customer_store_memberships", e);
+    }
 
     return NextResponse.json({
       kynistoPoints: {
@@ -124,6 +143,7 @@ export async function GET(request: Request) {
       scanLogs,
       memberships: {
         active,
+        pending,
         expired,
       },
     });

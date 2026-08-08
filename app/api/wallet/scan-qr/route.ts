@@ -62,23 +62,36 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Valid store QR Code token is required" }, { status: 400 });
     }
 
-    const token = qrCodeToken.trim();
+    const rawToken = qrCodeToken.trim();
+    // Extract clean slug or store ID from full URL or path (e.g. /stores/testimonial-2a0958 -> testimonial-2a0958)
+    const cleanedSlugOrId = rawToken
+      .replace(/^(?:https?:\/\/[^\/]+)?\/?(?:stores\/)?/i, "")
+      .replace(/\/.*$/, "")
+      .trim();
+
     const d1 = getD1();
     const now = Math.floor(Date.now() / 1000);
 
-    // 1. Find store loyalty settings by qr_code_token or matching store ID format
+    // 1. Find store loyalty settings by qr_code_token, store ID, or store slug
     let storeSettings = await d1.prepare(`
       SELECT sls.*, s.name as store_name
       FROM store_loyalty_settings sls
       JOIN stores s ON s.id = sls.store_id
-      WHERE sls.qr_code_token = ? OR sls.store_id = ? OR ? = ('KYNISTO_LOYALTY_' || sls.store_id)
-    `).bind(token, token, token).first<any>();
+      WHERE sls.qr_code_token = ? 
+         OR sls.store_id = ? 
+         OR sls.store_id = ?
+         OR s.slug = ? 
+         OR s.slug = ?
+         OR ? = ('KYNISTO_LOYALTY_' || sls.store_id)
+         OR ? = ('KYNISTO_LOYALTY_' || sls.store_id)
+    `).bind(rawToken, rawToken, cleanedSlugOrId, rawToken, cleanedSlugOrId, rawToken, cleanedSlugOrId).first<any>();
 
-    // Fallback: If no custom loyalty settings row exists yet for this store ID, initialize default settings for a valid store
+    // Fallback: If no custom loyalty settings row exists yet for this store ID/slug, initialize default settings for a valid store
     if (!storeSettings) {
       const existingStore = await d1.prepare(`
-        SELECT id, name FROM stores WHERE id = ? OR slug = ? OR ? = ('KYNISTO_LOYALTY_' || id)
-      `).bind(token, token, token).first<any>();
+        SELECT id, name FROM stores 
+        WHERE id = ? OR id = ? OR slug = ? OR slug = ? OR ? = ('KYNISTO_LOYALTY_' || id) OR ? = ('KYNISTO_LOYALTY_' || id)
+      `).bind(rawToken, cleanedSlugOrId, rawToken, cleanedSlugOrId, rawToken, cleanedSlugOrId).first<any>();
 
       if (existingStore) {
         const defaultToken = `KYNISTO_LOYALTY_${existingStore.id}`;

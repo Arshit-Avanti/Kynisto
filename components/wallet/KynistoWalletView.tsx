@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Gift, Wallet, Award, Download, Clock, Store, Crown, Loader2, CheckCircle2, Star, Sparkles, QrCode, ShieldCheck, X, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Gift, Wallet, Award, Download, Clock, Store, Crown, Loader2, CheckCircle2, Star, Sparkles, QrCode, ShieldCheck, X, Camera, RefreshCw } from 'lucide-react';
 import { apiFetch } from '@/lib/client-api';
 
 interface KynistoPointsHistory {
@@ -27,9 +27,10 @@ interface Membership {
   storeId: string;
   storeName: string;
   type: string;
+  status: string;
   validUntil: string;
-  isKynistoPremium: boolean;
   pricePaid?: number;
+  utr?: string;
   benefits?: string[];
   invoiceUrl: string;
 }
@@ -45,6 +46,7 @@ interface WalletData {
   scanLogs?: any[];
   memberships: {
     active: Membership[];
+    pending: Membership[];
     expired: Membership[];
   };
 }
@@ -53,7 +55,7 @@ const defaultWalletData: WalletData = {
   kynistoPoints: { total: 0, maxCap: 1000, progress: 0, history: [] },
   loyaltyPoints: [],
   scanLogs: [],
-  memberships: { active: [], expired: [] },
+  memberships: { active: [], pending: [], expired: [] },
 };
 
 const AnimatedNumber = ({ value }: { value: number }) => {
@@ -115,11 +117,15 @@ export default function KynistoWalletView() {
   const [redeeming, setRedeeming] = useState(false);
   const [redeemResult, setRedeemResult] = useState<{reward?: string; coupon?: string; error?: string} | null>(null);
 
-  // QR Scan Modal State
+  // QR Scan Modal State & Camera WebRTC
   const [showScanModal, setShowScanModal] = useState(false);
   const [qrInputToken, setQrInputToken] = useState("");
   const [scanning, setScanning] = useState(false);
+  const [isCameraActive, setIsCameraActive] = useState(false);
   const [scanResult, setScanResult] = useState<{ success?: boolean; message?: string; error?: string; kynistoPointsEarned?: number; storePointsEarned?: number; storeName?: string } | null>(null);
+  
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     fetchWalletData();
@@ -135,6 +141,7 @@ export default function KynistoWalletView() {
           scanLogs: Array.isArray(data.scanLogs) ? data.scanLogs : [],
           memberships: {
             active: Array.isArray(data.memberships?.active) ? data.memberships.active : [],
+            pending: Array.isArray(data.memberships?.pending) ? data.memberships.pending : [],
             expired: Array.isArray(data.memberships?.expired) ? data.memberships.expired : [],
           },
         });
@@ -146,10 +153,50 @@ export default function KynistoWalletView() {
     }
   };
 
+  const startCamera = async () => {
+    setScanResult(null);
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setScanResult({ error: "Camera access is not supported by your browser." });
+        return;
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" }
+      });
+      mediaStreamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+      setIsCameraActive(true);
+    } catch (err: any) {
+      console.warn("Camera permission error", err);
+      setScanResult({ error: "Camera permission denied or camera unavailable. Please grant camera access or enter the store QR token manually." });
+      setIsCameraActive(false);
+    }
+  };
+
+  const stopCamera = () => {
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraActive(false);
+  };
+
+  const handleCloseModal = () => {
+    stopCamera();
+    setShowScanModal(false);
+    setScanResult(null);
+  };
+
   const handleProcessQrScan = async (overrideToken?: string) => {
     const tokenToUse = overrideToken || qrInputToken.trim();
     if (!tokenToUse) {
-      setScanResult({ error: "Please enter or scan a valid Kynisto Store QR Token." });
+      setScanResult({ error: "Please enter or scan a valid Kynisto Store QR Token or URL." });
       return;
     }
 
@@ -170,6 +217,7 @@ export default function KynistoWalletView() {
           storeName: res.storeName,
         });
         setQrInputToken("");
+        stopCamera();
         await fetchWalletData();
       } else {
         setScanResult({ error: res?.error || 'Scan verification failed' });
@@ -230,6 +278,7 @@ export default function KynistoWalletView() {
   }
 
   const { kynistoPoints, loyaltyPoints, memberships, scanLogs = [] } = walletData;
+  const totalMemberships = (memberships.active?.length || 0) + (memberships.pending?.length || 0);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 relative">
@@ -266,7 +315,7 @@ export default function KynistoWalletView() {
         {[
           { id: 'kynisto', label: 'Kynisto Points', icon: Award },
           { id: 'loyalty', label: 'Store Loyalty', icon: Store },
-          { id: 'memberships', label: 'Memberships', icon: Crown },
+          { id: 'memberships', label: `Memberships (${totalMemberships})`, icon: Crown },
           { id: 'history', label: 'Scan Audit History', icon: Clock },
         ].map((tab) => (
           <button
@@ -424,32 +473,75 @@ export default function KynistoWalletView() {
           </div>
         )}
 
-        {/* Memberships Tab */}
+        {/* Memberships Tab (Fixes Image 4: Renders Pending & Active Purchased Passes) */}
         {activeTab === 'memberships' && (
           <div className="space-y-6 animate-in fade-in duration-500">
-            <div className="rounded-3xl bg-white dark:bg-black p-6 border border-gray-200 dark:border-gray-800 shadow-xl">
-              <h2 className="text-xl font-extrabold text-black dark:text-white mb-2">My Active VIP Store Memberships</h2>
-              {memberships.active.length === 0 ? (
-                <p className="text-sm font-bold text-gray-500 text-center py-8">No active store memberships. Browse storefronts to purchase VIP passes!</p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {memberships.active.map((mem) => (
-                    <div key={mem.id} className="p-5 rounded-2xl bg-gradient-to-br from-indigo-900/40 to-slate-900 border border-indigo-500/30 text-white">
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="font-black text-lg">{mem.type}</span>
-                        <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-black px-2.5 py-1 rounded-full">ACTIVE</span>
+            <div className="rounded-3xl bg-white dark:bg-black p-6 border border-gray-200 dark:border-gray-800 shadow-xl space-y-6">
+              <div>
+                <h2 className="text-xl font-extrabold text-black dark:text-white mb-1">My VIP Store Memberships</h2>
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400">View all your active memberships and pending store pass activation requests.</p>
+              </div>
+
+              {/* PENDING ACTIVATION MEMBERSHIPS */}
+              {memberships.pending && memberships.pending.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-black text-amber-500 flex items-center gap-2 uppercase tracking-wide">
+                    <Clock className="h-4 w-4" /> Pending Store Approvals ({memberships.pending.length})
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {memberships.pending.map((mem) => (
+                      <div key={mem.id} className="p-5 rounded-2xl bg-slate-900 border-2 border-amber-500/50 text-white flex flex-col justify-between space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="font-black text-lg text-amber-300">{mem.type}</span>
+                          <span className="bg-amber-500/20 text-amber-400 border border-amber-500/40 text-[11px] font-black px-2.5 py-1 rounded-full">
+                            PENDING VERIFICATION
+                          </span>
+                        </div>
+                        <div className="text-sm font-bold text-gray-300">{mem.storeName}</div>
+                        <div className="bg-slate-950/70 p-3 rounded-xl text-xs space-y-1 text-gray-400 font-extrabold">
+                          <div>Price: <b className="text-emerald-400">₹{mem.pricePaid}</b></div>
+                          {mem.utr && <div>UTR Ref: <code className="text-indigo-400">{mem.utr}</code></div>}
+                          <div className="text-amber-400 font-bold mt-1">
+                            Don&apos;t panic! The shop owner will verify your payment and activate your membership within 24 hours.
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-sm font-bold text-indigo-200 mb-4">{mem.storeName}</div>
-                      <div className="text-xs font-bold text-gray-400 mb-2">Valid Until: {mem.validUntil}</div>
-                      <ul className="text-xs space-y-1 text-gray-300">
-                        {mem.benefits?.map((b, idx) => (
-                          <li key={idx}>✓ {b}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
+
+              {/* ACTIVE MEMBERSHIPS */}
+              <div>
+                <h3 className="text-sm font-black text-emerald-400 flex items-center gap-2 uppercase tracking-wide mb-3">
+                  <CheckCircle2 className="h-4 w-4" /> Active VIP Store Passes ({memberships.active.length})
+                </h3>
+                {memberships.active.length === 0 && (!memberships.pending || memberships.pending.length === 0) ? (
+                  <p className="text-sm font-bold text-gray-500 text-center py-8">No active store memberships yet. Browse storefronts to purchase VIP passes!</p>
+                ) : memberships.active.length === 0 ? (
+                  <p className="text-xs font-bold text-gray-500 py-2">No verified active passes yet. Your pending request above will be activated by the store owner soon!</p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {memberships.active.map((mem) => (
+                      <div key={mem.id} className="p-5 rounded-2xl bg-gradient-to-br from-indigo-900/40 via-slate-900 to-emerald-950/40 border border-emerald-500/40 text-white flex flex-col justify-between space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="font-black text-lg text-emerald-300">{mem.type}</span>
+                          <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-black px-2.5 py-1 rounded-full">
+                            ACTIVE VIP
+                          </span>
+                        </div>
+                        <div className="text-sm font-bold text-indigo-200">{mem.storeName}</div>
+                        <div className="text-xs font-bold text-gray-400">Valid Until: <b className="text-amber-400">{mem.validUntil}</b></div>
+                        <ul className="text-xs space-y-1 text-gray-300 border-t border-gray-800 pt-2">
+                          {mem.benefits?.map((b, idx) => (
+                            <li key={idx}>✓ {b}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -498,15 +590,15 @@ export default function KynistoWalletView() {
         )}
       </div>
 
-      {/* CUSTOMER INTERACTIVE QR SCANNER MODAL */}
+      {/* CUSTOMER INTERACTIVE QR SCANNER MODAL WITH CAMERA WEBRTC */}
       {showScanModal && (
         <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border-2 border-emerald-500 rounded-3xl p-6 maxWidth-md w-full max-w-md text-white shadow-2xl relative animate-in zoom-in-95 duration-200">
+          <div className="bg-slate-900 border-2 border-emerald-500 rounded-3xl p-6 w-full max-w-md text-white shadow-2xl relative animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-black text-emerald-400 flex items-center gap-2">
                 <QrCode className="h-5 w-5" /> Scan Store Kynisto QR Code
               </h3>
-              <button onClick={() => setShowScanModal(false)} className="text-gray-400 hover:text-white text-xl cursor-pointer">
+              <button onClick={handleCloseModal} className="text-gray-400 hover:text-white text-xl cursor-pointer">
                 <X className="h-6 w-6" />
               </button>
             </div>
@@ -530,13 +622,38 @@ export default function KynistoWalletView() {
             )}
 
             <div className="space-y-4">
+              {/* LIVE CAMERA PREVIEW FEED */}
+              {isCameraActive ? (
+                <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-400 bg-black aspect-video flex items-center justify-center">
+                  <video ref={videoRef} playsInline autoPlay muted className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 border-2 border-dashed border-emerald-400/70 m-8 rounded-xl pointer-events-none flex items-center justify-center">
+                    <span className="text-[10px] font-black text-emerald-300 bg-slate-950/80 px-2 py-1 rounded">Position Store QR Code in Frame</span>
+                  </div>
+                  <button
+                    onClick={stopCamera}
+                    className="absolute top-2 right-2 bg-rose-600/90 text-white p-1.5 rounded-lg text-xs font-bold cursor-pointer"
+                  >
+                    Close Camera
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={startCamera}
+                  className="w-full py-4 px-4 rounded-2xl border-2 border-dashed border-emerald-500/60 bg-emerald-950/30 hover:bg-emerald-900/40 text-emerald-300 font-extrabold text-sm flex flex-col items-center justify-center gap-2 cursor-pointer transition-all"
+                >
+                  <Camera className="h-7 w-7 text-emerald-400 animate-bounce" />
+                  <span>Open Camera & Allow Access to Scan QR</span>
+                  <span className="text-[11px] font-bold text-gray-400">Prompts for browser camera permission</span>
+                </button>
+              )}
+
               <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
-                <div className="text-xs font-bold text-gray-400">Point your camera or enter the store&apos;s unique Kynisto QR Token:</div>
+                <div className="text-xs font-bold text-gray-400">Or enter store URL, slug, or QR token:</div>
                 <input
                   type="text"
                   value={qrInputToken}
                   onChange={(e) => setQrInputToken(e.target.value)}
-                  placeholder="e.g. KYNISTO_LOYALTY_store_id"
+                  placeholder="e.g. /stores/testimonial-2a0958 or token"
                   className="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl font-mono text-center text-sm font-bold focus:border-emerald-500 focus:outline-none"
                 />
               </div>

@@ -1858,16 +1858,26 @@ export default function Home() {
             The infrastructure of efficiency.
           </p>
 
-          <div className="floatingCardsContainer">
-            <Link href="/wallet" className="glassCard3D">
+          <div className="floatingCardsContainer" style={{ position: "relative", zIndex: 10, pointerEvents: "auto" }}>
+            <Link href="/wallet" className="glassCard3D" style={{ cursor: "pointer", pointerEvents: "auto", position: "relative", zIndex: 10 }}>
               <Icons.Star />
               <b>Loyalty Card</b>
             </Link>
-            <Link href="/healthcare" className="glassCard3D">
+            <Link href="/healthcare" className="glassCard3D" style={{ cursor: "pointer", pointerEvents: "auto", position: "relative", zIndex: 10 }}>
               <Icons.Clock />
               <b>Queue Ticket</b>
             </Link>
-            <Link href="/dashboard" className="glassCard3D">
+            <Link
+              href="/dashboard"
+              className="glassCard3D"
+              style={{ cursor: "pointer", pointerEvents: "auto", position: "relative", zIndex: 10 }}
+              onClick={(e) => {
+                // Ensure instant navigation even if event bubbling is intercepted by 3D transform layers
+                if (typeof window !== "undefined") {
+                  window.location.href = "/dashboard";
+                }
+              }}
+            >
               <Icons.Search />
               <b>Dashboard</b>
             </Link>
