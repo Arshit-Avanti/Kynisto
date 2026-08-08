@@ -283,6 +283,18 @@ function MembershipForm({
   const [qrCodeUrl, setQrCodeUrl] = useState<string>(plan?.qrCodeUrl ?? "");
   const [uploadingQr, setUploadingQr] = useState(false);
   const [selectedCoupons, setSelectedCoupons] = useState<string[]>(plan?.linkedCouponIds ?? []);
+  const [hasFreeTrial, setHasFreeTrial] = useState<boolean>(Boolean(plan?.hasFreeTrial));
+  const [freeTrialDays, setFreeTrialDays] = useState<number>(plan?.freeTrialDays ?? 7);
+  const [fixedExpiryDate, setFixedExpiryDate] = useState<string>(plan?.fixedExpiryDate ?? "");
+  const [rewardSchedules, setRewardSchedules] = useState<string[]>(
+    plan?.rewardScheduleDates?.length ? plan.rewardScheduleDates : ["1st of Every Month", "15th Mid-Month Special Perk"]
+  );
+  const [memberOffers, setMemberOffers] = useState<any[]>(
+    plan?.memberOffers?.length ? plan.memberOffers : [
+      { title: "Member VIP Discount", code: "VIP10", detail: "Extra 10% Off on All Orders" }
+    ]
+  );
+  const [isUpgradeOption, setIsUpgradeOption] = useState<boolean>(Boolean(plan?.isUpgradeOption));
   const [commissionAcknowledged, setCommissionAcknowledged] = useState(false);
 
   useEffect(() => {
@@ -291,11 +303,17 @@ function MembershipForm({
     setUpiId(plan?.upiId ?? "");
     setQrCodeUrl(plan?.qrCodeUrl ?? "");
     setSelectedCoupons(plan?.linkedCouponIds ?? []);
+    setHasFreeTrial(Boolean(plan?.hasFreeTrial));
+    setFreeTrialDays(plan?.freeTrialDays ?? 7);
+    setFixedExpiryDate(plan?.fixedExpiryDate ?? "");
+    setRewardSchedules(plan?.rewardScheduleDates?.length ? plan.rewardScheduleDates : ["1st of Every Month", "15th Mid-Month Special Perk"]);
+    setMemberOffers(plan?.memberOffers?.length ? plan.memberOffers : [{ title: "Member VIP Discount", code: "VIP10", detail: "Extra 10% Off on All Orders" }]);
+    setIsUpgradeOption(Boolean(plan?.isUpgradeOption));
     setCommissionAcknowledged(false);
   }, [plan]);
 
   const priceNum = typeof price === "number" ? price : parseFloat(price as string);
-  const isPriceValid = !isNaN(priceNum) && priceNum >= 80;
+  const isPriceValid = hasFreeTrial ? (!isNaN(priceNum) && priceNum >= 0) : (!isNaN(priceNum) && priceNum >= 80);
 
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -345,6 +363,12 @@ function MembershipForm({
       upiId,
       qrCodeUrl,
       linkedCouponIds: selectedCoupons,
+      hasFreeTrial,
+      freeTrialDays,
+      fixedExpiryDate,
+      rewardScheduleDates: rewardSchedules.filter((s) => s.trim() !== ""),
+      memberOffers: memberOffers.filter((o) => o.title && o.title.trim() !== ""),
+      isUpgradeOption,
       commissionAcknowledged
     };
 
@@ -377,14 +401,133 @@ function MembershipForm({
         />
         {price !== "" && !isPriceValid && (
           <span style={{ color: "#EF4444", fontSize: "0.85rem", marginTop: "4px", display: "block" }}>
-            Minimum membership price is ₹80.
+            {hasFreeTrial ? "Price must be ₹0 or more for Free Trial plans." : "Minimum membership price is ₹80."}
           </span>
         )}
       </label>
       
       <label>Duration (Days) <input name="durationDays" type="number" min="1" defaultValue={plan?.durationDays ?? 30} required /></label>
+
+      {/* 7-DAY FREE TRIAL & CUSTOM EXPIRY DATE OPTIONS */}
+      <div className="full" style={{ background: "rgba(99, 102, 241, 0.08)", border: "1px solid rgba(129, 140, 248, 0.3)", padding: "14px", borderRadius: "12px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px" }}>
+        <div>
+          <label style={{ display: "flex", alignItems: "center", gap: "8px", color: "#818CF8", fontWeight: 700, cursor: "pointer", margin: 0 }}>
+            <input type="checkbox" checked={hasFreeTrial} onChange={(e) => setHasFreeTrial(e.target.checked)} style={{ width: "auto" }} />
+            Enable Free Trial Access
+          </label>
+          {hasFreeTrial && (
+            <div style={{ marginTop: "6px" }}>
+              <span style={{ fontSize: "11px", color: "#94A3B8" }}>Trial Duration (Days):</span>
+              <input type="number" min="1" max="90" value={freeTrialDays} onChange={(e) => setFreeTrialDays(Number(e.target.value))} style={{ marginTop: "2px" }} />
+            </div>
+          )}
+        </div>
+
+        <div>
+          <span style={{ fontSize: "12px", fontWeight: 700, color: "#818CF8" }}>Fixed Expiry Date (Optional):</span>
+          <input type="date" value={fixedExpiryDate} onChange={(e) => setFixedExpiryDate(e.target.value)} placeholder="e.g. 2026-12-31" style={{ marginTop: "2px" }} />
+          <span style={{ fontSize: "10px", color: "#94A3B8" }}>Overrides days duration if specified.</span>
+        </div>
+
+        <div>
+          <label style={{ display: "flex", alignItems: "center", gap: "8px", color: "#F43F5E", fontWeight: 700, cursor: "pointer", margin: 0 }}>
+            <input type="checkbox" checked={isUpgradeOption} onChange={(e) => setIsUpgradeOption(e.target.checked)} style={{ width: "auto" }} />
+            Mark as Tier Upgrade Plan
+          </label>
+          <span style={{ fontSize: "10px", color: "#94A3B8" }}>Highlighted as an upgrade for existing members.</span>
+        </div>
+      </div>
       
       <label className="full">Description <textarea name="description" defaultValue={plan?.description} required placeholder="Describe exclusive VIP perks for customers..." /></label>
+
+      {/* REWARD SCHEDULE DATES BUILDER */}
+      <div className="full" style={{ background: "rgba(16, 185, 129, 0.08)", border: "1px solid rgba(16, 185, 129, 0.3)", padding: "14px", borderRadius: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+        <h4 style={{ margin: 0, color: "#34D399", display: "flex", alignItems: "center", gap: "6px", fontSize: "14px" }}>
+          <Clock size={16} /> Scheduled Reward Drop Dates (Shown in Customer Wallet)
+        </h4>
+        <p style={{ margin: 0, fontSize: "11px", color: "#CBD5E1" }}>
+          Add recurring or specific calendar dates when members receive their exclusive rewards/perks.
+        </p>
+
+        {rewardSchedules.map((sched, idx) => (
+          <div key={idx} style={{ display: "flex", gap: "6px" }}>
+            <input 
+              value={sched} 
+              onChange={(e) => {
+                const updated = [...rewardSchedules];
+                updated[idx] = e.target.value;
+                setRewardSchedules(updated);
+              }}
+              placeholder="e.g. 1st of Every Month / 25th Dec Gift Drop"
+              style={{ flex: 1 }}
+            />
+            <button type="button" className="portalButton secondary" onClick={() => {
+              const updated = [...rewardSchedules];
+              updated.splice(idx, 1);
+              setRewardSchedules(updated);
+            }}>
+              <Trash size={14} />
+            </button>
+          </div>
+        ))}
+
+        <button type="button" className="portalButton secondary" onClick={() => setRewardSchedules([...rewardSchedules, ""])} style={{ alignSelf: "flex-start", fontSize: "12px" }}>
+          + Add Reward Date
+        </button>
+      </div>
+
+      {/* MEMBER EXCLUSIVE OFFERS & PERKS BUILDER */}
+      <div className="full" style={{ background: "rgba(236, 72, 153, 0.08)", border: "1px solid rgba(236, 72, 153, 0.3)", padding: "14px", borderRadius: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+        <h4 style={{ margin: 0, color: "#F472B6", display: "flex", alignItems: "center", gap: "6px", fontSize: "14px" }}>
+          <Tag size={16} /> Member-Exclusive Special Offers & Promo Codes
+        </h4>
+        <p style={{ margin: 0, fontSize: "11px", color: "#CBD5E1" }}>
+          Create special discount codes and perks visible only to active members in their wallet.
+        </p>
+
+        {memberOffers.map((off, idx) => (
+          <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1.5fr auto", gap: "6px", alignItems: "center" }}>
+            <input 
+              value={off.title || ""} 
+              onChange={(e) => {
+                const updated = [...memberOffers];
+                updated[idx] = { ...updated[idx], title: e.target.value };
+                setMemberOffers(updated);
+              }}
+              placeholder="Offer Title (e.g. VIP 10% Off)"
+            />
+            <input 
+              value={off.code || ""} 
+              onChange={(e) => {
+                const updated = [...memberOffers];
+                updated[idx] = { ...updated[idx], code: e.target.value };
+                setMemberOffers(updated);
+              }}
+              placeholder="Promo Code (e.g. MEMBER10)"
+            />
+            <input 
+              value={off.detail || ""} 
+              onChange={(e) => {
+                const updated = [...memberOffers];
+                updated[idx] = { ...updated[idx], detail: e.target.value };
+                setMemberOffers(updated);
+              }}
+              placeholder="Perk Detail"
+            />
+            <button type="button" className="portalButton secondary" onClick={() => {
+              const updated = [...memberOffers];
+              updated.splice(idx, 1);
+              setMemberOffers(updated);
+            }}>
+              <Trash size={14} />
+            </button>
+          </div>
+        ))}
+
+        <button type="button" className="portalButton secondary" onClick={() => setMemberOffers([...memberOffers, { title: "", code: "", detail: "" }])} style={{ alignSelf: "flex-start", fontSize: "12px" }}>
+          + Add Member Offer
+        </button>
+      </div>
 
       {/* UPI ID & PAYMENT QR CODE PHOTO INPUTS */}
       <label>
@@ -509,7 +652,7 @@ function MembershipForm({
         </p>
         {isPriceValid && (
           <p style={{ margin: "0 0 1rem 0", fontSize: "0.95rem", fontWeight: "bold", color: "#4ADE80" }}>
-            Breakdown: Customer Pays (₹{priceNum}) - Kynisto Fee (₹50) = You Receive (₹{priceNum - 50})
+            Breakdown: Customer Pays (₹{priceNum}) - Kynisto Fee (₹50) = You Receive (₹{Math.max(0, priceNum - 50)})
           </p>
         )}
         <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", margin: 0, color: "#FCA5A5", fontWeight: 600 }}>

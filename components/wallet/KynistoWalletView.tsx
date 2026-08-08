@@ -574,22 +574,93 @@ export default function KynistoWalletView() {
                 ) : memberships.active.length === 0 ? (
                   <p className="text-xs font-bold text-gray-500 py-2">No verified active passes yet. Your pending request above will be activated by the store owner soon!</p>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {memberships.active.map((mem) => (
-                      <div key={mem.id} className="p-5 rounded-2xl bg-gradient-to-br from-indigo-900/40 via-slate-900 to-emerald-950/40 border border-emerald-500/40 text-white flex flex-col justify-between space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="font-black text-lg text-emerald-300">{mem.type}</span>
-                          <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-black px-2.5 py-1 rounded-full">
-                            ACTIVE VIP
+                  <div className="grid grid-cols-1 gap-6">
+                    {memberships.active.map((mem: any) => (
+                      <div key={mem.id} className="p-6 rounded-3xl bg-gradient-to-br from-indigo-950 via-slate-900 to-emerald-950 border-2 border-emerald-500/40 text-white flex flex-col justify-between space-y-4 shadow-2xl">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-black text-xl text-emerald-300">{mem.type}</span>
+                              {mem.hasFreeTrial && (
+                                <span className="bg-indigo-500/30 text-indigo-300 border border-indigo-500/50 text-[10px] font-black px-2 py-0.5 rounded-full">
+                                  ⚡ {mem.freeTrialDays || 7}-DAY FREE TRIAL
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-sm font-extrabold text-indigo-200 mt-1">{mem.storeName}</div>
+                          </div>
+                          <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-black px-3 py-1 rounded-full flex items-center gap-1">
+                            <Crown className="h-3.5 w-3.5" /> ACTIVE VIP
                           </span>
                         </div>
-                        <div className="text-sm font-bold text-indigo-200">{mem.storeName}</div>
-                        <div className="text-xs font-bold text-gray-400">Valid Until: <b className="text-amber-400">{mem.validUntil}</b></div>
-                        <ul className="text-xs space-y-1 text-gray-300 border-t border-gray-800 pt-2">
-                          {mem.benefits?.map((b, idx) => (
-                            <li key={idx}>✓ {b}</li>
-                          ))}
-                        </ul>
+
+                        <div className="flex items-center justify-between text-xs font-bold text-gray-400 bg-slate-950/60 p-3 rounded-xl border border-gray-800">
+                          <span>Pass Status: <b className="text-emerald-400">Verified & Active</b></span>
+                          <span>Valid Until: <b className="text-amber-400">{mem.validUntil}</b></span>
+                        </div>
+
+                        {/* SCHEDULED REWARD DROP DATES TIMELINE */}
+                        {Array.isArray(mem.rewardScheduleDates) && mem.rewardScheduleDates.length > 0 && (
+                          <div className="bg-emerald-950/40 border border-emerald-500/30 p-4 rounded-2xl space-y-2">
+                            <div className="text-xs font-black text-emerald-300 flex items-center gap-1.5 uppercase tracking-wide">
+                              <Clock className="h-4 w-4" /> Reward Schedule & Upcoming Drop Dates
+                            </div>
+                            <p className="text-[11px] text-gray-400 font-bold">You will be rewarded automatically on these scheduled dates:</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                              {mem.rewardScheduleDates.map((dateStr: string, idx: number) => (
+                                <div key={idx} className="bg-slate-900/90 border border-emerald-500/20 px-3 py-2 rounded-xl text-xs font-black text-emerald-200 flex items-center gap-2">
+                                  <Gift className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+                                  <span>{dateStr}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* MEMBER-EXCLUSIVE OFFERS & COUPONS */}
+                        {Array.isArray(mem.memberOffers) && mem.memberOffers.length > 0 && (
+                          <div className="bg-pink-950/40 border border-pink-500/30 p-4 rounded-2xl space-y-2">
+                            <div className="text-xs font-black text-pink-300 flex items-center gap-1.5 uppercase tracking-wide">
+                              <Gift className="h-4 w-4" /> Member-Exclusive Coupons & Special Offers
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                              {mem.memberOffers.map((off: any, idx: number) => (
+                                <div key={idx} className="bg-slate-900/90 border border-pink-500/30 p-3 rounded-xl flex flex-col justify-between space-y-1">
+                                  <div className="text-xs font-black text-white">{off.title}</div>
+                                  <div className="text-[11px] font-bold text-gray-400">{off.detail}</div>
+                                  {off.code && (
+                                    <div className="bg-pink-500/20 text-pink-300 border border-pink-500/40 px-2 py-1 rounded text-[11px] font-mono font-black self-start mt-1">
+                                      CODE: {off.code}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* BENEFITS LIST */}
+                        <div>
+                          <div className="text-xs font-black text-gray-400 uppercase tracking-wide mb-2">Included VIP Pass Benefits:</div>
+                          <ul className="text-xs space-y-1.5 text-gray-300">
+                            {mem.benefits?.map((b: string, idx: number) => (
+                              <li key={idx} className="flex items-center gap-2">
+                                <span className="text-emerald-400 font-bold">✓</span> {b}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* UPGRADE MEMBERSHIP ACTION */}
+                        <div className="border-t border-gray-800 pt-3 flex items-center justify-between">
+                          <span className="text-xs font-bold text-gray-400">Want higher perks & rewards?</span>
+                          <a 
+                            href={mem.storeId ? `/stores/${mem.storeId}` : '/stores'} 
+                            className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5"
+                          >
+                            <Crown className="h-3.5 w-3.5" /> Upgrade Membership Plan
+                          </a>
+                        </div>
                       </div>
                     ))}
                   </div>

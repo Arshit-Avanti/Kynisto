@@ -166,7 +166,8 @@ export async function GET(request: Request) {
       const cleanName = userName ? userName.toLowerCase().trim() : "___none___";
 
       const storeMembershipsResult = await d1.prepare(`
-        SELECT csm.*, s.name as store_name, smp.benefits
+        SELECT csm.*, s.name as store_name, smp.benefits,
+               smp.reward_schedule_dates, smp.member_offers, smp.has_free_trial, smp.free_trial_days, smp.fixed_expiry_date, smp.is_upgrade_option
         FROM customer_store_memberships csm
         LEFT JOIN stores s ON s.id = csm.store_id
         LEFT JOIN store_membership_plans smp ON smp.id = csm.plan_id
@@ -182,7 +183,8 @@ export async function GET(request: Request) {
       if (rowsToProcess.length === 0) {
         try {
           const allBackup = await d1.prepare(`
-            SELECT csm.*, s.name as store_name, smp.benefits
+            SELECT csm.*, s.name as store_name, smp.benefits,
+                   smp.reward_schedule_dates, smp.member_offers, smp.has_free_trial, smp.free_trial_days, smp.fixed_expiry_date, smp.is_upgrade_option
             FROM customer_store_memberships csm
             LEFT JOIN stores s ON s.id = csm.store_id
             LEFT JOIN store_membership_plans smp ON smp.id = csm.plan_id
@@ -211,17 +213,45 @@ export async function GET(request: Request) {
           }
         }
 
+        let parsedSchedule = ["1st of Every Month", "15th Mid-Month Special Perk", "End of Season VIP Drop"];
+        if (item.reward_schedule_dates) {
+          try {
+            const parsed = typeof item.reward_schedule_dates === "string" ? JSON.parse(item.reward_schedule_dates) : item.reward_schedule_dates;
+            if (Array.isArray(parsed) && parsed.length > 0) parsedSchedule = parsed;
+          } catch {
+            // fallback
+          }
+        }
+
+        let parsedOffers: any[] = [
+          { title: "VIP Store Discount", code: "MEMBERVIP10", detail: "Extra 10% Off on All Orders" },
+          { title: "Priority Queue Pass", code: "FASTLANE", detail: "Skip Queue at Counter" }
+        ];
+        if (item.member_offers) {
+          try {
+            const parsed = typeof item.member_offers === "string" ? JSON.parse(item.member_offers) : item.member_offers;
+            if (Array.isArray(parsed) && parsed.length > 0) parsedOffers = parsed;
+          } catch {
+            // fallback
+          }
+        }
+
         const formatted = {
           id: item.id,
           storeId: item.store_id,
           storeName: item.store_name ?? "Local Business",
           type: item.plan_name ?? "VIP Membership Pass",
           status: item.status || "pending_verification",
-          validUntil: item.expires_at ? new Date(item.expires_at * 1000).toISOString().split("T")[0] : "Active VIP Pass",
+          validUntil: item.expires_at ? new Date(item.expires_at * 1000).toISOString().split("T")[0] : (item.fixed_expiry_date || "Active VIP Pass"),
           pricePaid: item.amount_paid,
           utr: item.utr,
           createdAt: item.created_at,
           benefits: parsedBenefits,
+          rewardScheduleDates: parsedSchedule,
+          memberOffers: parsedOffers,
+          hasFreeTrial: Boolean(item.has_free_trial),
+          freeTrialDays: item.free_trial_days || 7,
+          isUpgradeOption: Boolean(item.is_upgrade_option),
           invoiceUrl: `/api/memberships/invoice/${item.id}`,
         };
 

@@ -27,10 +27,34 @@ async function ensureTables() {
         upi_id TEXT,
         qr_code_url TEXT,
         linked_coupon_ids TEXT,
+        has_free_trial INTEGER DEFAULT 0,
+        free_trial_days INTEGER DEFAULT 7,
+        fixed_expiry_date TEXT,
+        reward_schedule_dates TEXT,
+        member_offers TEXT,
+        is_upgrade_option INTEGER DEFAULT 0,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
       )
     `).run();
+
+    // Safely add missing columns if table already existed
+    const missingCols = [
+      "ALTER TABLE store_membership_plans ADD COLUMN has_free_trial INTEGER DEFAULT 0",
+      "ALTER TABLE store_membership_plans ADD COLUMN free_trial_days INTEGER DEFAULT 7",
+      "ALTER TABLE store_membership_plans ADD COLUMN fixed_expiry_date TEXT",
+      "ALTER TABLE store_membership_plans ADD COLUMN reward_schedule_dates TEXT",
+      "ALTER TABLE store_membership_plans ADD COLUMN member_offers TEXT",
+      "ALTER TABLE store_membership_plans ADD COLUMN is_upgrade_option INTEGER DEFAULT 0"
+    ];
+
+    for (const sql of missingCols) {
+      try {
+        await d1.prepare(sql).run();
+      } catch {
+        // column likely exists
+      }
+    }
 
     await d1.prepare(`
       CREATE TABLE IF NOT EXISTS customer_store_memberships (
@@ -47,10 +71,27 @@ async function ensureTables() {
         rejection_reason TEXT,
         starts_at INTEGER,
         expires_at INTEGER,
+        trial_ends_at INTEGER,
+        reward_schedule_dates TEXT,
+        member_offers TEXT,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
       )
     `).run();
+
+    const missingCustomerCols = [
+      "ALTER TABLE customer_store_memberships ADD COLUMN trial_ends_at INTEGER",
+      "ALTER TABLE customer_store_memberships ADD COLUMN reward_schedule_dates TEXT",
+      "ALTER TABLE customer_store_memberships ADD COLUMN member_offers TEXT"
+    ];
+
+    for (const sql of missingCustomerCols) {
+      try {
+        await d1.prepare(sql).run();
+      } catch {
+        // column exists
+      }
+    }
   } catch (e) {
     console.warn("Table creation notice:", e);
   }
@@ -108,6 +149,12 @@ export async function GET(req: Request) {
       upiId: p.upi_id || "",
       qrCodeUrl: p.qr_code_url || "",
       linkedCouponIds: p.linked_coupon_ids ? (typeof p.linked_coupon_ids === "string" ? JSON.parse(p.linked_coupon_ids) : p.linked_coupon_ids) : [],
+      hasFreeTrial: Boolean(p.has_free_trial),
+      freeTrialDays: p.free_trial_days || 7,
+      fixedExpiryDate: p.fixed_expiry_date || "",
+      rewardScheduleDates: p.reward_schedule_dates ? (typeof p.reward_schedule_dates === "string" ? JSON.parse(p.reward_schedule_dates) : p.reward_schedule_dates) : [],
+      memberOffers: p.member_offers ? (typeof p.member_offers === "string" ? JSON.parse(p.member_offers) : p.member_offers) : [],
+      isUpgradeOption: Boolean(p.is_upgrade_option),
       createdAt: p.created_at,
       updatedAt: p.updated_at
     }));
@@ -135,7 +182,8 @@ export async function POST(req: Request) {
     let {
       storeId, name, price, durationDays, description, badgeColor, planIcon,
       isActive, maxMembers, termsAndConditions, benefits, commissionAcknowledged,
-      upiId, qrCodeUrl, linkedCouponIds
+      upiId, qrCodeUrl, linkedCouponIds,
+      hasFreeTrial, freeTrialDays, fixedExpiryDate, rewardScheduleDates, memberOffers, isUpgradeOption
     } = body;
 
     const db = getDb();
@@ -153,7 +201,7 @@ export async function POST(req: Request) {
     }
 
     const numPrice = Number(price);
-    if (isNaN(numPrice) || numPrice < 80) {
+    if (isNaN(numPrice) || numPrice < (hasFreeTrial ? 0 : 80)) {
       return NextResponse.json({ error: "Minimum membership price is ₹80." }, { status: 400 });
     }
 
@@ -166,14 +214,18 @@ export async function POST(req: Request) {
 
     const benefitsJson = JSON.stringify(Array.isArray(benefits) ? benefits.filter(Boolean) : [String(description || "Exclusive membership perks")]);
     const couponsJson = JSON.stringify(Array.isArray(linkedCouponIds) ? linkedCouponIds : []);
+    const scheduleJson = JSON.stringify(Array.isArray(rewardScheduleDates) ? rewardScheduleDates.filter(Boolean) : []);
+    const offersJson = JSON.stringify(Array.isArray(memberOffers) ? memberOffers : []);
 
     const d1 = getD1();
     await d1.prepare(`
       INSERT INTO store_membership_plans (
         id, store_id, name, price, duration_days, description, benefits,
         badge_color, plan_icon, is_active, max_members, terms_and_conditions,
-        upi_id, qr_code_url, linked_coupon_ids, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        upi_id, qr_code_url, linked_coupon_ids,
+        has_free_trial, free_trial_days, fixed_expiry_date, reward_schedule_dates, member_offers, is_upgrade_option,
+        created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       planId, storeId, String(name).trim(), numPrice, Number(durationDays) || 30,
       String(description || "").trim(), benefitsJson, String(badgeColor || "#FF5722"),
@@ -181,7 +233,10 @@ export async function POST(req: Request) {
       termsAndConditions ? String(termsAndConditions) : null,
       upiId ? String(upiId).trim() : null,
       qrCodeUrl ? String(qrCodeUrl).trim() : null,
-      couponsJson, now, now
+      couponsJson,
+      hasFreeTrial ? 1 : 0, Number(freeTrialDays) || 7, fixedExpiryDate ? String(fixedExpiryDate).trim() : null,
+      scheduleJson, offersJson, isUpgradeOption ? 1 : 0,
+      now, now
     ).run();
 
     const newPlan = {
