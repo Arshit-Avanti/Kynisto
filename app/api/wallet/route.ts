@@ -124,27 +124,13 @@ export async function GET(request: Request) {
         FROM customer_store_memberships csm
         LEFT JOIN stores s ON s.id = csm.store_id
         LEFT JOIN store_membership_plans smp ON smp.id = csm.plan_id
+        WHERE csm.customer_id = ? 
+           OR (csm.customer_email IS NOT NULL AND csm.customer_email != '' AND LOWER(csm.customer_email) = ?)
+           OR (csm.customer_name IS NOT NULL AND csm.customer_name != '' AND LOWER(csm.customer_name) = ?)
         ORDER BY csm.created_at DESC
-      `).all();
+      `).bind(userId, userEmail, userName).all();
 
-      const allRows = storeMembershipsResult.results ?? [];
-
-      // Filter rows matching user ID, email, name, or created recently for customer
-      const matchingRows = allRows.filter((item: any) => {
-        const itemCustId = String(item.customer_id || "").toLowerCase();
-        const itemEmail = String(item.customer_email || "").toLowerCase();
-        const itemName = String(item.customer_name || "").toLowerCase();
-        
-        return (
-          itemCustId === userId.toLowerCase() ||
-          (userEmail && itemEmail && itemEmail === userEmail) ||
-          (userName && itemName && itemName === userName) ||
-          allRows.length === 1 // If 1 membership exists on single tenant DB
-        );
-      });
-
-      // Use matching rows, or all rows if user is logged in
-      const rowsToProcess = matchingRows.length > 0 ? matchingRows : allRows;
+      const rowsToProcess = storeMembershipsResult.results ?? [];
 
       rowsToProcess.forEach((item: any) => {
         if (!item.id || seenMembershipIds.has(item.id)) return;
@@ -190,8 +176,9 @@ export async function GET(request: Request) {
           FROM customer_memberships cm
           LEFT JOIN stores s ON s.id = cm.store_id
           LEFT JOIN store_membership_plans smp ON smp.id = cm.plan_id
+          WHERE cm.user_id = ?
           ORDER BY cm.created_at DESC
-        `).all();
+        `).bind(userId).all();
 
         (legacyMembershipsResult.results ?? []).forEach((item: any) => {
           if (!item.id || seenMembershipIds.has(item.id)) return;
