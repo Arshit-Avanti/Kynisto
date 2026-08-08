@@ -40,6 +40,49 @@ async function ensureLoyaltyTables() {
     `).run();
 
     await d1.prepare(`
+      CREATE TABLE IF NOT EXISTS kynisto_wallets (
+        user_id TEXT PRIMARY KEY,
+        kynisto_points INTEGER DEFAULT 0,
+        updated_at INTEGER NOT NULL
+      )
+    `).run();
+
+    await d1.prepare(`
+      CREATE TABLE IF NOT EXISTS kynisto_point_transactions (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        amount INTEGER NOT NULL,
+        type TEXT NOT NULL,
+        description TEXT,
+        created_at INTEGER NOT NULL
+      )
+    `).run();
+
+    await d1.prepare(`
+      CREATE TABLE IF NOT EXISTS store_loyalty_points (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        store_id TEXT NOT NULL,
+        points INTEGER DEFAULT 0,
+        last_visited_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        UNIQUE(user_id, store_id)
+      )
+    `).run();
+
+    await d1.prepare(`
+      CREATE TABLE IF NOT EXISTS store_loyalty_transactions (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        store_id TEXT NOT NULL,
+        amount INTEGER NOT NULL,
+        type TEXT NOT NULL,
+        description TEXT,
+        created_at INTEGER NOT NULL
+      )
+    `).run();
+
+    await d1.prepare(`
       INSERT INTO system_loyalty_config (id, kynisto_points_per_scan, max_kynisto_balance_cap, updated_at)
       VALUES ('global', 10, 1000, ?)
       ON CONFLICT DO NOTHING
@@ -63,9 +106,9 @@ export async function POST(request: Request) {
     }
 
     const rawToken = qrCodeToken.trim();
-    // Extract clean slug or store ID from full URL or path (e.g. /stores/testimonial-2a0958 -> testimonial-2a0958)
+    // Extract clean slug or store ID from full URL or path (e.g. /stores/testimonial-2a0958 or ores/testimonial-2a0958 -> testimonial-2a0958)
     const cleanedSlugOrId = rawToken
-      .replace(/^(?:https?:\/\/[^\/]+)?\/?(?:stores\/)?/i, "")
+      .replace(/^(?:https?:\/\/[^\/]+)?\/?(?:stores\/|ores\/|[^\/]+\/)?/i, "")
       .replace(/\/.*$/, "")
       .trim();
 
@@ -118,7 +161,7 @@ export async function POST(request: Request) {
       await d1.prepare(`
         INSERT INTO qr_scan_logs (id, user_id, store_id, qr_token, kynisto_points_earned, store_points_earned, status, scanned_at)
         VALUES (?, ?, ?, ?, 0, 0, 'invalid_qr', ?)
-      `).bind(`scan_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, session.user.id, "unknown", token, now).run();
+      `).bind(`scan_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, session.user.id, "unknown", rawToken, now).run();
 
       return NextResponse.json({ error: "Invalid or unrecognized Kynisto Store QR Code" }, { status: 404 });
     }
@@ -127,7 +170,7 @@ export async function POST(request: Request) {
       await d1.prepare(`
         INSERT INTO qr_scan_logs (id, user_id, store_id, qr_token, kynisto_points_earned, store_points_earned, status, scanned_at)
         VALUES (?, ?, ?, ?, 0, 0, 'store_disabled', ?)
-      `).bind(`scan_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, session.user.id, storeSettings.store_id, token, now).run();
+      `).bind(`scan_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, session.user.id, storeSettings.store_id, rawToken, now).run();
 
       return NextResponse.json({ error: `${storeSettings.store_name} has currently disabled QR loyalty rewards.` }, { status: 403 });
     }
@@ -150,7 +193,7 @@ export async function POST(request: Request) {
       await d1.prepare(`
         INSERT INTO qr_scan_logs (id, user_id, store_id, qr_token, kynisto_points_earned, store_points_earned, status, scanned_at)
         VALUES (?, ?, ?, ?, 0, 0, 'cooldown_active', ?)
-      `).bind(`scan_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, session.user.id, storeSettings.store_id, token, now).run();
+      `).bind(`scan_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, session.user.id, storeSettings.store_id, rawToken, now).run();
 
       return NextResponse.json({
         error: `You have already scanned at ${storeSettings.store_name} today. Please wait ${hoursLeft} hour${hoursLeft > 1 ? "s" : ""} before scanning again!`,
@@ -244,7 +287,7 @@ export async function POST(request: Request) {
     await d1.prepare(`
       INSERT INTO qr_scan_logs (id, user_id, store_id, qr_token, kynisto_points_earned, store_points_earned, status, scanned_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(scanLogId, session.user.id, storeSettings.store_id, token, kynistoAwarded, storePointsAwarded, finalStatus, now).run();
+    `).bind(scanLogId, session.user.id, storeSettings.store_id, rawToken, kynistoAwarded, storePointsAwarded, finalStatus, now).run();
 
     return NextResponse.json({
       success: true,

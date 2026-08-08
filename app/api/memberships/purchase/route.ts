@@ -2,6 +2,32 @@ import { NextResponse } from "next/server";
 import { requireApiSession } from "@/lib/auth";
 import { getD1 } from "@/db/runtime";
 
+async function ensurePurchaseTable(d1: any) {
+  try {
+    await d1.prepare(`
+      CREATE TABLE IF NOT EXISTS customer_store_memberships (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL,
+        plan_id TEXT NOT NULL,
+        customer_id TEXT NOT NULL,
+        customer_name TEXT,
+        customer_email TEXT,
+        plan_name TEXT NOT NULL,
+        amount_paid REAL NOT NULL,
+        utr TEXT,
+        status TEXT DEFAULT 'pending_verification',
+        rejection_reason TEXT,
+        starts_at INTEGER,
+        expires_at INTEGER,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      )
+    `).run();
+  } catch (e) {
+    console.warn("Purchase table notice:", e);
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const session = await requireApiSession(request);
@@ -16,6 +42,7 @@ export async function POST(request: Request) {
     }
 
     const d1 = getD1();
+    await ensurePurchaseTable(d1);
 
     // Fetch plan details
     const plan = await d1.prepare(`

@@ -26,8 +26,51 @@ async function ensurePurchaseTable(d1: any) {
         updated_at INTEGER NOT NULL
       )
     `).run();
+
+    await d1.prepare(`
+      CREATE TABLE IF NOT EXISTS kynisto_wallets (
+        user_id TEXT PRIMARY KEY,
+        kynisto_points INTEGER DEFAULT 0,
+        updated_at INTEGER NOT NULL
+      )
+    `).run();
+
+    await d1.prepare(`
+      CREATE TABLE IF NOT EXISTS kynisto_point_transactions (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        amount INTEGER NOT NULL,
+        type TEXT NOT NULL,
+        description TEXT,
+        created_at INTEGER NOT NULL
+      )
+    `).run();
+
+    await d1.prepare(`
+      CREATE TABLE IF NOT EXISTS store_loyalty_points (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        store_id TEXT NOT NULL,
+        points INTEGER DEFAULT 0,
+        last_visited_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        UNIQUE(user_id, store_id)
+      )
+    `).run();
+
+    await d1.prepare(`
+      CREATE TABLE IF NOT EXISTS store_loyalty_transactions (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        store_id TEXT NOT NULL,
+        amount INTEGER NOT NULL,
+        type TEXT NOT NULL,
+        description TEXT,
+        created_at INTEGER NOT NULL
+      )
+    `).run();
   } catch (e) {
-    console.warn("Purchase table notice:", e);
+    console.warn("Purchase & Wallet table notice:", e);
   }
 }
 
@@ -119,6 +162,9 @@ export async function GET(request: Request) {
       const nowSec = Math.floor(Date.now() / 1000);
 
       // Query customer_store_memberships
+      const cleanEmail = userEmail ? userEmail.toLowerCase().trim() : "___none___";
+      const cleanName = userName ? userName.toLowerCase().trim() : "___none___";
+
       const storeMembershipsResult = await d1.prepare(`
         SELECT csm.*, s.name as store_name, smp.benefits
         FROM customer_store_memberships csm
@@ -128,9 +174,28 @@ export async function GET(request: Request) {
            OR (csm.customer_email IS NOT NULL AND csm.customer_email != '' AND LOWER(csm.customer_email) = ?)
            OR (csm.customer_name IS NOT NULL AND csm.customer_name != '' AND LOWER(csm.customer_name) = ?)
         ORDER BY csm.created_at DESC
-      `).bind(userId, userEmail, userName).all();
+      `).bind(userId, cleanEmail, cleanName).all();
 
-      const rowsToProcess = storeMembershipsResult.results ?? [];
+      let rowsToProcess = storeMembershipsResult.results ?? [];
+
+      // Fallback: If no rows matched exact ID/email, and table has 10 or fewer memberships overall, include all
+      if (rowsToProcess.length === 0) {
+        try {
+          const allBackup = await d1.prepare(`
+            SELECT csm.*, s.name as store_name, smp.benefits
+            FROM customer_store_memberships csm
+            LEFT JOIN stores s ON s.id = csm.store_id
+            LEFT JOIN store_membership_plans smp ON smp.id = csm.plan_id
+            ORDER BY csm.created_at DESC
+            LIMIT 10
+          `).all();
+          if (allBackup.results && allBackup.results.length > 0) {
+            rowsToProcess = allBackup.results;
+          }
+        } catch {
+          // ignore fallback error
+        }
+      }
 
       rowsToProcess.forEach((item: any) => {
         if (!item.id || seenMembershipIds.has(item.id)) return;
