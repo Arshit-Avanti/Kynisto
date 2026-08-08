@@ -19,6 +19,7 @@ import { AdminMarketplaceControlCenter } from "@/components/dashboard/AdminMarke
 import { AdminNotificationPanel } from "@/components/dashboard/AdminNotificationPanel";
 import { AdminWalletPanel } from "@/components/dashboard/AdminWalletPanel";
 import { AdminLoyaltyPanel } from "@/components/dashboard/AdminLoyaltyPanel";
+import { AdminMembershipsPanel } from "@/components/dashboard/AdminMembershipsPanel";
 
 type Item = Record<string, string | number | null | undefined>;
 type Data = Record<string, unknown>;
@@ -45,7 +46,7 @@ export function AdminDashboard({ user }: { user: SessionUser }) {
     setLoading(true);
     setError("");
     try {
-      if (ADMIN_WORKSPACE_TABS.has(tab) || tab === "wallet" || tab === "chat" || tab === "healthcare" || tab === "subscriptions" || tab === "subscription" || tab === "subscription-marketplace" || tab === "marketplace" || tab === "notifications") {
+      if (ADMIN_WORKSPACE_TABS.has(tab) || tab === "wallet" || tab === "chat" || tab === "healthcare" || tab === "subscriptions" || tab === "subscription" || tab === "subscription-marketplace" || tab === "marketplace" || tab === "notifications" || tab === "memberships") {
         setLoading(false);
         return;
       }
@@ -102,8 +103,9 @@ export function AdminDashboard({ user }: { user: SessionUser }) {
       {tab === "notifications" && <AdminNotificationPanel />}
       {tab === "wallet" && <AdminWalletPanel />}
       {tab === "loyalty" && <AdminLoyaltyPanel />}
+      {tab === "memberships" && <AdminMembershipsPanel />}
       {tab === "services" && <AdminServicesPanel mutate={mutate} />}
-      {tab !== "overview" && tab !== "analytics" && tab !== "chat" && tab !== "healthcare" && tab !== "subscriptions" && tab !== "subscription" && tab !== "subscription-marketplace" && tab !== "marketplace" && tab !== "notifications" && tab !== "wallet" && tab !== "services" && !ADMIN_WORKSPACE_TABS.has(tab) && (
+      {tab !== "overview" && tab !== "analytics" && tab !== "chat" && tab !== "healthcare" && tab !== "subscriptions" && tab !== "subscription" && tab !== "subscription-marketplace" && tab !== "marketplace" && tab !== "notifications" && tab !== "wallet" && tab !== "memberships" && tab !== "services" && !ADMIN_WORKSPACE_TABS.has(tab) && (
         <>
           <form className="portalToolbar" onSubmit={(event) => { event.preventDefault(); void load(); }}>
             {tab !== "categories" && <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Search ${tab}…`} />}

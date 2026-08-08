@@ -2294,4 +2294,113 @@ video,
   will-change: transform;
 }
 
+/* ==========================================================================
+   MOBILE VIEWPORT & TOUCH SURFING OPTIMIZATIONS (100% ACCURACY & FIT)
+   ========================================================================== */
+
+html, body {
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+img, video, iframe, embed, object {
+  max-width: 100%;
+  height: auto;
+}
+
+.portal, .portalShell, .portalMain, .portalContent {
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .portalMain {
+    padding: 12px 10px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  .portalHeader {
+    padding: 10px 12px !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .portalTitleRow {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  .portalTitleRow button {
+    width: 100% !important;
+  }
+
+  .portalGrid, .portalCard, .portalCard.full {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .portalToolbar {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .portalToolbar input,
+  .portalToolbar select,
+  .portalToolbar button {
+    width: 100% !important;
+  }
+
+  .floating-nav-container,
+  .floatingNavContainer {
+    width: 94vw !important;
+    max-width: 94vw !important;
+    margin-top: 8px !important;
+    height: 62px !important;
+    padding: 0 12px !important;
+  }
+
+  .categoryGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .storeGrid,
+  .providerGrid,
+  .catalogGrid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Table Horizontal Scrolling container for narrow mobile viewports */
+  table {
+    display: block;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+
+  /* Button touch target optimization */
+  button, a {
+    min-height: 40px;
+    touch-action: manipulation;
+  }
+}
+
+
 

@@ -56,6 +56,7 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { label: "Shop owners", icon: Store, tab: "owners" },
     { label: "Customers", icon: UserCheck, tab: "customers" },
     { label: "Stores", icon: Building2, tab: "stores" },
+    { label: "Store Memberships", icon: Crown, tab: "memberships" },
     { label: "Products", icon: Package, tab: "products" },
     { label: "Orders", icon: ShoppingCart, tab: "orders" },
     { label: "Categories", icon: Tags, tab: "categories" },
