@@ -10,6 +10,7 @@ export async function GET(request: Request) {
     const session = await requireApiSession(request);
     const userId = session.user.id;
     const userEmail = session.user.email ? session.user.email.toLowerCase().trim() : "";
+    const userName = session.user.name ? session.user.name.toLowerCase().trim() : "";
     const db = getDb();
     const d1 = getD1();
 
@@ -79,7 +80,7 @@ export async function GET(request: Request) {
       canRedeemDiscount: (row.points ?? 0) >= 100,
     }));
 
-    // 5. Fetch Real Customer Memberships (matching user_id or customer_email)
+    // 5. Fetch Real Customer Memberships (matching user_id, customer_email, or customer_name)
     let active: any[] = [];
     let pending: any[] = [];
     let expired: any[] = [];
@@ -95,9 +96,11 @@ export async function GET(request: Request) {
         FROM customer_store_memberships csm
         LEFT JOIN stores s ON s.id = csm.store_id
         LEFT JOIN store_membership_plans smp ON smp.id = csm.plan_id
-        WHERE csm.customer_id = ? OR (csm.customer_email IS NOT NULL AND csm.customer_email != '' AND LOWER(csm.customer_email) = ?)
+        WHERE csm.customer_id = ? 
+           OR (csm.customer_email IS NOT NULL AND csm.customer_email != '' AND LOWER(csm.customer_email) = ?)
+           OR (csm.customer_name IS NOT NULL AND csm.customer_name != '' AND LOWER(csm.customer_name) = ?)
         ORDER BY csm.created_at DESC
-      `).bind(userId, userEmail).all();
+      `).bind(userId, userEmail, userName).all();
 
       (storeMembershipsResult.results ?? []).forEach((item: any) => {
         if (!item.id || seenMembershipIds.has(item.id)) return;
@@ -119,7 +122,7 @@ export async function GET(request: Request) {
           storeName: item.store_name ?? "Local Business",
           type: item.plan_name ?? "VIP Membership Pass",
           status: item.status || "pending_verification",
-          validUntil: item.expires_at ? new Date(item.expires_at * 1000).toISOString().split("T")[0] : "Pending Owner Verification",
+          validUntil: item.expires_at ? new Date(item.expires_at * 1000).toISOString().split("T")[0] : "Active VIP Pass",
           pricePaid: item.amount_paid,
           utr: item.utr,
           createdAt: item.created_at,

@@ -154,11 +154,17 @@ export default function KynistoWalletView() {
     }
   };
 
+  const handleOpenScanModal = () => {
+    setShowScanModal(true);
+    setScanResult(null);
+    void startCamera();
+  };
+
   const startCamera = async () => {
     setScanResult(null);
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setScanResult({ error: "Camera access is not supported on this browser. Use photo upload or type store token below." });
+        setScanResult({ error: "Camera access is not supported on this browser. Upload a QR photo or enter store token below." });
         return;
       }
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -172,7 +178,7 @@ export default function KynistoWalletView() {
       setIsCameraActive(true);
     } catch (err: any) {
       console.warn("Camera permission notice", err);
-      setScanResult({ error: "Camera permission denied by browser or camera unavailable. Please select/upload a QR photo or enter the store link below." });
+      setScanResult({ error: "Camera permission denied or unavailable. Please grant camera permission or select a QR photo / store token below." });
       setIsCameraActive(false);
     }
   };
@@ -199,24 +205,43 @@ export default function KynistoWalletView() {
     if (!file) return;
     setScanResult(null);
 
-    // Read image name or extract path text if available
     const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result as string;
-      if (text && text.includes("stores/")) {
-        const match = text.match(/\/stores\/[a-zA-Z0-9_-]+/);
+    reader.onload = async (event) => {
+      const dataUrl = event.target?.result as string;
+      
+      // Try BarcodeDetector if supported
+      if (typeof window !== "undefined" && "BarcodeDetector" in window) {
+        try {
+          const img = new Image();
+          img.src = dataUrl;
+          await img.decode();
+          const detector = new (window as any).BarcodeDetector({ formats: ["qr_code"] });
+          const barcodes = await detector.detect(img);
+          if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+            const detectedCode = barcodes[0].rawValue;
+            setQrInputToken(detectedCode);
+            await handleProcessQrScan(detectedCode);
+            return;
+          }
+        } catch (err) {
+          console.warn("BarcodeDetector fallback:", err);
+        }
+      }
+
+      // If text string contains store slug or URL pattern
+      if (dataUrl.includes("stores/")) {
+        const match = dataUrl.match(/\/stores\/[a-zA-Z0-9_-]+/);
         if (match) {
           setQrInputToken(match[0]);
-          void handleProcessQrScan(match[0]);
+          await handleProcessQrScan(match[0]);
           return;
         }
       }
-      // If photo was taken/uploaded, use current token or prompt verify
-      if (qrInputToken.trim()) {
-        void handleProcessQrScan(qrInputToken.trim());
-      } else {
-        setScanResult({ message: "Photo uploaded! Verify store token or tap verify below." });
-      }
+
+      // Otherwise if user has input token or filename, process it directly
+      const tokenCandidate = qrInputToken.trim() || file.name.replace(/\.[^/.]+$/, "");
+      setQrInputToken(tokenCandidate);
+      await handleProcessQrScan(tokenCandidate);
     };
     reader.readAsDataURL(file);
   };
@@ -330,7 +355,7 @@ export default function KynistoWalletView() {
 
         {/* SCAN STORE QR CODE BUTTON */}
         <button
-          onClick={() => { setShowScanModal(true); setScanResult(null); }}
+          onClick={handleOpenScanModal}
           className="relative z-10 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-600 to-indigo-600 px-5 py-3 text-sm font-black text-white shadow-xl hover:scale-105 active:scale-95 transition-all cursor-pointer border border-emerald-400/30"
         >
           <QrCode className="h-5 w-5 animate-pulse" />

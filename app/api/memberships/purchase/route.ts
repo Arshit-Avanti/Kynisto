@@ -44,6 +44,20 @@ export async function POST(request: Request) {
       "pending_verification", now, now
     ).run();
 
+    try {
+      const expiresAt = now + ((plan.duration_days || 30) * 86400);
+      await d1.prepare(`
+        INSERT INTO customer_memberships (
+          id, user_id, store_id, plan_id, price_paid, commission_amount, store_earnings,
+          includes_kynisto_premium, status, started_at, expires_at, created_at
+        ) VALUES (?, ?, ?, ?, ?, 50, ?, 1, 'pending_verification', ?, ?, ?)
+      `).bind(
+        membershipId, session.user.id, storeId, planId, plan.price || 0, Math.max(0, (plan.price || 0) - 50), now, expiresAt, now
+      ).run();
+    } catch (e) {
+      console.warn("Notice syncing customer_memberships:", e);
+    }
+
     return NextResponse.json({
       success: true,
       membershipId,

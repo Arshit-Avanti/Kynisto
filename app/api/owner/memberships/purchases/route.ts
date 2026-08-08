@@ -134,13 +134,35 @@ export async function POST(req: Request) {
       const startsAt = now;
       const expiresAt = now + (durationDays * 86400);
 
+      // 1. Update customer_store_memberships
       await d1.prepare(`
         UPDATE customer_store_memberships
         SET status = 'active', starts_at = ?, expires_at = ?, updated_at = ?
         WHERE id = ?
       `).bind(startsAt, expiresAt, now, purchaseId).run();
 
-        // Note: Points are strictly awarded ONLY via store QR code scan per system policy.
+      // 2. Also insert/update into customer_memberships table
+      try {
+        await d1.prepare(`
+          INSERT INTO customer_memberships (
+            id, user_id, store_id, plan_id, price_paid, commission_amount, store_earnings,
+            includes_kynisto_premium, status, started_at, expires_at, created_at
+          ) VALUES (?, ?, ?, ?, ?, 50, ?, 1, 'active', ?, ?, ?)
+          ON CONFLICT(id) DO UPDATE SET status = 'active', expires_at = excluded.expires_at
+        `).bind(
+          existing.id,
+          existing.customer_id,
+          existing.store_id,
+          existing.plan_id,
+          existing.amount_paid || 0,
+          Math.max(0, (existing.amount_paid || 0) - 50),
+          startsAt,
+          expiresAt,
+          now
+        ).run();
+      } catch (e) {
+        console.warn("Notice syncing customer_memberships:", e);
+      }
 
       // Unlock linked store coupons as loyalty rewards
       if (Array.isArray(linkedCouponIds) && linkedCouponIds.length > 0) {
