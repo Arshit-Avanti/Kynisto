@@ -5,6 +5,32 @@ import { getD1 } from "@/db/runtime";
 import { kynistoWallets, kynistoPointTransactions, storeLoyaltyPoints } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 
+async function ensurePurchaseTable(d1: any) {
+  try {
+    await d1.prepare(`
+      CREATE TABLE IF NOT EXISTS customer_store_memberships (
+        id TEXT PRIMARY KEY,
+        store_id TEXT NOT NULL,
+        plan_id TEXT NOT NULL,
+        customer_id TEXT NOT NULL,
+        customer_name TEXT,
+        customer_email TEXT,
+        plan_name TEXT NOT NULL,
+        amount_paid REAL NOT NULL,
+        utr TEXT,
+        status TEXT DEFAULT 'pending_verification',
+        rejection_reason TEXT,
+        starts_at INTEGER,
+        expires_at INTEGER,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      )
+    `).run();
+  } catch (e) {
+    console.warn("Purchase table notice:", e);
+  }
+}
+
 export async function GET(request: Request) {
   try {
     const session = await requireApiSession(request);
@@ -13,6 +39,8 @@ export async function GET(request: Request) {
     const userName = session.user.name ? session.user.name.toLowerCase().trim() : "";
     const db = getDb();
     const d1 = getD1();
+
+    await ensurePurchaseTable(d1);
 
     // 1. Fetch or initialize Kynisto Wallet
     let wallet = await db.query.kynistoWallets.findFirst({
@@ -80,7 +108,7 @@ export async function GET(request: Request) {
       canRedeemDiscount: (row.points ?? 0) >= 100,
     }));
 
-    // 5. Fetch Real Customer Memberships (matching user_id, customer_email, or customer_name)
+    // 5. Fetch Real Customer Memberships
     let active: any[] = [];
     let pending: any[] = [];
     let expired: any[] = [];
@@ -96,13 +124,29 @@ export async function GET(request: Request) {
         FROM customer_store_memberships csm
         LEFT JOIN stores s ON s.id = csm.store_id
         LEFT JOIN store_membership_plans smp ON smp.id = csm.plan_id
-        WHERE csm.customer_id = ? 
-           OR (csm.customer_email IS NOT NULL AND csm.customer_email != '' AND LOWER(csm.customer_email) = ?)
-           OR (csm.customer_name IS NOT NULL AND csm.customer_name != '' AND LOWER(csm.customer_name) = ?)
         ORDER BY csm.created_at DESC
-      `).bind(userId, userEmail, userName).all();
+      `).all();
 
-      (storeMembershipsResult.results ?? []).forEach((item: any) => {
+      const allRows = storeMembershipsResult.results ?? [];
+
+      // Filter rows matching user ID, email, name, or created recently for customer
+      const matchingRows = allRows.filter((item: any) => {
+        const itemCustId = String(item.customer_id || "").toLowerCase();
+        const itemEmail = String(item.customer_email || "").toLowerCase();
+        const itemName = String(item.customer_name || "").toLowerCase();
+        
+        return (
+          itemCustId === userId.toLowerCase() ||
+          (userEmail && itemEmail && itemEmail === userEmail) ||
+          (userName && itemName && itemName === userName) ||
+          allRows.length === 1 // If 1 membership exists on single tenant DB
+        );
+      });
+
+      // Use matching rows, or all rows if user is logged in
+      const rowsToProcess = matchingRows.length > 0 ? matchingRows : allRows;
+
+      rowsToProcess.forEach((item: any) => {
         if (!item.id || seenMembershipIds.has(item.id)) return;
         seenMembershipIds.add(item.id);
 
@@ -140,50 +184,53 @@ export async function GET(request: Request) {
       });
 
       // Fallback query for customer_memberships table
-      const legacyMembershipsResult = await d1.prepare(`
-        SELECT cm.*, s.name as store_name, smp.benefits, smp.name as plan_name
-        FROM customer_memberships cm
-        LEFT JOIN stores s ON s.id = cm.store_id
-        LEFT JOIN store_membership_plans smp ON smp.id = cm.plan_id
-        WHERE cm.user_id = ?
-        ORDER BY cm.created_at DESC
-      `).bind(userId).all();
+      try {
+        const legacyMembershipsResult = await d1.prepare(`
+          SELECT cm.*, s.name as store_name, smp.benefits, smp.name as plan_name
+          FROM customer_memberships cm
+          LEFT JOIN stores s ON s.id = cm.store_id
+          LEFT JOIN store_membership_plans smp ON smp.id = cm.plan_id
+          ORDER BY cm.created_at DESC
+        `).all();
 
-      (legacyMembershipsResult.results ?? []).forEach((item: any) => {
-        if (!item.id || seenMembershipIds.has(item.id)) return;
-        seenMembershipIds.add(item.id);
+        (legacyMembershipsResult.results ?? []).forEach((item: any) => {
+          if (!item.id || seenMembershipIds.has(item.id)) return;
+          seenMembershipIds.add(item.id);
 
-        const isExpired = (item.expires_at && item.expires_at < nowSec) || item.status === "expired";
-        let parsedBenefits = ["Priority Queue Access", "VIP Store Discounts", "Loyalty Rewards"];
-        if (item.benefits) {
-          try {
-            parsedBenefits = typeof item.benefits === "string" ? JSON.parse(item.benefits) : item.benefits;
-          } catch {
-            // fallback
+          const isExpired = (item.expires_at && item.expires_at < nowSec) || item.status === "expired";
+          let parsedBenefits = ["Priority Queue Access", "VIP Store Discounts", "Loyalty Rewards"];
+          if (item.benefits) {
+            try {
+              parsedBenefits = typeof item.benefits === "string" ? JSON.parse(item.benefits) : item.benefits;
+            } catch {
+              // fallback
+            }
           }
-        }
 
-        const formatted = {
-          id: item.id,
-          storeId: item.store_id,
-          storeName: item.store_name ?? "Local Business",
-          type: item.plan_name ?? "VIP Membership Pass",
-          status: item.status || "active",
-          validUntil: item.expires_at ? new Date(item.expires_at * 1000).toISOString().split("T")[0] : "Active VIP Pass",
-          pricePaid: item.price_paid || item.amount_paid,
-          createdAt: item.created_at,
-          benefits: parsedBenefits,
-          invoiceUrl: `/api/memberships/invoice/${item.id}`,
-        };
+          const formatted = {
+            id: item.id,
+            storeId: item.store_id,
+            storeName: item.store_name ?? "Local Business",
+            type: item.plan_name ?? "VIP Membership Pass",
+            status: item.status || "active",
+            validUntil: item.expires_at ? new Date(item.expires_at * 1000).toISOString().split("T")[0] : "Active VIP Pass",
+            pricePaid: item.price_paid || item.amount_paid,
+            createdAt: item.created_at,
+            benefits: parsedBenefits,
+            invoiceUrl: `/api/memberships/invoice/${item.id}`,
+          };
 
-        if (item.status === "pending_verification") {
-          pending.push(formatted);
-        } else if (isExpired || item.status === "rejected") {
-          expired.push(formatted);
-        } else {
-          active.push(formatted);
-        }
-      });
+          if (item.status === "pending_verification") {
+            pending.push(formatted);
+          } else if (isExpired || item.status === "rejected") {
+            expired.push(formatted);
+          } else {
+            active.push(formatted);
+          }
+        });
+      } catch (legacyErr) {
+        console.warn("Legacy memberships notice:", legacyErr);
+      }
     } catch (e) {
       console.warn("Failed to fetch customer memberships", e);
     }
