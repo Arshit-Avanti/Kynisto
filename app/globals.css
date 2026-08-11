@@ -2683,3 +2683,109 @@ img, video, iframe, embed, object {
   font-weight: 800 !important;
 }
 
+
+/* ==========================================================================
+   LIGHT MODE OVERRIDES — Fix invisible text in drawer, feature cards & store cards
+   These rules must come LAST to win the specificity war.
+   ========================================================================== */
+
+/* 1 ── Mobile drawer always has a dark background → ALL text inside = WHITE */
+.mode-light .mobileNavDrawer,
+.mode-light .mobileNavDrawer *,
+.mode-light .mobileNavDrawer a,
+.mode-light .mobileNavDrawer button,
+.mode-light .mobileNavDrawer span,
+.mode-light .mobileNavDrawer div,
+.mode-light .mobileNavDrawer p,
+.mode-light .mobileNavDrawer h1,
+.mode-light .mobileNavDrawer h2,
+.mode-light .mobileNavDrawer h3,
+.mode-light .mobileNavDrawer b,
+.mode-light .mobileNavDrawer nav,
+.mode-light .mobileNavDrawer nav *,
+.mode-light .drawerCard,
+.mode-light .drawerCard *,
+.mode-light .drawerLink,
+.mode-light .drawerLink * {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Drawer card items — readable contrast on dark drawer bg */
+.mode-light .mobileNavDrawer nav .drawerCard {
+  background: rgba(255, 255, 255, 0.09) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* 2 ── Feature cards (Universal Discovery etc.) — light mode: bright bg + dark text */
+.mode-light .featureCard,
+.light-theme .featureCard {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+.mode-light .featureCard h3,
+.light-theme .featureCard h3 {
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+  text-shadow: none !important;
+}
+
+.mode-light .featureCard p,
+.light-theme .featureCard p {
+  color: #374151 !important;
+  -webkit-text-fill-color: #374151 !important;
+  text-shadow: none !important;
+}
+
+/* 3 ── Popular Near You: truly transparent glass in light mode */
+.mode-light .storeCard,
+.light-theme .storeCard {
+  background: rgba(255, 255, 255, 0.5) !important;
+  border: 1px solid rgba(0, 0, 0, 0.09) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06) !important;
+}
+
+.mode-light .storeCard h3,
+.light-theme .storeCard h3 {
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+  text-shadow: none !important;
+}
+
+.mode-light .address,
+.light-theme .address {
+  color: #374151 !important;
+  -webkit-text-fill-color: #374151 !important;
+}
+
+.mode-light .storeMeta,
+.light-theme .storeMeta {
+  color: #374151 !important;
+  -webkit-text-fill-color: #374151 !important;
+}
+
+.mode-light .storeCard .rating,
+.light-theme .storeCard .rating {
+  color: #92400E !important;
+  -webkit-text-fill-color: #92400E !important;
+}
+
+.mode-light .storeCard .categoryLabel,
+.light-theme .storeCard .categoryLabel {
+  color: var(--accent-dark) !important;
+}
+
+.mode-light .detailsButton,
+.light-theme .detailsButton {
+  background: rgba(0, 0, 0, 0.07) !important;
+  color: #1E293B !important;
+  -webkit-text-fill-color: #1E293B !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
