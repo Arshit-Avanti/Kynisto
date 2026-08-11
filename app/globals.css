@@ -2404,3 +2404,282 @@ img, video, iframe, embed, object {
 
 
 
+
+
+/* ==========================================================================
+   TARGETED VISIBILITY FIXES — Homepage Only
+   1. Mobile Dropdown Menu text visibility
+   2. Feature Cards ("Universal Discovery" etc.) text visibility
+   3. Popular Near You — transparent cards matching page bg
+   4. Exact Location / Live Hours / Rating / Saved Favorites more visible
+   ========================================================================== */
+
+/* ── 1. MOBILE NAV DRAWER — Force all text white, increase drawer card contrast ── */
+.mobileNavDrawer {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  background: rgba(8, 12, 24, 0.99) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+}
+
+.mobileNavDrawer *,
+.mobileNavDrawer a,
+.mobileNavDrawer button,
+.mobileNavDrawer span:not([style*="background"]),
+.mobileNavDrawer div,
+.mobileNavDrawer p,
+.mobileNavDrawer b,
+.mobileNavDrawer nav,
+.mobileNavDrawer nav * {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Drawer nav item cards — visible against dark bg */
+.drawerCard,
+.drawerLink {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.drawerCard span,
+.drawerLink span {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Regular nav items (not special) — stronger bg for readability */
+.mobileNavDrawer nav .drawerCard {
+  background: rgba(255, 255, 255, 0.09) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  font-weight: 600 !important;
+}
+
+.mobileNavDrawer nav .drawerCard:hover {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Locality picker card inside drawer */
+.mobileNavDrawer .drawerCard[style*="rgba(255, 87, 34"] span,
+.mobileNavDrawer .drawerCard[style*="rgba(255, 87, 34"] {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Admin panel / orange accent link inside drawer */
+.mobileNavDrawer nav .drawerCard[style*="rgba(255, 122"],
+.mobileNavDrawer nav .drawerCard[style*="linear-gradient"] {
+  font-weight: 700 !important;
+}
+
+/* Kynisto logo text inside drawer */
+.mobileNavDrawer .kynistoLogo b {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+}
+
+/* ── 2. FEATURE CARDS — force fully white text, remove opacity dimming ── */
+.featureCard,
+.mode-light .featureCard,
+.mode-dark .featureCard,
+.light-theme .featureCard,
+.dark-theme .featureCard {
+  background: rgba(10, 14, 28, 0.88) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.featureCard h3,
+.mode-light .featureCard h3,
+.mode-dark .featureCard h3,
+.light-theme .featureCard h3,
+.dark-theme .featureCard h3 {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  opacity: 1 !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
+}
+
+.featureCard p,
+.mode-light .featureCard p,
+.mode-dark .featureCard p,
+.light-theme .featureCard p,
+.dark-theme .featureCard p {
+  color: #E2E8F0 !important;
+  -webkit-text-fill-color: #E2E8F0 !important;
+  opacity: 1 !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* ── 3. POPULAR NEAR YOU — transparent store cards matching page background ── */
+
+/* Transparent store card in both modes */
+.storeCard {
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+
+.mode-light .storeCard {
+  background: rgba(255, 255, 255, 0.45) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+
+.mode-dark .storeCard {
+  background: rgba(12, 18, 34, 0.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+
+/* Store card text — readable in both modes */
+.storeCard h3 {
+  color: var(--ink) !important;
+}
+
+.mode-dark .storeCard h3 {
+  color: #F1F5F9 !important;
+  -webkit-text-fill-color: #F1F5F9 !important;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6) !important;
+}
+
+.mode-light .storeCard h3 {
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+}
+
+/* Rating — more visible */
+.storeCard .rating {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+.mode-dark .storeCard .rating {
+  color: #fde68a !important;
+  -webkit-text-fill-color: #fde68a !important;
+}
+
+.mode-light .storeCard .rating {
+  color: #78350F !important;
+  -webkit-text-fill-color: #78350F !important;
+}
+
+.rating b {
+  color: #D97706 !important;
+  -webkit-text-fill-color: #D97706 !important;
+  font-weight: 800 !important;
+}
+
+/* Address (Exact Location) — more visible */
+.mode-dark .address {
+  color: #CBD5E1 !important;
+  -webkit-text-fill-color: #CBD5E1 !important;
+  font-size: 11.5px !important;
+}
+
+.mode-light .address {
+  color: #374151 !important;
+  -webkit-text-fill-color: #374151 !important;
+}
+
+/* Store Meta (Live hours, walk time) — more visible */
+.mode-dark .storeMeta {
+  color: #CBD5E1 !important;
+  -webkit-text-fill-color: #CBD5E1 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+.mode-light .storeMeta {
+  color: #374151 !important;
+  -webkit-text-fill-color: #374151 !important;
+  font-weight: 600 !important;
+}
+
+/* Details button transparent-compatible */
+.mode-dark .detailsButton {
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: #F1F5F9 !important;
+  -webkit-text-fill-color: #F1F5F9 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  font-weight: 700 !important;
+}
+
+.mode-light .detailsButton {
+  background: rgba(0, 0, 0, 0.08) !important;
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  font-weight: 700 !important;
+}
+
+/* Save heart icon */
+.mode-dark .saveIcon {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #F1F5F9 !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+/* ── 4. EXACT LOCATION / LIVE HOURS / SAVED FAVORITES — trustStrip visible ── */
+.trustStrip {
+  background: rgba(10, 16, 30, 0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-radius: 20px !important;
+  padding: 48px 40px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.mode-light .trustStrip {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.trustStrip b {
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8) !important;
+  letter-spacing: -0.01em !important;
+}
+
+.mode-light .trustStrip b {
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+  text-shadow: none !important;
+}
+
+.trustStrip small {
+  color: #94A3B8 !important;
+  -webkit-text-fill-color: #94A3B8 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+.mode-light .trustStrip small {
+  color: #475569 !important;
+  -webkit-text-fill-color: #475569 !important;
+}
+
+/* Trust strip icon circles more prominent */
+.trustStrip > div > span {
+  width: 50px !important;
+  height: 50px !important;
+  background: rgba(56, 189, 248, 0.3) !important;
+  color: #38bdf8 !important;
+  border: 1.5px solid rgba(56, 189, 248, 0.6) !important;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.35), 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+  font-size: 20px !important;
+  font-weight: 800 !important;
+}
+
