@@ -2105,7 +2105,7 @@ export default function Home() {
 
       <footer>
         <a className="brand footerBrand" href="#top"><KynistoLogo /></a>
-        <p className="demoNote">Your Locality · © 2026 Kynisto<br />MADE BY A&A</p>
+        <p className="demoNote" style={{ textAlign: "center" }}>Your Locality · © 2026 Kynisto<br />MADE BY A&A</p>
       </footer>
 
       {customizing && (
