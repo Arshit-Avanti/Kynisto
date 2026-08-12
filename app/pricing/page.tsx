@@ -111,7 +111,7 @@ export default function PricingPage() {
   }, []);
 
   return (
-    <main className="site mode-dark theme-royal bg-slate-950 min-h-screen text-slate-100">
+    <main className="site min-h-screen transition-colors duration-200">
       <Navbar3D userRole={currentUser?.role || null} savedCount={0} mode="pricing" />
 
       <div style={{ paddingTop: "100px" }}>

@@ -60,7 +60,7 @@
   --portal-muted: #475569;
   --portal-input: #FFFFFF;
 
-  --bg-page: #F8FAFC;
+  --bg-page: transparent;
   --bg-card: #FFFFFF;
   --text-primary: #0f172a;
   --text-secondary: #0F172A;
@@ -73,35 +73,107 @@
   --glass-surface: rgba(255, 255, 255, 0.95);
   --glass-border: rgba(0, 0, 0, 0.12);
   --accent-orange: #FF5722;
-  background-color: #F8FAFC;
   color: #0f172a;
 }
 
-/* Light mode: ensure readable dark text */
-.mode-light h1:not([class*="text-"]):not(.services-hero-title):not(.force-white-text),
-.mode-light h2:not([class*="text-"]):not(.force-white-text),
-.mode-light h3:not([class*="text-"]):not(.force-white-text),
-.mode-light h4:not([class*="text-"]):not(.force-white-text),
-.mode-light p:not([class*="text-"]):not(.services-hero-subtitle):not(.force-white-text),
-.mode-light label:not([class*="text-"]):not(.force-white-text),
-.light-theme h1:not([class*="text-"]):not(.services-hero-title):not(.force-white-text),
-.light-theme h2:not([class*="text-"]):not(.force-white-text),
-.light-theme h3:not([class*="text-"]):not(.force-white-text),
-.light-theme h4:not([class*="text-"]):not(.force-white-text),
-.light-theme p:not([class*="text-"]):not(.services-hero-subtitle):not(.force-white-text),
-.light-theme label:not([class*="text-"]):not(.force-white-text) {
+/* Light mode: ensure readable dark text on regular light cards, EXCEPT inside floating navbars or dark mobile drawers */
+.mode-light h1:not([class*="text-"]):not(.services-hero-title):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
+.mode-light h2:not([class*="text-"]):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
+.mode-light h3:not([class*="text-"]):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
+.mode-light h4:not([class*="text-"]):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
+.mode-light p:not([class*="text-"]):not(.services-hero-subtitle):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
+.mode-light label:not([class*="text-"]):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
+.light-theme h1:not([class*="text-"]):not(.services-hero-title):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
+.light-theme h2:not([class*="text-"]):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
+.light-theme h3:not([class*="text-"]):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
+.light-theme h4:not([class*="text-"]):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
+.light-theme p:not([class*="text-"]):not(.services-hero-subtitle):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
+.light-theme label:not([class*="text-"]):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *) {
   color: #0f172a;
   -webkit-text-fill-color: #0f172a;
   text-shadow: none;
 }
 
-/* Explicit reset for forced white text elements on dark media backdrops */
+/* Explicit reset for forced white text elements on dark media backdrops & mobile drawer */
 .force-white-text,
 .services-hero-title,
 .services-hero-subtitle,
 .services-page-shell h1,
-.services-page-shell h2 {
+.services-page-shell h2,
+.topbar *,
+.navbar3d *,
+.mobileNavDrawer,
+.mobileNavDrawer * {
   -webkit-text-fill-color: initial !important;
+}
+
+/* Mobile Navigation Drawer: Enforce crisp high-contrast white text & clear translucent dark glass cards in all theme modes */
+.mobileNavDrawer,
+.mobileNavDrawer *,
+.mobileNavDrawer a,
+.mobileNavDrawer button,
+.mobileNavDrawer span,
+.mobileNavDrawer div,
+.mode-light .mobileNavDrawer,
+.mode-light .mobileNavDrawer *,
+.mode-light .mobileNavDrawer a,
+.mode-light .mobileNavDrawer button,
+.mode-light .mobileNavDrawer span,
+.mode-light .mobileNavDrawer div,
+.light-theme .mobileNavDrawer,
+.light-theme .mobileNavDrawer *,
+.light-theme .mobileNavDrawer a,
+.light-theme .mobileNavDrawer button,
+.light-theme .mobileNavDrawer span,
+.light-theme .mobileNavDrawer div {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+.mobileNavDrawer .drawerCard,
+.mode-light .mobileNavDrawer .drawerCard,
+.light-theme .mobileNavDrawer .drawerCard {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+}
+
+/* Mobile 9:16 Vertical Video Full Homepage Coverage */
+@media (max-width: 768px) {
+  .mobile-9-16-video-container {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    min-height: 100dvh !important;
+    aspect-ratio: 9 / 16 !important;
+    overflow: hidden !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
+  }
+
+  .mobile-9-16-video-player {
+    width: 100vw !important;
+    height: 100vh !important;
+    min-height: 100dvh !important;
+    min-width: 56.25vh !important;
+    object-fit: cover !important;
+    object-position: center top !important;
+    transform: scale(1.12) translateZ(0) !important;
+  }
+
+  .site,
+  .hero,
+  .featureGrid,
+  .categorySection,
+  .advancedFilters,
+  .storeGrid,
+  .footer {
+    background-color: transparent !important;
+  }
 }
 
 /* Dark mode: ensure readable white text */
@@ -116,7 +188,13 @@
 .dark-theme h3:not([class*="text-"]),
 .dark-theme h4:not([class*="text-"]),
 .dark-theme p:not([class*="text-"]),
-.dark-theme label:not([class*="text-"]) {
+.dark-theme label:not([class*="text-"]),
+.dark h1:not([class*="text-"]),
+.dark h2:not([class*="text-"]),
+.dark h3:not([class*="text-"]),
+.dark h4:not([class*="text-"]),
+.dark p:not([class*="text-"]),
+.dark label:not([class*="text-"]) {
   color: #f1f5f9;
   -webkit-text-fill-color: #f1f5f9;
   text-shadow: none;

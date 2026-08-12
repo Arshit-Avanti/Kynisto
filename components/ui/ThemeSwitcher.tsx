@@ -34,15 +34,17 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ className = '', si
     body.setAttribute('data-theme', newTheme);
 
     // Remove existing theme classes
-    root.classList.remove('mode-light', 'mode-dark', 'theme-cyberpunk', 'theme-royal', 'theme-obsidian');
-    body.classList.remove('mode-light', 'mode-dark', 'theme-cyberpunk', 'theme-royal', 'theme-obsidian');
+    root.classList.remove('mode-light', 'mode-dark', 'light-theme', 'dark-theme', 'dark', 'theme-cyberpunk', 'theme-royal', 'theme-obsidian');
+    body.classList.remove('mode-light', 'mode-dark', 'light-theme', 'dark-theme', 'dark', 'theme-cyberpunk', 'theme-royal', 'theme-obsidian');
 
     if (newTheme === 'light') {
-      root.classList.add('mode-light');
-      body.classList.add('mode-light');
+      root.classList.add('mode-light', 'light-theme');
+      body.classList.add('mode-light', 'light-theme');
+      localStorage.setItem('theme', 'light');
     } else {
-      root.classList.add('mode-dark', `theme-${newTheme}`);
-      body.classList.add('mode-dark', `theme-${newTheme}`);
+      root.classList.add('mode-dark', 'dark-theme', 'dark', `theme-${newTheme}`);
+      body.classList.add('mode-dark', 'dark-theme', 'dark', `theme-${newTheme}`);
+      localStorage.setItem('theme', 'dark');
     }
   };
 

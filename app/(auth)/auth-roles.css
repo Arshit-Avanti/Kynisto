@@ -55,3 +55,33 @@
 .deniedCard { display: grid; gap: 12px; }
 .deniedCode { width: max-content; padding: 7px 11px; border-radius: 999px; background: #fbe5df; color: #9b321f; font-size: 11px; font-weight: 850; letter-spacing: .1em; }
 .authLinkButton { display: grid; place-items: center; text-decoration: none; }
+
+/* Dark mode contrast overrides */
+.dark-theme .loginRoleChoice label,
+.mode-dark .loginRoleChoice label,
+.dark .loginRoleChoice label {
+  background: #10192e;
+  border-color: #2b3956;
+}
+
+.dark-theme .loginRoleChoice label:hover,
+.dark-theme .loginRoleChoice label.selected,
+.mode-dark .loginRoleChoice label:hover,
+.mode-dark .loginRoleChoice label.selected,
+.dark .loginRoleChoice label:hover,
+.dark .loginRoleChoice label.selected {
+  background: #1a2744;
+  border-color: #3b82f6;
+}
+
+.dark-theme .loginRoleChoice b,
+.mode-dark .loginRoleChoice b,
+.dark .loginRoleChoice b {
+  color: #f8fafc;
+}
+
+.dark-theme .loginRoleChoice small,
+.mode-dark .loginRoleChoice small,
+.dark .loginRoleChoice small {
+  color: #94a3b8;
+}

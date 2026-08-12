@@ -7,7 +7,7 @@ export function ThemeToggle() {
 
   useEffect(() => {
     // Check initial theme from document class or localStorage
-    const isDark = document.documentElement.classList.contains("dark-theme");
+    const isDark = document.documentElement.classList.contains("dark-theme") || document.documentElement.classList.contains("dark") || document.documentElement.classList.contains("mode-dark");
     setTheme(isDark ? "dark" : "light");
   }, []);
 
@@ -15,14 +15,23 @@ export function ThemeToggle() {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
 
+    const root = document.documentElement;
+    const body = document.body;
+
     if (newTheme === "dark") {
-      document.documentElement.classList.remove("light-theme");
-      document.documentElement.classList.add("dark-theme");
+      root.classList.remove("light-theme", "mode-light");
+      body.classList.remove("light-theme", "mode-light");
+      root.classList.add("dark", "dark-theme", "mode-dark");
+      body.classList.add("dark", "dark-theme", "mode-dark");
       localStorage.setItem("theme", "dark");
+      localStorage.setItem("kynisto_theme", "cyberpunk");
     } else {
-      document.documentElement.classList.remove("dark-theme");
-      document.documentElement.classList.add("light-theme");
+      root.classList.remove("dark", "dark-theme", "mode-dark", "theme-cyberpunk", "theme-royal", "theme-obsidian");
+      body.classList.remove("dark", "dark-theme", "mode-dark", "theme-cyberpunk", "theme-royal", "theme-obsidian");
+      root.classList.add("light-theme", "mode-light");
+      body.classList.add("light-theme", "mode-light");
       localStorage.setItem("theme", "light");
+      localStorage.setItem("kynisto_theme", "light");
     }
   };
 

@@ -75,8 +75,22 @@ export function VideoBackground({
   }, []);
 
   return (
-    <div ref={containerRef} className="fixed inset-0 w-screen h-screen overflow-hidden pointer-events-none z-[-1] bg-[#050507]">
-      {/* High Performance Native Video Player */}
+    <div
+      ref={containerRef}
+      className="fixed inset-0 w-full h-full min-h-[100dvh] overflow-hidden pointer-events-none z-[-1] mobile-9-16-video-container"
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        minHeight: "100dvh",
+        zIndex: -1,
+        pointerEvents: "none",
+        backgroundColor: "#050507",
+      }}
+    >
+      {/* High Performance Native Video Player (Optimized for 9:16 Vertical Mobile & Full-Page Coverage) */}
       <video
         ref={videoRef}
         autoPlay
@@ -88,8 +102,14 @@ export function VideoBackground({
         x5-playsinline="true"
         x5-video-player-type="h5"
         preload="auto"
-        className="absolute inset-0 w-full h-full object-cover opacity-85 scale-105 filter brightness-105 contrast-105 pointer-events-none"
+        className="absolute inset-0 w-full h-full object-cover opacity-90 scale-105 filter brightness-105 contrast-105 pointer-events-none mobile-9-16-video-player"
         style={{
+          width: "100%",
+          height: "100%",
+          minWidth: "100vw",
+          minHeight: "100dvh",
+          objectFit: "cover",
+          objectPosition: "center top",
           transform: "translateZ(0)",
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",

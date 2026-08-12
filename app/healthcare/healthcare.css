@@ -1,6 +1,9 @@
 /* Kynisto Healthcare - Modern Medical Design System */
 
-:root {
+:root,
+.dark-theme,
+.mode-dark,
+.dark {
   --h-bg: #090d16;
   --h-card-bg: rgba(15, 23, 42, 0.75);
   --h-card-border: rgba(51, 65, 85, 0.6);
@@ -14,6 +17,23 @@
   --h-text-subtle: #64748b;
   --h-surface: rgba(30, 41, 59, 0.5);
   --h-glow: 0 0 25px rgba(16, 185, 129, 0.15);
+}
+
+.light-theme,
+.mode-light {
+  --h-bg: #f8fafc;
+  --h-card-bg: #ffffff;
+  --h-card-border: #cbd5e1;
+  --h-card-hover-border: #059669;
+  --h-primary: #059669;
+  --h-primary-gradient: linear-gradient(135deg, #059669 0%, #047857 100%);
+  --h-accent: #0284c7;
+  --h-accent-gradient: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  --h-text: #0f172a;
+  --h-text-muted: #475569;
+  --h-text-subtle: #64748b;
+  --h-surface: #f1f5f9;
+  --h-glow: 0 4px 20px rgba(5, 150, 105, 0.12);
 }
 
 .healthPage {

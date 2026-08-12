@@ -164,7 +164,7 @@ body {
 
 .portalButton,
 .authSubmit,
-button,
+.kynistoPrimaryBtn,
 .doneButton,
 .searchSubmit {
   background: linear-gradient(135deg, #FF5722 0%, #E53935 100%);
@@ -183,7 +183,7 @@ button,
 
 .portalButton:hover,
 .authSubmit:hover,
-button:hover,
+.kynistoPrimaryBtn:hover,
 .doneButton:hover,
 .searchSubmit:hover {
   background: linear-gradient(135deg, #F4511E 0%, #D32F2F 100%);
