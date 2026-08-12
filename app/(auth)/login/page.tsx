@@ -14,10 +14,10 @@ export default async function LoginPage() {
       <section className="androidDownload" aria-labelledby="android-download-title">
         <span className="androidDownloadIcon" aria-hidden="true">K</span>
         <div>
-          <strong id="android-download-title">Get Kynisto 2.0 for Android</strong>
-          <small>Install the official mobile app for the latest local discovery experience & instant updates.</small>
+          <strong id="android-download-title">Get Kynisto 2.1 for Android</strong>
+          <small>Install the official mobile app for the latest local discovery experience &amp; instant updates.</small>
         </div>
-        <a href="/downloads/Kynisto-2.0.0-release.apk" download="Kynisto-2.0.0-release.apk">
+        <a href="/downloads/Kynisto-2.1.0-release.apk" download="Kynisto-2.1.0-release.apk">
           Download APK
         </a>
       </section>

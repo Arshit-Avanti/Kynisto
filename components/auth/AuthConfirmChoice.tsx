@@ -93,8 +93,8 @@ export default function AuthConfirmChoice({ hash, accessToken }: AuthConfirmChoi
         
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           <a 
-            href="/downloads/Kynisto-2.0.0-release.apk"
-            download="Kynisto-2.0.0-release.apk"
+            href="/downloads/Kynisto-2.1.0-release.apk"
+            download="Kynisto-2.1.0-release.apk"
             style={{
               display: "flex",
               alignItems: "center",
@@ -112,7 +112,7 @@ export default function AuthConfirmChoice({ hash, accessToken }: AuthConfirmChoi
             }}
           >
             <span style={{ fontSize: "1.5rem" }}>📥</span>
-            Download Kynisto App (APK)
+            Download Kynisto App (APK v2.1)
           </a>
 
           <div style={{ display: "flex", alignItems: "center", margin: "0.5rem 0" }}>
@@ -181,8 +181,8 @@ export default function AuthConfirmChoice({ hash, accessToken }: AuthConfirmChoi
         </button>
 
         <a 
-          href="/downloads/Kynisto-2.0.0-release.apk"
-          download
+          href="/downloads/Kynisto-2.1.0-release.apk"
+          download="Kynisto-2.1.0-release.apk"
           style={{
             display: "flex",
             alignItems: "center",

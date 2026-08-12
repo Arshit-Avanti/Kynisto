@@ -93,7 +93,7 @@ const worker = {
       if (!asset.ok) return applySecurityHeaders(asset);
       const headers = new Headers(asset.headers);
       headers.set("Content-Type", "application/vnd.android.package-archive");
-      const filename = url.pathname.split("/").pop() || "Kynisto-2.0.0-release.apk";
+      const filename = url.pathname.split("/").pop() || "Kynisto-2.1.0-release.apk";
       headers.set("Content-Disposition", `attachment; filename="${filename}"`);
       headers.set("Cache-Control", "public, max-age=31536000, immutable");
       headers.set("Vary", "Accept-Encoding");

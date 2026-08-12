@@ -79,6 +79,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://gdakvxqegfnxflaqijwf.supabase.co" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://gdakvxqegfnxflaqijwf.supabase.co" />
+        <link rel="preconnect" href="https://kynisto.in" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://kynisto.in" />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${plusJakartaSans.variable}`}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
         <SupabaseAuthManager />
