@@ -570,20 +570,19 @@ const modernCleanTechStyles = `
     -webkit-text-fill-color: #ffffff;
     letter-spacing: -0.02em;
   }
-  /* In light mode, featureCard sits on a pale background — use strong dark ink */
   .mode-light .featureCard h3 {
-    color: #0f172a !important;
-    -webkit-text-fill-color: #0f172a !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
   }
   .featureCard p {
-    color: #cbd5e1;
+    color: #e2e8f0;
     line-height: 1.6;
     font-size: 1.1rem;
     margin: 0;
   }
   .mode-light .featureCard p {
-    color: #374151 !important;
-    -webkit-text-fill-color: #374151 !important;
+    color: #e2e8f0 !important;
+    -webkit-text-fill-color: #e2e8f0 !important;
   }
   
 
@@ -1935,18 +1934,18 @@ export default function Home() {
       <section className="featureGrid">
         <div className="featureCard">
           <div style={{ color: "#FF5722", marginBottom: "16px" }}><Icons.Search /></div>
-          <h3>Universal Discovery</h3>
-          <p>Find what you need, exactly when you need it. Intelligent search that understands intent and proximity.</p>
+          <h3 style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Universal Discovery</h3>
+          <p style={{ color: "#E2E8F0", WebkitTextFillColor: "#E2E8F0" }}>Find what you need, exactly when you need it. Intelligent search that understands intent and proximity.</p>
         </div>
         <div className="featureCard">
           <div style={{ color: "#3B82F6", marginBottom: "16px" }}><Icons.Clock /></div>
-          <h3>Real-time Queues</h3>
-          <p>Skip the waiting room. Monitor your position in line from anywhere and arrive exactly when it's your turn.</p>
+          <h3 style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Real-time Queues</h3>
+          <p style={{ color: "#E2E8F0", WebkitTextFillColor: "#E2E8F0" }}>Skip the waiting room. Monitor your position in line from anywhere and arrive exactly when it's your turn.</p>
         </div>
         <div className="featureCard">
           <div style={{ color: "#10B981", marginBottom: "16px" }}><Icons.Star /></div>
-          <h3>Unified Loyalty</h3>
-          <p>One wallet for every store. Earn, track, and redeem rewards seamlessly without juggling multiple apps.</p>
+          <h3 style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Unified Loyalty</h3>
+          <p style={{ color: "#E2E8F0", WebkitTextFillColor: "#E2E8F0" }}>One wallet for every store. Earn, track, and redeem rewards seamlessly without juggling multiple apps.</p>
         </div>
       </section>
 

@@ -2718,28 +2718,27 @@ img, video, iframe, embed, object {
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
-/* 2 ── Feature cards (Universal Discovery etc.) — light mode: bright bg + dark text */
+/* 2 ── Feature cards (Universal Discovery etc.) — pure white & light silver text in all modes */
 .mode-light .featureCard,
 .light-theme .featureCard {
-  background: rgba(255, 255, 255, 0.75) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+  background: rgba(10, 14, 28, 0.88) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
 }
 
 .mode-light .featureCard h3,
 .light-theme .featureCard h3 {
-  color: #0F172A !important;
-  -webkit-text-fill-color: #0F172A !important;
-  text-shadow: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
 }
 
 .mode-light .featureCard p,
 .light-theme .featureCard p {
-  color: #374151 !important;
-  -webkit-text-fill-color: #374151 !important;
-  text-shadow: none !important;
+  color: #E2E8F0 !important;
+  -webkit-text-fill-color: #E2E8F0 !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
 }
 
 /* 3 ── Popular Near You: truly transparent glass in light mode */
