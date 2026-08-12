@@ -4,10 +4,12 @@ import { useEffect, useRef } from "react";
 
 interface VideoBackgroundProps {
   videoSrc?: string;
+  mobileVideoSrc?: string;
 }
 
 export function VideoBackground({
   videoSrc = "/videos/drive-hero.mp4",
+  mobileVideoSrc = "/videos/mobile-9-16-hero.mp4",
 }: VideoBackgroundProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -115,6 +117,8 @@ export function VideoBackground({
           WebkitBackfaceVisibility: "hidden",
         }}
       >
+        {/* Dedicated 9:16 Mobile Video Source (Google Drive Video Source for Mobile Only) */}
+        <source src={mobileVideoSrc} media="(max-width: 768px)" type="video/mp4" />
         <source src={videoSrc} type="video/mp4" />
         {videoSrc !== "/videos/drive-hero.mp4" && (
           <source src="/videos/drive-hero.mp4" type="video/mp4" />
