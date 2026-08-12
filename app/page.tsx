@@ -524,65 +524,101 @@ const modernCleanTechStyles = `
     padding: 0 20px;
   }
   .featureCard {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 24px;
-    padding: 40px 32px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    background: rgba(13, 20, 36, 0.82) !important;
+    border-radius: 24px !important;
+    padding: 36px 30px !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 14px 40px rgba(0, 0, 0, 0.35) !important;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
     position: relative;
     overflow: hidden;
-    transform: translateZ(0);
-    will-change: transform, opacity;
-    contain: layout style paint;
   }
-  .mode-light .featureCard {
-    background: rgba(0, 0, 0, 0.02);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-  }
-  .featureCard::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.1), transparent 70%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  .featureCard:hover::before {
-    opacity: 1;
+  .mode-light .featureCard,
+  .light-theme .featureCard {
+    background: rgba(13, 20, 36, 0.82) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
   }
   .featureCard:hover {
-    transform: translateY(-8px) translateZ(0);
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 87, 34, 0.5);
-    box-shadow: 0 12px 28px rgba(0,0,0,0.18), 0 0 20px rgba(255,87,34,0.12);
+    transform: translateY(-6px) !important;
+    background: rgba(18, 28, 50, 0.92) !important;
+    border-color: rgba(59, 130, 246, 0.45) !important;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45), 0 0 25px rgba(59, 130, 246, 0.2) !important;
   }
   .mode-light .featureCard:hover {
-    background: rgba(0, 0, 0, 0.04);
-    box-shadow: 0 12px 28px rgba(0,0,0,0.05), 0 0 20px rgba(255,87,34,0.1);
+    background: rgba(18, 28, 50, 0.92) !important;
+    border-color: rgba(59, 130, 246, 0.45) !important;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45), 0 0 25px rgba(59, 130, 246, 0.2) !important;
   }
-  .featureCard h3 {
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin: 20px 0 12px 0;
-    color: #ffffff;
-    -webkit-text-fill-color: #ffffff;
-    letter-spacing: -0.02em;
+  .featureIconBadge {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    font-size: 24px;
   }
+  .discoveryBadge {
+    background: linear-gradient(135deg, rgba(255, 87, 34, 0.25), rgba(255, 87, 34, 0.08)) !important;
+    border: 1px solid rgba(255, 87, 34, 0.4) !important;
+    color: #FF7D47 !important;
+    box-shadow: 0 0 22px rgba(255, 87, 34, 0.25) !important;
+  }
+  .queuesBadge {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(59, 130, 246, 0.08)) !important;
+    border: 1px solid rgba(59, 130, 246, 0.4) !important;
+    color: #60A5FA !important;
+    box-shadow: 0 0 22px rgba(59, 130, 246, 0.25) !important;
+  }
+  .loyaltyBadge {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(16, 185, 129, 0.08)) !important;
+    border: 1px solid rgba(16, 185, 129, 0.4) !important;
+    color: #34D399 !important;
+    box-shadow: 0 0 22px rgba(16, 185, 129, 0.25) !important;
+  }
+  .featureHeadingDiscovery,
+  .featureHeadingQueues,
+  .featureHeadingLoyalty,
+  .featureCard h3,
   .mode-light .featureCard h3 {
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
+    font-size: 1.45rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em !important;
+    margin: 18px 0 10px 0 !important;
   }
-  .featureCard p {
-    color: #e2e8f0;
-    line-height: 1.6;
-    font-size: 1.1rem;
-    margin: 0;
+  .featureHeadingDiscovery {
+    color: #FFFFFF !important;
+    background: linear-gradient(135deg, #FFFFFF 50%, #FFCCBC 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8)) !important;
   }
+  .featureHeadingQueues {
+    color: #FFFFFF !important;
+    background: linear-gradient(135deg, #FFFFFF 50%, #BFDBFE 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8)) !important;
+  }
+  .featureHeadingLoyalty {
+    color: #FFFFFF !important;
+    background: linear-gradient(135deg, #FFFFFF 50%, #A7F3D0 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8)) !important;
+  }
+  .featureText,
+  .featureCard p,
   .mode-light .featureCard p {
-    color: #e2e8f0 !important;
-    -webkit-text-fill-color: #e2e8f0 !important;
+    color: #CBD5E1 !important;
+    -webkit-text-fill-color: #CBD5E1 !important;
+    font-size: 0.95rem !important;
+    line-height: 1.65 !important;
+    font-weight: 450 !important;
+    letter-spacing: 0.01em !important;
   }
   
 
@@ -1932,20 +1968,26 @@ export default function Home() {
 
       {/* Feature Grid directly below Hero */}
       <section className="featureGrid">
-        <div className="featureCard">
-          <div style={{ color: "#FF5722", marginBottom: "16px" }}><Icons.Search /></div>
-          <h3 style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Universal Discovery</h3>
-          <p style={{ color: "#E2E8F0", WebkitTextFillColor: "#E2E8F0" }}>Find what you need, exactly when you need it. Intelligent search that understands intent and proximity.</p>
+        <div className="featureCard featureCardDiscovery">
+          <div className="featureIconBadge discoveryBadge">
+            <Icons.Search />
+          </div>
+          <h3 className="featureHeadingDiscovery">Universal Discovery</h3>
+          <p className="featureText">Find what you need, exactly when you need it. Intelligent search that understands intent and proximity.</p>
         </div>
-        <div className="featureCard">
-          <div style={{ color: "#3B82F6", marginBottom: "16px" }}><Icons.Clock /></div>
-          <h3 style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Real-time Queues</h3>
-          <p style={{ color: "#E2E8F0", WebkitTextFillColor: "#E2E8F0" }}>Skip the waiting room. Monitor your position in line from anywhere and arrive exactly when it's your turn.</p>
+        <div className="featureCard featureCardQueues">
+          <div className="featureIconBadge queuesBadge">
+            <Icons.Clock />
+          </div>
+          <h3 className="featureHeadingQueues">Real-time Queues</h3>
+          <p className="featureText">Skip the waiting room. Monitor your position in line from anywhere and arrive exactly when it's your turn.</p>
         </div>
-        <div className="featureCard">
-          <div style={{ color: "#10B981", marginBottom: "16px" }}><Icons.Star /></div>
-          <h3 style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Unified Loyalty</h3>
-          <p style={{ color: "#E2E8F0", WebkitTextFillColor: "#E2E8F0" }}>One wallet for every store. Earn, track, and redeem rewards seamlessly without juggling multiple apps.</p>
+        <div className="featureCard featureCardLoyalty">
+          <div className="featureIconBadge loyaltyBadge">
+            <Icons.Star />
+          </div>
+          <h3 className="featureHeadingLoyalty">Unified Loyalty</h3>
+          <p className="featureText">One wallet for every store. Earn, track, and redeem rewards seamlessly without juggling multiple apps.</p>
         </div>
       </section>
 
