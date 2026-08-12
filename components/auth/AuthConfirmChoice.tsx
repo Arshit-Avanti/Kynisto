@@ -181,7 +181,7 @@ export default function AuthConfirmChoice({ hash, accessToken }: AuthConfirmChoi
         </button>
 
         <a 
-          href="https://kynisto.nxt-arshit.workers.dev/downloads/Kynisto-2.0.0-release.apk"
+          href="/downloads/Kynisto-2.0.0-release.apk"
           download
           style={{
             display: "flex",

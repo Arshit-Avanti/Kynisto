@@ -20,7 +20,7 @@ export function OwnerStoreQRCard({ store }: OwnerStoreQRCardProps) {
   const [copied, setCopied] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
 
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://kynisto.nxt-arshit.workers.dev";
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://kynisto.in";
   const profileUrl = `${origin}/stores/${store.slug}`;
   const qrImageApi = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(profileUrl)}`;
 

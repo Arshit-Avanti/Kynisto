@@ -189,8 +189,8 @@ export function AuthVideoBackground() {
         src="/JGGL.jpg"
         alt="Kynisto Hero"
         onError={(e) => {
-          // Fallback to absolute Worker CDN URL if relative path fails
-          (e.target as HTMLImageElement).src = "https://kynisto.nxt-arshit.workers.dev/JGGL.jpg";
+          // Fallback image handling
+          (e.target as HTMLImageElement).src = "/JGGL.jpg";
         }}
         style={{
           position: "absolute",

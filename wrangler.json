@@ -7,8 +7,8 @@
     "nodejs_compat"
   ],
   "routes": [
-    { "pattern": "kynisto.in/*", "custom_domain": true },
-    { "pattern": "www.kynisto.in/*", "custom_domain": true }
+    { "pattern": "kynisto.in", "custom_domain": true },
+    { "pattern": "www.kynisto.in", "custom_domain": true }
   ],
   "assets": {
     "directory": "./dist/client",

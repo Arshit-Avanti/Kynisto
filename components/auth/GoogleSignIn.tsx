@@ -27,7 +27,7 @@ export function GoogleSignIn({ returnTo: _propReturnTo }: { returnTo?: string } 
       const redirectTo =
         typeof window !== "undefined"
           ? `${window.location.origin}/auth/confirm`
-          : "https://kynisto.nxt-arshit.workers.dev/auth/confirm";
+          : "https://kynisto.in/auth/confirm";
       try {
         window.sessionStorage.setItem(PENDING_KEY, "1");
         window.sessionStorage.setItem(RETURNTO_KEY, "/");

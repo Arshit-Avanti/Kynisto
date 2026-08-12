@@ -70,7 +70,8 @@ export function OwnerHealthcareQRCard() {
   if (!data) return null;
 
   const { store, qr, analytics } = data;
-  const qrUrl = `https://kynisto.nxt-arshit.workers.dev/q/${qr.queueCode}`;
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://kynisto.in";
+  const qrUrl = `${origin}/q/${qr.queueCode}`;
   const qrImageApi = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrUrl)}`;
 
   return (
