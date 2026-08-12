@@ -588,37 +588,33 @@ const modernCleanTechStyles = `
     font-weight: 800 !important;
     letter-spacing: -0.02em !important;
     margin: 18px 0 10px 0 !important;
-  }
-  .featureHeadingDiscovery {
+  .featureHeadingDiscovery,
+  .featureHeadingQueues,
+  .featureHeadingLoyalty,
+  .featureCard h3,
+  .mode-light .featureCard h3,
+  .mode-dark .featureCard h3 {
     color: #FFFFFF !important;
-    background: linear-gradient(135deg, #FFFFFF 50%, #FFCCBC 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8)) !important;
-  }
-  .featureHeadingQueues {
-    color: #FFFFFF !important;
-    background: linear-gradient(135deg, #FFFFFF 50%, #BFDBFE 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8)) !important;
-  }
-  .featureHeadingLoyalty {
-    color: #FFFFFF !important;
-    background: linear-gradient(135deg, #FFFFFF 50%, #A7F3D0 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8)) !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    font-size: 1.45rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em !important;
+    margin: 18px 0 10px 0 !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
   }
   .featureText,
   .featureCard p,
-  .mode-light .featureCard p {
-    color: #CBD5E1 !important;
-    -webkit-text-fill-color: #CBD5E1 !important;
+  .mode-light .featureCard p,
+  .mode-dark .featureCard p {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
     font-size: 0.95rem !important;
     line-height: 1.65 !important;
-    font-weight: 450 !important;
+    font-weight: 500 !important;
     letter-spacing: 0.01em !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
   }
   
 
@@ -1972,22 +1968,22 @@ export default function Home() {
           <div className="featureIconBadge discoveryBadge">
             <Icons.Search />
           </div>
-          <h3 className="featureHeadingDiscovery">Universal Discovery</h3>
-          <p className="featureText">Find what you need, exactly when you need it. Intelligent search that understands intent and proximity.</p>
+          <h3 className="featureHeadingDiscovery" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Universal Discovery</h3>
+          <p className="featureText" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Find what you need, exactly when you need it. Intelligent search that understands intent and proximity.</p>
         </div>
         <div className="featureCard featureCardQueues">
           <div className="featureIconBadge queuesBadge">
             <Icons.Clock />
           </div>
-          <h3 className="featureHeadingQueues">Real-time Queues</h3>
-          <p className="featureText">Skip the waiting room. Monitor your position in line from anywhere and arrive exactly when it's your turn.</p>
+          <h3 className="featureHeadingQueues" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Real-time Queues</h3>
+          <p className="featureText" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Skip the waiting room. Monitor your position in line from anywhere and arrive exactly when it's your turn.</p>
         </div>
         <div className="featureCard featureCardLoyalty">
           <div className="featureIconBadge loyaltyBadge">
             <Icons.Star />
           </div>
-          <h3 className="featureHeadingLoyalty">Unified Loyalty</h3>
-          <p className="featureText">One wallet for every store. Earn, track, and redeem rewards seamlessly without juggling multiple apps.</p>
+          <h3 className="featureHeadingLoyalty" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Unified Loyalty</h3>
+          <p className="featureText" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>One wallet for every store. Earn, track, and redeem rewards seamlessly without juggling multiple apps.</p>
         </div>
       </section>
 

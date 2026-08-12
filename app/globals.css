@@ -2735,9 +2735,11 @@ img, video, iframe, embed, object {
 }
 
 .mode-light .featureCard p,
-.light-theme .featureCard p {
-  color: #E2E8F0 !important;
-  -webkit-text-fill-color: #E2E8F0 !important;
+.light-theme .featureCard p,
+.mode-dark .featureCard p,
+.dark-theme .featureCard p {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
 }
 
