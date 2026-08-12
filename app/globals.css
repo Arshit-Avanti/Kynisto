@@ -2903,21 +2903,206 @@ img, video, iframe, embed, object {
   -webkit-text-fill-color: #CBD5E1 !important;
 }
 
-.mode-light .emptyState p,
-.light-theme .emptyState p {
-  color: #475569 !important;
-  -webkit-text-fill-color: #475569 !important;
+
+/* ==========================================================================
+   POPULAR NEAR YOU — SAME TEXT COLOR & PILL STYLING IN LIGHT MODE AS DARK MODE
+   ========================================================================== */
+
+/* 1. Popular Near You Headings & Kickers: Same as Dark Mode (#FFFFFF & #FF5722) */
+.mode-light .placesSection h2,
+.mode-light .placesSection h3,
+.mode-light .placesSection #places-heading,
+.light-theme .placesSection h2,
+.light-theme .placesSection h3,
+.light-theme .placesSection #places-heading {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  font-weight: 850 !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9) !important;
 }
 
-/* 5. Store Cards: Transparent Glass in Dark & Light Modes */
-.storeCard,
-.mode-dark .storeCard,
-.dark-theme .storeCard {
-  background: rgba(255, 255, 255, 0.04) !important;
+.mode-light .placesSection .kicker,
+.light-theme .placesSection .kicker {
+  color: #FF5722 !important;
+  -webkit-text-fill-color: #FF5722 !important;
+  font-weight: 700 !important;
+}
+
+/* 2. Filter Group Pills ("All places", "Open now", "Nearest", "Top rated", "Newest"): Same Style as Dark Mode */
+.mode-light .filterGroup,
+.light-theme .filterGroup {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+}
+
+.mode-light .filterGroup button,
+.light-theme .filterGroup button {
+  color: #CBD5E1 !important;
+  -webkit-text-fill-color: #CBD5E1 !important;
+  font-weight: 720 !important;
+}
+
+.mode-light .filterGroup button[aria-pressed="true"],
+.light-theme .filterGroup button[aria-pressed="true"] {
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* 3. Advanced Filters Box & Inputs in Light Mode: Same Text Colors as Dark Mode */
+.mode-light .advancedFilters,
+.light-theme .advancedFilters {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+}
+
+.mode-light .advancedFilters label span,
+.light-theme .advancedFilters label span {
+  color: #F1F5F9 !important;
+  -webkit-text-fill-color: #F1F5F9 !important;
+  font-weight: 700 !important;
+}
+
+.mode-light .advancedFilters input,
+.light-theme .advancedFilters input {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  font-weight: 600 !important;
+}
+
+.mode-light .advancedFilters input::placeholder,
+.light-theme .advancedFilters input::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* 4. Results Count Bar in Light Mode: Same as Dark Mode */
+.mode-light .resultsBar,
+.mode-light .resultsBar *,
+.light-theme .resultsBar,
+.light-theme .resultsBar * {
+  color: #94A3B8 !important;
+  -webkit-text-fill-color: #94A3B8 !important;
+  font-weight: 600 !important;
+}
+
+.mode-light .resultsBar b,
+.light-theme .resultsBar b {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* 5. Store Cards in Light Mode: Same Text Colors & Details Button Style as Dark Mode */
+.mode-light .storeCard,
+.light-theme .storeCard {
+  background: rgba(12, 18, 34, 0.55) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25) !important;
+}
+
+.mode-light .storeCard h3,
+.light-theme .storeCard h3 {
+  color: #F1F5F9 !important;
+  -webkit-text-fill-color: #F1F5F9 !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7) !important;
+}
+
+.mode-light .storeCard .address,
+.mode-light .storeCard .address *,
+.light-theme .storeCard .address,
+.light-theme .storeCard .address * {
+  color: #CBD5E1 !important;
+  -webkit-text-fill-color: #CBD5E1 !important;
+}
+
+.mode-light .storeCard .storeMeta,
+.mode-light .storeCard .storeMeta span,
+.light-theme .storeCard .storeMeta,
+.light-theme .storeCard .storeMeta span {
+  color: #CBD5E1 !important;
+  -webkit-text-fill-color: #CBD5E1 !important;
+  font-weight: 600 !important;
+}
+
+.mode-light .storeCard .rating,
+.mode-light .storeCard .rating *,
+.light-theme .storeCard .rating,
+.light-theme .storeCard .rating * {
+  color: #FDE68A !important;
+  -webkit-text-fill-color: #FDE68A !important;
+}
+
+.mode-light .storeCard .rating b,
+.light-theme .storeCard .rating b {
+  color: #D97706 !important;
+  -webkit-text-fill-color: #D97706 !important;
+}
+
+.mode-light .storeCard .categoryLabel,
+.light-theme .storeCard .categoryLabel {
+  color: #93C5FD !important;
+  -webkit-text-fill-color: #93C5FD !important;
+  background: rgba(59, 130, 246, 0.18) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  font-weight: 700 !important;
+}
+
+.mode-light .storeCard .detailsButton,
+.light-theme .storeCard .detailsButton {
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: #F1F5F9 !important;
+  -webkit-text-fill-color: #F1F5F9 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  font-weight: 700 !important;
+}
+
+.mode-light .storeCard .saveIcon,
+.light-theme .storeCard .saveIcon {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #94A3B8 !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+/* 6. Empty State in Light Mode: Same as Dark Mode */
+.mode-light .emptyState,
+.light-theme .emptyState {
+  background: transparent !important;
+  background-color: transparent !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
+  border: 1px dashed rgba(255, 255, 255, 0.25) !important;
+}
+
+.mode-light .emptyState h3,
+.light-theme .emptyState h3 {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+  font-weight: 800 !important;
+}
+
+.mode-light .emptyState p,
+.light-theme .emptyState p {
+  color: #CBD5E1 !important;
+  -webkit-text-fill-color: #CBD5E1 !important;
+  font-weight: 500 !important;
+}
+
+.mode-light .emptyState > div,
+.light-theme .emptyState > div {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
 }
 
 .mode-light .storeCard,
