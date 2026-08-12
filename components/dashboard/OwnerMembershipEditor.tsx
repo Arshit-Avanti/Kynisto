@@ -1,8 +1,181 @@
 "use client";
 
-import { useState, useEffect, type FormEvent } from "react";
+import { useState, useEffect, useRef, type FormEvent } from "react";
 import { apiFetch } from "@/lib/client-api";
-import { CheckCircle2, Plus, Trash, QrCode, CreditCard, ShieldCheck, UserCheck, XCircle, Clock, Gift, Tag, Upload } from "lucide-react";
+import { CheckCircle2, Plus, Trash, QrCode, CreditCard, ShieldCheck, UserCheck, XCircle, Clock, Gift, Tag, Upload, AlertTriangle } from "lucide-react";
+
+// ---------------------------------------------------------------------------
+// ConfirmModal – standalone top-level component (React Hooks rules compliant)
+// ---------------------------------------------------------------------------
+type ModalConfig = {
+  title: string;
+  description: string;
+  customerInfo?: string;
+  showReason: boolean;
+  showRefund: boolean;
+  defaultReason: string;
+  danger: boolean;
+  onConfirm: (reason: string, refundNote: string, notify: boolean) => Promise<void>;
+};
+
+function ConfirmModal({
+  config, onClose,
+}: {
+  config: ModalConfig | null;
+  onClose: () => void;
+}) {
+  const [localReason, setLocalReason] = useState("");
+  const [localRefund, setLocalRefund] = useState("");
+  const [localNotify, setLocalNotify] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Sync reason default whenever config changes
+  useEffect(() => {
+    setLocalReason(config?.defaultReason ?? "");
+    setLocalRefund("");
+    setLocalNotify(true);
+    setSubmitting(false);
+  }, [config]);
+
+  if (!config) return null;
+
+  async function submit() {
+    if (!config) return;
+    setSubmitting(true);
+    await config.onConfirm(localReason, localRefund, localNotify);
+    onClose();
+  }
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 9999,
+      background: "rgba(0,0,0,0.75)",
+      backdropFilter: "blur(6px)",
+      display: "flex", alignItems: "center", justifyContent: "center", padding: "20px"
+    }}>
+      <div style={{
+        background: "linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%)",
+        border: `1px solid ${config.danger ? "rgba(239,68,68,0.5)" : "rgba(99,102,241,0.5)"}`,
+        borderRadius: "20px", padding: "28px", maxWidth: "480px", width: "100%",
+        boxShadow: "0 25px 60px rgba(0,0,0,0.5)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "14px" }}>
+          <div style={{
+            background: config.danger ? "rgba(239,68,68,0.15)" : "rgba(99,102,241,0.15)",
+            border: `1px solid ${config.danger ? "rgba(239,68,68,0.4)" : "rgba(99,102,241,0.4)"}`,
+            borderRadius: "12px", padding: "10px"
+          }}>
+            <AlertTriangle size={22} color={config.danger ? "#F87171" : "#818CF8"} />
+          </div>
+          <h3 style={{ color: "#FFF", fontWeight: 800, fontSize: "17px", margin: 0 }}>{config.title}</h3>
+        </div>
+
+        <p style={{ color: "#94A3B8", fontSize: "13px", marginBottom: "12px", lineHeight: 1.6 }}>
+          {config.description}
+        </p>
+
+        {config.customerInfo && (
+          <div style={{
+            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: "10px", padding: "10px 14px", fontSize: "12px", color: "#CBD5E1",
+            marginBottom: "14px", lineHeight: 1.7
+          }}>
+            <b style={{ color: "#818CF8" }}>Customer: </b>{config.customerInfo}
+          </div>
+        )}
+
+        {config.showReason && (
+          <label style={{ display: "block", marginBottom: "12px" }}>
+            <span style={{ fontSize: "12px", fontWeight: 700, color: "#CBD5E1", display: "block", marginBottom: "5px" }}>
+              Reason <span style={{ color: "#F87171" }}>*</span> (shown to customer)
+            </span>
+            <textarea
+              value={localReason}
+              onChange={(e) => setLocalReason(e.target.value)}
+              rows={3}
+              style={{
+                width: "100%", background: "#1E293B", border: "1px solid #475569",
+                color: "#FFF", padding: "10px 12px", borderRadius: "8px", fontSize: "13px",
+                resize: "vertical", fontFamily: "inherit"
+              }}
+            />
+          </label>
+        )}
+
+        {config.showRefund && (
+          <label style={{ display: "block", marginBottom: "12px" }}>
+            <span style={{ fontSize: "12px", fontWeight: 700, color: "#CBD5E1", display: "block", marginBottom: "5px" }}>
+              Refund / Compensation Note <span style={{ color: "#94A3B8" }}>(optional)</span>
+            </span>
+            <input
+              type="text"
+              value={localRefund}
+              onChange={(e) => setLocalRefund(e.target.value)}
+              placeholder="e.g. ₹200 refund will be processed in 3-5 business days"
+              style={{
+                width: "100%", background: "#1E293B", border: "1px solid #475569",
+                color: "#FFF", padding: "10px 12px", borderRadius: "8px", fontSize: "13px"
+              }}
+            />
+          </label>
+        )}
+
+        {(config.showReason || config.showRefund) && (
+          <label style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "18px", cursor: "pointer" }}>
+            <div
+              onClick={() => setLocalNotify((v) => !v)}
+              style={{
+                width: "42px", height: "24px", borderRadius: "12px", flexShrink: 0,
+                background: localNotify ? "#6366F1" : "#334155",
+                position: "relative", transition: "background 0.2s", cursor: "pointer",
+                border: `1px solid ${localNotify ? "#818CF8" : "#475569"}`
+              }}
+            >
+              <div style={{
+                position: "absolute", top: "3px",
+                left: localNotify ? "20px" : "3px",
+                width: "16px", height: "16px", borderRadius: "50%",
+                background: "#FFF", transition: "left 0.2s"
+              }} />
+            </div>
+            <span style={{ fontSize: "13px", color: "#CBD5E1" }}>
+              <b>Notify customer</b> via in-app notification
+            </span>
+          </label>
+        )}
+
+        <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={submitting}
+            style={{
+              background: "rgba(255,255,255,0.08)", color: "#CBD5E1",
+              border: "1px solid rgba(255,255,255,0.15)", padding: "10px 20px",
+              borderRadius: "10px", fontWeight: 700, cursor: "pointer", fontSize: "13px"
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={submit}
+            disabled={submitting || (config.showReason && !localReason.trim())}
+            style={{
+              background: config.danger ? "linear-gradient(135deg,#EF4444,#DC2626)" : "linear-gradient(135deg,#6366F1,#4F46E5)",
+              color: "#FFF", border: "none", padding: "10px 24px",
+              borderRadius: "10px", fontWeight: 800, cursor: "pointer", fontSize: "13px",
+              opacity: submitting ? 0.7 : 1
+            }}
+          >
+            {submitting ? "Processing..." : "Confirm"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
   const [plans, setPlans] = useState<any[]>([]);
@@ -13,6 +186,12 @@ export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
   const [toast, setToast] = useState("");
   const [editingPlan, setEditingPlan] = useState<any>(null);
   const [actionId, setActionId] = useState<string | null>(null);
+
+  // ---- Rich confirmation modal state ----
+  const [confirmModal, setConfirmModal] = useState<ModalConfig | null>(null);
+  const reasonRef = useRef<HTMLTextAreaElement>(null);
+  const refundRef = useRef<HTMLInputElement>(null);
+  const notifyRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     void loadData();
@@ -59,42 +238,96 @@ export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
     }
   }, [toast]);
 
-  async function handleDelete(id: string) {
-    if (!window.confirm("Are you sure you want to delete this membership plan?")) return;
-    try {
-      await apiFetch(`/api/owner/memberships/${id}`, { method: "DELETE", json: { storeId } });
-      setToast("Membership plan deleted successfully");
-      loadData();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to delete plan");
-    }
+  async function handleDeletePlan(id: string) {
+    setConfirmModal({
+      title: "Delete Membership Plan",
+      description: "This will permanently remove this membership plan. Existing customer memberships are NOT deleted — they will still show as active until they expire.",
+      showReason: false,
+      showRefund: false,
+      defaultReason: "",
+      danger: true,
+      onConfirm: async () => {
+        try {
+          await apiFetch(`/api/owner/memberships/${id}`, { method: "DELETE", json: { storeId } });
+          setToast("Membership plan deleted successfully");
+          void loadData();
+        } catch (e) {
+          setError(e instanceof Error ? e.message : "Failed to delete plan");
+        }
+      },
+    });
   }
 
-  async function handleApprovePurchase(purchaseId: string, action: "accept" | "reject" | "revoke" | "delete") {
-    setActionId(purchaseId);
-    setError("");
-    try {
-      let rejectionReason = "";
-      if (action === "revoke") {
-        rejectionReason = window.prompt("Reason for revoking/cancelling customer membership (will be displayed to customer in wallet):", "Membership cancelled by store owner.") || "Cancelled by store owner";
-      } else if (action === "delete") {
-        if (!window.confirm("Are you sure you want to permanently delete this customer's membership record?")) {
-          setActionId(null);
-          return;
-        }
-      }
+  // Opens the modal and, when confirmed, calls the actual API
+  function openPurchaseModal(
+    purchase: any,
+    action: "accept" | "reject" | "revoke" | "delete"
+  ) {
+    const customerInfo = `${purchase.customerName} (${purchase.customerEmail || "no email"})  •  Plan: ${purchase.planName}  •  Paid: ₹${purchase.amountPaid}`;
 
-      const res = await apiFetch<{ success: boolean; message: string }>(`/api/owner/memberships/purchases`, {
-        method: "POST",
-        json: { purchaseId, action, rejectionReason }
-      });
-      setToast(res.message || "Membership status updated.");
-      loadData();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to process membership request.");
-    } finally {
-      setActionId(null);
-    }
+    const configs: Record<string, Omit<ModalConfig, "onConfirm">> = {
+      accept: {
+        title: "Activate Member",
+        description: "Activate this customer's membership. Their VIP access will begin immediately and they will receive a welcome notification.",
+        customerInfo,
+        showReason: false,
+        showRefund: false,
+        defaultReason: "",
+        danger: false,
+      },
+      reject: {
+        title: "Reject Membership Request",
+        description: "The customer's payment request will be rejected. They will receive an in-app notification with the reason you provide.",
+        customerInfo,
+        showReason: true,
+        showRefund: false,
+        defaultReason: "Payment could not be verified. Please resubmit with a valid UTR reference.",
+        danger: true,
+      },
+      revoke: {
+        title: "Cancel / Revoke VIP Membership",
+        description: "The customer's active membership will be cancelled. They will see this cancellation in their wallet with the reason and any refund note you provide.",
+        customerInfo,
+        showReason: true,
+        showRefund: true,
+        defaultReason: "Membership cancelled by store owner.",
+        danger: true,
+      },
+      delete: {
+        title: "Permanently Delete Membership Record",
+        description: "This will permanently erase this customer's membership record. The customer will be notified before deletion. This cannot be undone.",
+        customerInfo,
+        showReason: false,
+        showRefund: true,
+        defaultReason: "",
+        danger: true,
+      },
+    };
+
+    const cfg = configs[action];
+    setConfirmModal({
+      ...cfg,
+      onConfirm: async (reason, refundNote, notify) => {
+        setActionId(purchase.id);
+        setError("");
+        try {
+          const payload: Record<string, any> = { purchaseId: purchase.id, action };
+          if (reason) payload.rejectionReason = reason;
+          if (refundNote) payload.refundNote = refundNote;
+          payload.notify = notify;
+          const res = await apiFetch<{ success: boolean; message: string }>("/api/owner/memberships/purchases", {
+            method: "POST",
+            json: payload,
+          });
+          setToast(res.message || "Membership status updated.");
+          void loadData();
+        } catch (e) {
+          setError(e instanceof Error ? e.message : "Failed to process membership request.");
+        } finally {
+          setActionId(null);
+        }
+      },
+    });
   }
 
   if (loading) return <div style={{ padding: "24px", color: "#94A3B8", textAlign: "center" }}>Loading membership system & pending requests...</div>;
@@ -105,6 +338,8 @@ export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
 
   return (
     <div className="portalGrid">
+      {/* Confirmation modal (replaces window.confirm / window.prompt) */}
+      <ConfirmModal config={confirmModal} onClose={() => setConfirmModal(null)} />
       {error && <p className="authError">{error}</p>}
       {toast && <div className="portalToast"><CheckCircle2 size={18} /> {toast}</div>}
 
@@ -165,7 +400,7 @@ export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
                   <button
                     type="button"
                     disabled={actionId === p.id}
-                    onClick={() => handleApprovePurchase(p.id, "accept")}
+                    onClick={() => openPurchaseModal(p, "accept")}
                     style={{ flex: 1, background: "linear-gradient(135deg, #10B981 0%, #059669 100%)", color: "#FFF", border: "none", padding: "10px", borderRadius: "10px", fontWeight: 800, cursor: "pointer", fontSize: "13px" }}
                   >
                     {actionId === p.id ? "Activating..." : "Accept & Activate"}
@@ -173,7 +408,7 @@ export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
                   <button
                     type="button"
                     disabled={actionId === p.id}
-                    onClick={() => handleApprovePurchase(p.id, "reject")}
+                    onClick={() => openPurchaseModal(p, "reject")}
                     style={{ background: "rgba(239,68,68,0.2)", color: "#F87171", border: "1px solid rgba(239,68,68,0.4)", padding: "10px 14px", borderRadius: "10px", fontWeight: 800, cursor: "pointer", fontSize: "13px" }}
                   >
                     Reject
@@ -218,7 +453,7 @@ export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
                   <button
                     type="button"
                     disabled={actionId === m.id}
-                    onClick={() => handleApprovePurchase(m.id, "revoke")}
+                    onClick={() => openPurchaseModal(m, "revoke")}
                     style={{ flex: 1, background: "rgba(239, 68, 68, 0.2)", color: "#F87171", border: "1px solid rgba(239, 68, 68, 0.4)", padding: "8px", borderRadius: "8px", fontWeight: 800, cursor: "pointer", fontSize: "12px" }}
                   >
                     {actionId === m.id ? "Processing..." : "Revoke / Cancel Pass"}
@@ -226,7 +461,7 @@ export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
                   <button
                     type="button"
                     disabled={actionId === m.id}
-                    onClick={() => handleApprovePurchase(m.id, "delete")}
+                    onClick={() => openPurchaseModal(m, "delete")}
                     style={{ background: "rgba(255, 255, 255, 0.1)", color: "#CBD5E1", border: "1px solid rgba(255, 255, 255, 0.2)", padding: "8px 12px", borderRadius: "8px", fontWeight: 700, cursor: "pointer", fontSize: "12px" }}
                   >
                     Delete Record
@@ -275,7 +510,7 @@ export function OwnerMembershipEditor({ storeId }: { storeId: string }) {
               </div>
               <div className="tableActions">
                 <button onClick={() => setEditingPlan(p)}>Edit</button>
-                <button onClick={() => handleDelete(p.id)} style={{ color: "#EF4444" }}>Delete</button>
+                <button onClick={() => handleDeletePlan(p.id)} style={{ color: "#EF4444" }}>Delete</button>
               </div>
             </div>
 

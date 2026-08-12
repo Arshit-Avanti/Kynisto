@@ -47,7 +47,7 @@ export async function GET(request: Request) {
       stores: stores.results ?? [],
       analytics: analytics.results ?? [],
       recentReviews: recentReviews.results ?? [],
-    });
+    }, { "Cache-Control": "private, max-age=30, stale-while-revalidate=60" });
   } catch (error) {
     return apiError(error);
   }

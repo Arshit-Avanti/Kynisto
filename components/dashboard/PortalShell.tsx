@@ -156,7 +156,7 @@ export function PortalShell({
     void refresh();
     const timer = window.setInterval(refresh, 15_000);
     return () => { mounted = false; window.clearInterval(timer); };
-  }, [active]);
+  }, []);
 
   useEffect(() => {
     if (open) {

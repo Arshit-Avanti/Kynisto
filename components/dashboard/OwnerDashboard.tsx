@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { apiFetch } from "@/lib/client-api";
 import type { SessionUser } from "@/lib/auth";
 import { ChatCenter } from "@/components/dashboard/ChatCenter";
@@ -44,10 +44,14 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
   const [media, setMedia] = useState<Item[]>([]);
   const [subPlan, setSubPlan] = useState<Record<string, any>>({ id: "free", allowQueueManagement: false });
   const [loading, setLoading] = useState(true);
+  const [tabLoading, setTabLoading] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
 
   const selected = useMemo(() => stores.find((store) => store.id === selectedId) ?? stores[0], [selectedId, stores]);
+
+  const selectedIdRef = useRef(selectedId);
+  selectedIdRef.current = selectedId;
 
   const loadOverview = useCallback(async () => {
     const [overview, categoryData, subRes] = await Promise.all([
@@ -60,8 +64,8 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
     setReviews(overview.recentReviews);
     setCategories(categoryData.items);
     if (subRes?.plan) setSubPlan(subRes.plan);
-    if (!selectedId && overview.stores[0]) setSelectedId(String(overview.stores[0].id));
-  }, [selectedId]);
+    if (!selectedIdRef.current && overview.stores[0]) setSelectedId(String(overview.stores[0].id));
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true); setError("");
@@ -72,7 +76,30 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
   }, [loadOverview]);
 
   useEffect(() => { void load(); }, [load]);
-  useEffect(() => { if (!selectedId) return; if (["products","services","offers"].includes(tab)) apiFetch<{items:Item[]}>(`/api/owner/catalog?resource=${tab}&storeId=${selectedId}`).then((result)=>setCatalog(result.items)).catch((e)=>setError(e.message)); if(tab==="media") apiFetch<{items:Item[]}>(`/api/media?storeId=${selectedId}`).then((result)=>setMedia(result.items)).catch((e)=>setError(e.message)); if(tab==="analytics") apiFetch<{items:Item[]}>("/api/owner/analytics").then((result)=>setAnalytics(result.items)).catch((e)=>setError(e.message)); }, [selectedId,tab]);
+  useEffect(() => {
+    if (!selectedId) return;
+    if (["products","services","offers"].includes(tab)) {
+      setTabLoading(true);
+      apiFetch<{items:Item[]}>(`/api/owner/catalog?resource=${tab}&storeId=${selectedId}`)
+        .then((result)=>setCatalog(result.items))
+        .catch((e)=>setError(e instanceof Error ? e.message : String(e)))
+        .finally(()=>setTabLoading(false));
+    }
+    if(tab==="media") {
+      setTabLoading(true);
+      apiFetch<{items:Item[]}>(`/api/media?storeId=${selectedId}`)
+        .then((result)=>setMedia(result.items))
+        .catch((e)=>setError(e instanceof Error ? e.message : String(e)))
+        .finally(()=>setTabLoading(false));
+    }
+    if(tab==="analytics") {
+      setTabLoading(true);
+      apiFetch<{items:Item[]}>("/api/owner/analytics")
+        .then((result)=>setAnalytics(result.items))
+        .catch((e)=>setError(e instanceof Error ? e.message : String(e)))
+        .finally(()=>setTabLoading(false));
+    }
+  }, [selectedId, tab]);
   useEffect(() => { setReviewPage(1); }, [selectedId]);
   useEffect(() => {
     if (!selectedId || tab !== "reviews") return;
@@ -87,6 +114,7 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
   async function mutate(path:string,method:string,json:unknown,message:string,photoFile?:File){try{const res=await apiFetch<{storeId?:string;ok?:boolean}>(path,{method,json});setToast(message);if(photoFile){const uploadStoreId=(res?.storeId)||selectedId;if(uploadStoreId){const fd=new FormData();fd.set("storeId",uploadStoreId);fd.set("kind","logo");fd.set("file",photoFile);try{await apiFetch("/api/media",{method:"POST",body:fd});setToast(message+" · Photo uploaded")}catch(photoErr){setError(photoErr instanceof Error?photoErr.message:"Photo upload failed. Use Media tab to upload.")}}}await loadOverview();if(selectedId&&["products","services","offers"].includes(tab)){const result=await apiFetch<{items:Item[]}>(`/api/owner/catalog?resource=${tab}&storeId=${selectedId}`);setCatalog(result.items)}if(path==="/api/owner/reviews"&&selectedId){const result=await apiFetch<{items:Item[];pagination:Pagination}>(`/api/owner/reviews?storeId=${selectedId}&page=${reviewPage}&limit=20`);setStoreReviews(result.items);setReviewPagination(result.pagination)}}catch(e){setError(e instanceof Error?e.message:"Action failed.")}}
 
   if (loading) return <div className="portalSkeleton"><span /><span /><span /><span /></div>;
+  if (tabLoading && !["overview", "profile", "reviews", "subscription", "healthcare", "chat", "memberships", "loyalty"].includes(tab)) return <div className="tabSkeleton"><span /><span /><span /></div>;
   if (tab === "chat") return <ChatCenter user={user} />;
   if (tab === "subscription") return <UserSubscriptionDashboard />;
   if (tab === "healthcare") {

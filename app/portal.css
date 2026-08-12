@@ -1165,3 +1165,228 @@
 .light-theme .accountDetail b, .portalShell.light-theme .accountDetail b { color: #0f172a !important; }
 .light-theme .accountDetail small, .portalShell.light-theme .accountDetail small { color: #64748b !important; }
 .light-theme .accountDetail em, .portalShell.light-theme .accountDetail em { color: #2563eb !important; }
+
+/* ============================================================
+   TAB SKELETON — Shows while tab-specific data loads
+   ============================================================ */
+.tabSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 4px 0;
+  animation: portalSkeletonFade 0.2s ease;
+}
+
+@keyframes portalSkeletonFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tabSkeleton span {
+  display: block;
+  border-radius: 16px;
+  background: linear-gradient(90deg, var(--glass-bg, rgba(255,255,255,0.05)) 25%, var(--glass-surface, rgba(255,255,255,0.1)) 50%, var(--glass-bg, rgba(255,255,255,0.05)) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+.tabSkeleton span:nth-child(1) { height: 180px; }
+.tabSkeleton span:nth-child(2) { height: 120px; width: 75%; }
+.tabSkeleton span:nth-child(3) { height: 120px; width: 55%; }
+
+/* ============================================================
+   MOBILE RESPONSIVE OVERHAUL — 100% accurate fit & function
+   ============================================================ */
+
+/* Force sidebar hidden on mobile */
+@media (max-width: 900px) {
+  .portal,
+  .portalShell {
+    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .portalSidebar {
+    position: fixed !important;
+    left: -100% !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: 280px !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 200 !important;
+    transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    overflow-y: auto !important;
+    contain: layout style paint !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.25) !important;
+  }
+
+  .portalSidebar.isOpen {
+    left: 0 !important;
+  }
+
+  .portalMain {
+    width: 100vw !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+  }
+
+  .mobileMenu {
+    display: grid !important;
+    place-items: center !important;
+  }
+
+  .portalHeader {
+    padding: 0 16px !important;
+    height: 60px !important;
+  }
+
+  .portalContent {
+    padding: 16px 12px !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+  }
+
+  .portalTitleRow {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .portalTitleRow h1 {
+    font-size: 22px !important;
+  }
+
+  .portalTitleRow select {
+    width: 100% !important;
+  }
+
+  /* Stats grid: 2 columns on mobile */
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .statCard {
+    padding: 14px !important;
+  }
+
+  .statCard strong {
+    font-size: 22px !important;
+  }
+
+  /* Portal grid: single column on mobile */
+  .portalGrid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .portalCard {
+    padding: 16px !important;
+    border-radius: 14px !important;
+  }
+
+  .portalCardHeader {
+    margin-bottom: 14px !important;
+  }
+
+  /* Tables scroll horizontally on mobile */
+  .portalTableWrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 12px !important;
+  }
+
+  .portalTable {
+    min-width: 540px !important;
+  }
+
+  /* Forms: full width on mobile */
+  .portalForm {
+    grid-template-columns: 1fr !important;
+  }
+
+  .portalForm .full,
+  .portalForm label {
+    grid-column: 1 !important;
+  }
+
+  /* Actions row wrap on mobile */
+  .tableActions,
+  .formActions {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .portalButton {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Header: hide userMeta text to save space */
+  .userMeta {
+    display: none !important;
+  }
+
+  /* Header actions: tighter gap */
+  .portalHeaderActions {
+    gap: 8px !important;
+  }
+
+  /* Portal toolbar wrap */
+  .portalToolbar {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .portalToolbar input,
+  .portalToolbar select,
+  .portalToolbar button {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Sidebar footer compact */
+  .portalSidebarFooter a,
+  .portalSidebarFooter button {
+    font-size: 12px !important;
+  }
+
+  /* Tab skeleton on mobile */
+  .tabSkeleton span:nth-child(1) { height: 120px; }
+  .tabSkeleton span:nth-child(2) { height: 90px; width: 100%; }
+  .tabSkeleton span:nth-child(3) { height: 90px; width: 100%; }
+}
+
+/* Extra small phones */
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .statCard strong {
+    font-size: 20px !important;
+  }
+
+  .portalContent {
+    padding: 12px 10px !important;
+  }
+
+  .portalHeader {
+    padding: 0 10px !important;
+  }
+}
+
+/* Backdrop for mobile sidebar */
+.portalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 199;
+  border: none;
+  cursor: default;
+  touch-action: none;
+}

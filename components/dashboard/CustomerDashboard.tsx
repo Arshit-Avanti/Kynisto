@@ -9,7 +9,7 @@ import { ChatCenter } from "@/components/dashboard/ChatCenter";
 import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscriptionDashboard";
 import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
 import KynistoWalletView from "@/components/wallet/KynistoWalletView";
-import { Heart, MessageSquare, ShoppingCart, MapPin, Package, Calendar, Ticket, CheckCircle2, ArrowRight, Store, Star, Wallet } from "lucide-react";
+import { Heart, MessageSquare, ShoppingCart, MapPin, Package, Calendar, Ticket, CheckCircle2, ArrowRight, Store, Star, Wallet, BellRing } from "lucide-react";
 
 type Item = Record<string, unknown>;
 type Payload = Record<string, unknown>;
@@ -35,6 +35,11 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
+  // Membership + system notifications (fetched on mount)
+  const [membershipNotifs, setMembershipNotifs] = useState<{
+    notifications: Array<{ id: string; type: string; title: string; body: string; isRead: boolean; metadata: any; createdAt: number }>;
+    unreadCount: number;
+  }>({ notifications: [], unreadCount: 0 });
   const [activeQueue, setActiveQueue] = useState<{
     storeId: string; storeName: string; tokenNumber: number;
     status: string; queueCode: string | null;
@@ -76,6 +81,33 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
 
   useEffect(() => { void load(); }, [load]);
   useEffect(() => { if (!toast) return; const timer = window.setTimeout(() => setToast(""), 2400); return () => clearTimeout(timer); }, [toast]);
+
+  // Fetch membership + system notifications on mount
+  useEffect(() => {
+    apiFetch<{ notifications: any[]; unreadCount: number }>("/api/customer/notifications")
+      .then((res) => setMembershipNotifs({ notifications: res?.notifications ?? [], unreadCount: res?.unreadCount ?? 0 }))
+      .catch(() => {});
+  }, []);
+
+  async function markNotifRead(id: string) {
+    try {
+      await apiFetch("/api/customer/notifications", { method: "POST", json: { action: "mark_read", notificationId: id } });
+      setMembershipNotifs((prev) => ({
+        notifications: prev.notifications.map((n) => n.id === id ? { ...n, isRead: true } : n),
+        unreadCount: Math.max(0, prev.unreadCount - 1),
+      }));
+    } catch {}
+  }
+
+  async function markAllNotifsRead() {
+    try {
+      await apiFetch("/api/customer/notifications", { method: "POST", json: { action: "mark_all_read" } });
+      setMembershipNotifs((prev) => ({
+        notifications: prev.notifications.map((n) => ({ ...n, isRead: true })),
+        unreadCount: 0,
+      }));
+    } catch {}
+  }
 
   // Fetch active queue on mount and poll every 30s
   const fetchActiveQueue = useCallback(async () => {
@@ -200,7 +232,7 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
     {tab === "cart" && <CartPanel items={items} subtotal={Number(data.subtotal ?? 0)} addresses={addresses} mutate={mutate} />}
     {tab === "orders" && <OrdersPanel items={items} mutate={mutate} />}
     {tab === "reviews" && <ReviewsPanel items={reviews} remove={deleteReview} productReviews={productReviews} deliveredOrders={items} mutateProduct={mutateProductReview} />}
-    {tab === "notifications" && <NotificationsPanel items={items} mutate={mutate} />}
+    {tab === "notifications" && <NotificationsPanel items={items} mutate={mutate} membershipNotifs={membershipNotifs.notifications} unreadCount={membershipNotifs.unreadCount} onMarkRead={markNotifRead} onMarkAllRead={markAllNotifsRead} />}
     {tab === "settings" && <SettingsPanel preferences={(data.preferences as Item | undefined) ?? {}} mutate={mutate} />}
     {tab === "support" && <SupportPanel items={items} mutate={mutate} />}
     
@@ -315,8 +347,136 @@ function ReviewsPanel({ items, remove, productReviews, deliveredOrders, mutatePr
   return <div className="portalGrid"><section className="portalCard"><div className="portalCardHeader"><h2>Shop reviews</h2><small>Public neighbourhood feedback</small></div>{items.length ? items.map((review) => <article className="accountReview" key={String(review.id)}><div><b style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}><Star size={14} /> {String(review.rating)} · {String(review.storeName)}</b><small>{String(review.title ?? "")}</small><p>{String(review.comment)}</p>{Boolean(review.ownerReply) && <em>Owner reply: {String(review.ownerReply)}</em>}</div><div className="tableActions"><Link href={`/stores/${String(review.slug)}`}>View store</Link><button onClick={() => void remove(review.id)}>Delete</button></div></article>) : <Empty text="Review a shop after a local experience." icon={Star} />}</section><section className="portalCard"><div className="portalCardHeader"><h2>Verified product ratings</h2><small>Delivered orders only</small></div>{productReviews.map((review) => <article className="accountReview" key={String(review.id)}><div><b style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}><Star size={14} /> {String(review.rating)} · {String(review.productName)}</b><small>{String(review.storeName)}</small><p>{String(review.comment)}</p></div><button className="portalButton secondary" onClick={() => void mutateProduct("DELETE", { reviewId: review.id }, "Product review deleted")}>Delete</button></article>)}{eligible.map((item) => <form className="productReviewForm" key={String(item.productId)} onSubmit={(event) => { event.preventDefault(); const values = Object.fromEntries(new FormData(event.currentTarget)); void mutateProduct("POST", { productId: item.productId, ...values, rating: Number(values.rating) }, "Product review published"); }}><b>Rate {String(item.productName)}</b><select name="rating" defaultValue="5"><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select><input name="title" placeholder="Short title" /><textarea name="comment" minLength={10} required placeholder="Share at least 10 characters about the product" /><button className="portalButton" type="submit">Publish rating</button></form>)}{!productReviews.length && !eligible.length && <Empty text="Delivered products you can rate will appear here." icon={Package} />}</section></div>;
 }
 
-function NotificationsPanel({ items, mutate }: { items: Item[]; mutate: (method: "PATCH", json: Payload, message: string) => Promise<void> }) {
-  return <section className="portalCard"><div className="portalCardHeader"><h2>Notifications</h2><small>Orders, support and platform news</small></div>{items.length ? <div className="workspaceList">{items.map((item) => <article key={String(item.id)} className={item.readAt ? "" : "unread"}><div><b>{String(item.title)}</b><p>{String(item.message)}</p><small>{new Date(Number(item.createdAt ?? 0) * 1000).toLocaleString()}</small></div>{!item.readAt && Boolean(item.canMarkRead) && <button className="portalButton secondary" onClick={() => void mutate("PATCH", { action: "mark_notification_read", notificationId: item.id }, "Marked as read")}>Mark read</button>}</article>)}</div> : <Empty text="You are all caught up." icon={MessageSquare} />}</section>;
+function NotificationsPanel({
+  items, mutate, membershipNotifs, unreadCount, onMarkRead, onMarkAllRead
+}: {
+  items: Item[];
+  mutate: (method: "PATCH", json: Payload, message: string) => Promise<void>;
+  membershipNotifs: Array<{ id: string; type: string; title: string; body: string; isRead: boolean; metadata: any; createdAt: number }>;
+  unreadCount: number;
+  onMarkRead: (id: string) => Promise<void>;
+  onMarkAllRead: () => Promise<void>;
+}) {
+  const membershipTypes = new Set(["membership_cancelled", "membership_rejected", "membership_deleted"]);
+  const membershipAlerts = membershipNotifs.filter((n) => membershipTypes.has(n.type));
+  const otherNotifs = membershipNotifs.filter((n) => !membershipTypes.has(n.type));
+
+  const typeStyle: Record<string, { bg: string; border: string; color: string; icon: string }> = {
+    membership_cancelled: { bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.35)", color: "#F87171", icon: "🚫" },
+    membership_rejected:  { bg: "rgba(234,179,8,0.08)",  border: "rgba(234,179,8,0.35)",  color: "#FACC15", icon: "❌" },
+    membership_deleted:   { bg: "rgba(100,116,139,0.08)", border: "rgba(100,116,139,0.3)", color: "#94A3B8", icon: "🗑️" },
+  };
+
+  return (
+    <section className="portalCard">
+      <div className="portalCardHeader" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <h2 style={{ display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
+            <BellRing size={20} />
+            Notifications
+            {unreadCount > 0 && (
+              <span style={{ background: "#EF4444", color: "#FFF", fontSize: "11px", fontWeight: 900, padding: "2px 8px", borderRadius: "10px" }}>
+                {unreadCount} NEW
+              </span>
+            )}
+          </h2>
+          <small style={{ color: "#94A3B8" }}>Membership updates, orders & platform news</small>
+        </div>
+        {unreadCount > 0 && (
+          <button
+            onClick={() => void onMarkAllRead()}
+            style={{ background: "rgba(99,102,241,0.15)", color: "#818CF8", border: "1px solid rgba(99,102,241,0.3)", padding: "8px 14px", borderRadius: "8px", fontWeight: 700, fontSize: "12px", cursor: "pointer" }}
+          >
+            Mark all read
+          </button>
+        )}
+      </div>
+
+      {/* MEMBERSHIP ALERT CARDS */}
+      {membershipAlerts.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "20px" }}>
+          {membershipAlerts.map((n) => {
+            const s = typeStyle[n.type] ?? typeStyle.membership_cancelled;
+            return (
+              <div key={n.id} style={{
+                background: s.bg, border: `1px solid ${s.border}`,
+                borderRadius: "14px", padding: "16px 18px",
+                opacity: n.isRead ? 0.6 : 1,
+                transition: "opacity 0.3s"
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 800, fontSize: "14px", color: s.color, marginBottom: "6px" }}>
+                      {s.icon} {n.title}
+                    </div>
+                    <p style={{ color: "#CBD5E1", fontSize: "13px", lineHeight: 1.6, margin: "0 0 8px 0" }}>
+                      {n.body}
+                    </p>
+                    {n.metadata?.refundNote && (
+                      <div style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: "8px", padding: "8px 12px", fontSize: "12px", color: "#4ADE80", fontWeight: 700 }}>
+                        💰 Refund: {n.metadata.refundNote}
+                      </div>
+                    )}
+                    <div style={{ fontSize: "11px", color: "#64748B", marginTop: "8px" }}>
+                      {new Date(n.createdAt * 1000).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                    </div>
+                  </div>
+                  {!n.isRead && (
+                    <button
+                      onClick={() => void onMarkRead(n.id)}
+                      style={{ background: "rgba(255,255,255,0.08)", color: "#94A3B8", border: "1px solid rgba(255,255,255,0.12)", padding: "6px 10px", borderRadius: "6px", fontSize: "11px", cursor: "pointer", flexShrink: 0 }}
+                    >
+                      ✓ Read
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* OTHER SYSTEM NOTIFICATIONS */}
+      {otherNotifs.length > 0 && (
+        <div className="workspaceList" style={{ marginBottom: "16px" }}>
+          {otherNotifs.map((n) => (
+            <article key={n.id} style={{ opacity: n.isRead ? 0.6 : 1 }}>
+              <div>
+                <b>{n.title}</b>
+                <p>{n.body}</p>
+                <small>{new Date(n.createdAt * 1000).toLocaleString()}</small>
+              </div>
+              {!n.isRead && (
+                <button className="portalButton secondary" onClick={() => void onMarkRead(n.id)}>Mark read</button>
+              )}
+            </article>
+          ))}
+        </div>
+      )}
+
+      {/* PLATFORM WORKSPACE NOTIFICATIONS (orders, support etc.) */}
+      {items.length > 0 ? (
+        <div className="workspaceList">
+          {items.map((item) => (
+            <article key={String(item.id)} className={item.readAt ? "" : "unread"}>
+              <div>
+                <b>{String(item.title)}</b>
+                <p>{String(item.message)}</p>
+                <small>{new Date(Number(item.createdAt ?? 0) * 1000).toLocaleString()}</small>
+              </div>
+              {!item.readAt && Boolean(item.canMarkRead) && (
+                <button className="portalButton secondary" onClick={() => void mutate("PATCH", { action: "mark_notification_read", notificationId: item.id }, "Marked as read")}>
+                  Mark read
+                </button>
+              )}
+            </article>
+          ))}
+        </div>
+      ) : membershipNotifs.length === 0 ? (
+        <Empty text="You are all caught up. No new notifications." icon={MessageSquare} />
+      ) : null}
+    </section>
+  );
 }
 
 function SettingsPanel({ preferences, mutate }: { preferences: Item; mutate: (method: "PATCH", json: Payload, message: string) => Promise<void> }) {

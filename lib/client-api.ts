@@ -53,6 +53,9 @@ export async function safeJsonParse<T = unknown>(response: Response): Promise<T 
   }
 }
 
+// In-flight GET request deduplication cache
+const _inflight = new Map<string, Promise<unknown>>();
+
 export async function apiFetch<T = unknown>(
   path: string,
   options: RequestInit & { json?: unknown } = {},
@@ -64,6 +67,29 @@ export async function apiFetch<T = unknown>(
     const csrf = cookieValue("kynisto_csrf");
     if (csrf) headers.set("X-CSRF-Token", csrf);
   }
+
+  // Deduplicate concurrent identical GET requests (prevents double API calls)
+  if (method === "GET" && !options.body && options.json === undefined) {
+    const existing = _inflight.get(path);
+    if (existing) return existing as Promise<T>;
+    const promise = fetch(path, {
+      ...options,
+      headers,
+      credentials: "same-origin",
+    }).then(async (response) => {
+      const data = (await safeJsonParse(response)) as T | { error?: { message?: string }; message?: string } | null;
+      if (!response.ok) {
+        const errorData = data as { error?: { message?: string }; message?: string } | null;
+        throw new Error(errorData?.error?.message ?? errorData?.message ?? `Request failed with status ${response.status}.`);
+      }
+      return data as T;
+    }).finally(() => {
+      _inflight.delete(path);
+    });
+    _inflight.set(path, promise);
+    return promise;
+  }
+
   const response = await fetch(path, {
     ...options,
     headers,

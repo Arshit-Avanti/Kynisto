@@ -5,6 +5,53 @@ import { getDb } from "@/db";
 import { kynistoWallets, kynistoPointTransactions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
+// ---------------------------------------------------------------------------
+// Helper: write an in-app notification to user_notifications
+// ---------------------------------------------------------------------------
+async function notifyCustomer(
+  d1: ReturnType<typeof getD1>,
+  opts: {
+    customerId: string;
+    type: string;
+    title: string;
+    body: string;
+    metadata?: Record<string, string>;
+  }
+) {
+  try {
+    await d1.prepare(`
+      CREATE TABLE IF NOT EXISTS user_notifications (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        type TEXT NOT NULL DEFAULT 'system',
+        title TEXT NOT NULL,
+        body TEXT NOT NULL,
+        is_read INTEGER NOT NULL DEFAULT 0,
+        metadata TEXT,
+        created_at INTEGER NOT NULL
+      )
+    `).run();
+    const id = `notif_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    await d1
+      .prepare(
+        `INSERT INTO user_notifications (id, user_id, type, title, body, is_read, metadata, created_at)
+         VALUES (?, ?, ?, ?, ?, 0, ?, ?)`
+      )
+      .bind(
+        id,
+        opts.customerId,
+        opts.type,
+        opts.title,
+        opts.body,
+        opts.metadata ? JSON.stringify(opts.metadata) : null,
+        Math.floor(Date.now() / 1000)
+      )
+      .run();
+  } catch (e) {
+    console.warn("notifyCustomer warning:", e);
+  }
+}
+
 async function ensurePurchaseTable() {
   try {
     const d1 = getD1();
@@ -97,7 +144,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { purchaseId, action, rejectionReason } = await req.json();
+    const { purchaseId, action, rejectionReason, refundNote: refundNoteParam } = await req.json();
     if (!purchaseId || !action) {
       return NextResponse.json({ error: "purchaseId and action are required" }, { status: 400 });
     }
@@ -181,15 +228,26 @@ export async function POST(req: Request) {
 
       return NextResponse.json({ success: true, status: "active", message: "Membership accepted & activated successfully!" });
     } else if (action === "reject") {
+      const rejectReason = rejectionReason ? String(rejectionReason) : "Verification failed";
       await d1.prepare(`
         UPDATE customer_store_memberships
         SET status = 'rejected', rejection_reason = ?, updated_at = ?
         WHERE id = ?
-      `).bind(rejectionReason ? String(rejectionReason) : "Verification failed", now, purchaseId).run();
+      `).bind(rejectReason, now, purchaseId).run();
+
+      // Notify customer
+      await notifyCustomer(d1, {
+        customerId: existing.customer_id,
+        type: "membership_rejected",
+        title: "\u274C Membership Request Rejected",
+        body: `Your request for the "${existing.plan_name}" membership was not approved. Reason: ${rejectReason}. If you believe this is an error, please contact the store directly.`,
+        metadata: { planName: existing.plan_name, storeId: existing.store_id, reason: rejectReason },
+      });
 
       return NextResponse.json({ success: true, status: "rejected", message: "Membership request rejected." });
     } else if (action === "revoke" || action === "cancel") {
       const reason = rejectionReason ? String(rejectionReason) : "Cancelled by store owner";
+      const refundNote = refundNoteParam ? String(refundNoteParam) : "";
       await d1.prepare(`
         UPDATE customer_store_memberships
         SET status = 'cancelled_by_owner', rejection_reason = ?, updated_at = ?
@@ -206,8 +264,34 @@ export async function POST(req: Request) {
         console.warn("Notice updating legacy memberships:", e);
       }
 
+      // Notify customer
+      const revokeBody = refundNote
+        ? `Your "${existing.plan_name}" VIP membership has been cancelled by the store owner. Reason: ${reason}. Refund info: ${refundNote}`
+        : `Your "${existing.plan_name}" VIP membership has been cancelled by the store owner. Reason: ${reason}`;
+      await notifyCustomer(d1, {
+        customerId: existing.customer_id,
+        type: "membership_cancelled",
+        title: "\uD83D\uDEAB Your VIP Membership Was Cancelled",
+        body: revokeBody,
+        metadata: { planName: existing.plan_name, storeId: existing.store_id, reason, refundNote },
+      });
+
       return NextResponse.json({ success: true, status: "cancelled_by_owner", message: "Customer membership cancelled/revoked. User has been informed in their wallet." });
     } else if (action === "delete") {
+      // Capture data BEFORE deleting so we can notify
+      const refundNote = refundNoteParam ? String(refundNoteParam) : "";
+
+      // Notify first, then delete
+      await notifyCustomer(d1, {
+        customerId: existing.customer_id,
+        type: "membership_deleted",
+        title: "\uD83D\uDDD1\uFE0F Membership Record Removed",
+        body: refundNote
+          ? `Your "${existing.plan_name}" membership record has been permanently removed by the store. Refund info: ${refundNote}`
+          : `Your "${existing.plan_name}" membership record has been permanently removed by the store.`,
+        metadata: { planName: existing.plan_name, storeId: existing.store_id, refundNote },
+      });
+
       await d1.prepare(`
         DELETE FROM customer_store_memberships WHERE id = ?
       `).bind(purchaseId).run();

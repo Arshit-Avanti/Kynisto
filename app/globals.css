@@ -1,15 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 :root {
-  --accent-orange: #000000;
+  --accent-orange: #FF5722;
   --bg-page: #ffffff;
   --bg-card: #ffffff;
   --primary: #000000;
   --primary-hover: #333333;
   --text-primary: #000000;
-  --text-secondary: #000000;
-  --text-muted: #000000;
+  --text-secondary: #64748b;
+  --text-muted: #64748b;
   --border: #e5e5e5;
   --radius: 8px;
 
@@ -20,39 +19,65 @@
   --line: var(--border);
   --accent: var(--primary);
   --accent-dark: var(--primary-hover);
-  --green: #000000;
-  --blue: #000000;
-  --yellow: #000000;
+  --green: #22c55e;
+  --blue: #3b82f6;
+  --yellow: #eab308;
 
   --bg-space: #ffffff;
-.light-theme,
-.mode-light {
-  --portal-bg: #F8FAFC !important;
-  --portal-card-bg: #FFFFFF !important;
-  --portal-text: #000000 !important;
-  --portal-border: #E2E8F0 !important;
-  --portal-muted: #1E293B !important;
-  --portal-input: #FFFFFF !important;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-surface: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --glass-hover: rgba(0, 0, 0, 0.06);
+  --glow-orange: rgba(255, 87, 34, 0.4);
+  --glow-red: rgba(239, 68, 68, 0.4);
+  --glow-amber: rgba(245, 158, 11, 0.4);
+  --glow-blue: rgba(59, 130, 246, 0.4);
+  --glow-violet: rgba(139, 92, 246, 0.4);
+  --glow-emerald: rgba(16, 185, 129, 0.4);
 
-  --bg-page: #F8FAFC !important;
-  --bg-card: #FFFFFF !important;
-  --text-primary: #000000 !important;
-  --text-secondary: #0F172A !important;
-  --ink: #000000 !important;
-  --muted: #1E293B !important;
-  --cream: #F8FAFC !important;
-  --paper: #FFFFFF !important;
-  --line: #E2E8F0 !important;
-  --glass-bg: rgba(255, 255, 255, 0.85) !important;
-  --glass-surface: rgba(255, 255, 255, 0.95) !important;
-  --glass-border: rgba(0, 0, 0, 0.12) !important;
-  --accent-orange: #FF5722 !important;
-  background-color: #F8FAFC !important;
-  color: #000000 !important;
+  /* Floating Navbar */
+  --floating-nav-position: fixed;
+  --floating-nav-top: 0px;
+  --floating-nav-margin-top: 16px;
+  --floating-nav-width: 90vw;
+  --floating-nav-max-width: 1500px;
+  --floating-nav-height: 72px;
+  --floating-nav-radius: 24px;
+  --floating-nav-bg: rgba(12, 18, 30, 0.78);
+  --floating-nav-backdrop-blur: 10px;
+  --floating-nav-border-color: rgba(255, 255, 255, 0.08);
+  --floating-nav-border: 1px solid var(--floating-nav-border-color);
+  --floating-nav-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  --floating-nav-z-index: 1000;
 }
 
-/* Light mode: ensure readable dark text on content elements only.
-   Exclude elements with explicit background colors (badges, status, buttons) and forced white text elements */
+.light-theme,
+.mode-light {
+  --portal-bg: #F8FAFC;
+  --portal-card-bg: #FFFFFF;
+  --portal-text: #0f172a;
+  --portal-border: #E2E8F0;
+  --portal-muted: #475569;
+  --portal-input: #FFFFFF;
+
+  --bg-page: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --text-primary: #0f172a;
+  --text-secondary: #0F172A;
+  --ink: #0f172a;
+  --muted: #475569;
+  --cream: #F8FAFC;
+  --paper: #FFFFFF;
+  --line: #E2E8F0;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-surface: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(0, 0, 0, 0.12);
+  --accent-orange: #FF5722;
+  background-color: #F8FAFC;
+  color: #0f172a;
+}
+
+/* Light mode: ensure readable dark text */
 .mode-light h1:not([class*="text-"]):not(.services-hero-title):not(.force-white-text),
 .mode-light h2:not([class*="text-"]):not(.force-white-text),
 .mode-light h3:not([class*="text-"]):not(.force-white-text),
@@ -79,7 +104,7 @@
   -webkit-text-fill-color: initial !important;
 }
 
-/* Dark mode: ensure readable white text on content elements only */
+/* Dark mode: ensure readable white text */
 .mode-dark h1:not([class*="text-"]),
 .mode-dark h2:not([class*="text-"]),
 .mode-dark h3:not([class*="text-"]),
@@ -97,29 +122,7 @@
   text-shadow: none;
 }
 
-  --glass-hover: rgba(0, 0, 0, 0.06);
-  --glow-orange: #000000;
-  --glow-red: #000000;
-  --glow-amber: #000000;
-  --glow-blue: #000000;
-  --glow-violet: #000000;
-  --glow-emerald: #000000;
-
-  /* Floating Navbar Container Variables */
-  --floating-nav-position: fixed;
-  --floating-nav-top: 0px;
-  --floating-nav-margin-top: 16px;
-  --floating-nav-width: 90vw;
-  --floating-nav-max-width: 1500px;
-  --floating-nav-height: 72px;
-  --floating-nav-radius: 24px;
-  --floating-nav-bg: rgba(12, 18, 30, 0.78);
-  --floating-nav-backdrop-blur: 10px;
-  --floating-nav-border-color: rgba(255, 255, 255, 0.08);
-  --floating-nav-border: 1px solid var(--floating-nav-border-color);
-  --floating-nav-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-  --floating-nav-z-index: 1000;
-}
+/* Floating Navbar Container Component */
 
 /* Floating Navbar Container Component & Utilities */
 .floating-nav-container,
@@ -218,7 +221,7 @@ body {
   overflow-x: clip;
   background: var(--bg-page);
   color: var(--text-primary);
-  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-jakarta, 'Plus Jakarta Sans'), var(--font-inter, 'Inter'), -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -452,21 +455,21 @@ textarea:focus {
 }
 
 .light-theme {
-  --portal-bg: #ffffff;
+  --portal-bg: #F8FAFC;
   --portal-card-bg: #ffffff;
-  --portal-text: #000000;
-  --portal-border: #e5e5e5;
-  --portal-muted: #000000;
+  --portal-text: #0f172a;
+  --portal-border: #E2E8F0;
+  --portal-muted: #475569;
   --portal-input: #ffffff;
 
-  --bg-page: #ffffff;
+  --bg-page: #F8FAFC;
   --bg-card: #ffffff;
-  --text-primary: #000000;
-  --text-secondary: #000000;
-  --glass-bg: rgba(0, 0, 0, 0.03);
-  --glass-surface: rgba(0, 0, 0, 0.05);
-  --glass-border: rgba(0, 0, 0, 0.1);
-  --accent-orange: #000000;
+  --text-primary: #0f172a;
+  --text-secondary: #0F172A;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-surface: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(0, 0, 0, 0.12);
+  --accent-orange: #FF5722;
 }
 
 .mode-dark .mapScene,
