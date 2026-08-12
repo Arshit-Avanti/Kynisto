@@ -1,14 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 :root {
-  --accent-orange: #FF5722;
+  --accent-orange: #000000;
   --bg-page: #ffffff;
   --bg-card: #ffffff;
   --primary: #000000;
   --primary-hover: #333333;
   --text-primary: #000000;
-  --text-secondary: #64748b;
-  --text-muted: #64748b;
+  --text-secondary: #000000;
+  --text-muted: #000000;
   --border: #e5e5e5;
   --radius: 8px;
 
@@ -19,23 +20,92 @@
   --line: var(--border);
   --accent: var(--primary);
   --accent-dark: var(--primary-hover);
-  --green: #22c55e;
-  --blue: #3b82f6;
-  --yellow: #eab308;
+  --green: #000000;
+  --blue: #000000;
+  --yellow: #000000;
 
   --bg-space: #ffffff;
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-surface: rgba(255, 255, 255, 0.95);
-  --glass-border: rgba(0, 0, 0, 0.1);
-  --glass-hover: rgba(0, 0, 0, 0.06);
-  --glow-orange: rgba(255, 87, 34, 0.4);
-  --glow-red: rgba(239, 68, 68, 0.4);
-  --glow-amber: rgba(245, 158, 11, 0.4);
-  --glow-blue: rgba(59, 130, 246, 0.4);
-  --glow-violet: rgba(139, 92, 246, 0.4);
-  --glow-emerald: rgba(16, 185, 129, 0.4);
+.light-theme,
+.mode-light {
+  --portal-bg: #F8FAFC !important;
+  --portal-card-bg: #FFFFFF !important;
+  --portal-text: #000000 !important;
+  --portal-border: #E2E8F0 !important;
+  --portal-muted: #1E293B !important;
+  --portal-input: #FFFFFF !important;
 
-  /* Floating Navbar */
+  --bg-page: #F8FAFC !important;
+  --bg-card: #FFFFFF !important;
+  --text-primary: #000000 !important;
+  --text-secondary: #0F172A !important;
+  --ink: #000000 !important;
+  --muted: #1E293B !important;
+  --cream: #F8FAFC !important;
+  --paper: #FFFFFF !important;
+  --line: #E2E8F0 !important;
+  --glass-bg: rgba(255, 255, 255, 0.85) !important;
+  --glass-surface: rgba(255, 255, 255, 0.95) !important;
+  --glass-border: rgba(0, 0, 0, 0.12) !important;
+  --accent-orange: #FF5722 !important;
+  background-color: #F8FAFC !important;
+  color: #000000 !important;
+}
+
+/* Light mode: ensure readable dark text on content elements only.
+   Exclude elements with explicit background colors (badges, status, buttons) and forced white text elements */
+.mode-light h1:not([class*="text-"]):not(.services-hero-title):not(.force-white-text),
+.mode-light h2:not([class*="text-"]):not(.force-white-text),
+.mode-light h3:not([class*="text-"]):not(.force-white-text),
+.mode-light h4:not([class*="text-"]):not(.force-white-text),
+.mode-light p:not([class*="text-"]):not(.services-hero-subtitle):not(.force-white-text),
+.mode-light label:not([class*="text-"]):not(.force-white-text),
+.light-theme h1:not([class*="text-"]):not(.services-hero-title):not(.force-white-text),
+.light-theme h2:not([class*="text-"]):not(.force-white-text),
+.light-theme h3:not([class*="text-"]):not(.force-white-text),
+.light-theme h4:not([class*="text-"]):not(.force-white-text),
+.light-theme p:not([class*="text-"]):not(.services-hero-subtitle):not(.force-white-text),
+.light-theme label:not([class*="text-"]):not(.force-white-text) {
+  color: #0f172a;
+  -webkit-text-fill-color: #0f172a;
+  text-shadow: none;
+}
+
+/* Explicit reset for forced white text elements on dark media backdrops */
+.force-white-text,
+.services-hero-title,
+.services-hero-subtitle,
+.services-page-shell h1,
+.services-page-shell h2 {
+  -webkit-text-fill-color: initial !important;
+}
+
+/* Dark mode: ensure readable white text on content elements only */
+.mode-dark h1:not([class*="text-"]),
+.mode-dark h2:not([class*="text-"]),
+.mode-dark h3:not([class*="text-"]),
+.mode-dark h4:not([class*="text-"]),
+.mode-dark p:not([class*="text-"]),
+.mode-dark label:not([class*="text-"]),
+.dark-theme h1:not([class*="text-"]),
+.dark-theme h2:not([class*="text-"]),
+.dark-theme h3:not([class*="text-"]),
+.dark-theme h4:not([class*="text-"]),
+.dark-theme p:not([class*="text-"]),
+.dark-theme label:not([class*="text-"]) {
+  color: #f1f5f9;
+  -webkit-text-fill-color: #f1f5f9;
+  text-shadow: none;
+}
+
+  --glass-hover: rgba(0, 0, 0, 0.06);
+  --glow-orange: #000000;
+  --glow-red: #000000;
+  --glow-amber: #000000;
+  --glow-blue: #000000;
+  --glow-violet: #000000;
+  --glow-emerald: #000000;
+
+  /* Floating Navbar Container Variables */
   --floating-nav-position: fixed;
   --floating-nav-top: 0px;
   --floating-nav-margin-top: 16px;
@@ -50,157 +120,6 @@
   --floating-nav-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   --floating-nav-z-index: 1000;
 }
-
-.light-theme,
-.mode-light {
-  --portal-bg: #F8FAFC;
-  --portal-card-bg: #FFFFFF;
-  --portal-text: #0f172a;
-  --portal-border: #E2E8F0;
-  --portal-muted: #475569;
-  --portal-input: #FFFFFF;
-
-  --bg-page: transparent;
-  --bg-card: #FFFFFF;
-  --text-primary: #0f172a;
-  --text-secondary: #0F172A;
-  --ink: #0f172a;
-  --muted: #475569;
-  --cream: #F8FAFC;
-  --paper: #FFFFFF;
-  --line: #E2E8F0;
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-surface: rgba(255, 255, 255, 0.95);
-  --glass-border: rgba(0, 0, 0, 0.12);
-  --accent-orange: #FF5722;
-  color: #0f172a;
-}
-
-/* Light mode: ensure readable dark text on regular light cards, EXCEPT inside floating navbars or dark mobile drawers */
-.mode-light h1:not([class*="text-"]):not(.services-hero-title):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
-.mode-light h2:not([class*="text-"]):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
-.mode-light h3:not([class*="text-"]):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
-.mode-light h4:not([class*="text-"]):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
-.mode-light p:not([class*="text-"]):not(.services-hero-subtitle):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
-.mode-light label:not([class*="text-"]):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
-.light-theme h1:not([class*="text-"]):not(.services-hero-title):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
-.light-theme h2:not([class*="text-"]):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
-.light-theme h3:not([class*="text-"]):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
-.light-theme h4:not([class*="text-"]):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
-.light-theme p:not([class*="text-"]):not(.services-hero-subtitle):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *),
-.light-theme label:not([class*="text-"]):not(.force-white-text):not(.topbar *):not(.mobileNavDrawer *) {
-  color: #0f172a;
-  -webkit-text-fill-color: #0f172a;
-  text-shadow: none;
-}
-
-/* Explicit reset for forced white text elements on dark media backdrops & mobile drawer */
-.force-white-text,
-.services-hero-title,
-.services-hero-subtitle,
-.services-page-shell h1,
-.services-page-shell h2,
-.topbar *,
-.navbar3d *,
-.mobileNavDrawer,
-.mobileNavDrawer * {
-  -webkit-text-fill-color: initial !important;
-}
-
-/* Mobile Navigation Drawer: Enforce crisp high-contrast white text & clear translucent dark glass cards in all theme modes */
-.mobileNavDrawer,
-.mobileNavDrawer *,
-.mobileNavDrawer a,
-.mobileNavDrawer button,
-.mobileNavDrawer span,
-.mobileNavDrawer div,
-.mode-light .mobileNavDrawer,
-.mode-light .mobileNavDrawer *,
-.mode-light .mobileNavDrawer a,
-.mode-light .mobileNavDrawer button,
-.mode-light .mobileNavDrawer span,
-.mode-light .mobileNavDrawer div,
-.light-theme .mobileNavDrawer,
-.light-theme .mobileNavDrawer *,
-.light-theme .mobileNavDrawer a,
-.light-theme .mobileNavDrawer button,
-.light-theme .mobileNavDrawer span,
-.light-theme .mobileNavDrawer div {
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
-}
-
-.mobileNavDrawer .drawerCard,
-.mode-light .mobileNavDrawer .drawerCard,
-.light-theme .mobileNavDrawer .drawerCard {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
-}
-
-/* Mobile 9:16 Vertical Video Full Homepage Coverage */
-@media (max-width: 768px) {
-  .mobile-9-16-video-container {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    min-height: 100dvh !important;
-    aspect-ratio: 9 / 16 !important;
-    overflow: hidden !important;
-    z-index: -1 !important;
-    pointer-events: none !important;
-  }
-
-  .mobile-9-16-video-player {
-    width: 100vw !important;
-    height: 100vh !important;
-    min-height: 100dvh !important;
-    min-width: 56.25vh !important;
-    object-fit: cover !important;
-    object-position: center top !important;
-    transform: scale(1.12) translateZ(0) !important;
-  }
-
-  .site,
-  .hero,
-  .featureGrid,
-  .categorySection,
-  .advancedFilters,
-  .storeGrid,
-  .footer {
-    background-color: transparent !important;
-  }
-}
-
-/* Dark mode: ensure readable white text */
-.mode-dark h1:not([class*="text-"]),
-.mode-dark h2:not([class*="text-"]),
-.mode-dark h3:not([class*="text-"]),
-.mode-dark h4:not([class*="text-"]),
-.mode-dark p:not([class*="text-"]),
-.mode-dark label:not([class*="text-"]),
-.dark-theme h1:not([class*="text-"]),
-.dark-theme h2:not([class*="text-"]),
-.dark-theme h3:not([class*="text-"]),
-.dark-theme h4:not([class*="text-"]),
-.dark-theme p:not([class*="text-"]),
-.dark-theme label:not([class*="text-"]),
-.dark h1:not([class*="text-"]),
-.dark h2:not([class*="text-"]),
-.dark h3:not([class*="text-"]),
-.dark h4:not([class*="text-"]),
-.dark p:not([class*="text-"]),
-.dark label:not([class*="text-"]) {
-  color: #f1f5f9;
-  -webkit-text-fill-color: #f1f5f9;
-  text-shadow: none;
-}
-
-/* Floating Navbar Container Component */
 
 /* Floating Navbar Container Component & Utilities */
 .floating-nav-container,
@@ -299,7 +218,7 @@ body {
   overflow-x: clip;
   background: var(--bg-page);
   color: var(--text-primary);
-  font-family: var(--font-jakarta, 'Plus Jakarta Sans'), var(--font-inter, 'Inter'), -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -533,21 +452,21 @@ textarea:focus {
 }
 
 .light-theme {
-  --portal-bg: #F8FAFC;
+  --portal-bg: #ffffff;
   --portal-card-bg: #ffffff;
-  --portal-text: #0f172a;
-  --portal-border: #E2E8F0;
-  --portal-muted: #475569;
+  --portal-text: #000000;
+  --portal-border: #e5e5e5;
+  --portal-muted: #000000;
   --portal-input: #ffffff;
 
-  --bg-page: #F8FAFC;
+  --bg-page: #ffffff;
   --bg-card: #ffffff;
-  --text-primary: #0f172a;
-  --text-secondary: #0F172A;
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-surface: rgba(255, 255, 255, 0.95);
-  --glass-border: rgba(0, 0, 0, 0.12);
-  --accent-orange: #FF5722;
+  --text-primary: #000000;
+  --text-secondary: #000000;
+  --glass-bg: rgba(0, 0, 0, 0.03);
+  --glass-surface: rgba(0, 0, 0, 0.05);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --accent-orange: #000000;
 }
 
 .mode-dark .mapScene,
@@ -2857,16 +2776,156 @@ img, video, iframe, embed, object {
   -webkit-text-fill-color: #92400E !important;
 }
 
-.mode-light .storeCard .categoryLabel,
-.light-theme .storeCard .categoryLabel {
-  color: var(--accent-dark) !important;
+
+/* ==========================================================================
+   POPULAR NEAR YOU — 100% TRANSPARENT IN BOTH DARK & LIGHT MODE
+   ========================================================================== */
+
+/* 1. Entire Section Background: 100% Transparent */
+.placesSection,
+.mode-dark .placesSection,
+.mode-light .placesSection,
+.dark-theme .placesSection,
+.light-theme .placesSection {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-top: none !important;
 }
 
-.mode-light .detailsButton,
-.light-theme .detailsButton {
-  background: rgba(0, 0, 0, 0.07) !important;
-  color: #1E293B !important;
-  -webkit-text-fill-color: #1E293B !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+/* 2. Advanced Filters Box: Transparent Glass */
+.advancedFilters,
+.mode-dark .advancedFilters,
+.mode-light .advancedFilters,
+.dark-theme .advancedFilters,
+.light-theme .advancedFilters {
+  background: rgba(255, 255, 255, 0.04) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+.mode-light .advancedFilters,
+.light-theme .advancedFilters {
+  background: rgba(0, 0, 0, 0.03) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Advanced Filters Inputs */
+.advancedFilters input,
+.mode-dark .advancedFilters input,
+.dark-theme .advancedFilters input {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.mode-light .advancedFilters input,
+.light-theme .advancedFilters input {
+  background: rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid rgba(0, 0, 0, 0.14) !important;
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+}
+
+/* 3. Filter Group Pills Container: Transparent Glass */
+.filterGroup,
+.mode-dark .filterGroup,
+.mode-light .filterGroup,
+.dark-theme .filterGroup,
+.light-theme .filterGroup {
+  background: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+.mode-light .filterGroup,
+.light-theme .filterGroup {
+  background: rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+}
+
+/* 4. Empty State Box ("No places match that search"): Transparent Glass */
+.emptyState,
+.mode-dark .emptyState,
+.mode-light .emptyState,
+.dark-theme .emptyState,
+.light-theme .emptyState {
+  background: transparent !important;
+  background-color: transparent !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px dashed rgba(255, 255, 255, 0.25) !important;
+}
+
+.mode-light .emptyState,
+.light-theme .emptyState {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 1px dashed rgba(0, 0, 0, 0.2) !important;
+}
+
+.emptyState > div,
+.mode-dark .emptyState > div,
+.dark-theme .emptyState > div {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+.mode-light .emptyState > div,
+.light-theme .emptyState > div {
+  background: rgba(0, 0, 0, 0.08) !important;
+  color: #0F172A !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+}
+
+.emptyState h3,
+.mode-dark .emptyState h3,
+.dark-theme .emptyState h3 {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+}
+
+.mode-light .emptyState h3,
+.light-theme .emptyState h3 {
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+  text-shadow: none !important;
+}
+
+.emptyState p,
+.mode-dark .emptyState p,
+.dark-theme .emptyState p {
+  color: #CBD5E1 !important;
+  -webkit-text-fill-color: #CBD5E1 !important;
+}
+
+.mode-light .emptyState p,
+.light-theme .emptyState p {
+  color: #475569 !important;
+  -webkit-text-fill-color: #475569 !important;
+}
+
+/* 5. Store Cards: Transparent Glass in Dark & Light Modes */
+.storeCard,
+.mode-dark .storeCard,
+.dark-theme .storeCard {
+  background: rgba(255, 255, 255, 0.04) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
+}
+
+.mode-light .storeCard,
+.light-theme .storeCard {
+  background: rgba(255, 255, 255, 0.25) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06) !important;
 }
 

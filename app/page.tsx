@@ -109,29 +109,22 @@ const modernCleanTechStyles = `
     -webkit-text-fill-color: #0f172a !important;
     text-shadow: none !important;
   }
-  /* Ensure text is dark in light mode on regular cards, EXCEPT inside floating navbars or dark mobile drawer */
-  .mode-light h1:not(.mobileNavDrawer *), .mode-light h2:not(.mobileNavDrawer *), .mode-light h3:not(.mobileNavDrawer *), .mode-light h4:not(.mobileNavDrawer *), .mode-light p:not(.mobileNavDrawer *),
-  .mode-light span:not(.categoryArt):not(.brandMark span):not(.mobileNavDrawer *), .mode-light label:not(.mobileNavDrawer *),
-  .mode-light .featureCard h3:not(.mobileNavDrawer *), .mode-light .featureCard p:not(.mobileNavDrawer *),
-  .mode-light .highContrastText:not(.mobileNavDrawer *), .mode-light .marqueeTrack span:not(.mobileNavDrawer *),
-  .mode-light .quickProof span:not(.mobileNavDrawer *), .mode-light .trustStrip p:not(.mobileNavDrawer *),
-  .mode-light .sectionHeading h2:not(.mobileNavDrawer *), .mode-light .sectionHeading span:not(.mobileNavDrawer *),
-  .mode-light .kicker:not(.mobileNavDrawer *), .mode-light .hero h1:not(.mobileNavDrawer *), .mode-light .hero p:not(.mobileNavDrawer *) {
+  /* Ensure ALL text is dark in light mode across the entire page, even after custom theme changes */
+  .mode-light h1, .mode-light h2, .mode-light h3, .mode-light h4, .mode-light p,
+  .mode-light span:not(.categoryArt):not(.brandMark span), .mode-light label,
+  .mode-light .featureCard h3, .mode-light .featureCard p,
+  .mode-light .highContrastText, .mode-light .marqueeTrack span,
+  .mode-light .quickProof span, .mode-light .trustStrip p,
+  .mode-light .sectionHeading h2, .mode-light .sectionHeading span,
+  .mode-light .kicker, .mode-light .hero h1, .mode-light .hero p {
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
     text-shadow: none !important;
   }
-  /* Mobile Navigation Drawer: Force crisp white text in all modes */
-  .mobileNavDrawer, .mobileNavDrawer *, .mode-light .mobileNavDrawer, .mode-light .mobileNavDrawer * {
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-  }
-  /* Topbar container always has dark glass background — text must remain crisp white */
-  .topbar a, .topbar button, .topbar .headerActions a, .topbar .headerActions button, .topbar .textButton, .topbar .accountButton, .topbar .savedButton,
-  .mode-light .topbar a, .mode-light .topbar button, .mode-light .topbar .headerActions a, .mode-light .topbar .headerActions button {
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
+  .mode-light .topbar a, .mode-light .topbar button, .mode-light .headerActions a, .mode-light .headerActions button, .mode-light .textButton, .mode-light .accountButton, .mode-light .savedButton {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    text-shadow: none !important;
     font-weight: 700 !important;
     font-size: 14px !important;
     transition: all 0.2s ease !important;
@@ -150,12 +143,12 @@ const modernCleanTechStyles = `
     color: rgba(0,0,0,0.4) !important;
     -webkit-text-fill-color: rgba(0,0,0,0.4) !important;
   }
-  /* Topbar buttons styling inside dark glass header */
-  .topbar .textButton, .topbar .accountButton, .topbar .savedButton {
-    background: rgba(255, 255, 255, 0.12) !important;
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  /* Fix nav/topbar invisible pill in light mode — force readable background + text */
+  .mode-light .textButton, .mode-light .accountButton, .mode-light .savedButton {
+    background: rgba(0, 0, 0, 0.06) !important;
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
   }
   .topbar a:hover, .topbar button:hover, .headerActions a:hover, .headerActions button:hover, .textButton:hover {
     color: #FF5722 !important;
@@ -252,8 +245,10 @@ const modernCleanTechStyles = `
     transition: transform 0.15s ease;
   }
   .mode-light .storeCard {
-    background: rgba(255, 255, 255, 0.85) !important;
+    background: rgba(255, 255, 255, 0.18) !important;
     border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
   }
   .mode-light .storeCard h3, .mode-light .storeCard b, .mode-light .storeCard p, .mode-light .storeCard .storeMeta span, .mode-light .categoryLabel, .mode-light .rating {
@@ -1147,7 +1142,7 @@ export default function Home() {
   const [userId, setUserId] = useState<string | null>(null);
   const [accent, setAccent] = useState<Accent>("royal");
   const [density, setDensity] = useState<Density>("comfortable");
-  const [themeMode, setThemeMode] = useState<ThemeMode>("light");
+  const [themeMode, setThemeMode] = useState<ThemeMode>("dark");
   const [areaFilter, setAreaFilter] = useState("");
   const [pinFilter, setPinFilter] = useState("");
   const [businessTypeFilter, setBusinessTypeFilter] = useState("");
@@ -1533,7 +1528,6 @@ export default function Home() {
           role="dialog"
           aria-modal="true"
           aria-label="Mobile Navigation Drawer"
-          className="mobileNavDrawer"
           style={{
             position: "fixed",
             top: 0,
@@ -1618,115 +1612,105 @@ export default function Home() {
             <Link
               href="/"
               onClick={() => setMobileOpen(false)}
-              className="drawerCard"
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "14px 16px",
                 borderRadius: "14px",
-                background: "rgba(255, 255, 255, 0.08)",
-                border: "1px solid rgba(255, 255, 255, 0.16)",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
                 color: "#FFFFFF",
-                WebkitTextFillColor: "#FFFFFF",
                 textDecoration: "none",
                 fontSize: "15px",
                 fontWeight: 600,
               }}
             >
-              <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Homepage</span>
-              <span style={{ opacity: 0.7, color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>→</span>
+              <span>Homepage</span>
+              <span style={{ opacity: 0.5 }}>→</span>
             </Link>
 
             <Link
               href="/products"
               onClick={() => setMobileOpen(false)}
-              className="drawerCard"
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "14px 16px",
                 borderRadius: "14px",
-                background: "rgba(255, 255, 255, 0.08)",
-                border: "1px solid rgba(255, 255, 255, 0.16)",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
                 color: "#FFFFFF",
-                WebkitTextFillColor: "#FFFFFF",
                 textDecoration: "none",
                 fontSize: "15px",
                 fontWeight: 600,
               }}
             >
-              <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Products</span>
-              <span style={{ opacity: 0.7, color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>→</span>
+              <span>Products</span>
+              <span style={{ opacity: 0.5 }}>→</span>
             </Link>
 
             <Link
               href="/healthcare"
               onClick={() => setMobileOpen(false)}
-              className="drawerCard"
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "14px 16px",
                 borderRadius: "14px",
-                background: "rgba(255, 255, 255, 0.08)",
-                border: "1px solid rgba(255, 255, 255, 0.16)",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
                 color: "#FFFFFF",
-                WebkitTextFillColor: "#FFFFFF",
                 textDecoration: "none",
                 fontSize: "15px",
                 fontWeight: 600,
               }}
             >
-              <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Healthcare</span>
-              <span style={{ opacity: 0.7, color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>→</span>
+              <span>Healthcare</span>
+              <span style={{ opacity: 0.5 }}>→</span>
             </Link>
 
             <Link
               href="/services"
               onClick={() => setMobileOpen(false)}
-              className="drawerCard"
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "14px 16px",
                 borderRadius: "14px",
-                background: "rgba(255, 255, 255, 0.08)",
-                border: "1px solid rgba(255, 255, 255, 0.16)",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
                 color: "#FFFFFF",
-                WebkitTextFillColor: "#FFFFFF",
                 textDecoration: "none",
                 fontSize: "15px",
                 fontWeight: 600,
               }}
             >
-              <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Services</span>
-              <span style={{ opacity: 0.7, color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>→</span>
+              <span>Services</span>
+              <span style={{ opacity: 0.5 }}>→</span>
             </Link>
 
             <Link
               href="/pricing"
               onClick={() => setMobileOpen(false)}
-              className="drawerCard"
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "14px 16px",
                 borderRadius: "14px",
-                background: "rgba(255, 122, 0, 0.18)",
-                border: "1px solid rgba(255, 122, 0, 0.45)",
-                color: "#FF8A00",
-                WebkitTextFillColor: "#FF8A00",
+                background: "rgba(255, 122, 0, 0.12)",
+                border: "1px solid rgba(255, 122, 0, 0.4)",
+                color: "#FF7A00",
                 textDecoration: "none",
                 fontSize: "15px",
                 fontWeight: 700,
               }}
             >
-              <span style={{ color: "#FF8A00", WebkitTextFillColor: "#FF8A00" }}>Pricing &amp; Plans</span>
+              <span>Pricing &amp; Plans</span>
               <span>⚡</span>
             </Link>
 
@@ -1741,7 +1725,6 @@ export default function Home() {
                 borderRadius: "14px",
                 background: "linear-gradient(135deg, #FF5722 0%, #E53935 100%)",
                 color: "#FFFFFF",
-                WebkitTextFillColor: "#FFFFFF",
                 textDecoration: "none",
                 fontSize: "15px",
                 fontWeight: 700,
@@ -1749,7 +1732,7 @@ export default function Home() {
                 marginTop: "6px",
               }}
             >
-              <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>
+              <span>
                 {userRole === "admin" ? "Admin Panel" : userRole === "store_owner" ? "Owner Dashboard" : userRole === "customer" ? "My Account" : "Dashboard / Log in"}
               </span>
               <span>👤</span>
@@ -1769,17 +1752,15 @@ export default function Home() {
                 setToast(saved.length ? `${saved.length} saved place${saved.length === 1 ? "" : "s"}` : "No saved places yet");
                 setMobileOpen(false);
               }}
-              className="drawerCard"
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "14px 16px",
                 borderRadius: "14px",
-                background: "rgba(255, 255, 255, 0.08)",
-                border: "1px solid rgba(255, 255, 255, 0.16)",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
                 color: "#FFFFFF",
-                WebkitTextFillColor: "#FFFFFF",
                 fontSize: "15px",
                 fontWeight: 600,
                 cursor: "pointer",
@@ -1787,10 +1768,10 @@ export default function Home() {
                 width: "100%",
               }}
             >
-              <span style={{ display: "flex", alignItems: "center", gap: "8px", color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>
-                <span style={{ color: "#FF5722", WebkitTextFillColor: "#FF5722" }}>♥</span> Saved Places
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ color: "#FF5722" }}>♥</span> Saved Places
               </span>
-              <b style={{ background: "rgba(255, 87, 34, 0.25)", color: "#FF8A00", WebkitTextFillColor: "#FF8A00", border: "1px solid rgba(255, 138, 0, 0.4)", padding: "2px 10px", borderRadius: "12px", fontSize: "12px" }}>
+              <b style={{ background: "rgba(255, 87, 34, 0.25)", color: "#FF8A00", border: "1px solid rgba(255, 138, 0, 0.4)", padding: "2px 10px", borderRadius: "12px", fontSize: "12px" }}>
                 {saved.length}
               </b>
             </button>
@@ -1801,17 +1782,15 @@ export default function Home() {
                 setCustomizing(true);
                 setMobileOpen(false);
               }}
-              className="drawerCard"
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "14px 16px",
                 borderRadius: "14px",
-                background: "rgba(255, 255, 255, 0.08)",
-                border: "1px solid rgba(255, 255, 255, 0.16)",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
                 color: "#FFFFFF",
-                WebkitTextFillColor: "#FFFFFF",
                 fontSize: "15px",
                 fontWeight: 600,
                 cursor: "pointer",
@@ -1819,7 +1798,7 @@ export default function Home() {
                 width: "100%",
               }}
             >
-              <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Customize Appearance</span>
+              <span>Customize Appearance</span>
               <span>⚙️</span>
             </button>
 
@@ -1832,10 +1811,9 @@ export default function Home() {
                   justifyContent: "space-between",
                   padding: "14px 16px",
                   borderRadius: "14px",
-                  background: "rgba(239, 68, 68, 0.15)",
-                  border: "1px solid rgba(239, 68, 68, 0.35)",
-                  color: "#f87171",
-                  WebkitTextFillColor: "#f87171",
+                  background: "rgba(239, 68, 68, 0.1)",
+                  border: "1px solid rgba(239, 68, 68, 0.3)",
+                  color: "#ef4444",
                   fontSize: "15px",
                   fontWeight: 600,
                   cursor: "pointer",
@@ -1848,7 +1826,7 @@ export default function Home() {
                   window.location.href = "/";
                 }}
               >
-                <span style={{ color: "#f87171", WebkitTextFillColor: "#f87171" }}>Sign Out</span>
+                <span>Sign Out</span>
                 <span>🚪</span>
               </button>
             )}
