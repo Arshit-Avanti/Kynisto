@@ -2629,13 +2629,14 @@ img, video, iframe, embed, object {
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
 }
 
-/* ── 4. EXACT LOCATION / LIVE HOURS / SAVED FAVORITES — trustStrip visible ── */
+/* ── 4. EXACT LOCATION / LIVE HOURS / SAVED FAVORITES — trustStrip visible & compact ── */
 .trustStrip {
   background: rgba(10, 16, 30, 0.6) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   border-radius: 20px !important;
-  padding: 48px 40px !important;
+  padding: 18px 32px !important;
+  margin: 24px auto !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
@@ -3113,4 +3114,44 @@ img, video, iframe, embed, object {
   border: 1px solid rgba(0, 0, 0, 0.12) !important;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06) !important;
 }
+
+/* Specific White Text Color Enforcements for Popular Near You section */
+.placesSection .kicker,
+.mode-light .placesSection .kicker,
+.light-theme .placesSection .kicker {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.placesSection h2,
+.placesSection h3,
+.placesSection #places-heading,
+.mode-light .placesSection h2,
+.mode-light .placesSection h3,
+.mode-light .placesSection #places-heading,
+.light-theme .placesSection h2,
+.light-theme .placesSection h3,
+.light-theme .placesSection #places-heading {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.emptyState h3,
+.mode-light .emptyState h3,
+.light-theme .emptyState h3,
+.mode-dark .emptyState h3,
+.dark-theme .emptyState h3 {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.emptyState p,
+.mode-light .emptyState p,
+.light-theme .emptyState p,
+.mode-dark .emptyState p,
+.dark-theme .emptyState p {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
 

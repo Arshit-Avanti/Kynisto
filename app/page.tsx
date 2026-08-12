@@ -2019,8 +2019,8 @@ export default function Home() {
 
         <div className="sectionHeading" style={{ marginTop: "36px", marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <span className="kicker" style={{ color: "#FF5722", fontWeight: 700 }}>📍 Verified Local Services</span>
-            <h2 className="highContrastText" style={{ fontSize: "1.8rem", fontWeight: 800, margin: "4px 0 0 0" }}>Recommended Stores Nearby Me</h2>
+            <span className="kicker" style={{ color: "#FFFFFF", fontWeight: 700 }}>📍 Verified Local Services</span>
+            <h2 className="highContrastText" style={{ fontSize: "1.8rem", fontWeight: 800, margin: "4px 0 0 0", color: "#FFFFFF" }}>Recommended Stores Nearby Me</h2>
           </div>
           <div className="resultsBar" style={{ margin: 0 }}>
             <span><b>{catalogTotal}</b> places found</span>
@@ -2105,7 +2105,7 @@ export default function Home() {
 
       <footer>
         <a className="brand footerBrand" href="#top"><KynistoLogo /></a>
-        <p className="demoNote">Your Locality · © 2026 Kynisto</p>
+        <p className="demoNote">Your Locality · © 2026 Kynisto<br />MADE BY A&A</p>
       </footer>
 
       {customizing && (
