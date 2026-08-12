@@ -121,6 +121,16 @@ const modernCleanTechStyles = `
     -webkit-text-fill-color: #0f172a !important;
     text-shadow: none !important;
   }
+  /* Popular Near You specified 5 texts -> pure white in all modes */
+  .mode-light .placesSection .kicker,
+  .mode-light .placesSection h2,
+  .mode-light .placesSection #places-heading,
+  .mode-light .emptyState h3,
+  .mode-light .emptyState p {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9) !important;
+  }
   .mode-light .topbar a, .mode-light .topbar button, .mode-light .headerActions a, .mode-light .headerActions button, .mode-light .textButton, .mode-light .accountButton, .mode-light .savedButton {
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
@@ -1978,8 +1988,8 @@ export default function Home() {
       <section className="placesSection" id="places" aria-labelledby="places-heading">
         <div className="sectionHeading placesHeading">
           <div>
-            <span className="kicker">Handy places around you</span>
-            <h2 id="places-heading">{category === "All" ? "Popular near you" : `${category} near you`}</h2>
+            <span className="kicker" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Handy places around you</span>
+            <h2 id="places-heading" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>{category === "All" ? "Popular near you" : `${category} near you`}</h2>
           </div>
           <div className="filterGroup" aria-label="Sort and filter stores">
             {([
@@ -2086,8 +2096,8 @@ export default function Home() {
         ) : (
           <div className="emptyState">
             <div aria-hidden="true">⌕</div>
-            <h3>No places match that search</h3>
-            <p>Try another service or clear your current filters.</p>
+            <h3 style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>No places match that search</h3>
+            <p style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Try another service or clear your current filters.</p>
             <button type="button" onClick={resetFilters}>Show all nearby places</button>
           </div>
         )}
