@@ -10,6 +10,7 @@ import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscri
 import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
 import KynistoWalletView from "@/components/wallet/KynistoWalletView";
 import { RoleSwitcherButton } from "@/components/auth/RoleSwitcherButton";
+import { Package, Heart, Star, ShoppingCart, MapPin, Store, Calendar, CheckCircle2, MessageSquare, Ticket, BellRing } from "lucide-react";
 
 type Item = Record<string, unknown>;
 type Payload = Record<string, unknown>;
