@@ -38,7 +38,8 @@ export async function POST(request: Request) {
     const onboardingCompleted = Boolean(
       profile?.onboarding_completed ||
       supabaseUser.user_metadata?.onboarding_completed ||
-      (rawRole && typeof rawRole === "string" && rawRole.trim() !== "" && rawRole !== "unassigned")
+      profile?.role_selected_at ||
+      supabaseUser.user_metadata?.role_selected_at
     );
 
     const role = applicationRoleFromProfile(rawRole) || "customer";
