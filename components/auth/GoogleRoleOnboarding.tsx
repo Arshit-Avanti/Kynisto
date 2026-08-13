@@ -60,37 +60,76 @@ export function GoogleRoleOnboarding() {
     loaded.current = true;
     void (async () => {
       try {
-        const supabase = await getSupabaseBrowserClient();
-        const {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession();
-        if (sessionError) throw sessionError;
-        if (!session?.user) {
-          throw new Error("Supabase session not found");
-        }
+        let currentUser: User | null = null;
 
-        syncSupabaseAccessCookie(session);
-
-        // Safely fetch profile and check if permanent role is already set
         try {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", session.user.id)
-            .maybeSingle();
+          const supabase = await getSupabaseBrowserClient();
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
 
-          const existingRole = profile?.role || session.user.user_metadata?.role;
-          if (existingRole) {
-            const dest = (existingRole === "shop_owner" || existingRole === "owner" || existingRole === "store_owner") ? "/owner" : "/";
-            window.location.replace(dest);
-            return;
+          if (session?.user) {
+            currentUser = session.user;
+            syncSupabaseAccessCookie(session);
+
+            try {
+              const { data: profile } = await supabase
+                .from("profiles")
+                .select("*")
+                .eq("id", session.user.id)
+                .maybeSingle();
+
+              const existingRole = profile?.role || session.user.user_metadata?.role;
+              if (existingRole && existingRole !== "unassigned") {
+                const dest = (existingRole === "shop_owner" || existingRole === "owner" || existingRole === "store_owner") ? "/owner" : "/";
+                window.location.replace(dest);
+                return;
+              }
+            } catch (profileErr) {
+              console.warn("Profile query bypassed:", profileErr);
+            }
           }
-        } catch (profileErr) {
-          console.warn("Profile table query gracefully bypassed:", profileErr);
+        } catch (supabaseErr) {
+          console.warn("Supabase browser session check bypassed:", supabaseErr);
         }
 
-        setUser(session.user);
+        // Fallback: Check server D1 session via /api/auth/me
+        if (!currentUser) {
+          try {
+            const { apiFetch } = await import("@/lib/client-api");
+            const meRes = await apiFetch<{ user: { id: string; email: string; name?: string; avatarUrl?: string; role?: string } | null }>("/api/auth/me");
+            if (meRes?.user) {
+              const meRole = meRes.user.role;
+              if (meRole && meRole !== "unassigned") {
+                const dest = (meRole === "store_owner" || meRole === "shop_owner" || meRole === "owner") ? "/owner" : "/";
+                window.location.replace(dest);
+                return;
+              }
+              currentUser = {
+                id: meRes.user.id,
+                email: meRes.user.email,
+                user_metadata: {
+                  full_name: meRes.user.name,
+                  avatar_url: meRes.user.avatarUrl,
+                  role: meRes.user.role,
+                },
+                app_metadata: {},
+                aud: "authenticated",
+                created_at: new Date().toISOString(),
+              } as unknown as User;
+            }
+          } catch (meErr) {
+            console.warn("API me fetch fallback failed:", meErr);
+          }
+        }
+
+        if (!currentUser) {
+          // Genuinely not logged in -> redirect to login smoothly
+          window.location.replace("/login");
+          return;
+        }
+
+        setUser(currentUser);
       } catch (loadError) {
         console.error("Google onboarding failed:", loadError);
         setError(getFriendlyErrorMessage(loadError));
@@ -109,12 +148,19 @@ export function GoogleRoleOnboarding() {
         throw new Error("invalid role");
       }
 
-      const supabase = await getSupabaseBrowserClient();
       const metadata = user.user_metadata || {};
       const targetRole = selectedRole === "shop_owner" ? "shop_owner" : selectedRole === "admin" ? "admin" : "customer";
 
-      // 1. Permanently update Supabase Auth User Metadata
+      // 1. Primary update: D1 database user role via API
+      const { apiFetch } = await import("@/lib/client-api");
+      await apiFetch("/api/auth/onboarding/role", {
+        method: "POST",
+        json: { role: targetRole },
+      });
+
+      // 2. Secondary update: Supabase Auth User Metadata & Profiles table
       try {
+        const supabase = await getSupabaseBrowserClient();
         await supabase.auth.updateUser({
           data: {
             role: targetRole,
@@ -122,12 +168,6 @@ export function GoogleRoleOnboarding() {
             role_selected_at: new Date().toISOString(),
           },
         });
-      } catch (metaErr) {
-        console.warn("Auth user metadata update bypassed:", metaErr);
-      }
-
-      // 2. Permanently upsert to Supabase profiles table
-      try {
         await supabase.from("profiles").upsert(
           {
             id: user.id,
@@ -140,29 +180,18 @@ export function GoogleRoleOnboarding() {
           },
           { onConflict: "id" },
         );
-      } catch (upsertErr) {
-        console.warn("Profiles upsert gracefully bypassed:", upsertErr);
+      } catch (metaErr) {
+        console.warn("Supabase profile/metadata sync gracefully bypassed:", metaErr);
       }
 
-      // 3. Update local D1 user role
-      try {
-        const { apiFetch } = await import("@/lib/client-api");
-        await apiFetch("/api/auth/onboarding/role", {
-          method: "POST",
-          json: { role: targetRole },
-        });
-      } catch (d1Err) {
-        console.warn("D1 role update gracefully bypassed:", d1Err);
-      }
-
-      // 4. Save to localStorage for instant client-side role memory
+      // 3. Save to localStorage for instant client-side role memory
       try {
         localStorage.setItem("kynisto_permanent_role", targetRole);
       } catch {
         // Ignore storage restriction errors
       }
 
-      // 5. Route to the permanent workspace based on selected role
+      // 4. Route to the permanent workspace based on selected role
       const destination = (targetRole === "shop_owner") ? "/owner" : (targetRole === "admin") ? "/admin" : "/";
       window.location.replace(destination);
     } catch (selectionError) {
