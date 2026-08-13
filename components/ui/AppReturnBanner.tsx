@@ -9,6 +9,10 @@ export function AppReturnBanner() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    // Ignore search engine and AdSense bots
+    const isBot = /bot|googlebot|crawler|spider|robot|crawling|mediapartners|adsbot|lighthouse/i.test(navigator.userAgent);
+    if (isBot) return;
+
     // Check if running on Android device
     const isAndroid = /Android/i.test(navigator.userAgent);
     

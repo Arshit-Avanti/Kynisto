@@ -23,6 +23,8 @@ interface ExecutionContext {
 /** Applies industry-standard security headers fully compatible with Google AdSense auto-ads & site preview. */
 function applySecurityHeaders(res: Response): Response {
   const headers = new Headers(res.headers);
+  headers.delete("X-Frame-Options");
+  headers.delete("x-frame-options");
   headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
