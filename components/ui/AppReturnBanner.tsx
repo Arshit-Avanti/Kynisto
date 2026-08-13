@@ -18,24 +18,41 @@ export function AppReturnBanner() {
 
     if (!isExternalBrowser) return;
 
-    // Determine target route in APK
-    const pathname = window.location.pathname.replace(/^\/+/, "");
-    const search = window.location.search;
-    const hash = window.location.hash;
+    void (async () => {
+      let accessToken = "";
+      try {
+        const { getSupabaseBrowserClient } = await import("@/lib/supabase-browser");
+        const supabase = await getSupabaseBrowserClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          accessToken = session.access_token;
+        }
+      } catch {}
 
-    // kynisto:// scheme handled by AndroidManifest.xml
-    const deepScheme = `kynisto://${pathname}${search}${hash}`;
-    setAppLink(deepScheme);
-    setShowBanner(true);
+      // Determine target route in APK
+      const pathname = window.location.pathname.replace(/^\/+/, "");
+      let targetSearch = window.location.search;
+      if (accessToken) {
+        const params = new URLSearchParams(targetSearch);
+        params.set("access_token", accessToken);
+        targetSearch = `?${params.toString()}`;
+      }
+      const hash = window.location.hash;
 
-    // Auto-launch trigger if user just completed Google OAuth sign in
-    const justSignedIn = window.sessionStorage.getItem("kynisto-just-signed-in");
-    if (justSignedIn === "true") {
-      window.sessionStorage.removeItem("kynisto-just-signed-in");
-      setTimeout(() => {
-        window.location.href = deepScheme;
-      }, 500);
-    }
+      // kynisto:// scheme handled by AndroidManifest.xml
+      const deepScheme = `kynisto://${pathname}${targetSearch}${hash}`;
+      setAppLink(deepScheme);
+      setShowBanner(true);
+
+      // Auto-launch trigger if user just completed Google OAuth sign in
+      const justSignedIn = window.sessionStorage.getItem("kynisto-just-signed-in");
+      if (justSignedIn === "true") {
+        window.sessionStorage.removeItem("kynisto-just-signed-in");
+        setTimeout(() => {
+          window.location.href = deepScheme;
+        }, 500);
+      }
+    })();
   }, []);
 
   function handleOpenApp() {
@@ -48,7 +65,7 @@ export function AppReturnBanner() {
       const pathname = window.location.pathname;
       const intentUrl = `intent://${window.location.host}${pathname}#Intent;scheme=kynisto;package=com.kynisto.app;end;`;
       window.location.href = intentUrl;
-    }, 400);
+    }, 500);
   }
 
   if (!showBanner) return null;
