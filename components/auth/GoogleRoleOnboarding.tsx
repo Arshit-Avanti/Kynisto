@@ -258,39 +258,37 @@ export function GoogleRoleOnboarding() {
           {error}
         </p>
       )}
-      {user && (
-        <div className="onboardingRoleGrid">
-          <button
-            type="button"
-            disabled={Boolean(busy)}
-            onClick={() => void selectRole("customer")}
-          >
-            <i aria-hidden="true">C</i>
-            <span>
-              <b>Customer</b>
-              <small>
-                Discover local shops, order products, book services &amp; join queues.
-              </small>
-            </span>
-            <em>{busy === "customer" ? "Setting up…" : "Continue as Customer →"}</em>
-          </button>
+      <div className="onboardingRoleGrid">
+        <button
+          type="button"
+          disabled={Boolean(busy)}
+          onClick={() => void selectRole("customer")}
+        >
+          <i aria-hidden="true">C</i>
+          <span>
+            <b>Customer</b>
+            <small>
+              Discover local shops, order products, book services &amp; join queues.
+            </small>
+          </span>
+          <em>{busy === "customer" ? "Setting up…" : "Continue as Customer →"}</em>
+        </button>
 
-          <button
-            type="button"
-            disabled={Boolean(busy)}
-            onClick={() => void selectRole("shop_owner")}
-          >
-            <i aria-hidden="true">S</i>
-            <span>
-              <b>Shop / Service Owner</b>
-              <small>
-                Manage your physical store, Healthcare clinic, live queues &amp; service catalog.
-              </small>
-            </span>
-            <em>{busy === "shop_owner" ? "Setting up…" : "Continue as Shop Owner →"}</em>
-          </button>
-        </div>
-      )}
+        <button
+          type="button"
+          disabled={Boolean(busy)}
+          onClick={() => void selectRole("shop_owner")}
+        >
+          <i aria-hidden="true">S</i>
+          <span>
+            <b>Shop / Service Owner</b>
+            <small>
+              Manage your physical store, Healthcare clinic, live queues &amp; service catalog.
+            </small>
+          </span>
+          <em>{busy === "shop_owner" ? "Setting up…" : "Continue as Shop Owner →"}</em>
+        </button>
+      </div>
       {error && (
         <div className="authCallbackActions">
           <button type="button" onClick={() => window.location.reload()}>

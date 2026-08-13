@@ -55,16 +55,35 @@ export async function PATCH(request: Request) {
       const userIds = cleanUserIds(body.userIds);
       if (userIds.includes(session.user.id)) throw new HttpError(409, "You cannot delete your own administrator account.", "SELF_PROTECTION");
       const placeholders = userIds.map(() => "?").join(",");
-      const users = await getD1().prepare(`SELECT u.id, u.email, u.role, COALESCE(us.is_super_admin, 0) AS isSuperAdmin,
-        (SELECT COUNT(*) FROM orders o WHERE o.user_id = u.id) AS orderCount
-        FROM users u LEFT JOIN user_security us ON us.user_id = u.id WHERE u.id IN (${placeholders})`).bind(...userIds).all<{ id: string; email: string; role: UserRole; isSuperAdmin: number; orderCount: number }>();
+      const users = await getD1().prepare(`SELECT u.id, u.email, u.role, COALESCE(us.is_super_admin, 0) AS isSuperAdmin
+        FROM users u LEFT JOIN user_security us ON us.user_id = u.id WHERE u.id IN (${placeholders})`).bind(...userIds).all<{ id: string; email: string; role: UserRole; isSuperAdmin: number }>();
       const found = users.results ?? [];
       if (found.length !== userIds.length) throw new HttpError(404, "One or more users were not found.", "USER_NOT_FOUND");
       if (found.some((user) => user.isSuperAdmin)) throw new HttpError(409, "The Super Admin account cannot be deleted.", "PROTECTED_SUPER_ADMIN");
       if (!session.user.isSuperAdmin && found.some((user) => user.role === "admin")) throw new HttpError(403, "Only the Super Admin can delete administrators.", "SUPER_ADMIN_REQUIRED");
-      if (found.some((user) => Number(user.orderCount) > 0)) throw new HttpError(409, "Users with order history must be suspended or banned instead of deleted.", "USER_HAS_ORDERS");
+      
       await writeAudit(request, session.user.id, "user.bulk_deleted", "user", userIds[0], { userIds, emails: found.map((user) => user.email), count: userIds.length });
-      await getD1().prepare(`DELETE FROM users WHERE id IN (${placeholders})`).bind(...userIds).run();
+      
+      const db = getD1();
+      for (const id of userIds) {
+        await db.batch([
+          db.prepare("DELETE FROM sessions WHERE user_id = ?").bind(id),
+          db.prepare("DELETE FROM user_security WHERE user_id = ?").bind(id),
+          db.prepare("DELETE FROM user_preferences WHERE user_id = ?").bind(id),
+          db.prepare("DELETE FROM external_auth_identities WHERE user_id = ?").bind(id),
+          db.prepare("DELETE FROM trial_history WHERE user_id = ?").bind(id),
+          db.prepare("DELETE FROM product_reviews WHERE user_id = ?").bind(id),
+          db.prepare("DELETE FROM favorites WHERE user_id = ?").bind(id),
+          db.prepare("DELETE FROM user_memberships WHERE user_id = ?").bind(id),
+          db.prepare("DELETE FROM queue_tokens WHERE user_id = ?").bind(id),
+          db.prepare("DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE user_id = ?)").bind(id),
+          db.prepare("DELETE FROM orders WHERE user_id = ?").bind(id),
+          db.prepare("DELETE FROM products WHERE store_id IN (SELECT id FROM stores WHERE owner_id = ?)").bind(id),
+          db.prepare("DELETE FROM services WHERE store_id IN (SELECT id FROM stores WHERE owner_id = ?)").bind(id),
+          db.prepare("DELETE FROM stores WHERE owner_id = ?").bind(id),
+          db.prepare("DELETE FROM users WHERE id = ?").bind(id),
+        ]);
+      }
       return Response.json({ ok: true, count: userIds.length });
     }
     const userId = cleanText(body.userId, "User", { max: 80 });
@@ -118,12 +137,27 @@ export async function DELETE(request: Request) {
     if (user.role === "admin" && !session.user.isSuperAdmin) {
       throw new HttpError(403, "Only the Super Admin can delete an administrator.", "SUPER_ADMIN_REQUIRED");
     }
-    const orderHistory = await getD1().prepare("SELECT COUNT(*) AS total FROM orders WHERE user_id = ?").bind(userId).first<{ total: number }>();
-    if (Number(orderHistory?.total ?? 0) > 0) {
-      throw new HttpError(409, "Users with order history must be suspended or banned instead of deleted.", "USER_HAS_ORDERS");
-    }
+
     await writeAudit(request, session.user.id, "user.deleted", "user", userId, { email: user.email });
-    await getD1().prepare("DELETE FROM users WHERE id = ?").bind(userId).run();
+
+    const db = getD1();
+    await db.batch([
+      db.prepare("DELETE FROM sessions WHERE user_id = ?").bind(userId),
+      db.prepare("DELETE FROM user_security WHERE user_id = ?").bind(userId),
+      db.prepare("DELETE FROM user_preferences WHERE user_id = ?").bind(userId),
+      db.prepare("DELETE FROM external_auth_identities WHERE user_id = ?").bind(userId),
+      db.prepare("DELETE FROM trial_history WHERE user_id = ?").bind(userId),
+      db.prepare("DELETE FROM product_reviews WHERE user_id = ?").bind(userId),
+      db.prepare("DELETE FROM favorites WHERE user_id = ?").bind(userId),
+      db.prepare("DELETE FROM user_memberships WHERE user_id = ?").bind(userId),
+      db.prepare("DELETE FROM queue_tokens WHERE user_id = ?").bind(userId),
+      db.prepare("DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE user_id = ?)").bind(userId),
+      db.prepare("DELETE FROM orders WHERE user_id = ?").bind(userId),
+      db.prepare("DELETE FROM products WHERE store_id IN (SELECT id FROM stores WHERE owner_id = ?)").bind(userId),
+      db.prepare("DELETE FROM services WHERE store_id IN (SELECT id FROM stores WHERE owner_id = ?)").bind(userId),
+      db.prepare("DELETE FROM stores WHERE owner_id = ?").bind(userId),
+      db.prepare("DELETE FROM users WHERE id = ?").bind(userId),
+    ]);
     return Response.json({ ok: true });
   } catch (error) {
     return apiError(error);
