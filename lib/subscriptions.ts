@@ -901,17 +901,22 @@ export async function ensureSubscriptionTables() {
       )
     `).run();
 
-    // 11. Trial History Table
+    // 11. Trial History Table (Strict Lifetime 1-Trial Enforcement)
     await db.prepare(`
       CREATE TABLE IF NOT EXISTS trial_history (
         id TEXT PRIMARY KEY,
-        user_id TEXT NOT NULL UNIQUE,
+        user_id TEXT NOT NULL,
+        email TEXT,
         plan_id TEXT NOT NULL,
         trial_started_at INTEGER NOT NULL,
         trial_ended_at INTEGER NOT NULL,
         created_at INTEGER NOT NULL DEFAULT (unixepoch())
       )
     `).run();
+
+    try {
+      await db.prepare("ALTER TABLE trial_history ADD COLUMN email TEXT").run();
+    } catch {}
 
     // 12. Subscription Messages from Users (Pending Payments)
     await db.prepare(`
@@ -2252,5 +2257,75 @@ export async function saveFullPermissionMatrix(matrix: Record<string, Record<str
     }
   }
   return true;
+}
+
+// -------------------------------------------------------------
+// STRICT LIFETIME 1-TIME FREE TRIAL ENFORCEMENT
+// -------------------------------------------------------------
+export async function hasUserClaimedTrial(userId: string, email?: string): Promise<boolean> {
+  if (!userId) return false;
+  try {
+    await ensureSubscriptionTables();
+    const db = getD1();
+    const cleanEmail = (email || "").trim().toLowerCase();
+
+    // 1. Check permanent trial_history table
+    const inTrialHistory = await db
+      .prepare(
+        `SELECT id FROM trial_history
+         WHERE user_id = ? OR (email IS NOT NULL AND email != '' AND LOWER(email) = ?)`
+      )
+      .bind(userId, cleanEmail)
+      .first();
+    if (inTrialHistory) return true;
+
+    // 2. Check active/past trial subscriptions or $0 non-free plans
+    const inSubscriptions = await db
+      .prepare(
+        `SELECT id FROM subscriptions
+         WHERE user_id = ?
+           AND (status = 'trial' OR payment_method LIKE '%trial%' OR (amount = 0 AND plan_id NOT IN ('free', 'free_customer', 'free_owner')))`
+      )
+      .bind(userId)
+      .first();
+    if (inSubscriptions) return true;
+
+    // 3. Check subscription messages for prior trial claims
+    const inMessages = await db
+      .prepare(
+        `SELECT id FROM subscription_messages
+         WHERE (user_id = ? OR (user_email IS NOT NULL AND user_email != '' AND LOWER(user_email) = ?))
+           AND (amount_paid = 0 OR billing_cycle = 'trial' OR plan_id LIKE '%trial%')`
+      )
+      .bind(userId, cleanEmail)
+      .first();
+    if (inMessages) return true;
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+export async function recordTrialClaim(userId: string, email: string, planId: string, durationDays: number = 30) {
+  if (!userId) return;
+  try {
+    await ensureSubscriptionTables();
+    const db = getD1();
+    const now = Math.floor(Date.now() / 1000);
+    const endedAt = now + durationDays * 86400;
+    const trialId = `trial_${now}_${Math.random().toString(36).substring(2, 7)}`;
+    const cleanEmail = (email || "").trim().toLowerCase();
+
+    await db
+      .prepare(
+        `INSERT OR IGNORE INTO trial_history (id, user_id, email, plan_id, trial_started_at, trial_ended_at, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`
+      )
+      .bind(trialId, userId, cleanEmail, planId, now, endedAt, now)
+      .run();
+  } catch (e) {
+    console.error("Failed to record trial claim:", e);
+  }
 }
 

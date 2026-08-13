@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { getD1 } from "@/db/runtime";
-import { ensureSubscriptionTables, getPlanConfig } from "@/lib/subscriptions";
+import { ensureSubscriptionTables, getPlanConfig, hasUserClaimedTrial, recordTrialClaim } from "@/lib/subscriptions";
 
 export const dynamic = "force-dynamic";
 
@@ -198,10 +198,18 @@ export async function POST(request: Request) {
     });
   }
 
-  // 4. SINGLE 7-DAY FREE TRIAL GRANT
+  // 4. SINGLE FREE TRIAL GRANT (Enforced 1-Time Lifetime Rule)
   if (action === "grant_trial") {
     if (!userId || !planId) {
       return NextResponse.json({ error: "userId and planId required for trial grant." }, { status: 400 });
+    }
+
+    const alreadyClaimed = await hasUserClaimedTrial(userId);
+    if (alreadyClaimed) {
+      return NextResponse.json(
+        { error: "This user has ALREADY claimed their one-time lifetime free trial! Action blocked." },
+        { status: 400 }
+      );
     }
 
     const plan = getPlanConfig(planId);
@@ -222,6 +230,10 @@ export async function POST(request: Request) {
       )
       .bind(subId, userId, plan.role, plan.id, billingCycle, now, expiresAt, receiptNumber, now, now)
       .run();
+
+    // Record trial claim permanently in trial_history
+    const userRow = await db.prepare("SELECT email FROM users WHERE id = ?").bind(userId).first<{ email: string }>();
+    await recordTrialClaim(userId, userRow?.email || "", plan.id, days);
 
     return NextResponse.json({
       success: true,

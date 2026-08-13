@@ -140,6 +140,32 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
 
   async function mutate(path:string,method:string,json:unknown,message:string,photoFile?:File){try{const res=await apiFetch<{storeId?:string;ok?:boolean}>(path,{method,json});setToast(message);if(photoFile){const uploadStoreId=(res?.storeId)||selectedId;if(uploadStoreId){const fd=new FormData();fd.set("storeId",uploadStoreId);fd.set("kind","logo");fd.set("file",photoFile);try{await apiFetch("/api/media",{method:"POST",body:fd});setToast(message+" · Photo uploaded")}catch(photoErr){setError(photoErr instanceof Error?photoErr.message:"Photo upload failed. Use Media tab to upload.")}}}await loadOverview();if(selectedId&&["products","services","offers"].includes(tab)){const result=await apiFetch<{items:Item[]}>(`/api/owner/catalog?resource=${tab}&storeId=${selectedId}`);setCatalog(result.items)}if(path==="/api/owner/reviews"&&selectedId){const result=await apiFetch<{items:Item[];pagination:Pagination}>(`/api/owner/reviews?storeId=${selectedId}&page=${reviewPage}&limit=20`);setStoreReviews(result.items);setReviewPagination(result.pagination)}}catch(e){setError(e instanceof Error?e.message:"Action failed.")}}
 
+  async function toggleStoreStatus(targetStoreId?: string, currentStatus?: string) {
+    const storeIdToToggle = targetStoreId || selected?.id;
+    if (!storeIdToToggle) return;
+
+    const current = currentStatus || (stores.find(s => String(s.id) === String(storeIdToToggle))?.status) || "active";
+    const newStatus = current === "closed" ? "active" : "closed";
+
+    // Optimistic state update
+    setStores((prev) =>
+      prev.map((s) => (String(s.id) === String(storeIdToToggle) ? { ...s, status: newStatus } : s))
+    );
+
+    try {
+      const res = await apiFetch<{ ok?: boolean; status?: string }>("/api/owner/stores", {
+        method: "PATCH",
+        json: { action: "toggle_status", storeId: String(storeIdToToggle), status: newStatus },
+      });
+      const finalStatus = res?.status || newStatus;
+      setToast(finalStatus === "closed" ? "🔴 Shop is now CLOSED for customers" : "🟢 Shop is now OPEN for business!");
+      void loadOverview();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update shop status");
+      void loadOverview();
+    }
+  }
+
   if (loading) return <div className="portalSkeleton"><span /><span /><span /><span /></div>;
   if (tabLoading && !["overview", "profile", "reviews", "subscription", "healthcare", "chat", "memberships", "loyalty"].includes(tab)) return <div className="tabSkeleton"><span /><span /><span /></div>;
   if (tab === "chat") return <ChatCenter user={user} />;
@@ -173,19 +199,54 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
   return (
     <>
       <SubscriptionExpiryBanner />
-      <div className="portalTitleRow">
+      <div className="portalTitleRow" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
         <div>
           <span className="portalEyebrow">Store owner workspace</span>
-          <h1 style={{ fontSize: "2rem", fontWeight: 800 }}>{title}</h1>
-          <p style={{ color: "var(--muted, #64748b)" }}>Only businesses assigned to this account are available here.</p>
+          <h1 style={{ fontSize: "2rem", fontWeight: 800, margin: "0.2rem 0" }}>{title}</h1>
+          <p style={{ color: "var(--muted, #64748b)", margin: 0 }}>Only businesses assigned to this account are available here.</p>
         </div>
-        {stores.length > 1 && (
-          <select value={String(selected?.id ?? "")} onChange={(e) => setSelectedId(e.target.value)} style={{ padding: "0.75rem 1rem", borderRadius: "10px", border: "1px solid #cbd5e1", background: "var(--cream, #f8fafc)", fontWeight: 600 }}>
-            {stores.map((store) => (
-              <option key={String(store.id)} value={String(store.id)}>{store.name}</option>
-            ))}
-          </select>
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+          {selected && (
+            <button
+              type="button"
+              onClick={() => toggleStoreStatus(String(selected.id), String(selected.status ?? "active"))}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.6rem",
+                padding: "0.6rem 1.25rem",
+                borderRadius: "9999px",
+                border: String(selected.status) === "closed" ? "1.5px solid #ef4444" : "1.5px solid #10b981",
+                background: String(selected.status) === "closed" ? "rgba(239, 68, 68, 0.12)" : "rgba(16, 185, 129, 0.12)",
+                color: String(selected.status) === "closed" ? "#dc2626" : "#059669",
+                fontWeight: 800,
+                fontSize: "0.95rem",
+                cursor: "pointer",
+                transition: "all 0.2s ease-in-out",
+                boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+              }}
+              title="Click to toggle shop open or closed status for customers"
+            >
+              <span
+                style={{
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  background: String(selected.status) === "closed" ? "#ef4444" : "#10b981",
+                  boxShadow: String(selected.status) === "closed" ? "0 0 10px #ef4444" : "0 0 10px #10b981",
+                }}
+              />
+              {String(selected.status) === "closed" ? "🔴 Shop Closed (Click to Open)" : "🟢 Shop Open (Click to Close)"}
+            </button>
+          )}
+          {stores.length > 1 && (
+            <select value={String(selected?.id ?? "")} onChange={(e) => setSelectedId(e.target.value)} style={{ padding: "0.75rem 1rem", borderRadius: "10px", border: "1px solid #cbd5e1", background: "var(--cream, #f8fafc)", fontWeight: 600 }}>
+              {stores.map((store) => (
+                <option key={String(store.id)} value={String(store.id)}>{store.name}</option>
+              ))}
+            </select>
+          )}
+        </div>
       </div>
 
       {error && <p className="authError" role="alert">{error}</p>}

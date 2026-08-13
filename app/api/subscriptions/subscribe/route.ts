@@ -48,6 +48,18 @@ export async function POST(request: Request) {
     );
   }
 
+  // Strict Lifetime Single-Trial Enforcement (One free trial per account in their entire life)
+  const isTrialRequest = amount === 0 || billingCycle === "trial" || planId.toLowerCase().includes("trial");
+  if (isTrialRequest) {
+    const alreadyClaimed = await hasUserClaimedTrial(session.user.id, email);
+    if (alreadyClaimed) {
+      return NextResponse.json(
+        { error: "Free trial has ALREADY been claimed for this account. Only ONE free trial is allowed per account in a lifetime." },
+        { status: 400 }
+      );
+    }
+  }
+
   const db = getD1();
   const now = Math.floor(Date.now() / 1000);
   const msgId = `msg_sub_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
