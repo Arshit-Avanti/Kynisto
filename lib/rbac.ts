@@ -118,7 +118,7 @@ const policies: Record<UserRole, readonly Permission[]> = {
   // Admins inherit all owner and customer actions in addition to global
   // controls. Resource-level ownership checks still apply inside each route.
   admin: [...adminPermissions, ...storeOwnerPermissions, ...customerPermissions],
-  store_owner: storeOwnerPermissions,
+  store_owner: [...storeOwnerPermissions, ...customerPermissions],
   customer: customerPermissions,
 };
 
