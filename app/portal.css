@@ -1,5 +1,5 @@
 .portal {
-  --p-bg: #f8fafc;
+  --p-bg: #ffffff;
   --p-panel: #ffffff;
   --p-solid: #ffffff;
   --p-ink: #0f172a;
@@ -9,24 +9,28 @@
   min-height: 100vh;
   display: grid;
   grid-template-columns: 245px 1fr;
-  background: var(--p-bg);
-  color: var(--p-ink);
+  background: #ffffff;
+  color: #0f172a;
   transition: background 0.2s, color 0.2s;
 }
 
+.portalShell.light-theme,
+.portalShell.mode-light,
 .light-theme,
 .mode-light {
-  --p-bg: #f8fafc;
+  --p-bg: #ffffff;
   --p-panel: #ffffff;
   --p-solid: #ffffff;
   --p-ink: #0f172a;
   --p-muted: #64748b;
   --p-line: #cbd5e1;
   --p-accent: var(--primary);
-  background: #f8fafc !important;
+  background: #ffffff !important;
   color: #0f172a !important;
 }
 
+.portalShell.dark-theme,
+.portalShell.mode-dark,
 .dark-theme,
 .mode-dark {
   --p-bg: #0B0F17;

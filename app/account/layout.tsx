@@ -11,6 +11,6 @@ import "../portal-media.css";
 export const dynamic = "force-dynamic";
 
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
-  const user = await requirePageRole(["customer"], "/account");
-  return <PortalShell user={user} workspaceRole="customer">{children}</PortalShell>;
+  const user = await requirePageRole(["customer", "store_owner", "admin"], "/account");
+  return <PortalShell user={user} workspaceRole={user.role === "store_owner" ? "store_owner" : "customer"}>{children}</PortalShell>;
 }
