@@ -16,6 +16,10 @@ export default function AuthConfirmChoice({ hash, accessToken }: AuthConfirmChoi
   const intentUrl = `intent://auth/confirm${hash}#Intent;scheme=kynisto;package=com.kynisto.app;end;`;
   const fallbackUrl = `kynisto://auth/confirm${hash}`;
 
+  useEffect(() => {
+    handleContinueInChrome();
+  }, [accessToken]);
+
   const handleContinueInChrome = () => {
     setStatusText("Authenticating session with Kynisto…");
     setIsLoading(true);
