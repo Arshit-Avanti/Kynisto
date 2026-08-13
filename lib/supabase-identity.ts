@@ -209,7 +209,7 @@ async function refreshGoogleIdentity(
     id: identity.userId,
     name: profile.name,
     email: profile.email,
-    role: identity.role,
+    role: effectiveRole,
     status: identity.status,
     avatarUrl: profile.avatarUrl,
   };
