@@ -203,6 +203,12 @@ export function SupabaseAuthManager() {
           window.history.replaceState({}, "", cleanUrl.toString());
         }
 
+        if (typeof window !== "undefined") {
+          try {
+            window.sessionStorage.setItem("kynisto-just-signed-in", "true");
+          } catch {}
+        }
+
         window.location.replace(res.redirectTo || "/account");
       } catch (completionError) {
         console.error("Post-login routing failed:", completionError);

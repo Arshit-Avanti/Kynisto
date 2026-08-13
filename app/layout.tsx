@@ -6,6 +6,7 @@ import "./kynisto-brand.css";
 import "./google-auth.css";
 import { AppUpdateManager } from "@/components/AppUpdateManager";
 import { SupabaseAuthManager } from "@/components/auth/SupabaseAuthManager";
+import { AppReturnBanner } from "@/components/ui/AppReturnBanner";
 import { AudioPermissionModal } from "@/components/ui/AudioPermissionModal";
 import { NotificationPermissionModal } from "@/components/ui/NotificationPermissionModal";
 
@@ -99,6 +100,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${plusJakartaSans.variable}`}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
         <SupabaseAuthManager />
+        <AppReturnBanner />
         {children}
         <AppUpdateManager />
         <AudioPermissionModal />
