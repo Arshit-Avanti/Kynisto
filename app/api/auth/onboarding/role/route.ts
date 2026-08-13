@@ -22,6 +22,15 @@ export async function POST(request: Request) {
 
     let grantedMaxTierTrial = false;
 
+    // VERY IMPORTANT: Actually save the selected role to the users table!
+    await db.prepare("UPDATE users SET role = ?, updated_at = ? WHERE id = ?")
+      .bind(dbRole, now, userId)
+      .run();
+
+    // If they already have an active Supabase session, this won't invalidate it,
+    // but getSessionUser() joins against users.role, so the next read will see the new role.
+
+
     if (dbRole === "store_owner") {
       const { ensureSubscriptionTables } = await import("@/lib/subscriptions");
       await ensureSubscriptionTables();
