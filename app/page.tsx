@@ -131,13 +131,33 @@ const modernCleanTechStyles = `
     -webkit-text-fill-color: #FFFFFF !important;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9) !important;
   }
-  .mode-light .topbar a, .mode-light .topbar button, .mode-light .headerActions a, .mode-light .headerActions button, .mode-light .textButton, .mode-light .accountButton, .mode-light .savedButton {
-    color: #0f172a !important;
-    -webkit-text-fill-color: #0f172a !important;
-    text-shadow: none !important;
+  /* FLOATING NAVIGATION BAR — UNIFIED (SAME IN LIGHT AND DARK MODE) */
+  .floating-nav-container,
+  .mode-light .floating-nav-container,
+  .light-theme .floating-nav-container,
+  .mode-dark .floating-nav-container,
+  .dark-theme .floating-nav-container {
+    background: rgba(10, 16, 30, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .floating-nav-container a,
+  .floating-nav-container button,
+  .mode-light .floating-nav-container a,
+  .mode-light .floating-nav-container button {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
     font-weight: 700 !important;
     font-size: 14px !important;
-    transition: all 0.2s ease !important;
+  }
+
+  .floating-nav-container nav a[href="/pricing"],
+  .mode-light .floating-nav-container nav a[href="/pricing"] {
+    color: #FF7A00 !important;
+    -webkit-text-fill-color: #FF7A00 !important;
   }
   .mode-light .sectionHeading h2, .mode-light .sectionHeading h3, .mode-light .hero h1, .mode-light .hero p, .mode-light h2, .mode-light h3 {
     color: #0f172a !important;
@@ -588,33 +608,37 @@ const modernCleanTechStyles = `
     font-weight: 800 !important;
     letter-spacing: -0.02em !important;
     margin: 18px 0 10px 0 !important;
-  .featureHeadingDiscovery,
-  .featureHeadingQueues,
-  .featureHeadingLoyalty,
-  .featureCard h3,
-  .mode-light .featureCard h3,
-  .mode-dark .featureCard h3 {
+  }
+  .featureHeadingDiscovery {
     color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
-    background: none !important;
-    -webkit-background-clip: unset !important;
-    font-size: 1.45rem !important;
-    font-weight: 800 !important;
-    letter-spacing: -0.02em !important;
-    margin: 18px 0 10px 0 !important;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
+    background: linear-gradient(135deg, #FFFFFF 50%, #FFCCBC 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8)) !important;
+  }
+  .featureHeadingQueues {
+    color: #FFFFFF !important;
+    background: linear-gradient(135deg, #FFFFFF 50%, #BFDBFE 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8)) !important;
+  }
+  .featureHeadingLoyalty {
+    color: #FFFFFF !important;
+    background: linear-gradient(135deg, #FFFFFF 50%, #A7F3D0 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8)) !important;
   }
   .featureText,
   .featureCard p,
-  .mode-light .featureCard p,
-  .mode-dark .featureCard p {
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
+  .mode-light .featureCard p {
+    color: #CBD5E1 !important;
+    -webkit-text-fill-color: #CBD5E1 !important;
     font-size: 0.95rem !important;
     line-height: 1.65 !important;
-    font-weight: 500 !important;
+    font-weight: 450 !important;
     letter-spacing: 0.01em !important;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
   }
   
 
@@ -1968,22 +1992,22 @@ export default function Home() {
           <div className="featureIconBadge discoveryBadge">
             <Icons.Search />
           </div>
-          <h3 className="featureHeadingDiscovery" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Universal Discovery</h3>
-          <p className="featureText" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Find what you need, exactly when you need it. Intelligent search that understands intent and proximity.</p>
+          <h3 className="featureHeadingDiscovery">Universal Discovery</h3>
+          <p className="featureText">Find what you need, exactly when you need it. Intelligent search that understands intent and proximity.</p>
         </div>
         <div className="featureCard featureCardQueues">
           <div className="featureIconBadge queuesBadge">
             <Icons.Clock />
           </div>
-          <h3 className="featureHeadingQueues" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Real-time Queues</h3>
-          <p className="featureText" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Skip the waiting room. Monitor your position in line from anywhere and arrive exactly when it's your turn.</p>
+          <h3 className="featureHeadingQueues">Real-time Queues</h3>
+          <p className="featureText">Skip the waiting room. Monitor your position in line from anywhere and arrive exactly when it's your turn.</p>
         </div>
         <div className="featureCard featureCardLoyalty">
           <div className="featureIconBadge loyaltyBadge">
             <Icons.Star />
           </div>
-          <h3 className="featureHeadingLoyalty" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Unified Loyalty</h3>
-          <p className="featureText" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>One wallet for every store. Earn, track, and redeem rewards seamlessly without juggling multiple apps.</p>
+          <h3 className="featureHeadingLoyalty">Unified Loyalty</h3>
+          <p className="featureText">One wallet for every store. Earn, track, and redeem rewards seamlessly without juggling multiple apps.</p>
         </div>
       </section>
 

@@ -199,7 +199,7 @@ export function Navbar3D({
 
   const desktopNav = useMemo(() => {
     if (isMobile) return null;
-    const navColor = isRestrictedMode ? "#FFFFFF" : "var(--text-primary)";
+    const navColor = "#FFFFFF";
     return (
       <nav aria-label="Main Navigation" style={{ display: "flex", alignItems: "center", gap: "24px", fontSize: "14px", fontWeight: 700, color: navColor }}>
         <Link href="/" style={{ color: navColor, WebkitTextFillColor: navColor, textDecoration: "none", transition: "all 0.15s" }}>Homepage</Link>

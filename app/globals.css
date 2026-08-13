@@ -2690,6 +2690,32 @@ img, video, iframe, embed, object {
    These rules must come LAST to win the specificity war.
    ========================================================================== */
 
+/* 0 ── Floating Navigation Bar — UNIFIED: SAME IN LIGHT AND DARK MODE */
+.floating-nav-container,
+.mode-light .floating-nav-container,
+.light-theme .floating-nav-container,
+.mode-dark .floating-nav-container,
+.dark-theme .floating-nav-container {
+  background: rgba(10, 16, 30, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4) !important;
+}
+
+.mode-light .floating-nav-container a,
+.mode-light .floating-nav-container button,
+.mode-light .floating-nav-container nav a,
+.mode-light .floating-nav-container nav button {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.mode-light .floating-nav-container nav a[href="/pricing"] {
+  color: #FF7A00 !important;
+  -webkit-text-fill-color: #FF7A00 !important;
+}
+
 /* 1 ── Mobile drawer always has a dark background → ALL text inside = WHITE */
 .mode-light .mobileNavDrawer,
 .mode-light .mobileNavDrawer *,
@@ -2735,11 +2761,9 @@ img, video, iframe, embed, object {
 }
 
 .mode-light .featureCard p,
-.light-theme .featureCard p,
-.mode-dark .featureCard p,
-.dark-theme .featureCard p {
-  color: #FFFFFF !important;
-  -webkit-text-fill-color: #FFFFFF !important;
+.light-theme .featureCard p {
+  color: #E2E8F0 !important;
+  -webkit-text-fill-color: #E2E8F0 !important;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
 }
 
