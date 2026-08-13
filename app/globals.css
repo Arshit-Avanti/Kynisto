@@ -2483,38 +2483,81 @@ img, video, iframe, embed, object {
   background-clip: unset !important;
 }
 
-/* ── 2. FEATURE CARDS — force fully white text, remove opacity dimming ── */
-.featureCard,
-.mode-light .featureCard,
-.mode-dark .featureCard,
-.light-theme .featureCard,
-.dark-theme .featureCard {
-  background: rgba(10, 14, 28, 0.88) !important;
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+/* ── 2. FEATURE CARDS — Light & Dark Mode High Contrast Legibility ── */
+.featureCard {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
 }
 
-.featureCard h3,
+.mode-light .featureCard,
+.light-theme .featureCard,
+[data-theme="light"] .featureCard {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07) !important;
+}
+
+.mode-dark .featureCard,
+.dark-theme .featureCard,
+[data-theme="dark"] .featureCard {
+  background: rgba(15, 23, 42, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+.featureCard h3 {
+  color: #0F172A;
+  -webkit-text-fill-color: #0F172A;
+  opacity: 1;
+}
+
 .mode-light .featureCard h3,
-.mode-dark .featureCard h3,
 .light-theme .featureCard h3,
-.dark-theme .featureCard h3 {
+[data-theme="light"] .featureCard h3 {
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+.mode-dark .featureCard h3,
+.dark-theme .featureCard h3,
+[data-theme="dark"] .featureCard h3 {
   color: #FFFFFF !important;
   -webkit-text-fill-color: #FFFFFF !important;
   opacity: 1 !important;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
 }
 
-.featureCard p,
+.featureCard p {
+  color: #334155;
+  -webkit-text-fill-color: #334155;
+  opacity: 1;
+}
+
 .mode-light .featureCard p,
-.mode-dark .featureCard p,
 .light-theme .featureCard p,
-.dark-theme .featureCard p {
-  color: #E2E8F0 !important;
-  -webkit-text-fill-color: #E2E8F0 !important;
+[data-theme="light"] .featureCard p {
+  color: #334155 !important;
+  -webkit-text-fill-color: #334155 !important;
   opacity: 1 !important;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
+  text-shadow: none !important;
+}
+
+.mode-dark .featureCard p,
+.dark-theme .featureCard p,
+[data-theme="dark"] .featureCard p {
+  color: #CBD5E1 !important;
+  -webkit-text-fill-color: #CBD5E1 !important;
+  opacity: 1 !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6) !important;
 }
 
 /* ── 3. POPULAR NEAR YOU — transparent store cards matching page background ── */
@@ -2744,27 +2787,31 @@ img, video, iframe, embed, object {
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
-/* 2 ── Feature cards (Universal Discovery etc.) — pure white & light silver text in all modes */
+/* 2 ── Feature cards (Universal Discovery etc.) — light frosted glass in light mode */
 .mode-light .featureCard,
-.light-theme .featureCard {
-  background: rgba(10, 14, 28, 0.88) !important;
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
+.light-theme .featureCard,
+[data-theme="light"] .featureCard {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07) !important;
 }
 
 .mode-light .featureCard h3,
-.light-theme .featureCard h3 {
-  color: #FFFFFF !important;
-  -webkit-text-fill-color: #FFFFFF !important;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
+.light-theme .featureCard h3,
+[data-theme="light"] .featureCard h3 {
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+  text-shadow: none !important;
 }
 
 .mode-light .featureCard p,
-.light-theme .featureCard p {
-  color: #E2E8F0 !important;
-  -webkit-text-fill-color: #E2E8F0 !important;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
+.light-theme .featureCard p,
+[data-theme="light"] .featureCard p {
+  color: #334155 !important;
+  -webkit-text-fill-color: #334155 !important;
+  text-shadow: none !important;
 }
 
 /* 3 ── Popular Near You: truly transparent glass in light mode */
