@@ -80,6 +80,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta name="google-adsense-account" content="ca-pub-9178031569606873" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9178031569606873"
+          crossOrigin="anonymous"
+        />
         <link rel="preconnect" href="https://gdakvxqegfnxflaqijwf.supabase.co" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://gdakvxqegfnxflaqijwf.supabase.co" />
         <link rel="preconnect" href="https://kynisto.in" crossOrigin="anonymous" />
