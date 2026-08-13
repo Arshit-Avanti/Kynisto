@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+User-agent: Mediapartners-Google
+Allow: /
+
+User-agent: Google-AdSense-AdsBot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+Sitemap: https://kynisto.in/sitemap.xml

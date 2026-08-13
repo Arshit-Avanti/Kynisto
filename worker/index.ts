@@ -20,18 +20,17 @@ interface ExecutionContext {
   passThroughOnException(): void;
 }
 
-/** Applies industry-standard security headers for an A+ security rating. */
+/** Applies industry-standard security headers while allowing Google AdSense preview & auto-ads. */
 function applySecurityHeaders(res: Response): Response {
   const headers = new Headers(res.headers);
   headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
-  headers.set("X-Frame-Options", "SAMEORIGIN");
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("Permissions-Policy", "camera=(), microphone=(self), geolocation=(self)");
   headers.set("X-XSS-Protection", "1; mode=block");
   headers.set(
     "Content-Security-Policy",
-    "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https: wss:; frame-ancestors 'none'; object-src 'none';",
+    "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: https://*.googlesyndication.com https://pagead2.googlesyndication.com https://*.google.com https://*.google-analytics.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https: wss: https://*.googlesyndication.com; frame-src 'self' https: https://googleads.g.doubleclick.net https://*.googlesyndication.com https://*.google.com; frame-ancestors 'self' https://*.google.com https://*.googlesyndication.com https://adsense.google.com https://web.archive.org; object-src 'none';",
   );
   return new Response(res.body, {
     status: res.status,
