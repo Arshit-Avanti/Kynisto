@@ -72,7 +72,7 @@ export function GoogleRoleOnboarding() {
 
         syncSupabaseAccessCookie(session);
 
-        // Safely fetch profile
+        // Safely fetch profile and check if permanent role is already set
         try {
           const { data: profile } = await supabase
             .from("profiles")
@@ -80,8 +80,10 @@ export function GoogleRoleOnboarding() {
             .eq("id", session.user.id)
             .maybeSingle();
 
-          if (profile?.role) {
-            window.location.replace("/");
+          const existingRole = profile?.role || session.user.user_metadata?.role;
+          if (existingRole) {
+            const dest = (existingRole === "shop_owner" || existingRole === "owner" || existingRole === "store_owner") ? "/owner" : "/";
+            window.location.replace(dest);
             return;
           }
         } catch (profileErr) {
@@ -109,8 +111,22 @@ export function GoogleRoleOnboarding() {
 
       const supabase = await getSupabaseBrowserClient();
       const metadata = user.user_metadata || {};
+      const targetRole = selectedRole === "shop_owner" ? "shop_owner" : selectedRole === "admin" ? "admin" : "customer";
 
-      // Attempt upsert to Supabase profiles table if available
+      // 1. Permanently update Supabase Auth User Metadata
+      try {
+        await supabase.auth.updateUser({
+          data: {
+            role: targetRole,
+            onboarding_completed: true,
+            role_selected_at: new Date().toISOString(),
+          },
+        });
+      } catch (metaErr) {
+        console.warn("Auth user metadata update bypassed:", metaErr);
+      }
+
+      // 2. Permanently upsert to Supabase profiles table
       try {
         await supabase.from("profiles").upsert(
           {
@@ -118,7 +134,7 @@ export function GoogleRoleOnboarding() {
             email: user.email,
             full_name: metadata.full_name || metadata.name || "",
             avatar_url: metadata.avatar_url || metadata.picture || "",
-            role: selectedRole === "admin" ? "admin" : selectedRole,
+            role: targetRole,
             onboarding_completed: true,
             updated_at: new Date().toISOString(),
           },
@@ -128,7 +144,15 @@ export function GoogleRoleOnboarding() {
         console.warn("Profiles upsert gracefully bypassed:", upsertErr);
       }
 
-      const destination = "/";
+      // 3. Save to localStorage for instant client-side role memory
+      try {
+        localStorage.setItem("kynisto_permanent_role", targetRole);
+      } catch {
+        // Ignore storage restriction errors
+      }
+
+      // 4. Route to the permanent workspace based on selected role
+      const destination = (targetRole === "shop_owner") ? "/owner" : (targetRole === "admin") ? "/admin" : "/";
       window.location.replace(destination);
     } catch (selectionError) {
       console.error("Google role selection failed:", selectionError);
@@ -181,10 +205,12 @@ export function GoogleRoleOnboarding() {
         </div>
       )}
       <div>
-        <span className="authKicker">One quick choice</span>
-        <h2>How do you want to use Kynisto?</h2>
-        <p>
-          Choose your account type to proceed into Kynisto.
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", padding: "0.25rem 0.75rem", borderRadius: "9999px", background: "rgba(37, 99, 235, 0.1)", color: "#2563eb", fontSize: "0.825rem", fontWeight: 700, marginBottom: "0.75rem" }}>
+          🔒 Permanent Account Setup
+        </div>
+        <h2>Select Account Type</h2>
+        <p style={{ color: "#64748b", fontSize: "0.95rem" }}>
+          Choose whether you are using Kynisto as a Customer or Shop Owner. This selection is permanent.
         </p>
       </div>
       {error && (
@@ -203,10 +229,10 @@ export function GoogleRoleOnboarding() {
             <span>
               <b>Customer</b>
               <small>
-                Discover, save, shop, book home services &amp; join queues.
+                Discover local shops, order products, book services &amp; join queues.
               </small>
             </span>
-            <em>{busy === "customer" ? "Creating…" : "Continue →"}</em>
+            <em>{busy === "customer" ? "Setting up…" : "Continue as Customer →"}</em>
           </button>
 
           <button
@@ -218,26 +244,10 @@ export function GoogleRoleOnboarding() {
             <span>
               <b>Shop / Service Owner</b>
               <small>
-                Operate your physical store or local home service business.
+                Manage your physical store, Healthcare clinic, live queues &amp; service catalog.
               </small>
             </span>
-            <em>{busy === "shop_owner" ? "Creating…" : "Continue →"}</em>
-          </button>
-
-          <button
-            type="button"
-            disabled={Boolean(busy)}
-            onClick={() => void selectRole("admin")}
-            style={{ border: "1px solid rgba(255, 87, 34, 0.4)", background: "rgba(255, 87, 34, 0.08)" }}
-          >
-            <i aria-hidden="true" style={{ background: "linear-gradient(135deg, #FF5722, #E53935)", color: "#ffffff" }}>A</i>
-            <span>
-              <b style={{ color: "#FF7A00" }}>Administrator</b>
-              <small>
-                Full administrative control center, store &amp; service moderation.
-              </small>
-            </span>
-            <em>{busy === "admin" ? "Creating…" : "Continue →"}</em>
+            <em>{busy === "shop_owner" ? "Setting up…" : "Continue as Shop Owner →"}</em>
           </button>
         </div>
       )}

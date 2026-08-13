@@ -203,7 +203,7 @@ export async function getSessionUser(): Promise<AuthSession | null> {
       // Ignore profile read error
     }
 
-    const role = applicationRoleFromProfile(profile?.role) || "customer";
+    const role = applicationRoleFromProfile(profile?.role || supabaseUser.user_metadata?.role) || "customer";
     const identity = await ensureGoogleLocalIdentity(supabaseUser, role);
 
     if (identity.status !== "active") return null;
