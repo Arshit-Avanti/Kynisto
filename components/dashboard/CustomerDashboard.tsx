@@ -9,7 +9,7 @@ import { ChatCenter } from "@/components/dashboard/ChatCenter";
 import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscriptionDashboard";
 import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
 import KynistoWalletView from "@/components/wallet/KynistoWalletView";
-import { Heart, MessageSquare, ShoppingCart, MapPin, Package, Calendar, Ticket, CheckCircle2, ArrowRight, Store, Star, Wallet, BellRing } from "lucide-react";
+import { RoleSwitcherButton } from "@/components/auth/RoleSwitcherButton";
 
 type Item = Record<string, unknown>;
 type Payload = Record<string, unknown>;
@@ -172,9 +172,12 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
         <h1 style={{ fontSize: "2.2rem", fontWeight: 800 }}>Welcome back, <span style={{ color: "#0ea5e9" }}>{user.name.split(" ")[0]}</span>!</h1>
         <p style={{ color: "#64748b", marginTop: "0.5rem" }}>Manage your profile, orders, wishlist and preferences. All your account information is secure and private.</p>
       </div>
-      <Link className="portalButton" href="/products" style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "#0ea5e9", color: "#fff", padding: "0.75rem 1.25rem", borderRadius: "12px", textDecoration: "none", fontWeight: 700 }}>
-        Explore Local Products <ArrowRight size={18} />
-      </Link>
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+        <RoleSwitcherButton currentRole={user.role} />
+        <Link className="portalButton" href="/products" style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "#0ea5e9", color: "#fff", padding: "0.75rem 1.25rem", borderRadius: "12px", textDecoration: "none", fontWeight: 700 }}>
+          Explore Local Products →
+        </Link>
+      </div>
     </div>
     {error && <p className="authError" role="alert">{error}</p>}
     

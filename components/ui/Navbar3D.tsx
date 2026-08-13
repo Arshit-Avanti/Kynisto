@@ -6,6 +6,8 @@ import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { BackButton } from "@/components/ui/BackButton";
 import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
 
+import { RoleSwitcherButton } from "@/components/auth/RoleSwitcherButton";
+
 interface Navbar3DProps {
   userRole: "admin" | "store_owner" | "customer" | null;
   savedCount: number;
@@ -277,7 +279,10 @@ export function Navbar3D({
 
       {desktopNav}
 
-      <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        {!isMobile && userRole && (
+          <RoleSwitcherButton currentRole={userRole} />
+        )}
         {!isMobile && (
           <Link
             href={userRole ? (userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account") : "/login"}
@@ -579,6 +584,12 @@ export function Navbar3D({
               </span>
               <span>👤</span>
             </Link>
+
+            {userRole && (
+              <div style={{ margin: "4px 0" }}>
+                <RoleSwitcherButton currentRole={userRole} style={{ width: "100%", justifyContent: "center" }} />
+              </div>
+            )}
 
             <button
               type="button"

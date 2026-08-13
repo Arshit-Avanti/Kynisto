@@ -20,6 +20,7 @@ import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscri
 import { FeatureGateNotice } from "@/components/subscription/FeatureGateNotice";
 import { SubscriptionGate } from "@/components/subscription/SubscriptionGate";
 import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
+import { RoleSwitcherButton } from "@/components/auth/RoleSwitcherButton";
 
 import { Eye, Star, Navigation, Phone, MessageCircle, BarChart2, CheckCircle2 } from "lucide-react";
 
@@ -206,6 +207,7 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
           <p style={{ color: "var(--muted, #64748b)", margin: 0 }}>Only businesses assigned to this account are available here.</p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+          <RoleSwitcherButton currentRole={user.role} />
           {selected && (
             <button
               type="button"

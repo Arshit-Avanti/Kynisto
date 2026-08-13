@@ -20,28 +20,50 @@ export async function POST(request: Request) {
     const now = Math.floor(Date.now() / 1000);
     const userId = session.user.id;
 
-    // Update D1 local users table with permanent chosen role
-    await db.batch([
-      db
-        .prepare("UPDATE users SET role = ?, updated_at = ? WHERE id = ?")
-        .bind(dbRole, now, userId),
-      db
-        .prepare(
-          "INSERT INTO audit_logs (id, actor_id, action, entity_type, entity_id, metadata, created_at) VALUES (?, ?, 'auth.role_selected', 'user', ?, ?, ?)"
-        )
-        .bind(
-          crypto.randomUUID(),
-          userId,
-          userId,
-          JSON.stringify({ role: dbRole }),
-          now
-        ),
-    ]);
+    let grantedMaxTierTrial = false;
+
+    if (dbRole === "store_owner") {
+      const { ensureSubscriptionTables } = await import("@/lib/subscriptions");
+      await ensureSubscriptionTables();
+
+      const existingTrial = await db
+        .prepare("SELECT id FROM trial_history WHERE user_id = ? OR email = ? LIMIT 1")
+        .bind(userId, session.user.email)
+        .first<{ id: string }>();
+
+      if (!existingTrial) {
+        grantedMaxTierTrial = true;
+        const trialStartedAt = now;
+        const trialEndedAt = now + 30 * 86400; // 30 Days (1 Month)
+
+        await db.batch([
+          db
+            .prepare(
+              "INSERT INTO trial_history (id, user_id, email, plan_id, trial_started_at, trial_ended_at, created_at) VALUES (?, ?, ?, 'enterprise', ?, ?, ?)"
+            )
+            .bind(crypto.randomUUID(), userId, session.user.email, trialStartedAt, trialEndedAt, now),
+          db
+            .prepare(
+              `INSERT INTO owner_subscriptions (id, user_id, role, plan, price, billing_cycle, status, start_date, expiry_date, trial, auto_renew, created_at, updated_at)
+               VALUES (?, ?, 'store_owner', 'enterprise', 0, 'monthly', 'active', ?, ?, 1, 0, ?, ?)
+               ON CONFLICT(user_id) DO UPDATE SET
+                 plan = 'enterprise',
+                 status = 'active',
+                 start_date = excluded.start_date,
+                 expiry_date = excluded.expiry_date,
+                 trial = 1,
+                 updated_at = excluded.updated_at`
+            )
+            .bind(crypto.randomUUID(), userId, trialStartedAt, trialEndedAt, now, now),
+        ]);
+      }
+    }
 
     const redirectTo = dbRole === "store_owner" ? "/owner" : "/";
     return NextResponse.json({
       success: true,
       role: dbRole,
+      grantedMaxTierTrial,
       redirectTo,
     });
   } catch (error) {
