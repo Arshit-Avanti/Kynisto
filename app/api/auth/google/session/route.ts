@@ -35,18 +35,21 @@ export async function POST(request: Request) {
     const profileRole = profile?.role;
     const rawRole = profileRole || metadataRole;
 
-    const onboardingCompleted = Boolean(
-      profile?.onboarding_completed ||
-      supabaseUser.user_metadata?.onboarding_completed ||
-      profile?.role_selected_at ||
-      supabaseUser.user_metadata?.role_selected_at
-    );
-
     const role = applicationRoleFromProfile(rawRole) || "customer";
     const identity = await ensureGoogleLocalIdentity(supabaseUser, role);
 
     // Create rock-solid D1 session cookie (same as local/admin login)
     await createSession(request, identity.id, true);
+
+    // D1 is the ultimate source of truth: If user role is already elevated to store_owner or admin, onboarding is complete!
+    const onboardingCompleted = Boolean(
+      identity.role === "store_owner" ||
+      identity.role === "admin" ||
+      profile?.onboarding_completed ||
+      supabaseUser.user_metadata?.onboarding_completed ||
+      profile?.role_selected_at ||
+      supabaseUser.user_metadata?.role_selected_at
+    );
 
     const needsOnboarding = !onboardingCompleted;
     const redirectTo = needsOnboarding

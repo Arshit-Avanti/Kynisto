@@ -145,7 +145,13 @@ export function SupabaseAuthManager() {
             return;
           }
 
-          if (currentSession?.access_token && (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED")) {
+          // Do NOT interrupt active onboarding role selection flow!
+          if (typeof window !== "undefined" && window.location.pathname.startsWith("/onboarding")) {
+            if (currentSession) syncSupabaseAccessCookie(currentSession);
+            return;
+          }
+
+          if (currentSession?.access_token && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
             if (timeoutId) clearTimeout(timeoutId);
             syncSupabaseAccessCookie(currentSession);
             await processAccessToken(currentSession.access_token);

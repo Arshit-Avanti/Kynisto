@@ -106,12 +106,6 @@ export function GoogleRoleOnboarding() {
             const { apiFetch } = await import("@/lib/client-api");
             const meRes = await apiFetch<{ user: { id: string; email: string; name?: string; avatarUrl?: string; role?: string } | null }>("/api/auth/me");
             if (meRes?.user) {
-              const permanentRole = window.localStorage.getItem("kynisto_permanent_role");
-              if (permanentRole) {
-                const dest = (permanentRole === "store_owner" || permanentRole === "shop_owner" || permanentRole === "owner") ? "/owner" : "/";
-                window.location.replace(dest);
-                return;
-              }
               currentUser = {
                 id: meRes.user.id,
                 email: meRes.user.email,
@@ -168,13 +162,6 @@ export function GoogleRoleOnboarding() {
       // 2. Secondary update: Supabase Auth User Metadata & Profiles table
       try {
         const supabase = await getSupabaseBrowserClient();
-        await supabase.auth.updateUser({
-          data: {
-            role: targetRole,
-            onboarding_completed: true,
-            role_selected_at: new Date().toISOString(),
-          },
-        });
         await supabase.from("profiles").upsert(
           {
             id: user.id,
@@ -187,6 +174,13 @@ export function GoogleRoleOnboarding() {
           },
           { onConflict: "id" },
         );
+        await supabase.auth.updateUser({
+          data: {
+            role: targetRole,
+            onboarding_completed: true,
+            role_selected_at: new Date().toISOString(),
+          },
+        });
       } catch (metaErr) {
         console.warn("Supabase profile/metadata sync gracefully bypassed:", metaErr);
       }
