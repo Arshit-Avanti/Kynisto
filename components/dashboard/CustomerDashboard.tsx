@@ -51,25 +51,37 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
     setError("");
     try {
       if (tab === "overview" || tab === "favorites" || tab === "reviews") {
-        const [saved, written, rated] = await Promise.all([
+        const [savedRes, writtenRes, ratedRes] = await Promise.allSettled([
           apiFetch<{ items: Item[] }>("/api/favorites"),
           apiFetch<{ items: Item[] }>("/api/reviews"),
           apiFetch<{ items: Item[] }>("/api/product-reviews"),
         ]);
-        setFavorites(saved.items);
-        setReviews(written.items);
-        setProductReviews(rated.items);
+        setFavorites(savedRes.status === "fulfilled" ? savedRes.value?.items ?? [] : []);
+        setReviews(writtenRes.status === "fulfilled" ? writtenRes.value?.items ?? [] : []);
+        setProductReviews(ratedRes.status === "fulfilled" ? ratedRes.value?.items ?? [] : []);
+
         if (tab === "overview") {
-          const cart = await apiFetch<Payload>("/api/customer/workspace?view=cart");
-          setData(cart);
+          try {
+            const cart = await apiFetch<Payload>("/api/customer/workspace?view=cart");
+            setData(cart ?? {});
+          } catch {
+            setData({});
+          }
         } else if (tab === "reviews") {
-          setData(await apiFetch<Payload>("/api/customer/workspace?view=orders&status=delivered&limit=50"));
+          try {
+            const deliveredOrders = await apiFetch<Payload>("/api/customer/workspace?view=orders&status=delivered&limit=50");
+            setData(deliveredOrders ?? {});
+          } catch {
+            setData({});
+          }
         }
       } else if (commerceTabs.has(tab)) {
         const requests: Promise<Payload>[] = [apiFetch<Payload>(`/api/customer/workspace?view=${tab}`)];
         if (tab === "cart") requests.push(apiFetch<Payload>("/api/customer/workspace?view=addresses"));
-        const [workspace, addressData] = await Promise.all(requests);
-        setData(workspace);
+        const results = await Promise.allSettled(requests);
+        const workspace = results[0].status === "fulfilled" ? results[0].value : {};
+        const addressData = results[1]?.status === "fulfilled" ? results[1].value : null;
+        setData(workspace ?? {});
         if (addressData) setAddresses((addressData.items as Item[] | undefined) ?? []);
       }
     } catch (loadError) {
@@ -169,7 +181,7 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
     <div className="portalTitleRow">
       <div>
         <span className="portalEyebrow">MY ACCOUNT</span>
-        <h1 style={{ fontSize: "2.2rem", fontWeight: 800 }}>Welcome back, <span style={{ color: "#0ea5e9" }}>{user.name.split(" ")[0]}</span>!</h1>
+        <h1 style={{ fontSize: "2.2rem", fontWeight: 800 }}>Welcome back, <span style={{ color: "#0ea5e9" }}>{(user?.name || user?.email || "User").split(" ")[0]}</span>!</h1>
         <p style={{ color: "#64748b", marginTop: "0.5rem" }}>Manage your profile, orders, wishlist and preferences. All your account information is secure and private.</p>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
