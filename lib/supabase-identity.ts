@@ -148,19 +148,30 @@ async function refreshGoogleIdentity(
   }
   const db = getD1();
   const now = Math.floor(Date.now() / 1000);
+  const isAdminEmail = profile.email.toLowerCase().trim() === "nxt.arshit@gmail.com";
+  const effectiveRole: GoogleRole = isAdminEmail ? "admin" : identity.role;
+
   const statements: D1PreparedStatement[] = [
     db
       .prepare(
-        "UPDATE users SET name = ?, avatar_url = ?, last_login_at = ?, updated_at = ? WHERE id = ?",
+        "UPDATE users SET name = ?, avatar_url = ?, role = CASE WHEN ? = 1 THEN 'admin' ELSE role END, last_login_at = ?, updated_at = ? WHERE id = ?",
       )
       .bind(
         profile.name,
         profile.avatarUrl,
+        isAdminEmail ? 1 : 0,
         now,
         now,
         identity.userId,
       ),
   ];
+  if (isAdminEmail) {
+    statements.push(
+      db
+        .prepare("UPDATE user_security SET is_super_admin = 1, updated_at = ? WHERE user_id = ?")
+        .bind(now, identity.userId),
+    );
+  }
   if (identity.providerUserId) {
     statements.push(
       db
@@ -206,12 +217,15 @@ async function refreshGoogleIdentity(
 
 async function createGoogleIdentity(
   profile: GoogleProfile,
-  role: GoogleRole,
+  roleInput: GoogleRole,
 ): Promise<GoogleLocalIdentity> {
   const db = getD1();
   const now = Math.floor(Date.now() / 1000);
   const userId = crypto.randomUUID();
   const unusablePassword = await hashPassword(randomToken(48));
+  const isAdminEmail = profile.email.toLowerCase().trim() === "nxt.arshit@gmail.com";
+  const role: GoogleRole = isAdminEmail ? "admin" : roleInput;
+  const isSuperAdmin = isAdminEmail ? 1 : 0;
   try {
     await db.batch([
       db
@@ -232,9 +246,9 @@ async function createGoogleIdentity(
         ),
       db
         .prepare(
-          "INSERT INTO user_security (user_id, must_change_password, is_super_admin, updated_at) VALUES (?, 0, 0, ?)",
+          "INSERT INTO user_security (user_id, must_change_password, is_super_admin, updated_at) VALUES (?, 0, ?, ?)",
         )
-        .bind(userId, now),
+        .bind(userId, isSuperAdmin, now),
       db
         .prepare(
           "INSERT INTO user_preferences (user_id, email_notifications, order_notifications, marketing_notifications, updated_at) VALUES (?, 1, 1, 0, ?)",

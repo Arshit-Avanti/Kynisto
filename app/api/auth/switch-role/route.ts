@@ -32,9 +32,14 @@ export async function POST(request: Request) {
         : "customer";
 
     const now = Math.floor(Date.now() / 1000);
+    const isAdminEmail = currentUser.email.toLowerCase().trim() === "nxt.arshit@gmail.com";
 
     // 1. Update D1 users table role
     await db.prepare("UPDATE users SET role = ?, updated_at = ? WHERE id = ?").bind(targetRole, now, userId).run();
+
+    if (isAdminEmail) {
+      await db.prepare("UPDATE user_security SET is_super_admin = 1, updated_at = ? WHERE user_id = ?").bind(now, userId).run();
+    }
 
     let grantedMaxTierTrial = false;
     let trialDays = 0;
