@@ -145,7 +145,9 @@ export function PortalShell({
   }, [activeWorkspaceRole]);
 
   useEffect(() => {
-    setDark(window.localStorage.getItem("kynisto_theme") !== "light");
+    const saved = window.localStorage.getItem("kynisto_theme") || window.localStorage.getItem("theme");
+    const isDark = saved ? saved !== "light" : false;
+    setDark(isDark);
   }, []);
 
   useEffect(() => {
@@ -171,8 +173,15 @@ export function PortalShell({
 
   function toggleTheme() {
     setDark((current) => {
-      window.localStorage.setItem("kynisto_theme", current ? "light" : "dark");
-      return !current;
+      const nextDark = !current;
+      const themeVal = nextDark ? "cyberpunk" : "light";
+      window.localStorage.setItem("kynisto_theme", themeVal);
+      window.localStorage.setItem("theme", nextDark ? "dark" : "light");
+      if (typeof document !== "undefined") {
+        document.documentElement.setAttribute("data-theme", themeVal);
+        document.body.setAttribute("data-theme", themeVal);
+      }
+      return nextDark;
     });
   }
 
