@@ -200,6 +200,10 @@ export function GoogleRoleOnboarding() {
 
       // 4. Route to the permanent workspace based on selected role
       const destination = (targetRole === "shop_owner") ? "/owner" : (targetRole === "admin") ? "/admin" : "/";
+      
+      // Delay to ensure Cloudflare D1 read replicas synchronize the role update
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      
       window.location.replace(destination);
     } catch (selectionError) {
       console.error("Google role selection failed:", selectionError);
