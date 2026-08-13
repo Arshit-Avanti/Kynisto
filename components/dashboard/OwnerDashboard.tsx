@@ -32,18 +32,29 @@ function Status({ value }: { value: unknown }) { const text=String(value??"pendi
 export function OwnerDashboard({ user }: { user: SessionUser }) {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") ?? "overview";
-  const [stores, setStores] = useState<Store[]>([]);
-  const [reviews, setReviews] = useState<Item[]>([]);
+  // Load initial cached overview data for instant 0ms load times
+  const initialCache = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = sessionStorage.getItem("kynisto_owner_dash_cache");
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const [stores, setStores] = useState<Store[]>(initialCache?.stores ?? []);
+  const [reviews, setReviews] = useState<Item[]>(initialCache?.reviews ?? []);
   const [storeReviews, setStoreReviews] = useState<Item[]>([]);
   const [reviewPage, setReviewPage] = useState(1);
   const [reviewPagination, setReviewPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, totalPages: 0 });
-  const [analytics, setAnalytics] = useState<Item[]>([]);
-  const [categories, setCategories] = useState<Item[]>([]);
-  const [selectedId, setSelectedId] = useState("");
+  const [analytics, setAnalytics] = useState<Item[]>(initialCache?.analytics ?? []);
+  const [categories, setCategories] = useState<Item[]>(initialCache?.categories ?? []);
+  const [selectedId, setSelectedId] = useState<string>(initialCache?.selectedId ?? (initialCache?.stores?.[0]?.id ? String(initialCache.stores[0].id) : ""));
   const [catalog, setCatalog] = useState<Item[]>([]);
   const [media, setMedia] = useState<Item[]>([]);
-  const [subPlan, setSubPlan] = useState<Record<string, any>>({ id: "free", allowQueueManagement: false });
-  const [loading, setLoading] = useState(true);
+  const [subPlan, setSubPlan] = useState<Record<string, any>>(initialCache?.subPlan ?? { id: "free", allowQueueManagement: false });
+  const [loading, setLoading] = useState(!initialCache);
   const [tabLoading, setTabLoading] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
@@ -64,16 +75,32 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
     setReviews(overview.recentReviews);
     setCategories(categoryData.items);
     if (subRes?.plan) setSubPlan(subRes.plan);
-    if (!selectedIdRef.current && overview.stores[0]) setSelectedId(String(overview.stores[0].id));
+    const activeId = selectedIdRef.current || (overview.stores[0] ? String(overview.stores[0].id) : "");
+    if (!selectedIdRef.current && overview.stores[0]) setSelectedId(activeId);
+
+    // Save payload in sessionStorage for instant subsequent page renders
+    try {
+      sessionStorage.setItem("kynisto_owner_dash_cache", JSON.stringify({
+        stores: overview.stores,
+        analytics: overview.analytics,
+        reviews: overview.recentReviews,
+        categories: categoryData.items,
+        subPlan: subRes?.plan ?? { id: "free", allowQueueManagement: false },
+        selectedId: activeId
+      }));
+    } catch {
+      // Ignore storage quota errors
+    }
   }, []);
 
   const load = useCallback(async () => {
-    setLoading(true); setError("");
+    if (!initialCache) setLoading(true);
+    setError("");
     try {
       await loadOverview();
     } catch (loadError) { setError(loadError instanceof Error ? loadError.message : "Unable to load dashboard."); }
     finally { setLoading(false); }
-  }, [loadOverview]);
+  }, [loadOverview, initialCache]);
 
   useEffect(() => { void load(); }, [load]);
   useEffect(() => {

@@ -195,6 +195,55 @@ export async function getSessionUser(): Promise<AuthSession | null> {
 
   try {
     const accessToken = decodeURIComponent(encodedSupabaseToken);
+    const tokenHash = await sha256(accessToken);
+    const now = Math.floor(Date.now() / 1000);
+
+    // 1. Fast path: check D1 sessions table for cached Supabase session (takes ~3ms instead of 2500ms)
+    const cachedSession = await getD1()
+      .prepare(
+        `SELECT s.id AS sessionId, s.expires_at AS expiresAt,
+                u.id AS userId, u.name, u.email, u.role, u.status, u.avatar_url AS avatarUrl,
+                sec.must_change_password AS mustChangePassword, sec.is_super_admin AS isSuperAdmin
+         FROM sessions s
+         JOIN users u ON u.id = s.user_id
+         JOIN user_security sec ON sec.user_id = u.id
+         WHERE s.token_hash = ? AND s.expires_at > ?`,
+      )
+      .bind(tokenHash, now)
+      .first<{
+        sessionId: string;
+        expiresAt: number;
+        userId: string;
+        name: string;
+        email: string;
+        role: UserRole;
+        status: "active" | "suspended" | "disabled" | "banned";
+        avatarUrl: string | null;
+        mustChangePassword: number;
+        isSuperAdmin: number;
+      }>()
+      .catch(() => null);
+
+    if (cachedSession && cachedSession.status === "active") {
+      return {
+        sessionId: cachedSession.sessionId,
+        csrfTokenHash: "",
+        expiresAt: cachedSession.expiresAt,
+        authentication: "supabase",
+        user: {
+          id: cachedSession.userId,
+          name: cachedSession.name,
+          email: cachedSession.email,
+          role: cachedSession.role,
+          status: cachedSession.status,
+          avatarUrl: cachedSession.avatarUrl,
+          mustChangePassword: Boolean(cachedSession.mustChangePassword),
+          isSuperAdmin: Boolean(cachedSession.isSuperAdmin),
+        },
+      };
+    }
+
+    // 2. Slow path fallback: verify with Supabase once and cache result in D1
     const supabaseUser = await getSupabaseUser(accessToken);
     let profile = null;
     try {
@@ -208,10 +257,26 @@ export async function getSessionUser(): Promise<AuthSession | null> {
 
     if (identity.status !== "active") return null;
 
+    const expiresAt = now + 86400 * 7;
+    const sessionId = `sb:${supabaseUser.id}`;
+
+    // Cache verified session into D1 sessions table for 7 days
+    try {
+      await getD1()
+        .prepare(
+          `INSERT OR REPLACE INTO sessions (id, user_id, token_hash, csrf_token_hash, expires_at, created_at)
+           VALUES (?, ?, ?, '', ?, ?)`
+        )
+        .bind(sessionId, identity.userId, tokenHash, expiresAt, now)
+        .run();
+    } catch {
+      // Ignore cache write failures
+    }
+
     return {
-      sessionId: `supabase:${supabaseUser.id}`,
+      sessionId,
       csrfTokenHash: "",
-      expiresAt: Math.floor(Date.now() / 1000) + DAY,
+      expiresAt,
       authentication: "supabase",
       user: {
         id: identity.userId,
