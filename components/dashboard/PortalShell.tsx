@@ -234,7 +234,7 @@ export function PortalShell({
           })}
         </nav>
         <div className="portalSidebarFooter" style={{ borderTop: dark ? "1px solid rgba(255,255,255,0.05)" : "1px solid rgba(0,0,0,0.05)", background: dark ? "rgba(15, 23, 42, 0.4)" : "rgba(255,255,255,0.4)" }}>
-          {user.role === "admin" && <>
+          {(user?.role === "admin" || user?.isSuperAdmin) && <>
             <Link href="/admin" style={{ color: dark ? "#cbd5e1" : "#475569" }}><span className="mr-2"><LayoutDashboard size={18} /></span> Admin workspace</Link>
             <Link href="/owner" style={{ color: dark ? "#cbd5e1" : "#475569" }}><span className="mr-2"><Store size={18} /></span> Shop owner tools</Link>
             <Link href="/account" style={{ color: dark ? "#cbd5e1" : "#475569" }}><span className="mr-2"><User size={18} /></span> Customer tools</Link>
@@ -253,9 +253,9 @@ export function PortalShell({
               {dark ? <Sun size={20} style={{ filter: "drop-shadow(0 0 5px rgba(251, 191, 36, 0.8))" }} /> : <Moon size={20} />}
             </button>
             <span className="userAvatar" style={{ border: dark ? "2px solid rgba(255,255,255,0.2)" : "2px solid rgba(0,0,0,0.1)", boxShadow: dark ? "0 0 10px rgba(255,255,255,0.1)" : "none" }}>
-              {user.avatarUrl ? <img src={user.avatarUrl} alt="" referrerPolicy="no-referrer" /> : <User size={20} color={dark ? "#fff" : "#0f172a"} />}
+              {user?.avatarUrl ? <img src={user.avatarUrl} alt="" referrerPolicy="no-referrer" /> : <User size={20} color={dark ? "#fff" : "#0f172a"} />}
             </span>
-            <span className="userMeta"><b style={{ color: dark ? "#f8fafc" : "#0f172a" }}>{user.name}</b><small style={{ color: dark ? "#94a3b8" : "#64748b" }}>{user.email}</small></span>
+            <span className="userMeta"><b style={{ color: dark ? "#f8fafc" : "#0f172a" }}>{user?.name || "User"}</b><small style={{ color: dark ? "#94a3b8" : "#64748b" }}>{user?.email || ""}</small></span>
           </div>
         </header>
         <div className="portalContent">{children}</div>

@@ -240,7 +240,7 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
 
     {tab === "overview" && <CustomerOverview user={user} favorites={favorites} reviews={[...reviews, ...productReviews]} cart={(data.items as Item[] | undefined) ?? []} />}
     {tab === "wallet" && <KynistoWalletView />}
-    {tab === "profile" && <ProfilePanel profile={(data.profile as Item | undefined) ?? { name: user.name, email: user.email }} mutate={mutate} />}
+    {tab === "profile" && <ProfilePanel profile={(data.profile as Item | undefined) ?? { name: user?.name || "", email: user?.email || "" }} mutate={mutate} />}
     {tab === "addresses" && <AddressesPanel items={items} mutate={mutate} />}
     {tab === "favorites" && <section className="portalCard"><FavoriteList items={favorites} remove={removeFavorite} /></section>}
     {tab === "wishlist" && <WishlistPanel items={items} mutate={mutate} />}
@@ -256,6 +256,7 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
 }
 
 function CustomerOverview({ user, favorites, reviews, cart }: { user: SessionUser; favorites: Item[]; reviews: Item[]; cart: Item[] }) {
+  const userName = user?.name || user?.email || "User";
   return (
     <>
       <div className="statsGrid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
@@ -308,11 +309,11 @@ function CustomerOverview({ user, favorites, reviews, cart }: { user: SessionUse
           <div className="accountDetail" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
               <div style={{ width: "64px", height: "64px", borderRadius: "16px", background: "#0ea5e9", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.75rem", fontWeight: 800 }}>
-                {user.name.slice(0, 1).toUpperCase()}
+                {userName.slice(0, 1).toUpperCase()}
               </div>
               <div>
-                <b style={{ fontSize: "1.25rem", color: "var(--text-primary, #0f172a)" }}>{user.name}</b>
-                <small style={{ display: "block", color: "var(--text-secondary, #64748b)", marginTop: "0.25rem", fontSize: "0.95rem" }}>{user.email}</small>
+                <b style={{ fontSize: "1.25rem", color: "var(--text-primary, #0f172a)" }}>{userName}</b>
+                <small style={{ display: "block", color: "var(--text-secondary, #64748b)", marginTop: "0.25rem", fontSize: "0.95rem" }}>{user?.email || ""}</small>
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", padding: "1.25rem", background: "var(--cream, #f8fafc)", borderRadius: "16px", border: "1px solid var(--line, #f1f5f9)" }}>
