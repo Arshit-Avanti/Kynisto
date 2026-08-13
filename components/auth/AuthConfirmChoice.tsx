@@ -31,23 +31,26 @@ export default function AuthConfirmChoice({ hash, accessToken }: AuthConfirmChoi
     const getTargetUrl = () => "/";
 
     if (accessToken) {
-      apiFetch<{ user: { role: string } | null }>("/api/auth/google/session", {
+      apiFetch<{ user: { role: string } | null; needsOnboarding?: boolean; redirectTo?: string }>("/api/auth/google/session", {
         method: "POST",
         json: { access_token: accessToken },
       })
-        .then(() => {
-          window.location.replace("/");
+        .then((res) => {
+          const target = res?.redirectTo || (res?.needsOnboarding ? "/onboarding" : "/");
+          window.location.replace(target);
         })
         .catch(() => {
-          window.location.replace("/");
+          window.location.replace("/onboarding");
         });
     } else {
       apiFetch<{ user: { role: string } | null }>("/api/auth/me")
-        .then(() => {
-          window.location.replace("/");
+        .then((res) => {
+          const role = res?.user?.role;
+          const target = role === "store_owner" || role === "shop_owner" ? "/owner" : role === "admin" ? "/admin" : "/";
+          window.location.replace(target);
         })
         .catch(() => {
-          window.location.replace("/");
+          window.location.replace("/onboarding");
         });
     }
   };

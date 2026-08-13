@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSession, dashboardForRole } from "@/lib/auth";
+import { createSession } from "@/lib/auth";
 import { apiError, assertSameOrigin } from "@/lib/security";
 import {
   applicationRoleFromProfile,
@@ -31,11 +31,30 @@ export async function POST(request: Request) {
       // Ignore profile query failure
     }
 
-    const role = applicationRoleFromProfile(profile?.role) || "customer";
+    const metadataRole = supabaseUser.user_metadata?.role;
+    const profileRole = profile?.role;
+    const rawRole = profileRole || metadataRole;
+
+    const onboardingCompleted = Boolean(
+      profile?.onboarding_completed ||
+      supabaseUser.user_metadata?.onboarding_completed ||
+      (rawRole && typeof rawRole === "string" && rawRole.trim() !== "" && rawRole !== "unassigned")
+    );
+
+    const role = applicationRoleFromProfile(rawRole) || "customer";
     const identity = await ensureGoogleLocalIdentity(supabaseUser, role);
 
     // Create rock-solid D1 session cookie (same as local/admin login)
     await createSession(request, identity.id, true);
+
+    const needsOnboarding = !onboardingCompleted;
+    const redirectTo = needsOnboarding
+      ? "/onboarding"
+      : identity.role === "store_owner"
+      ? "/owner"
+      : identity.role === "admin"
+      ? "/admin"
+      : "/";
 
     return NextResponse.json({
       user: {
@@ -45,7 +64,8 @@ export async function POST(request: Request) {
         role: identity.role,
         isSuperAdmin: false,
       },
-      redirectTo: "/",
+      needsOnboarding,
+      redirectTo,
     });
   } catch (error) {
     return apiError(error);

@@ -144,14 +144,25 @@ export function GoogleRoleOnboarding() {
         console.warn("Profiles upsert gracefully bypassed:", upsertErr);
       }
 
-      // 3. Save to localStorage for instant client-side role memory
+      // 3. Update local D1 user role
+      try {
+        const { apiFetch } = await import("@/lib/client-api");
+        await apiFetch("/api/auth/onboarding/role", {
+          method: "POST",
+          json: { role: targetRole },
+        });
+      } catch (d1Err) {
+        console.warn("D1 role update gracefully bypassed:", d1Err);
+      }
+
+      // 4. Save to localStorage for instant client-side role memory
       try {
         localStorage.setItem("kynisto_permanent_role", targetRole);
       } catch {
         // Ignore storage restriction errors
       }
 
-      // 4. Route to the permanent workspace based on selected role
+      // 5. Route to the permanent workspace based on selected role
       const destination = (targetRole === "shop_owner") ? "/owner" : (targetRole === "admin") ? "/admin" : "/";
       window.location.replace(destination);
     } catch (selectionError) {
