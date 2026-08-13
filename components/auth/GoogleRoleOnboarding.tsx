@@ -79,8 +79,15 @@ export function GoogleRoleOnboarding() {
                 .eq("id", session.user.id)
                 .maybeSingle();
 
-              const existingRole = profile?.role || session.user.user_metadata?.role;
-              if (existingRole && existingRole !== "unassigned") {
+              const onboardingCompleted = Boolean(
+                profile?.onboarding_completed ||
+                session.user.user_metadata?.onboarding_completed ||
+                profile?.role_selected_at ||
+                session.user.user_metadata?.role_selected_at
+              );
+              
+              if (onboardingCompleted) {
+                const existingRole = profile?.role || session.user.user_metadata?.role;
                 const dest = (existingRole === "shop_owner" || existingRole === "owner" || existingRole === "store_owner") ? "/owner" : "/";
                 window.location.replace(dest);
                 return;
@@ -99,9 +106,9 @@ export function GoogleRoleOnboarding() {
             const { apiFetch } = await import("@/lib/client-api");
             const meRes = await apiFetch<{ user: { id: string; email: string; name?: string; avatarUrl?: string; role?: string } | null }>("/api/auth/me");
             if (meRes?.user) {
-              const meRole = meRes.user.role;
-              if (meRole && meRole !== "unassigned") {
-                const dest = (meRole === "store_owner" || meRole === "shop_owner" || meRole === "owner") ? "/owner" : "/";
+              const permanentRole = window.localStorage.getItem("kynisto_permanent_role");
+              if (permanentRole) {
+                const dest = (permanentRole === "store_owner" || permanentRole === "shop_owner" || permanentRole === "owner") ? "/owner" : "/";
                 window.location.replace(dest);
                 return;
               }
