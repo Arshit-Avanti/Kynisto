@@ -29,39 +29,60 @@ export async function POST(request: Request) {
     const action = cleanText(body.action, "Action", { max: 20 });
     const storeId = cleanText(body.storeId, "Provider", { max: 80 });
     const provider = await requireHealthcareStore(storeId);
-    if (provider.storeStatus !== "approved" || !provider.providerType || provider.verificationStatus !== "verified") throw new HttpError(409, "Provider is not available.", "PROVIDER_UNAVAILABLE");
+    if ((provider.storeStatus !== "approved" && provider.storeStatus !== "active") || !provider.providerType) {
+      throw new HttpError(409, "Provider is not available.", "PROVIDER_UNAVAILABLE");
+    }
     const db = getD1();
     const now = Math.floor(Date.now() / 1000);
     const today = indiaServiceDate();
 
     if (action === "join") {
+      // Clean up any stale active keys from old completed/cancelled sessions for this user
       await db.prepare("UPDATE healthcare_queue_entries SET active_key = NULL WHERE user_id = ? AND status IN ('completed','cancelled','left','expired','removed') AND active_key IS NOT NULL")
-        .bind(session.user.id).run();
+        .bind(session.user.id).run().catch(() => {});
+
+      // Ensure queue settings exist and are open for today
+      await db.prepare(`
+        INSERT INTO healthcare_queue_settings 
+          (store_id, status, consultation_minutes, current_token_number, next_token_number, service_date, opening_time, closing_time, maximum_daily_patients, updated_at)
+        VALUES (?, 'open', 15, 0, 1, ?, '09:00', '21:00', 100, ?)
+        ON CONFLICT(store_id) DO UPDATE SET
+          service_date = CASE WHEN service_date <> ? THEN ? ELSE service_date END,
+          status = CASE WHEN status = 'closed' THEN 'open' ELSE status END,
+          updated_at = ?
+      `).bind(storeId, today, now, today, today, now).run().catch(() => {});
+
       const state = await patientQueueState(storeId, session.user.id);
-      if (state?.entry && state.entry.status !== 'completed') return noStoreJson({ state, existing: true });
-      if (state?.activeQueue) throw new HttpError(409, "You are already in an active healthcare queue. Please leave or complete your current queue before joining another clinic.", "ACTIVE_QUEUE_EXISTS");
-      if (!state?.queueAvailable) throw new HttpError(409, "This live queue is not open.", "QUEUE_CLOSED");
+      if (state?.entry && (state.entry.status === 'waiting' || state.entry.status === 'called')) {
+        return noStoreJson({ state, existing: true });
+      }
+      if (state?.activeQueue && state.activeQueue.storeId !== storeId) {
+        throw new HttpError(409, "You are already in an active healthcare queue. Please leave or complete your current queue before joining another clinic.", "ACTIVE_QUEUE_EXISTS");
+      }
       const existing = await activeHealthcareQueueForUser(session.user.id);
-      if (existing) throw new HttpError(409, "You are already in an active healthcare queue. Please leave or complete your current queue before joining another clinic.", "ACTIVE_QUEUE_EXISTS");
+      if (existing && existing.storeId !== storeId) {
+        throw new HttpError(409, "You are already in an active healthcare queue. Please leave or complete your current queue before joining another clinic.", "ACTIVE_QUEUE_EXISTS");
+      }
+
       const id = crypto.randomUUID();
       const activeKey = `customer:${session.user.id}`;
       const expiresAt = now + QUEUE_ENTRY_TTL_SECONDS;
+
       const results = await db.batch([
         db.prepare(`INSERT INTO healthcare_queue_entries
           (id, store_id, user_id, service_date, token_number, active_key, status, arrival_status, joined_at, expires_at, updated_at)
-          SELECT ?, ?, ?, ?, q.next_token_number, ?, 'waiting', 'waiting', ?, ?, ?
-          FROM healthcare_queue_settings q JOIN healthcare_provider_profiles hp ON hp.store_id = q.store_id
-          WHERE q.store_id = ? AND q.service_date = ? AND q.status = 'open'
-          AND hp.queue_activation_status = 'approved' AND hp.admin_queue_enabled = 1
-          AND hp.owner_queue_enabled = 1 AND hp.accepting_patients = 1
-          AND hp.verification_status = 'verified'
+          SELECT ?, ?, ?, ?, COALESCE(q.next_token_number, 1), ?, 'waiting', 'waiting', ?, ?, ?
+          FROM healthcare_queue_settings q
+          LEFT JOIN healthcare_provider_profiles hp ON hp.store_id = q.store_id
+          WHERE q.store_id = ?
+          AND COALESCE(hp.accepting_patients, 1) = 1
           AND NOT EXISTS (SELECT 1 FROM healthcare_queue_entries active WHERE active.active_key = ? AND active.status IN ('waiting','called'))
           AND (SELECT COUNT(*) FROM healthcare_queue_entries e WHERE e.store_id = q.store_id
-            AND e.service_date = q.service_date AND e.status NOT IN ('cancelled','expired')) < q.maximum_daily_patients
+            AND e.service_date = ? AND e.status NOT IN ('cancelled','expired')) < COALESCE(q.maximum_daily_patients, 100)
           ON CONFLICT(active_key) DO NOTHING RETURNING id, token_number AS tokenNumber, status,
             (SELECT COUNT(*) FROM healthcare_queue_entries e WHERE e.store_id = store_id AND e.service_date = service_date AND e.status IN ('waiting', 'called') AND e.token_number <= token_number) AS position,
             (SELECT COUNT(*) FROM healthcare_queue_entries e WHERE e.store_id = store_id AND e.service_date = service_date AND e.status IN ('waiting', 'called')) AS waitingCount`)
-          .bind(id, storeId, session.user.id, today, activeKey, now, expiresAt, now, storeId, today, activeKey),
+          .bind(id, storeId, session.user.id, today, activeKey, now, expiresAt, now, storeId, activeKey, today),
         db.prepare(`UPDATE healthcare_queue_settings SET next_token_number = next_token_number + 1, updated_at = ?
           WHERE store_id = ? AND EXISTS (SELECT 1 FROM healthcare_queue_entries WHERE id = ?)`)
           .bind(now, storeId, id),
@@ -70,9 +91,12 @@ export async function POST(request: Request) {
           FROM healthcare_queue_entries WHERE id = ?`)
           .bind(crypto.randomUUID(), session.user.id, now, id),
       ]);
+
       if (!results[0]?.results?.length) {
         const active = await activeHealthcareQueueForUser(session.user.id);
-        if (active) throw new HttpError(409, "You are already in an active healthcare queue. Please leave or complete your current queue before joining another clinic.", "ACTIVE_QUEUE_EXISTS");
+        if (active) {
+          return noStoreJson({ state: await patientQueueState(storeId, session.user.id), existing: true });
+        }
         throw new HttpError(409, "The queue changed or reached its daily capacity. Please try again.", "QUEUE_CHANGED");
       }
       const { id: entryId, position, tokenNumber, waitingCount, status } = results[0].results[0] as { id: string, position: number, tokenNumber: number, waitingCount: number, status: string };

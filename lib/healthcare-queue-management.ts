@@ -160,8 +160,14 @@ export async function operateHealthcareQueue(options: {
       db.prepare("UPDATE healthcare_queue_settings SET current_token_number = ?, updated_by = ?, updated_at = ? WHERE store_id = ?").bind(next.tokenNumber, actorId, now, storeId),
       db.prepare("INSERT INTO healthcare_queue_events (id, store_id, entry_id, actor_id, event_type, metadata, created_at) VALUES (?, ?, ?, ?, 'called', ?, ?)").bind(crypto.randomUUID(), storeId, next.id, actorId, JSON.stringify({ tokenNumber: next.tokenNumber }), now),
     ];
-    if (!next.isEmergency && !next.isWalkIn) statements.push(db.prepare("INSERT INTO notifications (id, user_id, audience, type, title, message, link, created_at) VALUES (?, ?, 'user', 'queue', 'It is your turn', ?, '/healthcare', ?)").bind(crypto.randomUUID(), next.userId, `${provider.name} is calling token ${next.tokenNumber}.`, now));
-    for (const patient of upcoming.results ?? []) statements.push(db.prepare("INSERT INTO notifications (id, user_id, audience, type, title, message, link, created_at) VALUES (?, ?, 'user', 'queue', 'Your turn is approaching', ?, '/healthcare', ?)").bind(crypto.randomUUID(), patient.userId, `Token ${patient.tokenNumber} will be called soon at ${provider.name}.`, now));
+    if (!next.isEmergency && !next.isWalkIn) {
+      statements.push(db.prepare("INSERT INTO notifications (id, user_id, audience, type, title, message, link, created_at) VALUES (?, ?, 'user', 'queue', '🚨 Your Turn Has Arrived!', ?, '/healthcare', ?)")
+        .bind(crypto.randomUUID(), next.userId, `Token #${next.tokenNumber} is now being called at ${provider.name}! Please enter the consultation room / counter immediately.`, now));
+    }
+    for (const patient of upcoming.results ?? []) {
+      statements.push(db.prepare("INSERT INTO notifications (id, user_id, audience, type, title, message, link, created_at) VALUES (?, ?, 'user', 'queue', 'Your turn is approaching', ?, '/healthcare', ?)")
+        .bind(crypto.randomUUID(), patient.userId, `Token #${patient.tokenNumber} will be called soon at ${provider.name}. Please stay near the clinic.`, now));
+    }
     await db.batch(statements);
     return { ok: true, called: next };
   }
@@ -181,7 +187,10 @@ export async function operateHealthcareQueue(options: {
       db.prepare("UPDATE healthcare_queue_entries SET recalled_at = ?, recall_count = recall_count + 1, updated_at = ? WHERE id = ?").bind(now, now, entry.id),
       db.prepare("INSERT INTO healthcare_queue_events (id, store_id, entry_id, actor_id, event_type, metadata, created_at) VALUES (?, ?, ?, ?, 'recalled', ?, ?)").bind(crypto.randomUUID(), storeId, entry.id, actorId, JSON.stringify({ tokenNumber: entry.tokenNumber }), now),
     ];
-    if (!entry.isEmergency && !entry.isWalkIn) statements.push(db.prepare("INSERT INTO notifications (id, user_id, audience, type, title, message, link, created_at) VALUES (?, ?, 'user', 'queue', 'Your token was recalled', ?, '/healthcare', ?)").bind(crypto.randomUUID(), entry.userId, `${provider.name} is recalling token ${entry.tokenNumber}.`, now));
+    if (!entry.isEmergency && !entry.isWalkIn) {
+      statements.push(db.prepare("INSERT INTO notifications (id, user_id, audience, type, title, message, link, created_at) VALUES (?, ?, 'user', 'queue', '🚨 Your Token Was Recalled', ?, '/healthcare', ?)")
+        .bind(crypto.randomUUID(), entry.userId, `Token #${entry.tokenNumber} is being recalled at ${provider.name}. Please proceed to the room now.`, now));
+    }
     await db.batch(statements);
     return { ok: true, status: "recalled" };
   }
@@ -195,7 +204,7 @@ export async function operateHealthcareQueue(options: {
       db.prepare("INSERT INTO healthcare_queue_events (id, store_id, entry_id, actor_id, event_type, metadata, created_at) VALUES (?, ?, ?, ?, 'removed', ?, ?)")
         .bind(crypto.randomUUID(), storeId, entry.id, actorId, JSON.stringify({ tokenNumber: entry.tokenNumber }), now),
       ...(!entry.isEmergency && !entry.isWalkIn ? [db.prepare("INSERT INTO notifications (id, user_id, audience, type, title, message, link, created_at) VALUES (?, ?, 'user', 'queue', 'Removed from queue', ?, '/healthcare', ?)")
-        .bind(crypto.randomUUID(), entry.userId, `Token ${entry.tokenNumber} was removed from ${provider.name}.`, now)] : []),
+        .bind(crypto.randomUUID(), entry.userId, `Token #${entry.tokenNumber} was removed from the queue at ${provider.name}.`, now)] : []),
     ]);
     return { ok: true, status: "removed" };
   }
@@ -210,8 +219,8 @@ export async function operateHealthcareQueue(options: {
       .bind(entry.tokenNumber, actorId, now, storeId),
     db.prepare("INSERT INTO healthcare_queue_events (id, store_id, entry_id, actor_id, event_type, metadata, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
       .bind(crypto.randomUUID(), storeId, entry.id, actorId, status, JSON.stringify({ tokenNumber: entry.tokenNumber }), now),
-    ...(!entry.isEmergency && !entry.isWalkIn && status === "completed" ? [db.prepare("INSERT INTO notifications (id, user_id, audience, type, title, message, link, created_at) VALUES (?, ?, 'user', 'queue', 'Visit completed', ?, '/healthcare', ?)")
-      .bind(crypto.randomUUID(), entry.userId, `Your visit at ${provider.name} is complete.`, now)] : []),
+    ...(!entry.isEmergency && !entry.isWalkIn && status === "completed" ? [db.prepare("INSERT INTO notifications (id, user_id, audience, type, title, message, link, created_at) VALUES (?, ?, 'user', 'queue', '🎉 Thank you for visiting!', ?, '/healthcare', ?)")
+      .bind(crypto.randomUUID(), entry.userId, `Thank you for visiting ${provider.name}! Your consultation is complete. We hope you had a smooth experience.`, now)] : []),
     ...(!entry.isEmergency && !entry.isWalkIn && status === "skipped" ? [db.prepare("INSERT INTO notifications (id, user_id, audience, type, title, message, link, created_at) VALUES (?, ?, 'user', 'queue', 'Skipped', ?, '/healthcare', ?)")
       .bind(crypto.randomUUID(), entry.userId, `Your token was skipped at ${provider.name}.`, now)] : []),
   ]);

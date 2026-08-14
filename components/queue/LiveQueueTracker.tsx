@@ -204,7 +204,7 @@ const defaultHealthcareProviders: HealthcareQueueItem[] = [
 export default function LiveQueueTracker() {
   const router = useRouter();
   const [view, setView] = useState<'list' | 'ticket'>('list');
-  const [queues, setQueues] = useState<HealthcareQueueItem[]>(defaultHealthcareProviders);
+  const [queues, setQueues] = useState<HealthcareQueueItem[]>([]);
   const [selectedQueue, setSelectedQueue] = useState<HealthcareQueueItem | null>(null);
   
   // Real patient state from D1 Database (managed by owner/admin)
@@ -239,30 +239,17 @@ export default function LiveQueueTracker() {
   const fetchHealthcareQueues = useCallback(async () => {
     try {
       const data = await apiFetch<{ items: HealthcareQueueItem[] }>('/api/healthcare');
-      if (data && data.items && data.items.length > 0) {
+      if (data && data.items) {
         setQueues(data.items);
       }
     } catch {
-      // Keep default dataset if backend returns empty or unseeded
+      // Backend error fallback
     }
   }, []);
 
   useEffect(() => {
     fetchHealthcareQueues();
   }, [fetchHealthcareQueues]);
-
-  // Check URL params for pre-selected store or queue code
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const searchParams = new URLSearchParams(window.location.search);
-    const storeIdParam = searchParams.get('storeId') || searchParams.get('store') || searchParams.get('id');
-    if (storeIdParam && queues.length > 0) {
-      const match = queues.find((q) => String(q.id) === String(storeIdParam) || q.slug === storeIdParam);
-      if (match && !selectedQueue) {
-        setSelectedQueue(match);
-      }
-    }
-  }, [queues, selectedQueue]);
 
   // 2. Fetch exact patient queue state from DB for selected clinic (syncs with Owner Dashboard in real-time)
   const syncPatientStateWithStore = useCallback(async (storeId: string | number) => {
@@ -286,26 +273,19 @@ export default function LiveQueueTracker() {
             const ownerConsultationMins = state.consultationMinutes || 15;
             setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
           } else if (state.entry.status === 'completed') {
-            const wasActiveTracked = (prevEntryStatusRef.current === 'waiting' || prevEntryStatusRef.current === 'called' || entryStatus === 'called' || entryStatus === 'waiting') && currentEntryId === state.entry.id;
-            if (wasActiveTracked || liveCompleted) {
-              setEntryStatus('completed');
-              setLiveCompleted(true);
-              if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-                new Notification("🎉 Consultation Completed!", {
-                  body: `Thanks for participating in the queue! We hope you had a smooth experience.`,
-                  icon: "/icons/icon-192x192.png",
-                });
-              }
-            } else {
-              // Past completed entry without active session -> do not block UI with completed view!
-              setCurrentEntryId(null);
-              setEntryStatus('waiting');
+            setEntryStatus('completed');
+            setLiveCompleted(true);
+            if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+              new Notification("🎉 Consultation Completed!", {
+                body: `Thank you for visiting! Your consultation is complete.`,
+                icon: "/icons/icon-192x192.png",
+              });
             }
           } else {
             setEntryStatus(state.entry.status);
           }
         } else if (currentEntryId && (prevEntryStatusRef.current === 'waiting' || prevEntryStatusRef.current === 'called' || entryStatus === 'called' || entryStatus === 'waiting')) {
-          // Owner marked completed or removed -> automatically transition to Thanks for Participating screen!
+          // Owner marked completed -> automatically transition to Thank You screen!
           setEntryStatus('completed');
           setLiveCompleted(true);
         } else if (selectedQueue) {
@@ -314,23 +294,111 @@ export default function LiveQueueTracker() {
         }
       }
     } catch {
-      // Ignore network failures, retain current snapshot
+      // Retain current snapshot
     }
-  }, [selectedQueue, userPosition, currentEntryId, entryStatus, liveCompleted]);
+  }, [selectedQueue, userPosition, currentEntryId, entryStatus]);
+
+  // 3. Auto-detect user's active joined queue in database on load
+  useEffect(() => {
+    let cancelled = false;
+    async function checkUserActiveQueue() {
+      try {
+        const auth = await apiFetch<{ user?: { id: string } }>('/api/auth/me').catch(() => null);
+        if (!auth || !auth.user || cancelled) return;
+
+        const res = await apiFetch<{ activeQueue: { storeId: string; storeName: string; storeSlug: string; tokenNumber: number; status: string } | null }>('/api/healthcare/queue/active');
+        if (res && res.activeQueue && !cancelled) {
+          const storeId = res.activeQueue.storeId;
+          const match = queues.find((q) => String(q.id) === String(storeId) || q.slug === storeId);
+          if (match) {
+            setSelectedQueue(match);
+          } else {
+            setSelectedQueue({
+              id: storeId,
+              name: res.activeQueue.storeName || 'Healthcare Clinic',
+              category: 'Healthcare',
+              providerType: 'Clinic',
+              address: '',
+              queueStatus: 'open',
+              waitingCount: 1,
+            });
+          }
+          setMyTokenNumber(res.activeQueue.tokenNumber);
+          setEntryStatus(res.activeQueue.status as any);
+          setView('ticket');
+          void syncPatientStateWithStore(storeId);
+        }
+      } catch {
+        // No active queue
+      }
+    }
+    checkUserActiveQueue();
+    return () => { cancelled = true; };
+  }, [queues, syncPatientStateWithStore]);
+
+  // Check URL params for pre-selected store or queue code
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const searchParams = new URLSearchParams(window.location.search);
+    const storeIdParam = searchParams.get('storeId') || searchParams.get('store') || searchParams.get('id');
+    if (storeIdParam && queues.length > 0) {
+      const match = queues.find((q) => String(q.id) === String(storeIdParam) || q.slug === storeIdParam);
+      if (match && !selectedQueue) {
+        setSelectedQueue(match);
+      }
+    }
+  }, [queues, selectedQueue]);
 
   const notifiedTokenRef = useRef<number | null>(null);
 
-  // Poll server every 3 seconds when viewing ticket to sync with Owner's "Call Next", "Pause", or "End Queue" actions
+  // Poll server and stream events when viewing ticket to sync with Owner actions in real-time
   useEffect(() => {
     if (view !== 'ticket' || !selectedQueue || isCancelled) return;
     
+    // Initial fetch & 3s polling backup
     syncPatientStateWithStore(selectedQueue.id);
     const pollInterval = setInterval(() => {
       syncPatientStateWithStore(selectedQueue.id);
     }, 3000);
 
-    return () => clearInterval(pollInterval);
-  }, [view, selectedQueue, isCancelled, syncPatientStateWithStore]);
+    // Realtime SSE Stream for instant sub-second push updates
+    let source: EventSource | null = null;
+    try {
+      source = new EventSource(`/api/healthcare/queue/stream?storeId=${encodeURIComponent(String(selectedQueue.id))}`);
+      source.addEventListener('queue', (event) => {
+        try {
+          const payload = JSON.parse((event as MessageEvent).data);
+          if (payload && payload.state) {
+            const { state } = payload;
+            setIsQueueOpen(state.queueStatus !== 'closed');
+            setCurrentToken(state.currentTokenNumber || 0);
+            if (state.entry) {
+              setEntryStatus(state.entry.status);
+              setCurrentEntryId(state.entry.id);
+              setUserPosition(state.entry.position || 1);
+              setMyTokenNumber(state.entry.tokenNumber);
+              setTotalInQueue(Math.max(1, state.waitingCount || state.entry.position || 1));
+              if (state.entry.status === 'completed') {
+                setLiveCompleted(true);
+              }
+            } else if (currentEntryId && (entryStatus === 'waiting' || entryStatus === 'called')) {
+              setEntryStatus('completed');
+              setLiveCompleted(true);
+            }
+          }
+        } catch {
+          // ignore stream parse error
+        }
+      });
+    } catch {
+      // SSE fallback handled by polling
+    }
+
+    return () => {
+      clearInterval(pollInterval);
+      if (source) source.close();
+    };
+  }, [view, selectedQueue, isCancelled, syncPatientStateWithStore, currentEntryId, entryStatus]);
 
   // 🔔 Trigger Native Push Notification, Chime Sound, and Vibration ONLY when Turn Arrives
   useEffect(() => {
@@ -381,9 +449,8 @@ export default function LiveQueueTracker() {
     setErrorMsg(null);
     notifiedTokenRef.current = null;
 
-    // Check if owner explicitly closed queue
     if (item.queueStatus === 'closed') {
-      setErrorMsg(`The live queue for ${item.name} is currently closed by the owner.`);
+      setErrorMsg(`The live queue for ${item.name} is currently closed.`);
       return;
     }
 
@@ -398,7 +465,7 @@ export default function LiveQueueTracker() {
         return;
       }
 
-      const response = await apiFetch<{ state: PatientQueueStateResponse['state'] }>('/api/healthcare/queue', {
+      const response = await apiFetch<{ state: PatientQueueStateResponse['state']; tokenNumber?: number; position?: number; entry?: { id: string } }>('/api/healthcare/queue', {
         method: 'POST',
         json: { action: 'join', storeId: String(item.id) },
       });
@@ -408,57 +475,47 @@ export default function LiveQueueTracker() {
         setIsQueueOpen(queueStatus !== 'closed');
         setCurrentEntryId(entry.id);
         
-        // Ensure that a newly joined/existing entry when joining is treated as 'waiting' if it somehow comes back as 'completed'
         const initialStatus = entry.status === 'completed' ? 'waiting' : entry.status;
         setEntryStatus(initialStatus);
         prevEntryStatusRef.current = initialStatus;
         setLiveCompleted(false);
-        const pos = entry.position || 1;
+        const pos = entry.position || response.position || 1;
         setUserPosition(pos);
-        setMyTokenNumber(entry.tokenNumber);
+        setMyTokenNumber(entry.tokenNumber || response.tokenNumber || 1);
         setTotalInQueue(Math.max(1, response.state.waitingCount || pos));
         const ownerConsultationMins = consultationMinutes || item.consultationMinutes || 15;
         setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
-      } else {
-        // First patient joining empty queue
-        setCurrentEntryId(null);
-        const waiting = item.waitingCount || 0;
-        const ownerConsultationMins = item.consultationMinutes || 15;
-        const pos = waiting + 1;
-        setTotalInQueue(pos);
+      } else if (response && (response.tokenNumber || response.position)) {
+        setCurrentEntryId(response.entry?.id || null);
+        const pos = response.position || 1;
         setUserPosition(pos);
-        setMyTokenNumber((item.currentTokenNumber || 0) + pos);
-        setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
-        setIsQueueOpen(true);
+        setMyTokenNumber(response.tokenNumber || 1);
+        setTotalInQueue(pos);
         setEntryStatus('waiting');
         prevEntryStatusRef.current = 'waiting';
         setLiveCompleted(false);
+        const ownerConsultationMins = item.consultationMinutes || 15;
+        setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
+      } else {
+        await syncPatientStateWithStore(item.id);
       }
 
       setIsCancelled(false);
       setIsLate(false);
       setView('ticket');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch {
-      // Fallback
-      setCurrentEntryId(null);
-      const waiting = item.waitingCount || 0;
-      const ownerConsultationMins = item.consultationMinutes || 15;
-      const pos = waiting + 1;
-      setTotalInQueue(pos);
-      setUserPosition(pos);
-      setMyTokenNumber((item.currentTokenNumber || 0) + pos);
-      setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
-      setIsQueueOpen(true);
-      setEntryStatus('waiting');
-      setIsCancelled(false);
-      setIsLate(false);
-      setView('ticket');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err: any) {
+      const msg = err?.message || 'Failed to join queue.';
+      setErrorMsg(msg);
+      // If user is already in queue, sync their state and show ticket
+      if (msg.includes('already in an active') || msg.includes('existing')) {
+        await syncPatientStateWithStore(item.id);
+        setView('ticket');
+      }
     } finally {
       setIsJoining(false);
     }
-  }, [router]);
+  }, [router, syncPatientStateWithStore]);
 
   const handleRunningLate = useCallback(async () => {
     setIsLate(true);
@@ -663,7 +720,7 @@ export default function LiveQueueTracker() {
     );
   }
 
-  // 2. TURN COMPLETED STATE VIEW (Shows exact requested user text)
+  // 2. TURN COMPLETED STATE VIEW (Shows exact requested user thank you message)
   if (isCompleted && selectedQueue) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center font-sans">
@@ -671,10 +728,10 @@ export default function LiveQueueTracker() {
           <PartyPopper className="w-12 h-12 text-emerald-400" />
         </div>
         <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-          Thanks for Participating in Queue
+          Thank You for Visiting!
         </h2>
         <p className="text-lg sm:text-xl text-slate-300 font-medium mt-4 max-w-lg leading-relaxed">
-          Your consultation is completed. We hope you had a smooth experience!
+          Your consultation at <strong className="text-emerald-400">{selectedQueue.name}</strong> is now complete. Thank you for visiting!
         </p>
 
         <div className="mt-10 flex flex-col sm:flex-row gap-4">
@@ -690,9 +747,9 @@ export default function LiveQueueTracker() {
               prevEntryStatusRef.current = null;
               setView('list');
             }}
-            className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base rounded-2xl shadow-xl transition-all"
+            className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base rounded-2xl shadow-xl transition-all cursor-pointer"
           >
-            ← Return to Healthcare Hub
+            Done · Return to Healthcare Hub
           </button>
           <Link href="/" className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-base rounded-2xl transition-all">
             Home Dashboard
