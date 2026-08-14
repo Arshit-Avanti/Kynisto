@@ -37,7 +37,7 @@ import {
   HelpCircle,
   RefreshCw,
 } from "lucide-react";
-import { MarketplaceFeature, MarketplaceCombo, DbPlan } from "@/lib/subscriptions";
+import { MarketplaceFeature, MarketplaceCombo, DbPlan } from "@/lib/subscriptions-shared";
 
 const BADGE_PRESETS = [
   { label: "🔥 Best Seller", value: "Best Seller" },

@@ -7,7 +7,7 @@ import {
   SHOP_OWNER_PLANS,
   UPI_PAYMENT_ID,
   PlanConfig,
-} from "@/lib/subscriptions";
+} from "@/lib/subscriptions-shared";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 
 export function PricingSection({

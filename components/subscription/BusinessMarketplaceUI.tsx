@@ -27,7 +27,7 @@ import {
   Building2,
   TrendingUp,
 } from "lucide-react";
-import { UPI_PAYMENT_ID, PAYMENT_QR_IMAGE } from "@/lib/subscriptions";
+import { UPI_PAYMENT_ID, PAYMENT_QR_IMAGE } from "@/lib/subscriptions-shared";
 
 export interface ModularAddon {
   id: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ALL_PLANS, CUSTOMER_PLANS, SHOP_OWNER_PLANS, getPlanConfig } from "@/lib/subscriptions";
+import { ALL_PLANS, CUSTOMER_PLANS, SHOP_OWNER_PLANS, getPlanConfig } from "@/lib/subscriptions-shared";
 import { AdminMarketplaceControlCenter } from "@/components/dashboard/AdminMarketplaceControlCenter";
 
 interface AdminSubscription {

@@ -372,7 +372,7 @@ export async function requirePageRole(
     redirect("/change-password");
   }
   if (session.user.role !== "admin" && !allowedRoles.includes(session.user.role)) {
-    redirect(`/access-denied?from=${encodeURIComponent(returnTo)}`);
+    redirect(dashboardForRole(session.user.role));
   }
   return session.user;
 }

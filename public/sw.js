@@ -1,6 +1,6 @@
 // Kynisto High-Performance PWA & Web Push Service Worker
-const CACHE_NAME = "kynisto-static-v3";
-const API_CACHE = "kynisto-api-v3";
+const CACHE_NAME = "kynisto-static-v4";
+const API_CACHE = "kynisto-api-v4";
 const PRECACHE_URLS = [
   "/",
   "/healthcare",

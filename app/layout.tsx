@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Geist, Geist_Mono, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import "./kynisto-brand.css";
 import "./google-auth.css";
@@ -9,32 +8,6 @@ import { SupabaseAuthManager } from "@/components/auth/SupabaseAuthManager";
 import { AppReturnBanner } from "@/components/ui/AppReturnBanner";
 import { AudioPermissionModal } from "@/components/ui/AudioPermissionModal";
 import { NotificationPermissionModal } from "@/components/ui/NotificationPermissionModal";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-});
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-jakarta",
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "500", "600", "700", "800"],
-});
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
@@ -93,12 +66,13 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://googleads.g.doubleclick.net" />
         <link rel="preconnect" href="https://tpc.googlesyndication.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://tpc.googlesyndication.com" />
-        <link rel="preconnect" href="https://gdakvxqegfnxflaqijwf.supabase.co" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://gdakvxqegfnxflaqijwf.supabase.co" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
         <link rel="preconnect" href="https://kynisto.in" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://kynisto.in" />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${plusJakartaSans.variable}`}>
+      <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
         <SupabaseAuthManager />
         <AppReturnBanner />

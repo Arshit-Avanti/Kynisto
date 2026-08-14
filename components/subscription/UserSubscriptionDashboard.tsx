@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { PlanConfig, getPlanConfig } from "@/lib/subscriptions";
+import { PlanConfig, getPlanConfig } from "@/lib/subscriptions-shared";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 
 interface SubscriptionData {

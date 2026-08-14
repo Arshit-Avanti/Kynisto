@@ -20,7 +20,7 @@ import {
   Clock,
   X,
 } from "lucide-react";
-import { UPI_PAYMENT_ID, PAYMENT_QR_IMAGE } from "@/lib/subscriptions";
+import { UPI_PAYMENT_ID, PAYMENT_QR_IMAGE } from "@/lib/subscriptions-shared";
 
 interface CustomerPlanUIProps {
   currentPlanId?: string;

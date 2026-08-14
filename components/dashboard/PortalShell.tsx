@@ -200,20 +200,20 @@ export function PortalShell({
 
   function isOwnerTabLocked(tab: string | undefined): boolean {
     if (!tab) return false;
-    const planId = String(subPlan.id ?? "free").toLowerCase();
-    if (planId === "enterprise" || planId === "admin" || user.role === "admin") return false;
+    const planId = String(subPlan?.id ?? "free").toLowerCase();
+    if (planId === "enterprise" || planId === "admin" || user?.role === "admin" || user?.isSuperAdmin) return false;
 
     switch (tab) {
       case "healthcare":
-        return !subPlan.allowQueueManagement && !["starter", "pro", "enterprise"].includes(planId);
+        return !subPlan?.allowQueueManagement && !["starter", "pro", "enterprise"].includes(planId);
       case "analytics":
       case "sales":
-        return !subPlan.allowAnalytics && !["starter", "pro", "enterprise"].includes(planId);
+        return !subPlan?.allowAnalytics && !["starter", "pro", "enterprise"].includes(planId);
       case "offers":
       case "coupons":
-        return !subPlan.allowPromotions && !["pro", "enterprise"].includes(planId);
+        return !subPlan?.allowPromotions && !["pro", "enterprise"].includes(planId);
       case "memberships":
-        return !subPlan.allowCustomBranding && !["pro", "enterprise"].includes(planId);
+        return !subPlan?.allowCustomBranding && !["pro", "enterprise"].includes(planId);
       default:
         return false;
     }
@@ -223,7 +223,7 @@ export function PortalShell({
     <div className={`portal portalShell ${dark ? "dark-theme" : "light-theme"}`} style={{ background: dark ? "linear-gradient(135deg, #020617 0%, #0f172a 100%)" : "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)" }}>
       <aside className={`portalSidebar ${open ? "isOpen" : ""}`} style={{ overflowY: "auto", background: dark ? "rgba(15, 23, 42, 0.88)" : "rgba(255, 255, 255, 0.95)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderRight: dark ? "1px solid rgba(0, 240, 255, 0.15)" : "1px solid #e2e8f0", boxShadow: "0 0 30px rgba(0,0,0,0.15)" }}>
         <Link className="portalBrand" href="/" style={{ filter: dark ? "drop-shadow(0 0 10px rgba(255,255,255,0.2))" : "none" }}><KynistoLogo /></Link>
-        <div className="portalRole" style={{ background: dark ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.03)", borderRadius: "12px", margin: "0 1rem" }}><small style={{ color: dark ? "#94a3b8" : "#64748b" }}>Workspace</small><strong style={{ color: dark ? "#e2e8f0" : "#0f172a", textShadow: dark ? "0 0 10px rgba(255,255,255,0.2)" : "none" }}>{activeWorkspaceRole === "admin" ? (user.isSuperAdmin ? "Super Administration" : "Administration") : activeWorkspaceRole === "store_owner" ? `${user.role === "admin" ? "Admin · " : ""}Shop owner` : `${user.role === "admin" ? "Admin · " : ""}Customer account`}</strong></div>
+        <div className="portalRole" style={{ background: dark ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.03)", borderRadius: "12px", margin: "0 1rem" }}><small style={{ color: dark ? "#94a3b8" : "#64748b" }}>Workspace</small><strong style={{ color: dark ? "#e2e8f0" : "#0f172a", textShadow: dark ? "0 0 10px rgba(255,255,255,0.2)" : "none" }}>{activeWorkspaceRole === "admin" ? (user?.isSuperAdmin ? "Super Administration" : "Administration") : activeWorkspaceRole === "store_owner" ? `${user?.role === "admin" ? "Admin · " : ""}Shop owner` : `${user?.role === "admin" ? "Admin · " : ""}Customer account`}</strong></div>
         <nav style={{ padding: "0 1rem" }}>
           {nav.map((item) => {
             const Icon = item.icon;
