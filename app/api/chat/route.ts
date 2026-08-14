@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       const store = await db
         .prepare(`SELECT s.id, s.name, s.owner_id AS ownerId FROM stores s
           JOIN users u ON u.id = s.owner_id AND u.role = 'store_owner' AND u.status = 'active'
-          WHERE s.id = ? AND s.status = 'approved' LIMIT 1`)
+          WHERE s.id = ? AND (s.status = 'approved' OR s.status = 'active') LIMIT 1`)
         .bind(storeId)
         .first<{ id: string; name: string; ownerId: string | null }>();
       if (!store?.ownerId) throw new HttpError(409, "This shop is not accepting chat yet.", "CHAT_UNAVAILABLE");

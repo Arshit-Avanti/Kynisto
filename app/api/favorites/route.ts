@@ -16,7 +16,7 @@ export async function GET(request: Request) {
          FROM favorites f
          JOIN stores s ON s.id = f.store_id
          JOIN categories c ON c.id = s.category_id
-         WHERE f.user_id = ? AND s.status = 'approved'
+         WHERE f.user_id = ? AND (s.status = 'approved' OR s.status = 'active')
          ORDER BY f.created_at DESC`,
       )
       .bind(session.user.id)
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const body = await safeJson(request);
     const storeId = cleanText(body.storeId, "Store", { max: 80 });
     const exists = await getD1()
-      .prepare("SELECT id FROM stores WHERE id = ? AND status = 'approved'")
+      .prepare("SELECT id FROM stores WHERE id = ? AND (status = 'approved' OR status = 'active')")
       .bind(storeId)
       .first();
     if (!exists) throw new HttpError(404, "Store not found.", "STORE_NOT_FOUND");

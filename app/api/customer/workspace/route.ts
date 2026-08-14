@@ -352,7 +352,7 @@ export async function GET(request: Request) {
            FROM wishlist_items w
            JOIN products p ON p.id = w.product_id AND p.status = 'active'
            JOIN inventory i ON i.product_id = p.id AND i.store_id = p.store_id
-           JOIN stores s ON s.id = p.store_id AND s.status = 'approved'
+           JOIN stores s ON s.id = p.store_id AND (s.status = 'approved' OR s.status = 'active')
            WHERE w.user_id = ? ORDER BY w.created_at DESC`,
         )
         .bind(userId)
@@ -470,7 +470,7 @@ async function publicProduct(productId: string) {
        JOIN inventory i ON i.product_id = p.id AND i.store_id = p.store_id
        JOIN stores s ON s.id = p.store_id
        LEFT JOIN store_settings ss ON ss.store_id = s.id
-       WHERE p.id = ? AND p.status = 'active' AND p.price IS NOT NULL AND s.status = 'approved'
+       WHERE p.id = ? AND p.status = 'active' AND p.price IS NOT NULL AND (s.status = 'approved' OR s.status = 'active')
        LIMIT 1`,
     )
     .bind(productId)
@@ -705,7 +705,7 @@ async function updateCartItem(userId: string, productId: string, quantity: numbe
        JOIN products p ON p.id = ci.product_id
        JOIN inventory i ON i.product_id = p.id AND i.store_id = p.store_id
        JOIN stores s ON s.id = p.store_id
-       WHERE ci.user_id = ? AND ci.product_id = ? AND p.status = 'active' AND s.status = 'approved'
+       WHERE ci.user_id = ? AND ci.product_id = ? AND p.status = 'active' AND (s.status = 'approved' OR s.status = 'active')
        LIMIT 1`,
     )
     .bind(userId, productId)
@@ -780,7 +780,7 @@ async function placeOrder(request: Request, userId: string, body: JsonBody) {
          FROM cart_items ci
          JOIN products p ON p.id = ci.product_id AND p.status = 'active' AND p.price IS NOT NULL
          JOIN inventory i ON i.product_id = p.id AND i.store_id = p.store_id
-         JOIN stores s ON s.id = p.store_id AND s.status = 'approved'
+         JOIN stores s ON s.id = p.store_id AND (s.status = 'approved' OR s.status = 'active')
          LEFT JOIN store_settings ss ON ss.store_id = s.id
          WHERE ci.user_id = ? ORDER BY ci.created_at ASC`,
       )
@@ -1399,7 +1399,7 @@ async function createSupportTicket(request: Request, userId: string, body: JsonB
     resolvedStoreId = ownedOrder.storeId;
   } else if (storeId) {
     const store = await db
-      .prepare("SELECT id FROM stores WHERE id = ? AND status = 'approved' LIMIT 1")
+      .prepare("SELECT id FROM stores WHERE id = ? AND (status = 'approved' OR status = 'active') LIMIT 1")
       .bind(storeId)
       .first();
     if (!store) throw new HttpError(404, "Shop not found.", "STORE_NOT_FOUND");

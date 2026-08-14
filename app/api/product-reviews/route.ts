@@ -35,7 +35,7 @@ export async function GET(request: Request) {
            JOIN products p ON p.id = pr.product_id
            JOIN stores s ON s.id = p.store_id
            WHERE pr.product_id = ? AND pr.status = 'published'
-             AND p.status = 'active' AND s.status = 'approved'
+             AND p.status = 'active' AND (s.status = 'approved' OR s.status = 'active')
            ORDER BY pr.created_at DESC LIMIT 50`,
         ).bind(productId).all(),
         db.prepare(
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
            JOIN products p ON p.id = pr.product_id
            JOIN stores s ON s.id = p.store_id
            WHERE pr.product_id = ? AND pr.status = 'published'
-             AND p.status = 'active' AND s.status = 'approved'`,
+             AND p.status = 'active' AND (s.status = 'approved' OR s.status = 'active')`,
         ).bind(productId).first(),
       ]);
       return noStoreJson({ items: items.results ?? [], summary: summary ?? { rating: 0, reviews: 0 } });
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
        JOIN products p ON p.id = oi.product_id
        JOIN stores s ON s.id = p.store_id
        WHERE oi.product_id = ? AND o.user_id = ? AND o.status = 'delivered'
-         AND p.status = 'active' AND s.status = 'approved'
+         AND p.status = 'active' AND (s.status = 'approved' OR s.status = 'active')
        ORDER BY o.created_at DESC LIMIT 1`,
     ).bind(productId, session.user.id).first<{ orderItemId: string }>();
     if (!purchase) throw new HttpError(403, "Product ratings require a delivered Kynisto order.", "VERIFIED_PURCHASE_REQUIRED");

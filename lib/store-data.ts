@@ -169,13 +169,13 @@ const storeSelect = `SELECT
   s.logo_url AS logoUrl, s.banner_url AS bannerUrl,
   s.rating_average AS ratingAverage, s.rating_count AS ratingCount,
   s.view_count AS viewCount, s.created_at AS createdAt,
-  c.id AS categoryId, c.name AS category, c.slug AS categorySlug, c.module AS categoryModule,
+  c.id AS categoryId, COALESCE(c.name, s.business_type) AS category, c.slug AS categorySlug, c.module AS categoryModule,
   c.icon AS categoryIcon, c.color AS categoryColor,
   sc.name AS subcategory, hp.queue_activation_status AS queueActivationStatus,
   hp.admin_queue_enabled AS adminQueueEnabled, hp.owner_queue_enabled AS ownerQueueEnabled,
   hqs.status AS queueStatus, hqs.opening_time AS queueOpeningTime, hqs.closing_time AS queueClosingTime
  FROM stores s
- JOIN categories c ON c.id = s.category_id
+ LEFT JOIN categories c ON c.id = s.category_id
  LEFT JOIN categories sc ON sc.id = s.subcategory_id
  LEFT JOIN healthcare_provider_profiles hp ON hp.store_id = s.id
  LEFT JOIN healthcare_queue_settings hqs ON hqs.store_id = s.id`;
@@ -191,7 +191,7 @@ export async function listCategories(module: "local" | "healthcare" | "all" = "l
   const childModuleCondition = module === "all" ? "" : "AND module = ?";
   const parentStatement = db.prepare(
     `SELECT c.id, c.name, c.slug, c.description, c.icon, c.color,
-      COUNT(CASE WHEN s.status = 'approved' THEN 1 END) AS storeCount
+      COUNT(CASE WHEN s.status IN ('approved', 'active') THEN 1 END) AS storeCount
      FROM categories c
      LEFT JOIN stores s ON s.category_id = c.id
      WHERE c.parent_id IS NULL AND c.status = 'active' ${moduleCondition}
@@ -250,7 +250,7 @@ export async function listStores(options: {
 
   await ensureSeeded();
   const db = getD1();
-  const conditions = ["s.status = 'approved'", "c.module = 'local'", "c.status = 'active'"];
+  const conditions = ["(s.status = 'approved' OR s.status = 'active')", "c.module = 'local'", "c.status = 'active'"];
   const bindings: unknown[] = [];
   const query = options.query?.trim();
   if (query) {
@@ -324,7 +324,7 @@ export async function getStoreBySlug(slug: string) {
   await ensureSeeded();
   const db = getD1();
   const row = await db
-    .prepare(`${storeSelect} WHERE s.slug = ? AND s.status = 'approved' LIMIT 1`)
+    .prepare(`${storeSelect} WHERE s.slug = ? AND (s.status = 'approved' OR s.status = 'active') LIMIT 1`)
     .bind(slug)
     .first<StoreRow>();
   if (!row) return null;

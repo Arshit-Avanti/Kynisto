@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     const title = cleanText(body.title, "Title", { max: 100, required: false });
     const comment = cleanText(body.comment, "Review", { min: 10, max: 1500 });
     const store = await getD1()
-      .prepare("SELECT id FROM stores WHERE id = ? AND status = 'approved'")
+      .prepare("SELECT id FROM stores WHERE id = ? AND (status = 'approved' OR status = 'active')")
       .bind(storeId)
       .first();
     if (!store) throw new HttpError(404, "Store not found.", "STORE_NOT_FOUND");

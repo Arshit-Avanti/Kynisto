@@ -57,6 +57,19 @@ const worker = {
       return Response.redirect(`https://${url.host}${url.pathname}${url.search}`, 301);
     }
 
+    if (url.pathname === "/robots.txt") {
+      const origin = `https://${url.host}`;
+      return new Response(
+        `User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /owner/\nDisallow: /account/\nDisallow: /api/\n\nUser-agent: Mediapartners-Google\nAllow: /\n\nUser-agent: Google-AdSense-AutoAds\nAllow: /\n\nUser-agent: Google-AdSense-AutoAds-Preflight\nAllow: /\n\nUser-agent: Googlebot\nAllow: /\n\nUser-agent: Googlebot-Image\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`,
+        {
+          headers: {
+            "Content-Type": "text/plain; charset=utf-8",
+            "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
+          },
+        },
+      );
+    }
+
     if (url.pathname === "/ads.txt") {
       return applySecurityHeaders(
         new Response("google.com, pub-9178031569606873, DIRECT, f08c47fec0942fa0\n", {

@@ -9,7 +9,7 @@ function xml(value: string) {
 export async function GET(request: Request) {
   await ensureSeeded();
   const origin = new URL(request.url).origin;
-  const stores = await getD1().prepare("SELECT slug, updated_at AS updatedAt FROM stores WHERE status = 'approved' ORDER BY updated_at DESC").all<{ slug: string; updatedAt: number }>();
+  const stores = await getD1().prepare("SELECT slug, updated_at AS updatedAt FROM stores WHERE status IN ('approved', 'active') ORDER BY updated_at DESC").all<{ slug: string; updatedAt: number }>();
   const urls = [
     `<url><loc>${xml(`${origin}/`)}</loc><changefreq>daily</changefreq><priority>1.0</priority></url>`,
     `<url><loc>${xml(`${origin}/healthcare`)}</loc><changefreq>daily</changefreq><priority>0.9</priority></url>`,

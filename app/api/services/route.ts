@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
         s.address, s.area, s.city
       FROM services sv
       JOIN stores s ON s.id = sv.store_id
-      WHERE sv.status = 'active' AND s.status = 'approved'`;
+      WHERE sv.status = 'active' AND (s.status = 'approved' OR s.status = 'active')`;
 
     const params: (string | number)[] = [];
 

@@ -65,7 +65,7 @@ export async function GET(request: Request) {
     const sortParam = url.searchParams.get("sort") ?? "relevance";
     const sort = (sortParam in SORT_SQL ? sortParam : "relevance") as ProductSort;
     const inStock = url.searchParams.get("inStock") === "true";
-    const conditions = ["p.status = 'active'", "p.price IS NOT NULL", "s.status = 'approved'"];
+    const conditions = ["p.status = 'active'", "p.price IS NOT NULL", "(s.status = 'approved' OR s.status = 'active')"];
     const bindings: unknown[] = [];
 
     if (query) {

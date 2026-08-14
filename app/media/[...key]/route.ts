@@ -9,7 +9,7 @@ export async function GET(
   if (!object) return new Response("Not found", { status: 404 });
   const headers = new Headers();
   headers.set("Content-Type", object.httpMetadata?.contentType ?? "application/octet-stream");
-  headers.set("Cache-Control", object.httpMetadata?.cacheControl ?? "public, max-age=3600");
+  headers.set("Cache-Control", object.httpMetadata?.cacheControl ?? "public, max-age=31536000, immutable");
   headers.set("ETag", object.httpEtag);
   headers.set("X-Content-Type-Options", "nosniff");
   return new Response(object.body, { headers });
