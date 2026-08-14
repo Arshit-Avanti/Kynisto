@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/client-api";
 import { getSupabaseBrowserClient, syncSupabaseAccessCookie } from "@/lib/supabase-browser";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 
-export default function AuthTransferPage() {
+function AuthTransferContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<"syncing" | "success" | "error">("syncing");
@@ -80,6 +80,73 @@ export default function AuthTransferPage() {
 
   return (
     <div style={{
+      background: "rgba(15, 23, 42, 0.8)",
+      border: "1px solid rgba(255, 255, 255, 0.1)",
+      borderRadius: "24px",
+      padding: "36px 32px",
+      maxWidth: "420px",
+      width: "100%",
+      boxShadow: "0 20px 40px rgba(0, 0, 0, 0.5)"
+    }}>
+      {status === "syncing" && (
+        <>
+          <div style={{
+            width: "48px",
+            height: "48px",
+            border: "3px solid rgba(255, 87, 34, 0.2)",
+            borderTopColor: "#FF5722",
+            borderRadius: "50%",
+            margin: "0 auto 20px",
+            animation: "spin 0.8s linear infinite"
+          }} />
+          <h3 style={{ fontSize: "1.25rem", fontWeight: 700, margin: "0 0 8px 0" }}>Syncing App Login...</h3>
+          <p style={{ color: "#94a3b8", fontSize: "0.9rem", margin: 0 }}>
+            Connecting your Google account securely to the Kynisto App.
+          </p>
+        </>
+      )}
+
+      {status === "success" && (
+        <>
+          <div style={{ fontSize: "40px", marginBottom: "16px" }}>🚀</div>
+          <h3 style={{ fontSize: "1.25rem", fontWeight: 700, margin: "0 0 8px 0", color: "#10b981" }}>Logged In Successfully!</h3>
+          <p style={{ color: "#94a3b8", fontSize: "0.9rem", margin: 0 }}>
+            Redirecting you into the app...
+          </p>
+        </>
+      )}
+
+      {status === "error" && (
+        <>
+          <div style={{ fontSize: "40px", marginBottom: "16px" }}>⚠️</div>
+          <h3 style={{ fontSize: "1.25rem", fontWeight: 700, margin: "0 0 8px 0", color: "#f87171" }}>Session Sync Notice</h3>
+          <p style={{ color: "#94a3b8", fontSize: "0.9rem", margin: "0 0 20px 0" }}>
+            {errorMessage || "Unable to sync session automatically."}
+          </p>
+          <button
+            type="button"
+            onClick={() => router.replace("/login")}
+            style={{
+              background: "#FF5722",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "12px",
+              padding: "12px 24px",
+              fontWeight: 700,
+              cursor: "pointer"
+            }}
+          >
+            Go to Sign In
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function AuthTransferPage() {
+  return (
+    <div style={{
       minHeight: "100vh",
       display: "flex",
       flexDirection: "column",
@@ -95,68 +162,20 @@ export default function AuthTransferPage() {
         <KynistoLogo />
       </div>
 
-      <div style={{
-        background: "rgba(15, 23, 42, 0.8)",
-        border: "1px solid rgba(255, 255, 255, 0.1)",
-        borderRadius: "24px",
-        padding: "36px 32px",
-        maxWidth: "420px",
-        width: "100%",
-        boxShadow: "0 20px 40px rgba(0, 0, 0, 0.5)"
-      }}>
-        {status === "syncing" && (
-          <>
-            <div style={{
-              width: "48px",
-              height: "48px",
-              border: "3px solid rgba(255, 87, 34, 0.2)",
-              borderTopColor: "#FF5722",
-              borderRadius: "50%",
-              margin: "0 auto 20px",
-              animation: "spin 0.8s linear infinite"
-            }} />
-            <h3 style={{ fontSize: "1.25rem", fontWeight: 700, margin: "0 0 8px 0" }}>Syncing App Login...</h3>
-            <p style={{ color: "#94a3b8", fontSize: "0.9rem", margin: 0 }}>
-              Connecting your Google account securely to the Kynisto App.
-            </p>
-          </>
-        )}
-
-        {status === "success" && (
-          <>
-            <div style={{ fontSize: "40px", marginBottom: "16px" }}>🚀</div>
-            <h3 style={{ fontSize: "1.25rem", fontWeight: 700, margin: "0 0 8px 0", color: "#10b981" }}>Logged In Successfully!</h3>
-            <p style={{ color: "#94a3b8", fontSize: "0.9rem", margin: 0 }}>
-              Redirecting you into the app...
-            </p>
-          </>
-        )}
-
-        {status === "error" && (
-          <>
-            <div style={{ fontSize: "40px", marginBottom: "16px" }}>⚠️</div>
-            <h3 style={{ fontSize: "1.25rem", fontWeight: 700, margin: "0 0 8px 0", color: "#f87171" }}>Session Sync Notice</h3>
-            <p style={{ color: "#94a3b8", fontSize: "0.9rem", margin: "0 0 20px 0" }}>
-              {errorMessage || "Unable to sync session automatically."}
-            </p>
-            <button
-              type="button"
-              onClick={() => router.replace("/login")}
-              style={{
-                background: "#FF5722",
-                color: "#ffffff",
-                border: "none",
-                borderRadius: "12px",
-                padding: "12px 24px",
-                fontWeight: 700,
-                cursor: "pointer"
-              }}
-            >
-              Go to Sign In
-            </button>
-          </>
-        )}
-      </div>
+      <Suspense fallback={
+        <div style={{
+          background: "rgba(15, 23, 42, 0.8)",
+          borderRadius: "24px",
+          padding: "36px 32px",
+          maxWidth: "420px",
+          width: "100%",
+          color: "#94a3b8"
+        }}>
+          Loading session...
+        </div>
+      }>
+        <AuthTransferContent />
+      </Suspense>
 
       <style jsx global>{`
         @keyframes spin {

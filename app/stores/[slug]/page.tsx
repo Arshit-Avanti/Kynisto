@@ -16,8 +16,8 @@ export async function generateMetadata({ params }: RouteProps): Promise<Metadata
   const { slug } = await params;
   const store = await getStoreBySlug(slug);
   if (!store) return { title: "Business not found | Kynisto" };
-  const title = `${store.name} in ${store.area} | Kynisto`;
-  const description = `${store.description.slice(0, 145)} Find address, hours, reviews, services and directions.`;
+  const title = `${store.name} in ${store.area || store.city || "locality"} | Kynisto`;
+  const description = `${(store.description || "").slice(0, 145)} Find address, hours, reviews, services and directions.`;
   return {
     title,
     description,
@@ -42,7 +42,7 @@ export default async function StoreProfilePage({ params }: RouteProps) {
     "@type": "LocalBusiness",
     name: store.name,
     description: store.description,
-    image: [store.logoUrl, store.bannerUrl, ...store.images.map((image) => String(image.url))].filter(Boolean),
+    image: [store.logoUrl, store.bannerUrl, ...(store.images || []).map((image) => String(image?.url || ""))].filter(Boolean),
     address: {
       "@type": "PostalAddress",
       streetAddress: store.address,
@@ -54,7 +54,7 @@ export default async function StoreProfilePage({ params }: RouteProps) {
     geo: { "@type": "GeoCoordinates", latitude: store.latitude, longitude: store.longitude },
     telephone: store.phone,
     url: store.website,
-    aggregateRating: store.reviews > 0 ? { "@type": "AggregateRating", ratingValue: store.rating, reviewCount: store.reviews } : undefined,
+    aggregateRating: Number(store.reviews ?? 0) > 0 ? { "@type": "AggregateRating", ratingValue: Number(store.rating ?? 0), reviewCount: Number(store.reviews ?? 0) } : undefined,
   };
 
   return (
@@ -252,12 +252,12 @@ export default async function StoreProfilePage({ params }: RouteProps) {
                 <div style={{ display: "flex", gap: "16px", color: "#94a3b8", fontSize: "14px", fontWeight: 500, flexWrap: "wrap" }}>
                   <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#f8fafc", fontWeight: 700 }}>
                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ filter: "drop-shadow(0 0 5px rgba(251,191,36,0.5))" }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                     {store.rating.toFixed(1)} <span style={{ color: "#64748b", fontWeight: 500 }}>({store.reviews} reviews)</span>
+                     {Number(store.rating ?? 0).toFixed(1)} <span style={{ color: "#64748b", fontWeight: 500 }}>({store.reviews ?? 0} reviews)</span>
                   </span>
                   <span>•</span>
-                  <span>{store.distance.toFixed(1)} km away</span>
+                  <span>{Number(store.distance ?? 0).toFixed(1)} km away</span>
                   <span>•</span>
-                  <span>{store.hours}</span>
+                  <span>{store.hours || "Open today"}</span>
                 </div>
                 <StoreActions store={{ id: store.id, slug: store.slug, name: store.name, address: store.address, mapsUrl, phone: store.phone, whatsapp: store.whatsapp, website: store.website, hasOwner: store.hasOwner, categoryModule: store.categoryModule, queueEnabled: store.queueEnabled }} />
               </div>
@@ -286,7 +286,7 @@ export default async function StoreProfilePage({ params }: RouteProps) {
             <div id="membership-plans">
               <StoreMembershipStorefront storeId={store.id} storeName={store.name} />
             </div>
-            {(store.services.length > 0 || store.products.length > 0) && (
+            {((store.services || []).length > 0 || (store.products || []).length > 0) && (
               <section className="glass-section" style={{ padding: "24px", borderRadius: "16px" }}>
                 <div style={{ marginBottom: "20px" }}>
                   <span style={{ color: "#60a5fa", fontSize: "13px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", textShadow: "0 0 10px rgba(96,165,250,0.3)" }}>What they offer</span>
