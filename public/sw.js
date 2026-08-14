@@ -1,11 +1,103 @@
-// Kynisto Web & App Push Notification Service Worker
+// Kynisto High-Performance PWA & Web Push Service Worker
+const CACHE_NAME = "kynisto-static-v3";
+const API_CACHE = "kynisto-api-v3";
+const PRECACHE_URLS = [
+  "/",
+  "/healthcare",
+  "/manifest.webmanifest",
+  "/icons/icon-192x192.png",
+  "/icons/badge-72x72.png",
+  "/kynisto-logo.svg",
+  "/kynisto-mark.svg"
+];
 
 self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS).catch(() => {}))
+  );
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((k) => k !== CACHE_NAME && k !== API_CACHE)
+          .map((k) => caches.delete(k))
+      )
+    ).then(() => self.clients.claim())
+  );
+});
+
+// ⚡ Ultra-Fast Fetch Interceptor (Cache-First for Static Assets, SWR for Read APIs)
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+  if (request.method !== "GET") return;
+
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+
+  // 1. Static Assets (JS, CSS, Fonts, Images) -> Cache-First (< 5ms response)
+  if (
+    url.pathname.startsWith("/assets/") ||
+    url.pathname.startsWith("/_next/") ||
+    url.pathname.startsWith("/icons/") ||
+    /\.(?:js|css|woff2?|svg|png|jpg|jpeg|webp|avif|ico)$/i.test(url.pathname)
+  ) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
+        return fetch(request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // 2. Read APIs (Categories, Stores, Healthcare, Products) -> Stale-While-Revalidate (Instant response)
+  if (
+    url.pathname.startsWith("/api/categories") ||
+    url.pathname.startsWith("/api/stores") ||
+    url.pathname.startsWith("/api/products") ||
+    url.pathname.startsWith("/api/services") ||
+    url.pathname.startsWith("/api/healthcare")
+  ) {
+    // Avoid caching live queue stream or actions
+    if (url.pathname.includes("/stream") || url.pathname.includes("/active") || url.pathname.includes("/qr")) {
+      return;
+    }
+
+    event.respondWith(
+      caches.open(API_CACHE).then((cache) =>
+        cache.match(request).then((cached) => {
+          const networkFetch = fetch(request)
+            .then((networkResponse) => {
+              if (networkResponse.ok) {
+                cache.put(request, networkResponse.clone());
+              }
+              return networkResponse;
+            })
+            .catch(() => cached);
+
+          return cached || networkFetch;
+        })
+      )
+    );
+    return;
+  }
+
+  // 3. Navigation Pages -> Network-First with Offline / Cache Fallback
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request).catch(() => caches.match(request).then((res) => res || caches.match("/")))
+    );
+  }
 });
 
 // 🔔 Listen for Web & App Push Notifications

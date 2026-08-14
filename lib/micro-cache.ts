@@ -48,11 +48,13 @@ export const microCache = new MicroCache();
 
 export function microCacheJson(
   data: unknown,
-  cacheControl = "public, max-age=15, stale-while-revalidate=60",
+  cacheControl = "public, max-age=15, s-maxage=60, stale-while-revalidate=300",
   init: ResponseInit = {},
 ): Response {
   const headers = new Headers(init.headers);
   headers.set("Cache-Control", cacheControl);
+  headers.set("CDN-Cache-Control", "max-age=60");
+  headers.set("Cloudflare-CDN-Cache-Control", "max-age=60");
   headers.set("Content-Type", "application/json; charset=utf-8");
   return new Response(JSON.stringify(data), { ...init, headers });
 }

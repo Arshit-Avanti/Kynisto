@@ -53,39 +53,147 @@ export async function safeJsonParse<T = unknown>(response: Response): Promise<T 
   }
 }
 
-// In-flight GET request deduplication cache
+// In-memory Fast SWR Client Cache for sub-millisecond RAM response
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
+const _ramCache = new Map<string, CacheEntry<unknown>>();
 const _inflight = new Map<string, Promise<unknown>>();
+
+// Dynamic cache duration rules (in milliseconds)
+function getCacheDuration(path: string): number {
+  if (path.startsWith("/api/categories")) return 180_000; // 3 min
+  if (path.startsWith("/api/stores") && !path.includes("manage")) return 45_000; // 45s
+  if (path.startsWith("/api/products")) return 45_000;
+  if (path.startsWith("/api/services")) return 45_000;
+  if (path.startsWith("/api/healthcare") && !path.includes("queue")) return 20_000; // 20s
+  if (path.startsWith("/api/auth/me")) return 10_000; // 10s
+  return 5_000;
+}
+
+function getCachedData<T>(key: string): { data: T; isFresh: boolean } | null {
+  const now = Date.now();
+  const ttl = getCacheDuration(key);
+
+  const ram = _ramCache.get(key) as CacheEntry<T> | undefined;
+  if (ram) {
+    return { data: ram.data, isFresh: now - ram.timestamp < ttl };
+  }
+
+  if (typeof window !== "undefined" && window.sessionStorage) {
+    try {
+      const stored = sessionStorage.getItem(`kyn_cache_${key}`);
+      if (stored) {
+        const parsed = JSON.parse(stored) as CacheEntry<T>;
+        _ramCache.set(key, parsed);
+        return { data: parsed.data, isFresh: now - parsed.timestamp < ttl };
+      }
+    } catch {
+      // Ignore quota/parse errors
+    }
+  }
+
+  return null;
+}
+
+function setCachedData<T>(key: string, data: T): void {
+  const entry: CacheEntry<T> = { data, timestamp: Date.now() };
+  _ramCache.set(key, entry);
+
+  if (_ramCache.size > 250) {
+    const oldestKey = _ramCache.keys().next().value;
+    if (oldestKey) _ramCache.delete(oldestKey);
+  }
+
+  if (typeof window !== "undefined" && window.sessionStorage) {
+    try {
+      sessionStorage.setItem(`kyn_cache_${key}`, JSON.stringify(entry));
+    } catch {
+      // Ignore storage errors
+    }
+  }
+}
+
+export function invalidateClientCache(pathPrefix?: string): void {
+  if (!pathPrefix) {
+    _ramCache.clear();
+    if (typeof window !== "undefined" && window.sessionStorage) {
+      Object.keys(sessionStorage).forEach((k) => {
+        if (k.startsWith("kyn_cache_")) sessionStorage.removeItem(k);
+      });
+    }
+    return;
+  }
+
+  for (const k of Array.from(_ramCache.keys())) {
+    if (k.startsWith(pathPrefix)) _ramCache.delete(k);
+  }
+  if (typeof window !== "undefined" && window.sessionStorage) {
+    Object.keys(sessionStorage).forEach((k) => {
+      if (k.startsWith(`kyn_cache_${pathPrefix}`)) sessionStorage.removeItem(k);
+    });
+  }
+}
 
 export async function apiFetch<T = unknown>(
   path: string,
-  options: RequestInit & { json?: unknown } = {},
+  options: RequestInit & { json?: unknown; skipCache?: boolean } = {},
 ): Promise<T> {
   const headers = new Headers(options.headers);
   if (options.json !== undefined) headers.set("Content-Type", "application/json");
   const method = (options.method ?? "GET").toUpperCase();
+  
   if (!["GET", "HEAD", "OPTIONS"].includes(method)) {
     const csrf = cookieValue("kynisto_csrf");
     if (csrf) headers.set("X-CSRF-Token", csrf);
+    invalidateClientCache();
   }
 
-  // Deduplicate concurrent identical GET requests (prevents double API calls)
-  if (method === "GET" && !options.body && options.json === undefined) {
+  // Ultra-Fast SWR Cached Fetch for GET requests (< 1ms when cached)
+  if (method === "GET" && !options.body && options.json === undefined && !options.skipCache) {
+    const cached = getCachedData<T>(path);
+    if (cached && cached.isFresh) {
+      return cached.data;
+    }
+
+    // Deduplicate in-flight concurrent requests to the same endpoint
     const existing = _inflight.get(path);
     if (existing) return existing as Promise<T>;
-    const promise = fetch(path, {
-      ...options,
-      headers,
-      credentials: "same-origin",
-    }).then(async (response) => {
-      const data = (await safeJsonParse(response)) as T | { error?: { message?: string }; message?: string } | null;
-      if (!response.ok) {
-        const errorData = data as { error?: { message?: string }; message?: string } | null;
-        throw new Error(errorData?.error?.message ?? errorData?.message ?? `Request failed with status ${response.status}.`);
+
+    const promise = (async () => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 7500); // 7.5s low-network timeout
+
+        const response = await fetch(path, {
+          ...options,
+          headers,
+          credentials: "same-origin",
+          signal: options.signal || controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        const data = (await safeJsonParse(response)) as T | { error?: { message?: string }; message?: string } | null;
+        if (!response.ok) {
+          const errorData = data as { error?: { message?: string }; message?: string } | null;
+          throw new Error(errorData?.error?.message ?? errorData?.message ?? `Request failed with status ${response.status}.`);
+        }
+        
+        setCachedData(path, data as T);
+        return data as T;
+      } catch (err) {
+        // Low-network / Offline Fallback: If network failed but we have stale cache, return it!
+        if (cached && cached.data) {
+          return cached.data;
+        }
+        throw err;
       }
-      return data as T;
-    }).finally(() => {
+    })().finally(() => {
       _inflight.delete(path);
     });
+
     _inflight.set(path, promise);
     return promise;
   }
