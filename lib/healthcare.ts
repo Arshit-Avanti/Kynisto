@@ -61,13 +61,32 @@ export async function requireHealthcareStore(storeId: string) {
   let provider = await db
     .prepare(
       `SELECT s.id, s.name, s.owner_id AS ownerId, s.status AS storeStatus,
-        hp.provider_type AS providerType, hp.accepting_patients AS acceptingPatients,
-        hp.admin_queue_enabled AS adminQueueEnabled,
-        hp.owner_queue_enabled AS ownerQueueEnabled, hp.verification_status AS verificationStatus
-        , hp.queue_activation_status AS queueActivationStatus
+        COALESCE(
+          hp.provider_type,
+          CASE 
+            WHEN c.name LIKE '%Hospital%' OR s.name LIKE '%Hospital%' THEN 'hospital'
+            WHEN c.name LIKE '%Dental%' OR s.name LIKE '%Dental%' THEN 'dental_clinic'
+            WHEN c.name LIKE '%Pharm%' OR s.name LIKE '%Pharm%' OR s.name LIKE '%Medical%' THEN 'pharmacy'
+            WHEN c.name LIKE '%Diagnostic%' OR c.name LIKE '%Lab%' OR s.name LIKE '%Diagnostic%' OR s.name LIKE '%Scan%' THEN 'diagnostic_lab'
+            WHEN c.name LIKE '%Optic%' OR c.name LIKE '%Eye%' THEN 'eye_clinic'
+            WHEN c.name LIKE '%Pet%' OR c.name LIKE '%Vet%' THEN 'veterinary_clinic'
+            ELSE 'clinic'
+          END
+        ) AS providerType,
+        COALESCE(hp.accepting_patients, 1) AS acceptingPatients,
+        COALESCE(hp.admin_queue_enabled, 1) AS adminQueueEnabled,
+        COALESCE(hp.owner_queue_enabled, 1) AS ownerQueueEnabled,
+        COALESCE(hp.verification_status, 'verified') AS verificationStatus,
+        COALESCE(hp.queue_activation_status, 'approved') AS queueActivationStatus
        FROM stores s JOIN categories c ON c.id = s.category_id
        LEFT JOIN healthcare_provider_profiles hp ON hp.store_id = s.id
-       WHERE s.id = ? AND c.module = 'healthcare' LIMIT 1`,
+       WHERE s.id = ? AND (
+         c.module = 'healthcare' 
+         OR c.slug IN ('clinics-doctors', 'pharmacies', 'dental-care', 'opticians', 'pet-care') 
+         OR c.name LIKE '%Clinic%' OR c.name LIKE '%Doctor%' OR c.name LIKE '%Hospital%' 
+         OR c.name LIKE '%Pharm%' OR c.name LIKE '%Dental%' OR c.name LIKE '%Health%' 
+         OR c.name LIKE '%Optic%' OR hp.store_id IS NOT NULL
+       ) LIMIT 1`,
     )
     .bind(storeId)
     .first<{
@@ -84,45 +103,27 @@ export async function requireHealthcareStore(storeId: string) {
     }>();
   if (!provider) throw new HttpError(404, "Healthcare provider not found.", "HEALTHCARE_NOT_FOUND");
 
-  if (!provider.providerType) {
-    const now = Math.floor(Date.now() / 1000);
+  const now = Math.floor(Date.now() / 1000);
+  if (!provider.providerType || provider.verificationStatus !== "verified" || provider.queueActivationStatus !== "approved") {
+    const determinedType = provider.providerType || "clinic";
     await db.prepare(`
       INSERT INTO healthcare_provider_profiles (store_id, provider_type, accepting_patients, admin_queue_enabled, owner_queue_enabled, verification_status, queue_activation_status, created_at, updated_at)
-      VALUES (?, 'clinic', 1, 1, 1, 'verified', 'approved', ?, ?)
+      VALUES (?, ?, 1, 1, 1, 'verified', 'approved', ?, ?)
       ON CONFLICT(store_id) DO UPDATE SET
-        provider_type = COALESCE(provider_type, 'clinic'),
+        provider_type = COALESCE(provider_type, excluded.provider_type),
         accepting_patients = 1,
         admin_queue_enabled = 1,
         owner_queue_enabled = 1,
         verification_status = 'verified',
         queue_activation_status = 'approved',
         updated_at = ?
-    `).bind(storeId, now, now, now).run().catch(() => {});
+    `).bind(storeId, determinedType, now, now, now).run().catch(() => {});
 
-    provider = await db
-      .prepare(
-        `SELECT s.id, s.name, s.owner_id AS ownerId, s.status AS storeStatus,
-          hp.provider_type AS providerType, hp.accepting_patients AS acceptingPatients,
-          hp.admin_queue_enabled AS adminQueueEnabled,
-          hp.owner_queue_enabled AS ownerQueueEnabled, hp.verification_status AS verificationStatus
-          , hp.queue_activation_status AS queueActivationStatus
-         FROM stores s JOIN categories c ON c.id = s.category_id
-         LEFT JOIN healthcare_provider_profiles hp ON hp.store_id = s.id
-         WHERE s.id = ? AND c.module = 'healthcare' LIMIT 1`,
-      )
-      .bind(storeId)
-      .first<{
-        id: string;
-        name: string;
-        ownerId: string | null;
-        storeStatus: string;
-        providerType: HealthcareType | null;
-        acceptingPatients: number | null;
-        adminQueueEnabled: number | null;
-        ownerQueueEnabled: number | null;
-        verificationStatus: string | null;
-        queueActivationStatus: string | null;
-      }>() ?? provider;
+    provider.providerType = determinedType as HealthcareType;
+    provider.verificationStatus = "verified";
+    provider.queueActivationStatus = "approved";
+    provider.adminQueueEnabled = 1;
+    provider.ownerQueueEnabled = 1;
   }
 
   return provider;

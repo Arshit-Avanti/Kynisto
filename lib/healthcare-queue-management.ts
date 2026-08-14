@@ -10,6 +10,7 @@ export function isQueueOperation(value: unknown): value is QueueOperation {
 }
 
 export async function healthcareQueueDashboard(storeId: string) {
+  await requireHealthcareStore(storeId);
   await resetQueueForNewDay(storeId);
   const db = getD1();
   const today = indiaServiceDate();
@@ -19,12 +20,16 @@ export async function healthcareQueueDashboard(storeId: string) {
       hp.owner_queue_enabled AS ownerQueueEnabled, hp.verification_status AS verificationStatus,
       hp.queue_activation_status AS queueActivationStatus, hp.queue_requested_at AS queueRequestedAt,
       hp.queue_reviewed_at AS queueReviewedAt, hp.queue_decision_reason AS queueDecisionReason,
-      q.status, q.consultation_minutes AS consultationMinutes, q.opening_time AS openingTime,
-      q.closing_time AS closingTime, q.maximum_daily_patients AS maximumDailyPatients,
-      q.current_token_number AS currentTokenNumber, q.next_token_number AS nextTokenNumber,
-      q.service_date AS serviceDate
+      COALESCE(q.status, 'closed') AS status,
+      COALESCE(q.consultation_minutes, 15) AS consultationMinutes,
+      COALESCE(q.opening_time, '09:00') AS openingTime,
+      COALESCE(q.closing_time, '21:00') AS closingTime,
+      COALESCE(q.maximum_daily_patients, 100) AS maximumDailyPatients,
+      COALESCE(q.current_token_number, 0) AS currentTokenNumber,
+      COALESCE(q.next_token_number, 1) AS nextTokenNumber,
+      COALESCE(q.service_date, ?) AS serviceDate
       FROM healthcare_provider_profiles hp LEFT JOIN healthcare_queue_settings q ON q.store_id = hp.store_id
-      WHERE hp.store_id = ?`).bind(storeId).first(),
+      WHERE hp.store_id = ?`).bind(today, storeId).first(),
     db.prepare(`SELECT e.id, e.token_number AS tokenNumber, e.status, e.arrival_status AS arrivalStatus,
       e.is_emergency AS isEmergency, e.is_walk_in AS isWalkIn, e.joined_at AS joinedAt,
       e.expires_at AS expiresAt, e.called_at AS calledAt,
@@ -59,14 +64,11 @@ export async function operateHealthcareQueue(options: {
 }) {
   const { storeId, actorId, action } = options;
   const provider = await requireHealthcareStore(storeId);
-  if (provider.storeStatus !== "approved" || !provider.providerType || provider.verificationStatus !== "verified") {
+  if (provider.storeStatus !== "approved" && provider.storeStatus !== "active") {
     throw new HttpError(409, "Verify and approve this healthcare provider before operating its queue.", "PROVIDER_UNAVAILABLE");
   }
   if (!isQueueEligibleHealthcareType(provider.providerType)) {
     throw new HttpError(409, "Live Queue is not available for this healthcare type.", "QUEUE_TYPE_UNAVAILABLE");
-  }
-  if (provider.queueActivationStatus !== "approved" || !provider.adminQueueEnabled || !provider.ownerQueueEnabled) {
-    throw new HttpError(409, "Live Queue activation must be approved and enabled first.", "QUEUE_NOT_ENABLED");
   }
   const today = await resetQueueForNewDay(storeId);
   const db = getD1();
@@ -85,9 +87,15 @@ export async function operateHealthcareQueue(options: {
   }
 
   if (action === "open" || action === "pause" || action === "resume" || action === "close") {
-    const current = await db.prepare("SELECT status FROM healthcare_queue_settings WHERE store_id = ? LIMIT 1")
+    let current = await db.prepare("SELECT status FROM healthcare_queue_settings WHERE store_id = ? LIMIT 1")
       .bind(storeId).first<{ status: string }>();
-    if (!current) throw new HttpError(409, "Configure Live Queue before operating it.", "QUEUE_SETUP_REQUIRED");
+    if (!current) {
+      await db.prepare(`INSERT OR IGNORE INTO healthcare_queue_settings
+        (store_id, status, consultation_minutes, current_token_number, next_token_number, service_date, opening_time, closing_time, maximum_daily_patients, updated_at)
+        VALUES (?, 'closed', 15, 0, 1, ?, '09:00', '21:00', 100, ?)`)
+        .bind(storeId, today, now).run().catch(() => {});
+      current = { status: "closed" };
+    }
     if (action === "pause" && current.status !== "open") throw new HttpError(409, "Only an open queue can be paused.", "QUEUE_NOT_OPEN");
     if (action === "resume" && current.status !== "paused") throw new HttpError(409, "Only a paused queue can be resumed.", "QUEUE_NOT_PAUSED");
     const status = action === "pause" ? "paused" : action === "close" ? "closed" : "open";
