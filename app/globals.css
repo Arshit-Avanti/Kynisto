@@ -2905,6 +2905,12 @@ footer.efferdFooterBlock {
   justify-content: space-between !important;
   align-items: flex-start !important;
   gap: 48px !important;
+  padding-bottom: 32px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.mode-light .efferdFooterGrid {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
 }
 
 .efferdFooterBrandCol {
