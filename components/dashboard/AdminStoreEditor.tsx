@@ -30,6 +30,8 @@ function parseHours(value: unknown): { open: string; close: string } {
   return { open: "09:00", close: "21:00" };
 }
 
+import { WeeklyScheduleEditor } from "@/components/dashboard/WeeklyScheduleEditor";
+
 export function AdminStoreEditor({
   categories,
   owners,
@@ -41,8 +43,6 @@ export function AdminStoreEditor({
   store?: AdminItem;
   onSubmit: (body: unknown) => Promise<void>;
 }) {
-  const hours = parseHours(store?.businessHours);
-  const openingDays = parseDays(store?.openingDays);
   const text = (key: string, fallback = "") => String(store?.[key] ?? fallback);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -80,12 +80,12 @@ export function AdminStoreEditor({
         <label>Latitude<input name="latitude" type="number" step="any" defaultValue={text("latitude", "28.7381")} /></label>
         <label>Longitude<input name="longitude" type="number" step="any" defaultValue={text("longitude", "77.2669")} /></label>
         <label className="full">Google Maps URL<input name="googleMapsUrl" type="url" defaultValue={text("googleMapsUrl")} /></label>
-        <label>Opens<input name="openTime" type="time" defaultValue={hours.open} /></label>
-        <label>Closes<input name="closeTime" type="time" defaultValue={hours.close} /></label>
-        <fieldset className="dayChecks full">
-          <legend>Opening days</legend>
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, index) => <label key={day}><input name="openingDay" type="checkbox" value={index} defaultChecked={openingDays.includes(index)} />{day}</label>)}
-        </fieldset>
+        
+        <WeeklyScheduleEditor
+          initialHours={store?.businessHours}
+          initialOpeningDays={store?.openingDays}
+        />
+
         <div className="formActions"><button className="portalButton" type="submit">{store ? "Save store changes" : "Create approved store"}</button></div>
       </form>
     </section>

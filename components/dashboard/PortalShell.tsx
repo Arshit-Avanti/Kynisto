@@ -130,9 +130,11 @@ export function PortalShell({
   const [dark, setDark] = useState(false);
   const [open, setOpen] = useState(false);
   const [chatUnread, setChatUnread] = useState(0);
-  const [subPlan, setSubPlan] = useState<Record<string, any>>({ id: "free" });
-  const activeWorkspaceRole = workspaceRole ?? user.role;
-  const nav = useMemo(() => navByRole[activeWorkspaceRole], [activeWorkspaceRole]);
+  const rawRole = String(workspaceRole ?? user?.role ?? "customer");
+  const activeWorkspaceRole: UserRole = (rawRole === "owner" || rawRole === "shop_owner" || rawRole === "store_owner")
+    ? "store_owner"
+    : (rawRole === "admin" ? "admin" : "customer");
+  const nav = useMemo(() => navByRole[activeWorkspaceRole] ?? navByRole.customer ?? [], [activeWorkspaceRole]);
 
   useEffect(() => {
     if (activeWorkspaceRole === "store_owner") {

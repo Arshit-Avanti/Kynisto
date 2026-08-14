@@ -76,25 +76,58 @@ function indiaTime() {
 }
 
 function storeOpenStatus(hoursJson: string) {
-  const hours = parseJson<Record<string, { open: string; close: string }>>(hoursJson, {});
+  const hours = parseJson<Record<string, { open?: string; close?: string; open2?: string; close2?: string; closed?: boolean }>>(hoursJson, {});
   const { day, minutes } = indiaTime();
   const today = hours[day];
-  if (!today) return { open: false, hours: "Closed today" };
-  const toMinutes = (value: string) => {
+  if (!today || today.closed === true) return { open: false, hours: "Closed today" };
+
+  const toMinutes = (value?: string) => {
+    if (!value || !value.includes(":")) return -1;
     const [hour, minute] = value.split(":").map(Number);
     return hour * 60 + minute;
   };
-  const isOpen = minutes >= toMinutes(today.open) && minutes < toMinutes(today.close);
-  const format = (value: string) => {
+
+  const format = (value?: string) => {
+    if (!value || !value.includes(":")) return "";
     const [hourValue, minute] = value.split(":").map(Number);
     const suffix = hourValue >= 12 ? "PM" : "AM";
     const hour = hourValue % 12 || 12;
     return `${hour}:${String(minute).padStart(2, "0")} ${suffix}`;
   };
-  return {
-    open: isOpen,
-    hours: isOpen ? `Open until ${format(today.close)}` : `Opens at ${format(today.open)}`,
-  };
+
+  const mOpen1 = toMinutes(today.open);
+  const mClose1 = toMinutes(today.close);
+  const mOpen2 = toMinutes(today.open2);
+  const mClose2 = toMinutes(today.close2);
+
+  const inShift1 = mOpen1 >= 0 && mClose1 >= 0 && minutes >= mOpen1 && minutes < mClose1;
+  const inShift2 = mOpen2 >= 0 && mClose2 >= 0 && minutes >= mOpen2 && minutes < mClose2;
+
+  if (inShift1) {
+    const eveningNote = mOpen2 >= 0 ? ` (Evening ${format(today.open2)}–${format(today.close2)})` : "";
+    return { open: true, hours: `Open (Morning) · Closes ${format(today.close)}${eveningNote}` };
+  }
+
+  if (inShift2) {
+    return { open: true, hours: `Open (Evening) · Closes ${format(today.close2)}` };
+  }
+
+  // Currently closed - calculate next shift
+  if (mOpen1 >= 0 && minutes < mOpen1) {
+    return { open: false, hours: `Opens at ${format(today.open)} (Morning)` };
+  } else if (mClose1 >= 0 && mOpen2 >= 0 && minutes >= mClose1 && minutes < mOpen2) {
+    return { open: false, hours: `Morning shift ended · Opens at ${format(today.open2)} (Evening)` };
+  } else if (mOpen2 >= 0 && minutes < mOpen2) {
+    return { open: false, hours: `Opens at ${format(today.open2)} (Evening)` };
+  } else if (today.open && !today.open2) {
+    const isOpen = mOpen1 >= 0 && mClose1 >= 0 && minutes >= mOpen1 && minutes < mClose1;
+    return {
+      open: isOpen,
+      hours: isOpen ? `Open until ${format(today.close)}` : `Opens at ${format(today.open)}`,
+    };
+  }
+
+  return { open: false, hours: "Closed for the day" };
 }
 
 function distanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {

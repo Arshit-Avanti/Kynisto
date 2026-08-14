@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState, useCallback, useEffect, type FormEvent, type DragEvent } from "react";
 import { apiFetch } from "@/lib/client-api";
+import { WeeklyScheduleEditor } from "@/components/dashboard/WeeklyScheduleEditor";
 
 type DataItem = Record<string, unknown>;
 
@@ -756,17 +757,10 @@ export function OwnerStoreEditor({
           )}
         </div>
 
-        <label>Opens<input name="openTime" type="time" defaultValue={hours.open} /></label>
-        <label>Closes<input name="closeTime" type="time" defaultValue={hours.close} /></label>
-        <fieldset className="dayChecks full">
-          <legend>Opening days</legend>
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, index) => (
-            <label key={day}>
-              <input name="openingDay" type="checkbox" value={index} defaultChecked={openingDays.includes(index)} />
-              {day}
-            </label>
-          ))}
-        </fieldset>
+        <WeeklyScheduleEditor
+          initialHours={store?.businessHours}
+          initialOpeningDays={store?.openingDays}
+        />
 
         <div className="formActions full" style={{ marginTop: "16px", display: "flex", gap: "12px" }}>
           <button type="button" className="portalButton secondary" onClick={() => setStep(3)}>Back</button>

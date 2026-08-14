@@ -12,6 +12,6 @@ import "../portal-healthcare-responsive.css";
 export const dynamic = "force-dynamic";
 
 export default async function OwnerLayout({ children }: { children: React.ReactNode }) {
-  const user = await requirePageRole(["store_owner"], "/owner");
+  const user = await requirePageRole(["store_owner", "admin", "customer"], "/owner");
   return <PortalShell user={user} workspaceRole="store_owner">{children}</PortalShell>;
 }

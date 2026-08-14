@@ -18,8 +18,43 @@ export function parseStoreInput(body: Record<string, unknown>) {
   const closeTime = cleanText(body.closeTime ?? "21:00", "Closing time", { max: 5 });
 
   let businessHoursStr: string;
-  if (isHomeService && typeof body.businessHours === "string" && body.businessHours.trim().length > 0) {
+  let finalOpeningDays = openingDays;
+
+  if (isHomeService && typeof body.businessHours === "string" && body.businessHours.trim().length > 0 && !body.businessHours.startsWith("{")) {
     businessHoursStr = cleanText(body.businessHours, "Business hours", { max: 200 });
+  } else if (typeof body.businessHours === "string" && body.businessHours.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(body.businessHours) as Record<string, any>;
+      const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+      const validated: Record<string, any> = {};
+      const calculatedOpenDays: number[] = [];
+
+      dayKeys.forEach((key, index) => {
+        const d = parsed[key];
+        if (d && d.closed !== true) {
+          calculatedOpenDays.push(index);
+          const o1 = cleanText(d.open ?? "09:00", "Opening time", { max: 5 });
+          const c1 = cleanText(d.close ?? "21:00", "Closing time", { max: 5 });
+          const dayObj: Record<string, any> = { open: o1, close: c1, closed: false };
+          if (d.open2 && d.close2) {
+            dayObj.open2 = cleanText(d.open2, "Evening opening time", { max: 5 });
+            dayObj.close2 = cleanText(d.close2, "Evening closing time", { max: 5 });
+          }
+          validated[key] = dayObj;
+        } else {
+          validated[key] = { closed: true };
+        }
+      });
+
+      businessHoursStr = JSON.stringify(validated);
+      if (calculatedOpenDays.length > 0) {
+        finalOpeningDays = calculatedOpenDays;
+      }
+    } catch {
+      businessHoursStr = JSON.stringify(
+        Object.fromEntries(openingDays.map((day) => [["sun", "mon", "tue", "wed", "thu", "fri", "sat"][day], { open: openTime, close: closeTime }]))
+      );
+    }
   } else {
     if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(openTime) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(closeTime)) {
       throw new ValidationError("Business hours must use 24-hour HH:MM format.");
@@ -57,6 +92,6 @@ export function parseStoreInput(body: Record<string, unknown>) {
     email: body.email ? emailInput(body.email) : null,
     website: urlInput(body.website, "Website"),
     businessHours: businessHoursStr,
-    openingDays: JSON.stringify(openingDays),
+    openingDays: JSON.stringify(finalOpeningDays),
   };
 }

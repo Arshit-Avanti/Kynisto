@@ -395,14 +395,82 @@ export default async function StoreProfilePage({ params }: RouteProps) {
             
             <section className="glass-section" style={{ padding: "24px", borderRadius: "16px" }}>
               <span style={{ color: "#60a5fa", fontSize: "13px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>Business hours</span>
-              <h2 className="neon-text" style={{ fontSize: "20px", fontWeight: 800, color: "#ffffff", margin: "4px 0 16px 0" }}>Opening days</h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                {Object.entries(store.businessHours as Record<string, { open: string; close: string }>).map(([day, hours]) => (
-                  <div key={day} style={{ display: "flex", justifyContent: "space-between", padding: "8px", backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "6px" }}>
-                    <b style={{ fontSize: "14px", color: "#f8fafc" }}>{day}</b>
-                    <span style={{ fontSize: "14px", color: "#cbd5e1", fontWeight: 500 }}>{hours.open} – {hours.close}</span>
+              <h2 className="neon-text" style={{ fontSize: "20px", fontWeight: 800, color: "#ffffff", margin: "4px 0 16px 0" }}>Weekly Schedule</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                {typeof store.businessHours === "string" && !store.businessHours.startsWith("{") ? (
+                  <div style={{ padding: "12px", backgroundColor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "8px" }}>
+                    <span style={{ fontSize: "14px", color: "#f8fafc", fontWeight: 600 }}>{store.businessHours}</span>
                   </div>
-                ))}
+                ) : (
+                  Object.entries(
+                    (store.businessHours as Record<string, { open?: string; close?: string; open2?: string; close2?: string; closed?: boolean }>) ?? {}
+                  ).map(([day, hours]) => {
+                    const dayLabels: Record<string, string> = {
+                      sun: "Sunday",
+                      mon: "Monday",
+                      tue: "Tuesday",
+                      wed: "Wednesday",
+                      thu: "Thursday",
+                      fri: "Friday",
+                      sat: "Saturday",
+                    };
+                    const dayName = dayLabels[day.toLowerCase()] || day;
+                    const isClosed = hours.closed === true || (!hours.open && !hours.open2);
+
+                    const fmt = (t?: string) => {
+                      if (!t || !t.includes(":")) return t || "";
+                      const [h, m] = t.split(":").map(Number);
+                      const sfx = h >= 12 ? "PM" : "AM";
+                      const hr = h % 12 || 12;
+                      return `${hr}:${String(m).padStart(2, "0")} ${sfx}`;
+                    };
+
+                    return (
+                      <div
+                        key={day}
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "4px",
+                          padding: "10px 12px",
+                          backgroundColor: isClosed ? "rgba(239, 68, 68, 0.05)" : "rgba(255,255,255,0.03)",
+                          border: isClosed ? "1px solid rgba(239, 68, 68, 0.15)" : "1px solid rgba(255,255,255,0.06)",
+                          borderRadius: "10px",
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <b style={{ fontSize: "14px", color: isClosed ? "#94a3b8" : "#f8fafc" }}>{dayName}</b>
+                          {isClosed ? (
+                            <span style={{ fontSize: "12px", fontWeight: 700, color: "#f87171", background: "rgba(239, 68, 68, 0.15)", padding: "2px 8px", borderRadius: "6px" }}>
+                              Closed
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: "12px", fontWeight: 700, color: "#4ade80", background: "rgba(34, 197, 94, 0.15)", padding: "2px 8px", borderRadius: "6px" }}>
+                              Open
+                            </span>
+                          )}
+                        </div>
+
+                        {!isClosed && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px", marginTop: "2px", fontSize: "13px", color: "#cbd5e1" }}>
+                            {hours.open && (
+                              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                <span style={{ color: "#fbbf24", fontSize: "12px" }}>☀️ Morning:</span>
+                                <span style={{ fontWeight: 500 }}>{fmt(hours.open)} – {fmt(hours.close)}</span>
+                              </div>
+                            )}
+                            {hours.open2 && (
+                              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                <span style={{ color: "#818cf8", fontSize: "12px" }}>🌙 Evening:</span>
+                                <span style={{ fontWeight: 500 }}>{fmt(hours.open2)} – {fmt(hours.close2)}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </section>
           </aside>

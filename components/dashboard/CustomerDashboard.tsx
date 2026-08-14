@@ -489,7 +489,7 @@ function NotificationsPanel({
             </article>
           ))}
         </div>
-      ) : membershipNotifs.length === 0 ? (
+      ) : (membershipNotifs?.length ?? 0) === 0 ? (
         <Empty text="You are all caught up. No new notifications." icon={MessageSquare} />
       ) : null}
     </section>
