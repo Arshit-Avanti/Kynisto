@@ -1969,8 +1969,8 @@ export default function Home() {
               id="store-search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search salon, groceries, clinic..."
-              style={{ fontSize: "1.1rem", padding: "16px 12px" }}
+              placeholder="Try 'restaurant with dishes under 99' or 'cycle brake repair'..."
+              style={{ fontSize: "1.05rem", padding: "16px 12px" }}
               className="highContrastText"
             />
             {query && (
@@ -1978,6 +1978,58 @@ export default function Home() {
             )}
             <button className="searchSubmit" type="submit" style={{ padding: "12px 28px", fontSize: "1.05rem", borderRadius: "16px" }}>Search</button>
           </form>
+
+          {/* Smart Conversational Search Suggestion Chips */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+            flexWrap: "wrap",
+            maxWidth: "750px",
+            margin: "-12px auto 24px auto",
+            fontSize: "0.85rem",
+          }}>
+            <span style={{ color: "#94a3b8", fontSize: "0.8rem", fontWeight: 600 }}>💡 Smart Search:</span>
+            {[
+              "Restaurant with dishes under 99",
+              "Cycle brake repair under 50rs",
+              "5 star clinic near me",
+              "Home electrician near me",
+            ].map((promptText) => (
+              <button
+                key={promptText}
+                type="button"
+                onClick={() => {
+                  setQuery(promptText);
+                  document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                style={{
+                  background: "rgba(255, 255, 255, 0.06)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  color: "#cbd5e1",
+                  borderRadius: "20px",
+                  padding: "4px 12px",
+                  cursor: "pointer",
+                  fontSize: "0.78rem",
+                  transition: "all 0.2s ease",
+                  whiteSpace: "nowrap"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(255, 87, 34, 0.15)";
+                  e.currentTarget.style.borderColor = "#FF5722";
+                  e.currentTarget.style.color = "#ffffff";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.06)";
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)";
+                  e.currentTarget.style.color = "#cbd5e1";
+                }}
+              >
+                {promptText}
+              </button>
+            ))}
+          </div>
 
           <div className="quickProof" aria-label="Kynisto highlights" style={{ marginTop: "16px" }}>
             <span className="highContrastText"><b>100+</b> Places</span>

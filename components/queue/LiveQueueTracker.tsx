@@ -251,6 +251,15 @@ export default function LiveQueueTracker() {
     fetchHealthcareQueues();
   }, [fetchHealthcareQueues]);
 
+  const userPositionRef = useRef(userPosition);
+  userPositionRef.current = userPosition;
+  const currentEntryIdRef = useRef(currentEntryId);
+  currentEntryIdRef.current = currentEntryId;
+  const entryStatusRef = useRef(entryStatus);
+  entryStatusRef.current = entryStatus;
+  const selectedQueueRef = useRef(selectedQueue);
+  selectedQueueRef.current = selectedQueue;
+
   // 2. Fetch exact patient queue state from DB for selected clinic (syncs with Owner Dashboard in real-time)
   const syncPatientStateWithStore = useCallback(async (storeId: string | number) => {
     try {
@@ -284,19 +293,20 @@ export default function LiveQueueTracker() {
           } else {
             setEntryStatus(state.entry.status);
           }
-        } else if (currentEntryId && (prevEntryStatusRef.current === 'waiting' || prevEntryStatusRef.current === 'called' || entryStatus === 'called' || entryStatus === 'waiting')) {
+        } else if (currentEntryIdRef.current && (prevEntryStatusRef.current === 'waiting' || prevEntryStatusRef.current === 'called' || entryStatusRef.current === 'called' || entryStatusRef.current === 'waiting')) {
           // Owner marked completed -> automatically transition to Thank You screen!
           setEntryStatus('completed');
           setLiveCompleted(true);
-        } else if (selectedQueue) {
-          const ownerConsultationMins = state.consultationMinutes || selectedQueue.consultationMinutes || 15;
-          setEstimatedWait((userPosition > 1 ? userPosition - 1 : 0) * ownerConsultationMins);
+        } else if (selectedQueueRef.current) {
+          const ownerConsultationMins = state.consultationMinutes || selectedQueueRef.current.consultationMinutes || 15;
+          const pos = userPositionRef.current;
+          setEstimatedWait((pos > 1 ? pos - 1 : 0) * ownerConsultationMins);
         }
       }
     } catch {
       // Retain current snapshot
     }
-  }, [selectedQueue, userPosition, currentEntryId, entryStatus]);
+  }, []);
 
   // 3. Auto-detect user's active joined queue in database on load
   useEffect(() => {
@@ -352,19 +362,20 @@ export default function LiveQueueTracker() {
   const notifiedTokenRef = useRef<number | null>(null);
 
   // Poll server and stream events when viewing ticket to sync with Owner actions in real-time
+  const selectedQueueId = selectedQueue?.id;
   useEffect(() => {
-    if (view !== 'ticket' || !selectedQueue || isCancelled) return;
+    if (view !== 'ticket' || !selectedQueueId || isCancelled) return;
     
-    // Initial fetch & 3s polling backup
-    syncPatientStateWithStore(selectedQueue.id);
+    // Initial fetch & 4s polling backup
+    syncPatientStateWithStore(selectedQueueId);
     const pollInterval = setInterval(() => {
-      syncPatientStateWithStore(selectedQueue.id);
-    }, 3000);
+      syncPatientStateWithStore(selectedQueueId);
+    }, 4000);
 
     // Realtime SSE Stream for instant sub-second push updates
     let source: EventSource | null = null;
     try {
-      source = new EventSource(`/api/healthcare/queue/stream?storeId=${encodeURIComponent(String(selectedQueue.id))}`);
+      source = new EventSource(`/api/healthcare/queue/stream?storeId=${encodeURIComponent(String(selectedQueueId))}`);
       source.addEventListener('queue', (event) => {
         try {
           const payload = JSON.parse((event as MessageEvent).data);
@@ -381,7 +392,7 @@ export default function LiveQueueTracker() {
               if (state.entry.status === 'completed') {
                 setLiveCompleted(true);
               }
-            } else if (currentEntryId && (entryStatus === 'waiting' || entryStatus === 'called')) {
+            } else if (currentEntryIdRef.current && (entryStatusRef.current === 'waiting' || entryStatusRef.current === 'called')) {
               setEntryStatus('completed');
               setLiveCompleted(true);
             }
@@ -398,7 +409,7 @@ export default function LiveQueueTracker() {
       clearInterval(pollInterval);
       if (source) source.close();
     };
-  }, [view, selectedQueue, isCancelled, syncPatientStateWithStore, currentEntryId, entryStatus]);
+  }, [view, selectedQueueId, isCancelled, syncPatientStateWithStore]);
 
   // 🔔 Trigger Native Push Notification, Chime Sound, and Vibration ONLY when Turn Arrives
   useEffect(() => {

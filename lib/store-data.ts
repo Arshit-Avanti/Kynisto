@@ -2,6 +2,7 @@ import { getD1 } from "@/db/runtime";
 import { ensureSeeded } from "@/db/seed";
 import { d1SearchText } from "@/lib/validation";
 import { microCache } from "@/lib/micro-cache";
+import { parseSearchIntent } from "@/lib/smart-search";
 
 const DEFAULT_LATITUDE = 28.7381;
 const DEFAULT_LONGITUDE = 77.2669;
@@ -286,11 +287,76 @@ export async function listStores(options: {
   const conditions = ["(s.status = 'approved' OR s.status = 'active')", "c.module = 'local'", "c.status = 'active'"];
   const bindings: unknown[] = [];
   const query = options.query?.trim();
+
+  let matchedCatalogStoreIds: string[] = [];
+
   if (query) {
-    conditions.push("(s.name LIKE ? OR c.name LIKE ? OR sc.name LIKE ? OR s.area LIKE ? OR s.city LIKE ? OR s.postal_code LIKE ? OR s.business_type LIKE ?)");
-    const pattern = `%${d1SearchText(query.replace(/[%_]/g, ""))}%`;
-    bindings.push(pattern, pattern, pattern, pattern, pattern, pattern, pattern);
+    const parsed = parseSearchIntent(query);
+
+    // 1. Search matching products & services with price filters if conversational
+    try {
+      const productQueryParts: string[] = [];
+      const productBindings: unknown[] = [];
+      const serviceQueryParts: string[] = [];
+      const serviceBindings: unknown[] = [];
+
+      for (const token of parsed.cleanedTokens) {
+        const pattern = `%${d1SearchText(token)}%`;
+        productQueryParts.push("(p.name LIKE ? OR p.description LIKE ?)");
+        productBindings.push(pattern, pattern);
+        serviceQueryParts.push("(sv.name LIKE ? OR sv.description LIKE ?)");
+        serviceBindings.push(pattern, pattern);
+      }
+
+      const priceProductCondition = parsed.maxPrice !== undefined ? " AND p.price <= ?" : (parsed.minPrice !== undefined ? " AND p.price >= ?" : "");
+      if (parsed.maxPrice !== undefined) productBindings.push(parsed.maxPrice);
+      else if (parsed.minPrice !== undefined) productBindings.push(parsed.minPrice);
+
+      const priceServiceCondition = parsed.maxPrice !== undefined ? " AND sv.price_from <= ?" : (parsed.minPrice !== undefined ? " AND sv.price_from >= ?" : "");
+      if (parsed.maxPrice !== undefined) serviceBindings.push(parsed.maxPrice);
+      else if (parsed.minPrice !== undefined) serviceBindings.push(parsed.minPrice);
+
+      const [productRows, serviceRows] = await Promise.all([
+        productQueryParts.length > 0
+          ? db.prepare(`SELECT DISTINCT store_id FROM products p WHERE p.status = 'active' AND (${productQueryParts.join(" OR ")}) ${priceProductCondition} LIMIT 100`).bind(...productBindings).all<{ store_id: string }>().catch(() => ({ results: [] }))
+          : Promise.resolve({ results: [] }),
+        serviceQueryParts.length > 0
+          ? db.prepare(`SELECT DISTINCT store_id FROM services sv WHERE sv.status = 'active' AND (${serviceQueryParts.join(" OR ")}) ${priceServiceCondition} LIMIT 100`).bind(...serviceBindings).all<{ store_id: string }>().catch(() => ({ results: [] }))
+          : Promise.resolve({ results: [] }),
+      ]);
+
+      const pIds = (productRows.results ?? []).map((r) => r.store_id);
+      const sIds = (serviceRows.results ?? []).map((r) => r.store_id);
+      matchedCatalogStoreIds = Array.from(new Set([...pIds, ...sIds]));
+    } catch {
+      // Ignore catalog search error
+    }
+
+    // 2. Build multi-token text & semantic condition
+    const tokenConditions: string[] = [];
+    for (const token of parsed.cleanedTokens) {
+      const pattern = `%${d1SearchText(token)}%`;
+      tokenConditions.push("(s.name LIKE ? OR c.name LIKE ? OR sc.name LIKE ? OR s.area LIKE ? OR s.city LIKE ? OR s.business_type LIKE ? OR s.description LIKE ?)");
+      bindings.push(pattern, pattern, pattern, pattern, pattern, pattern, pattern);
+    }
+
+    for (const cat of parsed.categoryHints) {
+      const catPattern = `%${d1SearchText(cat)}%`;
+      tokenConditions.push("(c.name LIKE ? OR s.business_type LIKE ?)");
+      bindings.push(catPattern, catPattern);
+    }
+
+    if (matchedCatalogStoreIds.length > 0) {
+      const placeholders = matchedCatalogStoreIds.map(() => "?").join(",");
+      tokenConditions.push(`s.id IN (${placeholders})`);
+      bindings.push(...matchedCatalogStoreIds);
+    }
+
+    if (tokenConditions.length > 0) {
+      conditions.push(`(${tokenConditions.join(" OR ")})`);
+    }
   }
+
   if (options.category) {
     conditions.push("(c.slug = ? OR sc.slug = ? OR c.name = ? OR sc.name = ?)");
     bindings.push(options.category, options.category, options.category, options.category);
@@ -327,13 +393,61 @@ export async function listStores(options: {
   }
 
   let stores = uniqueRows.map((row) => toPublicStore(row, latitude, longitude));
-  if (options.openNow) stores = stores.filter((store) => store.open);
 
-  const sort = options.sort ?? "relevance";
-  if (sort === "nearest") stores.sort((left, right) => left.distance - right.distance);
-  if (sort === "rated") stores.sort((left, right) => right.rating - left.rating || right.reviews - left.reviews);
-  if (sort === "newest") stores.sort((left, right) => right.createdAt - left.createdAt);
-  if (sort === "relevance" && !query) stores.sort((left, right) => right.rating * Math.log10(right.reviews + 10) - left.rating * Math.log10(left.reviews + 10));
+  // Dynamic filter application based on Natural Language intent
+  if (query) {
+    const parsed = parseSearchIntent(query);
+    if (parsed.maxDistanceKm !== undefined) {
+      const distanceFiltered = stores.filter((s) => s.distance <= (parsed.maxDistanceKm || 50));
+      if (distanceFiltered.length > 0) stores = distanceFiltered;
+    }
+    if (parsed.minRating !== undefined) {
+      const ratingFiltered = stores.filter((s) => s.rating >= (parsed.minRating || 4));
+      if (ratingFiltered.length > 0) stores = ratingFiltered;
+    }
+    if (parsed.openNow || options.openNow) {
+      const openFiltered = stores.filter((store) => store.open);
+      if (openFiltered.length > 0) stores = openFiltered;
+    }
+  } else if (options.openNow) {
+    stores = stores.filter((store) => store.open);
+  }
+
+  const parsedIntent = query ? parseSearchIntent(query) : null;
+  const effectiveSort = options.sort ?? parsedIntent?.sortBy ?? "relevance";
+
+  if (effectiveSort === "nearest") {
+    stores.sort((left, right) => left.distance - right.distance);
+  } else if (effectiveSort === "rated") {
+    stores.sort((left, right) => right.rating - left.rating || right.reviews - left.reviews);
+  } else if (effectiveSort === "newest") {
+    stores.sort((left, right) => right.createdAt - left.createdAt);
+  } else if (effectiveSort === "relevance") {
+    if (query && parsedIntent) {
+      // Smart Relevance Score calculation
+      stores.sort((left, right) => {
+        let leftScore = left.rating * 2;
+        let rightScore = right.rating * 2;
+        const qLower = query.toLowerCase();
+
+        // Exact name or category match bonus
+        if (left.name.toLowerCase().includes(qLower)) leftScore += 20;
+        if (right.name.toLowerCase().includes(qLower)) rightScore += 20;
+
+        // Proximity bonus
+        leftScore += Math.max(0, 10 - left.distance);
+        rightScore += Math.max(0, 10 - right.distance);
+
+        // Catalog match bonus
+        if (matchedCatalogStoreIds.includes(String(left.id))) leftScore += 15;
+        if (matchedCatalogStoreIds.includes(String(right.id))) rightScore += 15;
+
+        return rightScore - leftScore;
+      });
+    } else {
+      stores.sort((left, right) => right.rating * Math.log10(right.reviews + 10) - left.rating * Math.log10(left.reviews + 10));
+    }
+  }
 
   const page = Math.max(1, Math.floor(options.page ?? 1));
   const limit = Math.min(24, Math.max(1, Math.floor(options.limit ?? 12)));

@@ -140,14 +140,22 @@ const worker = {
       return applySecurityHeaders(new Response(asset.body, { status: asset.status, headers }));
     }
 
-    if (url.pathname.startsWith("/api/categories") || url.pathname.startsWith("/api/auth/google/config")) {
+    if (
+      url.pathname.startsWith("/api/categories") ||
+      url.pathname.startsWith("/api/stores") ||
+      url.pathname.startsWith("/api/products") ||
+      url.pathname.startsWith("/api/services") ||
+      url.pathname.startsWith("/api/healthcare") ||
+      url.pathname.startsWith("/api/auth/google/config") ||
+      url.pathname.startsWith("/api/version")
+    ) {
       const method = request.method.toUpperCase();
-      if (method === "GET") {
+      if (method === "GET" && !url.searchParams.has("manage") && !url.pathname.includes("queue/active")) {
         try {
           const appRes = await handler.fetch(request, env, ctx);
           const resWithCache = applySecurityHeaders(appRes);
           if (resWithCache.status === 200) {
-            resWithCache.headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=86400");
+            resWithCache.headers.set("Cache-Control", "public, max-age=30, s-maxage=60, stale-while-revalidate=86400");
             resWithCache.headers.set("Vary", "Accept-Encoding");
           }
           return resWithCache;

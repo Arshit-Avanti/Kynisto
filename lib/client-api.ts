@@ -154,7 +154,20 @@ export async function apiFetch<T = unknown>(
   // Ultra-Fast SWR Cached Fetch for GET requests (< 1ms when cached)
   if (method === "GET" && !options.body && options.json === undefined && !options.skipCache) {
     const cached = getCachedData<T>(path);
-    if (cached && cached.isFresh) {
+    if (cached) {
+      if (cached.isFresh) {
+        return cached.data;
+      }
+      // Stale cache available: return cached data immediately (0ms) and revalidate in background
+      void (async () => {
+        try {
+          const res = await fetch(path, { ...options, headers, credentials: "same-origin" });
+          const freshData = await safeJsonParse<T>(res);
+          if (res.ok && freshData && !(freshData as { error?: unknown }).error) {
+            setCachedData(path, freshData);
+          }
+        } catch {}
+      })();
       return cached.data;
     }
 

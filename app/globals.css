@@ -3575,4 +3575,35 @@ footer.efferdFooterBlock {
   -webkit-text-fill-color: #FFFFFF !important;
 }
 
+/* ⚡ ULTRA-FAST APK & WEB LOW-LATENCY GPU OPTIMIZATIONS (<20ms response) */
+html {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  scroll-behavior: smooth;
+}
+
+.storeGrid,
+.catalogGrid,
+.portalGrid,
+.healthcareGrid {
+  contain: layout style;
+  transform: translateZ(0);
+  -webkit-overflow-scrolling: touch;
+}
+
+.storeCard,
+.portalCard,
+.glass-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 240px;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+img, video {
+  content-visibility: auto;
+}
+
+
 
