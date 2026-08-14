@@ -67,8 +67,8 @@ export function HomeServicesDiscovery() {
         if (!active) return;
         setUserRole(sessionData.user?.role ?? null);
         if (sessionData.user?.role === "customer" || sessionData.user?.role === "admin") {
-          const favoriteData = await apiFetch<{ items: Array<{ storeId: string }> }>("/api/favorites");
-          if (active) setSavedCount(favoriteData.items.length);
+          const favoriteData = await apiFetch<{ items: Array<{ storeId: string }> }>("/api/favorites").catch(() => ({ items: [] }));
+          if (active && Array.isArray(favoriteData?.items)) setSavedCount(favoriteData.items.length);
         }
       })
       .catch(() => undefined);

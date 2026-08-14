@@ -171,11 +171,12 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
     catch (mutationError) { setError(mutationError instanceof Error ? mutationError.message : "Action failed."); }
   }
 
-  if (loading) return <div className="portalSkeleton"><span /><span /><span /><span /></div>;
+  const items = (data.items as Item[] | undefined) ?? [];
+  const hasExistingData = items.length > 0 || favorites.length > 0 || reviews.length > 0 || Boolean(data.user);
+  if (loading && !hasExistingData) return <div className="portalSkeleton"><span /><span /><span /><span /></div>;
   if (tab === "chat") return <ChatCenter user={user} />;
   if (tab === "subscription") return <UserSubscriptionDashboard />;
   const titles: Record<string, string> = { overview: "My Kynisto", subscription: "Premium & Plans", profile: "Profile", addresses: "Saved addresses", favorites: "Favourite shops", wishlist: "Product wishlist", cart: "Shopping cart", orders: "Orders & tracking", reviews: "My reviews", notifications: "Notifications", settings: "Settings", support: "Support & complaints" };
-  const items = (data.items as Item[] | undefined) ?? [];
 
   return <>
     <SubscriptionExpiryBanner />

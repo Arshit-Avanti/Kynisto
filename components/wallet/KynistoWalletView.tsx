@@ -62,20 +62,24 @@ const AnimatedNumber = ({ value }: { value: number }) => {
   const [displayValue, setDisplayValue] = useState(0);
 
   useEffect(() => {
+    let animId: number;
     let startTimestamp: number | null = null;
-    const duration = 1200;
+    const duration = 800;
     const step = (timestamp: number) => {
       if (!startTimestamp) startTimestamp = timestamp;
       const progress = Math.min((timestamp - startTimestamp) / duration, 1);
       const easeProgress = 1 - Math.pow(1 - progress, 4);
       setDisplayValue(Math.floor(easeProgress * value));
       if (progress < 1) {
-        window.requestAnimationFrame(step);
+        animId = window.requestAnimationFrame(step);
       } else {
         setDisplayValue(value);
       }
     };
-    window.requestAnimationFrame(step);
+    animId = window.requestAnimationFrame(step);
+    return () => {
+      if (animId) window.cancelAnimationFrame(animId);
+    };
   }, [value]);
 
   return <span>{displayValue.toLocaleString()}</span>;
