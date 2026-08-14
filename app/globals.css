@@ -2901,9 +2901,10 @@ footer.efferdFooterBlock {
 }
 
 .efferdFooterGrid {
-  display: grid !important;
-  grid-template-columns: 1.6fr 1fr 1fr 1fr !important;
-  gap: 40px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 48px !important;
   padding-bottom: 36px !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
@@ -2916,6 +2917,15 @@ footer.efferdFooterBlock {
   display: flex !important;
   flex-direction: column !important;
   gap: 16px !important;
+  flex: 1.2 !important;
+  max-width: 360px !important;
+}
+
+.efferdFooterNavGroup {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 52px !important;
+  margin-left: auto !important;
 }
 
 .efferdBrandDesc {
@@ -3019,7 +3029,8 @@ footer.efferdFooterBlock {
   padding-top: 24px !important;
   display: flex !important;
   align-items: center !important;
-  justify-content: center !important;
+  justify-content: flex-end !important;
+  text-align: right !important;
 }
 
 .efferdFooterBottom .demoNote {
@@ -3028,6 +3039,7 @@ footer.efferdFooterBlock {
   color: #94A3B8 !important;
   -webkit-text-fill-color: #94A3B8 !important;
   line-height: 1.7 !important;
+  text-align: right !important;
 }
 
 .mode-light .efferdFooterBottom .demoNote {
@@ -3037,8 +3049,22 @@ footer.efferdFooterBlock {
 
 @media (max-width: 960px) {
   .efferdFooterGrid {
-    grid-template-columns: 1fr 1fr !important;
+    flex-direction: column !important;
     gap: 32px !important;
+  }
+  .efferdFooterNavGroup {
+    flex-wrap: wrap !important;
+    gap: 32px !important;
+    margin-left: 0 !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+  .efferdFooterBottom {
+    justify-content: center !important;
+    text-align: center !important;
+  }
+  .efferdFooterBottom .demoNote {
+    text-align: center !important;
   }
 }
 
@@ -3047,8 +3073,8 @@ footer.efferdFooterBlock {
     padding: 32px 20px 20px !important;
     margin: 24px auto !important;
   }
-  .efferdFooterGrid {
-    grid-template-columns: 1fr !important;
+  .efferdFooterNavGroup {
+    flex-direction: column !important;
     gap: 24px !important;
   }
 }

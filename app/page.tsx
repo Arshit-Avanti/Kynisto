@@ -2246,43 +2246,45 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="efferdFooterCol">
-            <h4>Explore</h4>
-            <nav aria-label="Footer Explore Navigation">
-              <a href="/">Homepage</a>
-              <a href="/products">Nearby Products</a>
-              <a href="/healthcare">Healthcare &amp; Clinics</a>
-              <a href="/services">Local Services</a>
-              <a href="/pricing" style={{ color: "#FF7A00", fontWeight: 750 }}>Pricing &amp; Plans</a>
-            </nav>
-          </div>
+          <div className="efferdFooterNavGroup">
+            <div className="efferdFooterCol">
+              <h4>Explore</h4>
+              <nav aria-label="Footer Explore Navigation">
+                <a href="/">Homepage</a>
+                <a href="/products">Nearby Products</a>
+                <a href="/healthcare">Healthcare &amp; Clinics</a>
+                <a href="/services">Local Services</a>
+                <a href="/pricing" style={{ color: "#FF7A00", fontWeight: 750 }}>Pricing &amp; Plans</a>
+              </nav>
+            </div>
 
-          <div className="efferdFooterCol">
-            <h4>Portals &amp; Workspaces</h4>
-            <nav aria-label="Footer Portals Navigation">
-              <a href="/account">Customer Dashboard</a>
-              <a href="/owner">Business Workspace</a>
-              <a href="/admin">Admin Panel</a>
-              <a href="/q/demo">Live Queue Tracker</a>
-              <a href="/wallet">Kynisto Loyalty Wallet</a>
-            </nav>
-          </div>
+            <div className="efferdFooterCol">
+              <h4>Portals &amp; Workspaces</h4>
+              <nav aria-label="Footer Portals Navigation">
+                <a href="/account">Customer Dashboard</a>
+                <a href="/owner">Business Workspace</a>
+                <a href="/admin">Admin Panel</a>
+                <a href="/q/demo">Live Queue Tracker</a>
+                <a href="/wallet">Kynisto Loyalty Wallet</a>
+              </nav>
+            </div>
 
-          <div className="efferdFooterCol">
-            <h4>Community</h4>
-            <nav aria-label="Footer Community Navigation">
-              <a href="https://github.com/Arshit-Avanti/Kynisto" target="_blank" rel="noopener noreferrer">
-                Open Source (GitHub)
-              </a>
-              <a href="/pricing">Partner Subscriptions</a>
-              <a href="mailto:support@kynisto.in">Help &amp; Support</a>
-              <a href="#places-heading">Verified Directory</a>
-            </nav>
+            <div className="efferdFooterCol">
+              <h4>Community</h4>
+              <nav aria-label="Footer Community Navigation">
+                <a href="https://github.com/Arshit-Avanti/Kynisto" target="_blank" rel="noopener noreferrer">
+                  Open Source (GitHub)
+                </a>
+                <a href="/pricing">Partner Subscriptions</a>
+                <a href="mailto:support@kynisto.in">Help &amp; Support</a>
+                <a href="#places-heading">Verified Directory</a>
+              </nav>
+            </div>
           </div>
         </div>
 
         <div className="efferdFooterBottom">
-          <p className="demoNote" style={{ textAlign: "center", margin: 0 }}>
+          <p className="demoNote" style={{ textAlign: "right", margin: 0 }}>
             Your Locality · © 2026 Kynisto
             <br />
             <span style={{ fontWeight: 800, letterSpacing: "0.08em", opacity: 0.9 }}>MADE BY A&amp;A</span>
