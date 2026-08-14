@@ -44,7 +44,10 @@ const Icons = {
   Clock: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>,
   ArrowRight: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>,
   Sliders: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>,
-  Check: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+  Check: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>,
+  GitHub: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>,
+  YouTube: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>,
+  Twitter: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
 };
 
 const modernCleanTechStyles = `
@@ -2203,9 +2206,88 @@ export default function Home() {
         </div>
       </section>
 
-      <footer>
-        <a className="brand footerBrand" href="#top"><KynistoLogo /></a>
-        <p className="demoNote" style={{ textAlign: "center" }}>Your Locality · © 2026 Kynisto<br />MADE BY A&A</p>
+      <footer className="efferdFooterBlock" aria-label="Site Footer">
+        <div className="efferdFooterGrid">
+          <div className="efferdFooterBrandCol">
+            <a className="brand footerBrand" href="#top" aria-label="Kynisto top">
+              <KynistoLogo />
+            </a>
+            <p className="efferdBrandDesc">
+              Universal hyper-local discovery, live clinic queue tracking, and smart community commerce for your neighborhood.
+            </p>
+            <div className="efferdSocialRow">
+              <a
+                href="https://github.com/Arshit-Avanti/Kynisto"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="efferdSocialBtn"
+                aria-label="GitHub Repository"
+              >
+                <Icons.GitHub />
+              </a>
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="efferdSocialBtn"
+                aria-label="YouTube Channel"
+              >
+                <Icons.YouTube />
+              </a>
+              <a
+                href="https://x.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="efferdSocialBtn"
+                aria-label="Twitter / X Profile"
+              >
+                <Icons.Twitter />
+              </a>
+            </div>
+          </div>
+
+          <div className="efferdFooterCol">
+            <h4>Explore</h4>
+            <nav aria-label="Footer Explore Navigation">
+              <a href="/">Homepage</a>
+              <a href="/products">Nearby Products</a>
+              <a href="/healthcare">Healthcare &amp; Clinics</a>
+              <a href="/services">Local Services</a>
+              <a href="/pricing" style={{ color: "#FF7A00", fontWeight: 750 }}>Pricing &amp; Plans</a>
+            </nav>
+          </div>
+
+          <div className="efferdFooterCol">
+            <h4>Portals &amp; Workspaces</h4>
+            <nav aria-label="Footer Portals Navigation">
+              <a href="/account">Customer Dashboard</a>
+              <a href="/owner">Business Workspace</a>
+              <a href="/admin">Admin Panel</a>
+              <a href="/q/demo">Live Queue Tracker</a>
+              <a href="/wallet">Kynisto Loyalty Wallet</a>
+            </nav>
+          </div>
+
+          <div className="efferdFooterCol">
+            <h4>Community</h4>
+            <nav aria-label="Footer Community Navigation">
+              <a href="https://github.com/Arshit-Avanti/Kynisto" target="_blank" rel="noopener noreferrer">
+                Open Source (GitHub)
+              </a>
+              <a href="/pricing">Partner Subscriptions</a>
+              <a href="mailto:support@kynisto.in">Help &amp; Support</a>
+              <a href="#places-heading">Verified Directory</a>
+            </nav>
+          </div>
+        </div>
+
+        <div className="efferdFooterBottom">
+          <p className="demoNote" style={{ textAlign: "center", margin: 0 }}>
+            Your Locality · © 2026 Kynisto
+            <br />
+            <span style={{ fontWeight: 800, letterSpacing: "0.08em", opacity: 0.9 }}>MADE BY A&amp;A</span>
+          </p>
+        </div>
       </footer>
 
       {customizing && (
