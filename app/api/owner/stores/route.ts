@@ -24,7 +24,8 @@ async function verifyCategories(categoryId: string, subcategoryId: string | null
 export async function POST(request: Request) {
   try {
     const session = await requireApiPermission(request, "store.manage_own", { csrf: true });
-    const input = parseStoreInput(await safeJson(request));
+    const body = await safeJson(request);
+    const input = parseStoreInput(body);
     await verifyCategories(input.categoryId, input.subcategoryId);
     const db = getD1();
     const now = Math.floor(Date.now() / 1000);
@@ -32,13 +33,16 @@ export async function POST(request: Request) {
     const status = autoApprove ? "approved" : "pending";
     const storeId = crypto.randomUUID();
     const slug = `${slugify(input.name)}-${crypto.randomUUID().slice(0, 6)}`;
+    const logoUrl = cleanText(body.logoUrl, "Logo URL", { max: 500, required: false }) || null;
+    const bannerUrl = cleanText(body.bannerUrl, "Banner URL", { max: 500, required: false }) || null;
+
     await db.batch([
       db.prepare(
         `INSERT INTO stores
          (id, owner_id, category_id, subcategory_id, name, slug, description, business_type,
           address, area, city, state, country, postal_code, latitude, longitude, location_accuracy, location_verified,
-          google_maps_url, phone, whatsapp, email, website, business_hours, opening_days, status, approved_at, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          google_maps_url, phone, whatsapp, email, website, business_hours, opening_days, logo_url, banner_url, status, approved_at, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .bind(
         storeId,
@@ -66,6 +70,8 @@ export async function POST(request: Request) {
         input.website,
         input.businessHours,
         input.openingDays,
+        logoUrl,
+        bannerUrl,
         status,
         autoApprove ? now : null,
         now,
@@ -79,8 +85,8 @@ export async function POST(request: Request) {
     if (input.businessType === "Home Service Business") {
       const serviceId = crypto.randomUUID();
       const serviceSlug = `${slugify(input.name)}-${crypto.randomUUID().slice(0, 6)}`;
-      const priceFrom = Number((body as any)?.startingPrice ?? (body as any)?.priceFrom ?? 299);
-      const estimatedArrival = cleanText((body as any)?.estimatedArrival ?? "30–60 min Arrival");
+      const priceFrom = Number(body.startingPrice ?? body.priceFrom ?? 299);
+      const estimatedArrival = cleanText(body.estimatedArrival ?? "30–60 min Arrival", "Estimated Arrival", { required: false }) || "30–60 min Arrival";
 
       // Fetch category name
       const categoryRow = await db.prepare("SELECT name FROM categories WHERE id = ?").bind(input.categoryId).first<{ name: string }>();
@@ -93,7 +99,7 @@ export async function POST(request: Request) {
     }
 
     await writeAudit(request, session.user.id, "store.created", "store", storeId, { status, autoApproved: autoApprove });
-    return Response.json({ storeId, status }, { status: 201 });
+    return Response.json({ storeId, status, ok: true }, { status: 201 });
   } catch (error) {
     return apiError(error);
   }
@@ -120,12 +126,17 @@ export async function PATCH(request: Request) {
     const input = parseStoreInput(body);
     await verifyCategories(input.categoryId, input.subcategoryId);
     const db = getD1();
+    const logoUrl = body.logoUrl !== undefined ? (cleanText(body.logoUrl, "Logo URL", { max: 500, required: false }) || null) : undefined;
+    const bannerUrl = body.bannerUrl !== undefined ? (cleanText(body.bannerUrl, "Banner URL", { max: 500, required: false }) || null) : undefined;
+
     await db
       .prepare(
         `UPDATE stores SET category_id = ?, subcategory_id = ?, name = ?, description = ?, business_type = ?,
           address = ?, area = ?, city = ?, state = ?, country = ?, postal_code = ?, latitude = ?, longitude = ?,
           location_accuracy = ?, location_verified = ?,
           google_maps_url = ?, phone = ?, whatsapp = ?, email = ?, website = ?, business_hours = ?, opening_days = ?,
+          logo_url = CASE WHEN ? IS NOT NULL THEN ? ELSE logo_url END,
+          banner_url = CASE WHEN ? IS NOT NULL THEN ? ELSE banner_url END,
           status = CASE WHEN status = 'rejected' THEN 'pending' ELSE status END,
           rejection_reason = CASE WHEN status = 'rejected' THEN NULL ELSE rejection_reason END,
           updated_at = ? WHERE id = ? AND owner_id = ?`,
@@ -153,6 +164,10 @@ export async function PATCH(request: Request) {
         input.website,
         input.businessHours,
         input.openingDays,
+        logoUrl !== undefined ? 1 : null,
+        logoUrl ?? null,
+        bannerUrl !== undefined ? 1 : null,
+        bannerUrl ?? null,
         Math.floor(Date.now() / 1000),
         storeId,
         session.user.id,
@@ -186,7 +201,7 @@ export async function PATCH(request: Request) {
     const isRejected = currentStore.status === "rejected";
     const nextStatus = isRejected ? "pending" : currentStore.status;
     await writeAudit(request, session.user.id, isRejected ? "store.resubmitted" : "store.updated", "store", storeId, { status: nextStatus });
-    return Response.json({ ok: true, status: nextStatus });
+    return Response.json({ ok: true, status: nextStatus, storeId });
   } catch (error) {
     return apiError(error);
   }

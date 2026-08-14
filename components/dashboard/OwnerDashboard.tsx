@@ -139,7 +139,68 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
   }, [selectedId, tab, reviewPage]);
   useEffect(()=>{if(!toast)return;const timer=setTimeout(()=>setToast(""),2200);return()=>clearTimeout(timer)},[toast]);
 
-  async function mutate(path:string,method:string,json:unknown,message:string,photoFile?:File){try{const res=await apiFetch<{storeId?:string;ok?:boolean}>(path,{method,json});setToast(message);if(photoFile){const uploadStoreId=(res?.storeId)||selectedId;if(uploadStoreId){const fd=new FormData();fd.set("storeId",uploadStoreId);fd.set("kind","logo");fd.set("file",photoFile);try{await apiFetch("/api/media",{method:"POST",body:fd});setToast(message+" · Photo uploaded")}catch(photoErr){setError(photoErr instanceof Error?photoErr.message:"Photo upload failed. Use Media tab to upload.")}}}await loadOverview();if(selectedId&&["products","services","offers"].includes(tab)){const result=await apiFetch<{items:Item[]}>(`/api/owner/catalog?resource=${tab}&storeId=${selectedId}`);setCatalog(result.items)}if(path==="/api/owner/reviews"&&selectedId){const result=await apiFetch<{items:Item[];pagination:Pagination}>(`/api/owner/reviews?storeId=${selectedId}&page=${reviewPage}&limit=20`);setStoreReviews(result.items);setReviewPagination(result.pagination)}}catch(e){setError(e instanceof Error?e.message:"Action failed.")}}
+  async function mutate(
+    path: string,
+    method: string,
+    json: unknown,
+    message: string,
+    files?: { logo?: File; banner?: File; photo?: File } | File,
+  ) {
+    try {
+      try {
+        sessionStorage.removeItem("kynisto_owner_dash_cache");
+      } catch {}
+
+      const res = await apiFetch<{ storeId?: string; ok?: boolean; id?: string }>(path, { method, json });
+      setToast(message);
+
+      const targetStoreId = res?.storeId || res?.id || (json as Record<string, unknown>)?.storeId || selectedId;
+
+      if (targetStoreId && files) {
+        const logo = files instanceof File ? files : files.logo || files.photo;
+        const banner = files instanceof File ? undefined : files.banner;
+
+        if (logo) {
+          const fd = new FormData();
+          fd.set("storeId", String(targetStoreId));
+          fd.set("kind", "logo");
+          fd.set("file", logo);
+          try {
+            await apiFetch("/api/media", { method: "POST", body: fd });
+            setToast(message + " · Logo uploaded");
+          } catch (photoErr) {
+            setError(photoErr instanceof Error ? photoErr.message : "Logo upload failed.");
+          }
+        }
+
+        if (banner) {
+          const fd = new FormData();
+          fd.set("storeId", String(targetStoreId));
+          fd.set("kind", "banner");
+          fd.set("file", banner);
+          try {
+            await apiFetch("/api/media", { method: "POST", body: fd });
+            setToast(message + " · Banner uploaded");
+          } catch (bannerErr) {
+            setError(bannerErr instanceof Error ? bannerErr.message : "Banner upload failed.");
+          }
+        }
+      }
+
+      await loadOverview();
+      if (selectedId && ["products", "services", "offers"].includes(tab)) {
+        const result = await apiFetch<{ items: Item[] }>(`/api/owner/catalog?resource=${tab}&storeId=${selectedId}`);
+        setCatalog(result.items);
+      }
+      if (path === "/api/owner/reviews" && selectedId) {
+        const result = await apiFetch<{ items: Item[]; pagination: Pagination }>(`/api/owner/reviews?storeId=${selectedId}&page=${reviewPage}&limit=20`);
+        setStoreReviews(result.items);
+        setReviewPagination(result.pagination);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Action failed.");
+    }
+  }
 
   async function toggleStoreStatus(targetStoreId?: string, currentStatus?: string) {
     const storeIdToToggle = targetStoreId || selected?.id;
@@ -262,7 +323,7 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
               <h2>Create your first business listing</h2>
               <small>It will be sent for admin approval</small>
             </div>
-            <OwnerStoreEditor categories={categories} onSubmit={(body, photoFile) => mutate("/api/owner/stores", "POST", body, "Business submitted for approval", photoFile)} />
+            <OwnerStoreEditor categories={categories} onSubmit={(body, files) => mutate("/api/owner/stores", "POST", body, "Business submitted for approval", files)} />
           </section>
         )
       ) : (
@@ -287,7 +348,7 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
                   <h2>Edit business profile</h2>
                   <Status value={selected.status} />
                 </div>
-                <OwnerStoreEditor categories={categories} store={selected} onSubmit={(body, photoFile) => mutate("/api/owner/stores", "PATCH", { ...(body as object), storeId: selected.id }, "Business profile updated", photoFile)} />
+                <OwnerStoreEditor categories={categories} store={selected} onSubmit={(body, files) => mutate("/api/owner/stores", "PATCH", { ...(body as object), storeId: selected.id }, "Business profile updated", files)} />
                 {selected.status !== "approved" && (
                   <div className="ownerDangerZone">
                     <p><b>Remove listing</b><small>Pending or rejected listings can be deleted by their owner.</small></p>

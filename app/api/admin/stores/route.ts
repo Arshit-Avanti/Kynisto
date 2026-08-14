@@ -54,6 +54,7 @@ export async function GET(request: Request) {
         s.state, s.country, s.postal_code AS postalCode, s.latitude, s.longitude,
         s.google_maps_url AS googleMapsUrl, s.phone, s.whatsapp, s.email, s.website,
         s.business_hours AS businessHours, s.opening_days AS openingDays,
+        s.logo_url AS logoUrl, s.banner_url AS bannerUrl,
         s.status, s.rating_average AS rating, s.rating_count AS reviewCount,
         COALESCE(c.name, s.business_type, 'Local Business') AS category, s.owner_id AS ownerId, u.name AS ownerName, u.email AS ownerEmail
         FROM stores s LEFT JOIN categories c ON c.id = s.category_id LEFT JOIN users u ON u.id = s.owner_id
@@ -81,11 +82,14 @@ export async function POST(request: Request) {
     }
     const storeId = crypto.randomUUID();
     const now = Math.floor(Date.now() / 1000);
-    const status = body.status === "pending" ? "pending" : "approved";
-    await getD1().prepare(`INSERT INTO stores (id, owner_id, category_id, subcategory_id, name, slug, description, business_type, address, area, city, state, country, postal_code, latitude, longitude, google_maps_url, phone, whatsapp, email, website, business_hours, opening_days, status, approved_at, approved_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .bind(storeId, ownerId, input.categoryId, input.subcategoryId, input.name, `${slugify(input.name)}-${storeId.slice(0, 6)}`, input.description, input.businessType, input.address, input.area, input.city, input.state, input.country, input.postalCode, input.latitude, input.longitude, input.googleMapsUrl, input.phone, input.whatsapp, input.email, input.website, input.businessHours, input.openingDays, status, status === "approved" ? now : null, status === "approved" ? session.user.id : null, now, now).run();
+    const status = body.status === "pending" ? "pending" : (body.status === "suspended" ? "suspended" : (body.status === "rejected" ? "rejected" : "approved"));
+    const logoUrl = cleanText(body.logoUrl, "Logo URL", { max: 500, required: false }) || null;
+    const bannerUrl = cleanText(body.bannerUrl, "Banner URL", { max: 500, required: false }) || null;
+
+    await getD1().prepare(`INSERT INTO stores (id, owner_id, category_id, subcategory_id, name, slug, description, business_type, address, area, city, state, country, postal_code, latitude, longitude, google_maps_url, phone, whatsapp, email, website, business_hours, opening_days, logo_url, banner_url, status, approved_at, approved_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .bind(storeId, ownerId, input.categoryId, input.subcategoryId, input.name, `${slugify(input.name)}-${storeId.slice(0, 6)}`, input.description, input.businessType, input.address, input.area, input.city, input.state, input.country, input.postalCode, input.latitude, input.longitude, input.googleMapsUrl, input.phone, input.whatsapp, input.email, input.website, input.businessHours, input.openingDays, logoUrl, bannerUrl, status, status === "approved" ? now : null, status === "approved" ? session.user.id : null, now, now).run();
     await writeAudit(request, session.user.id, "store.admin_created", "store", storeId, { status, ownerId });
-    return Response.json({ storeId }, { status: 201 });
+    return Response.json({ storeId, ok: true }, { status: 201 });
   } catch (error) {
     return apiError(error);
   }
@@ -95,7 +99,7 @@ export async function PATCH(request: Request) {
   try {
     const session = await requireApiPermission(request, "stores.manage_all", { csrf: true });
     const body = await safeJson(request);
-    const action = cleanText(body.action, "Action", { max: 30 });
+    const action = cleanText(body.action ?? "update", "Action", { max: 30 });
     const now = Math.floor(Date.now() / 1000);
     const db = getD1();
 
@@ -120,9 +124,9 @@ export async function PATCH(request: Request) {
         await db.prepare(`UPDATE stores SET status = ?, rejection_reason = ?, approved_at = CASE WHEN ? = 'pending' THEN NULL ELSE approved_at END, approved_by = CASE WHEN ? = 'pending' THEN NULL ELSE approved_by END, updated_at = ? WHERE id IN (${placeholders})`)
           .bind(status, reason, status, status, now, ...storeIds).run();
       } else {
-        throw new HttpError(400, "Unsupported bulk store action.", "INVALID_ACTION");
+        throw new HttpError(400, "Unsupported bulk operation.", "INVALID_OPERATION");
       }
-      await writeAudit(request, session.user.id, `store.bulk_${operation}`, "store", storeIds[0], { storeIds, count: storeIds.length, ownerId: body.ownerId, reason: body.reason });
+      await writeAudit(request, session.user.id, `store.bulk_${operation}`, "store", storeIds[0], { count: storeIds.length, storeIds });
       return Response.json({ ok: true, count: storeIds.length });
     }
 
@@ -152,20 +156,32 @@ export async function PATCH(request: Request) {
         const owner = await db.prepare("SELECT id FROM users WHERE id = ? AND role = 'store_owner' AND status = 'active'").bind(ownerId).first();
         if (!owner) throw new HttpError(400, "Choose an active store owner.", "INVALID_OWNER");
       }
+      const logoUrl = body.logoUrl !== undefined ? (cleanText(body.logoUrl, "Logo URL", { max: 500, required: false }) || null) : undefined;
+      const bannerUrl = body.bannerUrl !== undefined ? (cleanText(body.bannerUrl, "Banner URL", { max: 500, required: false }) || null) : undefined;
+      const status = body.status ? cleanText(body.status, "Status", { max: 30 }) : undefined;
+
       await db.prepare(`UPDATE stores SET owner_id = ?, category_id = ?, subcategory_id = ?, name = ?,
         description = ?, business_type = ?, address = ?, area = ?, city = ?, state = ?, country = ?,
         postal_code = ?, latitude = ?, longitude = ?, google_maps_url = ?, phone = ?, whatsapp = ?,
-        email = ?, website = ?, business_hours = ?, opening_days = ?, updated_at = ? WHERE id = ?`)
+        email = ?, website = ?, business_hours = ?, opening_days = ?,
+        logo_url = CASE WHEN ? IS NOT NULL THEN ? ELSE logo_url END,
+        banner_url = CASE WHEN ? IS NOT NULL THEN ? ELSE banner_url END,
+        status = CASE WHEN ? IS NOT NULL THEN ? ELSE status END,
+        updated_at = ? WHERE id = ?`)
         .bind(ownerId, input.categoryId, input.subcategoryId, input.name, input.description,
           input.businessType, input.address, input.area, input.city, input.state, input.country,
           input.postalCode, input.latitude, input.longitude, input.googleMapsUrl, input.phone,
-          input.whatsapp, input.email, input.website, input.businessHours, input.openingDays, now, storeId)
+          input.whatsapp, input.email, input.website, input.businessHours, input.openingDays,
+          logoUrl !== undefined ? 1 : null, logoUrl ?? null,
+          bannerUrl !== undefined ? 1 : null, bannerUrl ?? null,
+          status !== undefined ? 1 : null, status ?? null,
+          now, storeId)
         .run();
     } else {
       throw new HttpError(400, "Unsupported store action.", "INVALID_ACTION");
     }
     await writeAudit(request, session.user.id, `store.${action}`, "store", storeId, { reason: body.reason, ownerId: body.ownerId });
-    return Response.json({ ok: true });
+    return Response.json({ ok: true, storeId });
   } catch (error) {
     return apiError(error);
   }

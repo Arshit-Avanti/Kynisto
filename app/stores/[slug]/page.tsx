@@ -172,46 +172,98 @@ export default async function StoreProfilePage({ params }: RouteProps) {
       </header>
 
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "16px" }}>
-        <section className="glass-section" style={{ borderRadius: "16px", overflow: "hidden", marginBottom: "24px" }}>
-          <div style={{ height: "240px", position: "relative", backgroundColor: "#1e293b", backgroundImage: store.bannerUrl ? `url(${store.bannerUrl})` : undefined, backgroundSize: "cover", backgroundPosition: "center" }}>
-            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #0B0F17 0%, transparent 80%)" }} />
-            <div style={{ position: "absolute", bottom: "-32px", left: "24px", display: "flex", gap: "16px", alignItems: "flex-end", zIndex: 10 }}>
-              {store.logoUrl ? (
-                <img src={store.logoUrl} alt={store.name} className="neon-border" style={{ width: "80px", height: "80px", borderRadius: "16px", objectFit: "cover", border: "2px solid", background: "#0B0F17" }} />
-              ) : (
-                <div className="neon-border" style={{ width: "80px", height: "80px", borderRadius: "16px", border: "2px solid", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "32px", color: "#f8fafc" }}>{store.icon}</div>
-              )}
-            </div>
-          </div>
-          <div style={{ padding: "48px 24px 24px" }}>
-            <div style={{ display: "flex", gap: "8px", marginBottom: "12px", flexWrap: "wrap", alignItems: "center" }}>
-              <span className="badge-neon" style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", fontWeight: 700 }}>{store.category}</span>
-              {store.subcategory && <span className="badge-neon" style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", fontWeight: 600 }}>{store.subcategory}</span>}
-              <span style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 700, color: store.open ? "#4ade80" : "#f87171", backgroundColor: store.open ? "rgba(74, 222, 128, 0.1)" : "rgba(248, 113, 113, 0.1)", border: `1px solid ${store.open ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}`, padding: "4px 10px", borderRadius: "6px", animation: store.open ? 'pulse-green 2s infinite' : 'pulse-red 2s infinite' }}>
-                <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: store.open ? "#4ade80" : "#f87171", boxShadow: `0 0 5px ${store.open ? '#4ade80' : '#f87171'}` }} />
-                {store.open ? "Open now" : "Closed"}
-              </span>
-              {store.queueEnabled && (
-                <span style={{ backgroundColor: store.queueStatus === "open" ? "rgba(74,222,128,0.1)" : "rgba(248,113,113,0.1)", color: store.queueStatus === "open" ? "#4ade80" : "#f87171", border: `1px solid ${store.queueStatus === "open" ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}`, padding: "4px 10px", borderRadius: "6px", fontSize: "12px", fontWeight: 700 }}>
-                  Queue: {store.queueStatus ?? "closed"}
-                </span>
-              )}
-            </div>
-            <h1 className="neon-text" style={{ fontSize: "32px", fontWeight: 800, color: "#ffffff", margin: "0 0 12px 0", letterSpacing: "-0.5px" }}>{store.name}</h1>
-            <p style={{ fontSize: "16px", color: "#94a3b8", lineHeight: 1.6, margin: "0 0 20px 0", maxWidth: "800px" }}>{store.description}</p>
-            <div style={{ display: "flex", gap: "16px", color: "#94a3b8", fontSize: "14px", fontWeight: 500, flexWrap: "wrap" }}>
-              <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#f8fafc", fontWeight: 700 }}>
-                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ filter: "drop-shadow(0 0 5px rgba(251,191,36,0.5))" }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                 {store.rating.toFixed(1)} <span style={{ color: "#64748b", fontWeight: 500 }}>({store.reviews} reviews)</span>
-              </span>
-              <span>•</span>
-              <span>{store.distance.toFixed(1)} km away</span>
-              <span>•</span>
-              <span>{store.hours}</span>
-            </div>
-            <StoreActions store={{ id: store.id, slug: store.slug, name: store.name, address: store.address, mapsUrl, phone: store.phone, whatsapp: store.whatsapp, website: store.website, hasOwner: store.hasOwner, categoryModule: store.categoryModule, queueEnabled: store.queueEnabled }} />
-          </div>
-        </section>
+        {(() => {
+          const heroImage = store.bannerUrl || store.logoUrl || (store.images && store.images.length > 0 ? store.images[0].url : null);
+          const avatarImage = store.logoUrl || (store.images && store.images.find((i: any) => i.kind === "logo")?.url) || (store.images && store.images.length > 0 ? store.images[0].url : null);
+          const storeInitial = (store.name || "S").trim().charAt(0).toUpperCase();
+          const hasCustomIcon = store.icon && store.icon !== "⌖" && store.icon !== "+" && store.icon.length <= 4;
+
+          return (
+            <section className="glass-section" style={{ borderRadius: "16px", overflow: "hidden", marginBottom: "24px" }}>
+              <div style={{
+                height: "260px",
+                position: "relative",
+                backgroundColor: "#0F172A",
+                backgroundImage: heroImage ? `url(${heroImage})` : `radial-gradient(ellipse at top right, rgba(255,87,34,0.25) 0%, rgba(30,41,59,0.9) 60%, #0B0F17 100%)`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }}>
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #0B0F17 0%, rgba(11,15,23,0.5) 50%, rgba(11,15,23,0.2) 100%)" }} />
+                {!heroImage && (
+                  <div style={{ position: "absolute", inset: 0, opacity: 0.08, backgroundImage: "radial-gradient(#ffffff 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+                )}
+                <div style={{ position: "absolute", bottom: "-36px", left: "24px", display: "flex", gap: "16px", alignItems: "flex-end", zIndex: 10 }}>
+                  {avatarImage ? (
+                    <img
+                      src={avatarImage}
+                      alt={store.name}
+                      className="neon-border"
+                      style={{
+                        width: "88px",
+                        height: "88px",
+                        borderRadius: "18px",
+                        objectFit: "cover",
+                        border: "3px solid #1E293B",
+                        background: "#0B0F17",
+                        boxShadow: "0 10px 25px -5px rgba(0,0,0,0.6)",
+                      }}
+                    />
+                  ) : (
+                    <div
+                      className="neon-border"
+                      style={{
+                        width: "88px",
+                        height: "88px",
+                        borderRadius: "18px",
+                        border: "3px solid #1E293B",
+                        background: "linear-gradient(135deg, #1E293B 0%, #0F172A 100%)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: hasCustomIcon ? "34px" : "36px",
+                        fontWeight: 900,
+                        color: "#FF5722",
+                        boxShadow: "0 10px 25px -5px rgba(0,0,0,0.6), inset 0 0 15px rgba(255,87,34,0.2)",
+                        letterSpacing: "-1px",
+                      }}
+                    >
+                      {hasCustomIcon ? store.icon : storeInitial}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div style={{ padding: "52px 24px 24px" }}>
+                <div style={{ display: "flex", gap: "8px", marginBottom: "12px", flexWrap: "wrap", alignItems: "center" }}>
+                  <span className="badge-neon" style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", fontWeight: 700 }}>{store.category}</span>
+                  {store.subcategory && <span className="badge-neon" style={{ padding: "4px 10px", borderRadius: "6px", fontSize: "12px", fontWeight: 600 }}>{store.subcategory}</span>}
+                  <span style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: 700, color: store.open ? "#4ade80" : "#f87171", backgroundColor: store.open ? "rgba(74, 222, 128, 0.1)" : "rgba(248, 113, 113, 0.1)", border: `1px solid ${store.open ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}`, padding: "4px 10px", borderRadius: "6px", animation: store.open ? 'pulse-green 2s infinite' : 'pulse-red 2s infinite' }}>
+                    <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: store.open ? "#4ade80" : "#f87171", boxShadow: `0 0 5px ${store.open ? '#4ade80' : '#f87171'}` }} />
+                    {store.open ? "Open now" : "Closed"}
+                  </span>
+                  {store.queueEnabled && (
+                    <span style={{ backgroundColor: store.queueStatus === "open" ? "rgba(74,222,128,0.1)" : "rgba(248,113,113,0.1)", color: store.queueStatus === "open" ? "#4ade80" : "#f87171", border: `1px solid ${store.queueStatus === "open" ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}`, padding: "4px 10px", borderRadius: "6px", fontSize: "12px", fontWeight: 700 }}>
+                      Queue: {store.queueStatus ?? "closed"}
+                    </span>
+                  )}
+                </div>
+                <h1 className="neon-text" style={{ fontSize: "32px", fontWeight: 800, color: "#ffffff", margin: "0 0 12px 0", letterSpacing: "-0.5px" }}>{store.name}</h1>
+                <p style={{ fontSize: "16px", color: "#94a3b8", lineHeight: 1.6, margin: "0 0 20px 0", maxWidth: "800px" }}>{store.description}</p>
+                <div style={{ display: "flex", gap: "16px", color: "#94a3b8", fontSize: "14px", fontWeight: 500, flexWrap: "wrap" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#f8fafc", fontWeight: 700 }}>
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ filter: "drop-shadow(0 0 5px rgba(251,191,36,0.5))" }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                     {store.rating.toFixed(1)} <span style={{ color: "#64748b", fontWeight: 500 }}>({store.reviews} reviews)</span>
+                  </span>
+                  <span>•</span>
+                  <span>{store.distance.toFixed(1)} km away</span>
+                  <span>•</span>
+                  <span>{store.hours}</span>
+                </div>
+                <StoreActions store={{ id: store.id, slug: store.slug, name: store.name, address: store.address, mapsUrl, phone: store.phone, whatsapp: store.whatsapp, website: store.website, hasOwner: store.hasOwner, categoryModule: store.categoryModule, queueEnabled: store.queueEnabled }} />
+              </div>
+            </section>
+          );
+        })()}
 
         <style dangerouslySetInnerHTML={{ __html: `
           .storefrontResponsiveLayout {

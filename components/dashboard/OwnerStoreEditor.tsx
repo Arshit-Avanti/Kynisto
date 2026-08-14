@@ -431,7 +431,7 @@ export function OwnerStoreEditor({
 }: {
   categories: DataItem[];
   store?: DataItem;
-  onSubmit: (body: unknown, photoFile?: File) => Promise<void>;
+  onSubmit: (body: unknown, files?: { logo?: File; banner?: File; photo?: File }) => Promise<void>;
 }) {
   const [step, setStep] = useState(1);
   const [categoryId, setCategoryId] = useState(String(store?.categoryId ?? ""));
@@ -456,54 +456,62 @@ export function OwnerStoreEditor({
   const homeHours = typeof store?.businessHours === "string" && !store.businessHours.startsWith("{") ? store.businessHours : "09:00 AM - 08:00 PM";
   const homeAddress = text("address") === "Doorstep / Mobile Service" ? "" : text("address");
 
-  // Photo upload state
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadError, setUploadError] = useState("");
-  const [isDragging, setIsDragging] = useState(false);
-
+  // Logo upload state
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoError, setLogoError] = useState("");
+  const [isDraggingLogo, setIsDraggingLogo] = useState(false);
   const existingLogo = text("logoUrl") || null;
 
-  const handleFileSelect = useCallback(async (file: File) => {
-    setUploadError("");
+  // Banner upload state
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerError, setBannerError] = useState("");
+  const [isDraggingBanner, setIsDraggingBanner] = useState(false);
+  const existingBanner = text("bannerUrl") || null;
+
+  const processImageFile = useCallback(async (file: File): Promise<File> => {
     const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
     if (!ALLOWED.includes(file.type)) {
-      setUploadError("Please choose a JPG, PNG, or WEBP image.");
-      return;
+      throw new Error("Please choose a JPG, PNG, or WEBP image.");
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setUploadError("Photo must be smaller than 5 MB.");
-      return;
+    if (file.size > 8 * 1024 * 1024) {
+      throw new Error("Photo must be smaller than 8 MB.");
     }
-    try {
-      const compressed = await compressImage(file);
-      const url = URL.createObjectURL(compressed);
-      setPreviewUrl(url);
-      setSelectedFile(compressed);
-    } catch {
-      setUploadError("Could not process the image. Please try another file.");
-    }
+    return compressImage(file);
   }, []);
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) void handleFileSelect(file);
-  };
+  const handleLogoSelect = useCallback(async (file: File) => {
+    setLogoError("");
+    try {
+      const compressed = await processImageFile(file);
+      const url = URL.createObjectURL(compressed);
+      setLogoPreview(url);
+      setLogoFile(compressed);
+    } catch (err) {
+      setLogoError(err instanceof Error ? err.message : "Could not process image.");
+    }
+  }, [processImageFile]);
 
-  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setIsDragging(false);
-    const file = event.dataTransfer.files?.[0];
-    if (file) void handleFileSelect(file);
-  };
+  const handleBannerSelect = useCallback(async (file: File) => {
+    setBannerError("");
+    try {
+      const compressed = await processImageFile(file);
+      const url = URL.createObjectURL(compressed);
+      setBannerPreview(url);
+      setBannerFile(compressed);
+    } catch (err) {
+      setBannerError(err instanceof Error ? err.message : "Could not process image.");
+    }
+  }, [processImageFile]);
 
   const handleGpsConfirm = (lat: number, lng: number, accuracy: number | null, verified: boolean) => {
     setGpsLat(lat);
     setGpsLng(lng);
     setGpsAccuracy(accuracy);
     setGpsVerified(verified);
-    // Auto-advance to Step 4 (Photo & Hours) after a short delay for visual feedback
     setTimeout(() => setStep(4), 700);
   };
 
@@ -514,7 +522,6 @@ export function OwnerStoreEditor({
       ...Object.fromEntries(form),
       openingDays: form.getAll("openingDay").map(Number),
     };
-    // Merge GPS data — override manual lat/lng if GPS was confirmed
     if (gpsVerified && gpsLat !== null && gpsLng !== null) {
       body.latitude = gpsLat;
       body.longitude = gpsLng;
@@ -523,7 +530,11 @@ export function OwnerStoreEditor({
     } else {
       body.locationVerified = false;
     }
-    await onSubmit(body, selectedFile ?? undefined);
+    await onSubmit(body, {
+      logo: logoFile ?? undefined,
+      banner: bannerFile ?? undefined,
+      photo: logoFile ?? bannerFile ?? undefined,
+    });
   }
 
   // ─── Step indicator styles ──────────────────────────────────────────────────
@@ -701,60 +712,111 @@ export function OwnerStoreEditor({
           </div>
         )}
 
-        {/* ── Business Photo ─────────────────────────────────────────────── */}
-        <div className="storePhotoSection full">
-          <h3>Business Photo</h3>
-          <div
-            className={`photoUploadArea ${isDragging ? "dragging" : ""}`}
-            onClick={() => fileInputRef.current?.click()}
-            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-            onDragLeave={() => setIsDragging(false)}
-            onDrop={handleDrop}
-            role="button"
-            tabIndex={0}
-            aria-label="Upload business photo"
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click(); }}
-          >
-            {previewUrl || existingLogo ? (
-              <img src={previewUrl ?? existingLogo!} alt="Business photo preview" className="photoPreview" />
-            ) : (
-              <div className="photoPlaceholder">
-                <span aria-hidden="true">📷</span>
-                <p>Drag &amp; Drop or Click to Browse</p>
-                <small>JPG, JPEG, PNG, WEBP · Max 5 MB</small>
-              </div>
-            )}
-          </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={handleInputChange}
-            style={{ display: "none" }}
-            aria-hidden="true"
-          />
-          {(previewUrl || existingLogo) && (
-            <div className="photoActions">
-              <button type="button" onClick={() => fileInputRef.current?.click()}>
-                {previewUrl ? "Change Photo" : "Update Photo"}
-              </button>
-              {previewUrl && (
-                <button
-                  type="button"
-                  onClick={() => { setPreviewUrl(null); setSelectedFile(null); }}
-                  className="danger"
-                >
-                  Remove Selection
-                </button>
+        {/* ── Business Visuals (Logo & Banner) ───────────────────────────── */}
+        <div className="storePhotoSection full" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>
+          {/* Logo / Profile Picture */}
+          <div style={{ background: "rgba(15,23,42,0.6)", padding: "16px", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <h3 style={{ margin: "0 0 4px 0", fontSize: "1rem", color: "#FFFFFF" }}>Store Logo / Profile Picture</h3>
+            <p style={{ margin: "0 0 12px 0", fontSize: "0.8rem", color: "#94a3b8" }}>Square icon (1:1) shown on cards and search</p>
+            <div
+              className={`photoUploadArea ${isDraggingLogo ? "dragging" : ""}`}
+              onClick={() => logoInputRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); setIsDraggingLogo(true); }}
+              onDragLeave={() => setIsDraggingLogo(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDraggingLogo(false);
+                const file = e.dataTransfer.files?.[0];
+                if (file) void handleLogoSelect(file);
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label="Upload store logo"
+              style={{ minHeight: "140px", borderRadius: "12px", border: "2px dashed rgba(255,255,255,0.15)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(0,0,0,0.2)" }}
+            >
+              {logoPreview || existingLogo ? (
+                <img src={logoPreview ?? existingLogo!} alt="Store logo preview" style={{ width: "80px", height: "80px", borderRadius: "16px", objectFit: "cover", border: "2px solid #FF5722" }} />
+              ) : (
+                <div className="photoPlaceholder" style={{ textAlign: "center" }}>
+                  <span style={{ fontSize: "28px" }}>🏷️</span>
+                  <p style={{ margin: "4px 0 0", fontSize: "0.85rem", color: "#e2e8f0" }}>Choose Logo Photo</p>
+                  <small style={{ color: "#64748b" }}>JPG, PNG, WebP · Max 8 MB</small>
+                </div>
               )}
             </div>
-          )}
-          {uploadError && <p className="authError" role="alert">{uploadError}</p>}
-          {existingLogo && !previewUrl && (
-            <p style={{ fontSize: "0.8rem", color: "#64748b", marginTop: "0.5rem" }}>
-              Current photo shown above. To upload to your store media library, use the <strong>Media</strong> tab.
-            </p>
-          )}
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleLogoSelect(f); }}
+              style={{ display: "none" }}
+            />
+            {(logoPreview || existingLogo) && (
+              <div className="photoActions" style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
+                <button type="button" onClick={() => logoInputRef.current?.click()} style={{ padding: "6px 12px", fontSize: "0.8rem" }}>
+                  {logoPreview ? "Change Logo" : "Update Logo"}
+                </button>
+                {logoPreview && (
+                  <button type="button" onClick={() => { setLogoPreview(null); setLogoFile(null); }} className="danger" style={{ padding: "6px 12px", fontSize: "0.8rem" }}>
+                    Remove
+                  </button>
+                )}
+              </div>
+            )}
+            {logoError && <p className="authError" style={{ marginTop: "6px", fontSize: "0.8rem" }}>{logoError}</p>}
+          </div>
+
+          {/* Cover Banner */}
+          <div style={{ background: "rgba(15,23,42,0.6)", padding: "16px", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <h3 style={{ margin: "0 0 4px 0", fontSize: "1rem", color: "#FFFFFF" }}>Store Cover Banner</h3>
+            <p style={{ margin: "0 0 12px 0", fontSize: "0.8rem", color: "#94a3b8" }}>Wide landscape header (16:9) on full profile</p>
+            <div
+              className={`photoUploadArea ${isDraggingBanner ? "dragging" : ""}`}
+              onClick={() => bannerInputRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); setIsDraggingBanner(true); }}
+              onDragLeave={() => setIsDraggingBanner(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDraggingBanner(false);
+                const file = e.dataTransfer.files?.[0];
+                if (file) void handleBannerSelect(file);
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label="Upload store cover banner"
+              style={{ minHeight: "140px", borderRadius: "12px", border: "2px dashed rgba(255,255,255,0.15)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "rgba(0,0,0,0.2)" }}
+            >
+              {bannerPreview || existingBanner ? (
+                <img src={bannerPreview ?? existingBanner!} alt="Store banner preview" style={{ width: "100%", maxHeight: "110px", borderRadius: "8px", objectFit: "cover", border: "1px solid rgba(255,255,255,0.2)" }} />
+              ) : (
+                <div className="photoPlaceholder" style={{ textAlign: "center" }}>
+                  <span style={{ fontSize: "28px" }}>🖼️</span>
+                  <p style={{ margin: "4px 0 0", fontSize: "0.85rem", color: "#e2e8f0" }}>Choose Cover Banner</p>
+                  <small style={{ color: "#64748b" }}>Landscape JPG, PNG, WebP · Max 8 MB</small>
+                </div>
+              )}
+            </div>
+            <input
+              ref={bannerInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleBannerSelect(f); }}
+              style={{ display: "none" }}
+            />
+            {(bannerPreview || existingBanner) && (
+              <div className="photoActions" style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
+                <button type="button" onClick={() => bannerInputRef.current?.click()} style={{ padding: "6px 12px", fontSize: "0.8rem" }}>
+                  {bannerPreview ? "Change Banner" : "Update Banner"}
+                </button>
+                {bannerPreview && (
+                  <button type="button" onClick={() => { setBannerPreview(null); setBannerFile(null); }} className="danger" style={{ padding: "6px 12px", fontSize: "0.8rem" }}>
+                    Remove
+                  </button>
+                )}
+              </div>
+            )}
+            {bannerError && <p className="authError" style={{ marginTop: "6px", fontSize: "0.8rem" }}>{bannerError}</p>}
+          </div>
         </div>
 
         <WeeklyScheduleEditor

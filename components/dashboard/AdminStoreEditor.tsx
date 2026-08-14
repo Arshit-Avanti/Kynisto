@@ -79,6 +79,16 @@ export function AdminStoreEditor({
         <label>PIN code<input name="postalCode" defaultValue={text("postalCode", "201102")} /></label>
         <label>Latitude<input name="latitude" type="number" step="any" defaultValue={text("latitude", "28.7381")} /></label>
         <label>Longitude<input name="longitude" type="number" step="any" defaultValue={text("longitude", "77.2669")} /></label>
+        <label>Logo / Avatar URL<input name="logoUrl" defaultValue={text("logoUrl")} placeholder="/media/stores/... or https://..." /></label>
+        <label>Banner / Cover Image URL<input name="bannerUrl" defaultValue={text("bannerUrl")} placeholder="/media/stores/... or https://..." /></label>
+        <label>Store Status
+          <select name="status" defaultValue={text("status", "approved")}>
+            <option value="approved">Approved (Active)</option>
+            <option value="pending">Pending Approval</option>
+            <option value="rejected">Rejected</option>
+            <option value="suspended">Suspended</option>
+          </select>
+        </label>
         <label className="full">Google Maps URL<input name="googleMapsUrl" type="url" defaultValue={text("googleMapsUrl")} /></label>
         
         <WeeklyScheduleEditor

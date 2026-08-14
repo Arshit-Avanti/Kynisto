@@ -2116,9 +2116,28 @@ export default function Home() {
                   className={`storeVisual tone-${store.tone}`}
                   aria-label={`View ${store.name} details`}
                   onClick={() => setSelectedStore(store)}
+                  style={{ position: "relative", overflow: "hidden" }}
                 >
-                  <span className="visualPattern" aria-hidden="true" />
-                  <span className="storeGlyph" aria-hidden="true">{store.icon}</span>
+                  {store.bannerUrl || store.logoUrl ? (
+                    <img
+                      src={store.bannerUrl || store.logoUrl}
+                      alt={store.name}
+                      loading="lazy"
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <>
+                      <span className="visualPattern" aria-hidden="true" />
+                      <span className="storeGlyph" aria-hidden="true">{store.icon}</span>
+                    </>
+                  )}
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(11,15,23,0.7) 0%, transparent 70%)", pointerEvents: "none" }} />
                   <span className={`statusBadge ${store.open ? "isOpen" : "isClosed"}`}>{store.open ? "Open now" : "Closed"}</span>
                   <span className="distanceBadge">{store.distance.toFixed(1)} km</span>
                 </button>
