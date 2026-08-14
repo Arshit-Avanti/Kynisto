@@ -16,21 +16,15 @@ export async function GET(request: Request) {
     if (!canManageAll && !canManageOwn) throw new HttpError(403, "Access Denied", "ACCESS_DENIED");
     if (!canManageAll) await requireOwnedStore(session.user.id, storeId);
 
-    const encoder = new TextEncoder();
-    let cancelled = false;
-    const stream = new ReadableStream<Uint8Array>({
-      async start(controller) {
-        controller.enqueue(encoder.encode("retry: 1500\n\n"));
-        for (let attempt = 0; attempt < 12 && !cancelled; attempt += 1) {
-          const queue = await healthcareQueueDashboard(storeId);
-          controller.enqueue(encoder.encode(`event: queue\ndata: ${JSON.stringify({ queue })}\n\n`));
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-        }
-        if (!cancelled) controller.close();
+    const queue = await healthcareQueueDashboard(storeId);
+    const payload = `retry: 3000\nevent: queue\ndata: ${JSON.stringify({ queue })}\n\n`;
+    return new Response(payload, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-store, no-transform",
+        Connection: "keep-alive",
       },
-      cancel() { cancelled = true; },
     });
-    return new Response(stream, { headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-store, no-transform", Connection: "keep-alive" } });
   } catch (error) {
     return apiError(error);
   }
