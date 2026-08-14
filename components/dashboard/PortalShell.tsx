@@ -130,6 +130,7 @@ export function PortalShell({
   const [dark, setDark] = useState(false);
   const [open, setOpen] = useState(false);
   const [chatUnread, setChatUnread] = useState(0);
+  const [subPlan, setSubPlan] = useState<Record<string, any>>({ id: "free" });
   const rawRole = String(workspaceRole ?? user?.role ?? "customer");
   const activeWorkspaceRole: UserRole = (rawRole === "owner" || rawRole === "shop_owner" || rawRole === "store_owner")
     ? "store_owner"
