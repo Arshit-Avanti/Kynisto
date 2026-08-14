@@ -2282,14 +2282,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-
-        <div className="efferdFooterBottom">
-          <p className="demoNote" style={{ textAlign: "right", margin: 0 }}>
-            Your Locality · © 2026 Kynisto
-            <br />
-            <span style={{ fontWeight: 800, letterSpacing: "0.08em", opacity: 0.9 }}>MADE BY A&amp;A</span>
-          </p>
-        </div>
       </footer>
 
       {customizing && (

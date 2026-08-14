@@ -2884,7 +2884,7 @@ img, video, iframe, embed, object {
 footer.efferdFooterBlock {
   width: min(1344px, calc(100% - 64px)) !important;
   margin: 40px auto 32px !important;
-  padding: 48px 40px 28px !important;
+  padding: 44px 40px !important;
   background: rgba(10, 16, 30, 0.75) !important;
   backdrop-filter: blur(24px) !important;
   -webkit-backdrop-filter: blur(24px) !important;
@@ -2905,12 +2905,6 @@ footer.efferdFooterBlock {
   justify-content: space-between !important;
   align-items: flex-start !important;
   gap: 48px !important;
-  padding-bottom: 36px !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-.mode-light .efferdFooterGrid {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
 }
 
 .efferdFooterBrandCol {
