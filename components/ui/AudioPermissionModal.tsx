@@ -8,7 +8,10 @@ export function AudioPermissionModal() {
 
   useEffect(() => {
     // Check if user has already responded to audio permission prompt
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || window.self !== window.top) return;
+
+    const isBot = /bot|googlebot|crawler|spider|robot|crawling|mediapartners|adsbot|lighthouse/i.test(navigator.userAgent);
+    if (isBot) return;
 
     const permission = localStorage.getItem("kynisto_audio_permission_v1");
     if (!permission) {

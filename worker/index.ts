@@ -28,11 +28,18 @@ function applySecurityHeaders(res: Response): Response {
   headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  headers.set("Permissions-Policy", "camera=(), microphone=(self), geolocation=(self)");
   headers.set("X-XSS-Protection", "1; mode=block");
   headers.set(
     "Content-Security-Policy",
-    "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https: wss:; frame-src 'self' https: data: blob:; frame-ancestors *; object-src 'none';",
+    "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: https://*.google.com https://*.googlesyndication.com https://*.google-analytics.com https://pagead2.googlesyndication.com https://adservice.google.com https://tpc.googlesyndication.com; " +
+    "style-src 'self' 'unsafe-inline' https: https://*.google.com https://*.googleapis.com; " +
+    "img-src 'self' data: blob: https: https://*.google.com https://*.googlesyndication.com https://*.google-analytics.com https://*.doubleclick.net https://pagead2.googlesyndication.com; " +
+    "font-src 'self' data: https: https://*.gstatic.com https://*.googleapis.com; " +
+    "connect-src 'self' https: wss: https://*.google.com https://*.googlesyndication.com https://pagead2.googlesyndication.com https://*.google-analytics.com https://*.doubleclick.net https://adservice.google.com; " +
+    "frame-src 'self' https: data: blob: https://*.google.com https://*.googlesyndication.com https://*.googleusercontent.com https://*.doubleclick.net https://tpc.googlesyndication.com https://*.admob.com; " +
+    "frame-ancestors 'self' https://*.google.com https://*.googlesyndication.com https://*.googleusercontent.com https://*.admob.com https://*.adsense.com https://adsense.google.com https://admob.google.com *; " +
+    "object-src 'none';"
   );
   return new Response(res.body, {
     status: res.status,
@@ -44,6 +51,11 @@ function applySecurityHeaders(res: Response): Response {
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+
+    // Enforce canonical HTTPS redirection
+    if (url.protocol === "http:" || request.headers.get("x-forwarded-proto") === "http") {
+      return Response.redirect(`https://${url.host}${url.pathname}${url.search}`, 301);
+    }
 
     if (url.pathname === "/ads.txt") {
       return applySecurityHeaders(

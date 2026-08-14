@@ -7,7 +7,10 @@ export function NotificationPermissionModal() {
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || window.self !== window.top) return;
+
+    const isBot = /bot|googlebot|crawler|spider|robot|crawling|mediapartners|adsbot|lighthouse/i.test(navigator.userAgent);
+    if (isBot) return;
 
     // Check if notification permission is already handled
     const notifPermission = localStorage.getItem("kynisto_notif_permission_v1");

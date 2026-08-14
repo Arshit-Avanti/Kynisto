@@ -87,11 +87,12 @@ export default function RootLayout({
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9178031569606873"
           crossOrigin="anonymous"
         />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(adsbygoogle = window.adsbygoogle || []).push({ google_ad_client: "ca-pub-9178031569606873", enable_page_level_ads: true });`,
-          }}
-        />
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+        <link rel="preconnect" href="https://googleads.g.doubleclick.net" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://googleads.g.doubleclick.net" />
+        <link rel="preconnect" href="https://tpc.googlesyndication.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://tpc.googlesyndication.com" />
         <link rel="preconnect" href="https://gdakvxqegfnxflaqijwf.supabase.co" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://gdakvxqegfnxflaqijwf.supabase.co" />
         <link rel="preconnect" href="https://kynisto.in" crossOrigin="anonymous" />
