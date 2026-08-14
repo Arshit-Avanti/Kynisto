@@ -9,6 +9,7 @@ import { apiFetch } from "@/lib/client-api";
 import { getSupabaseBrowserClient, syncSupabaseAccessCookie } from "@/lib/supabase-browser";
 import { WelcomeRewardModal } from "@/components/subscription/WelcomeRewardModal";
 import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
+import { EfferdFooter3 } from "@/components/blocks/footer-3";
 
 type Category = {
   name: string;
@@ -2206,83 +2207,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="efferdFooterBlock" aria-label="Site Footer">
-        <div className="efferdFooterGrid">
-          <div className="efferdFooterBrandCol">
-            <a className="brand footerBrand" href="#top" aria-label="Kynisto top">
-              <KynistoLogo />
-            </a>
-            <p className="efferdBrandDesc">
-              Universal hyper-local discovery, live clinic queue tracking, and smart community commerce for your neighborhood.
-            </p>
-            <div className="efferdSocialRow">
-              <a
-                href="https://github.com/Arshit-Avanti/Kynisto"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="efferdSocialBtn"
-                aria-label="GitHub Repository"
-              >
-                <Icons.GitHub />
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="efferdSocialBtn"
-                aria-label="YouTube Channel"
-              >
-                <Icons.YouTube />
-              </a>
-              <a
-                href="https://x.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="efferdSocialBtn"
-                aria-label="Twitter / X Profile"
-              >
-                <Icons.Twitter />
-              </a>
-            </div>
-          </div>
-
-          <div className="efferdFooterNavGroup">
-            <div className="efferdFooterCol">
-              <h4>Explore</h4>
-              <nav aria-label="Footer Explore Navigation">
-                <a href="/">Homepage</a>
-                <a href="/products">Nearby Products</a>
-                <a href="/healthcare">Healthcare &amp; Clinics</a>
-                <a href="/services">Local Services</a>
-                <a href="/pricing" style={{ color: "#FF7A00", fontWeight: 750 }}>Pricing &amp; Plans</a>
-              </nav>
-            </div>
-
-            <div className="efferdFooterCol">
-              <h4>Portals &amp; Workspaces</h4>
-              <nav aria-label="Footer Portals Navigation">
-                <a href="/account">Customer Dashboard</a>
-                <a href="/owner">Business Workspace</a>
-                <a href="/admin">Admin Panel</a>
-                <a href="/q/demo">Live Queue Tracker</a>
-                <a href="/wallet">Kynisto Loyalty Wallet</a>
-              </nav>
-            </div>
-
-            <div className="efferdFooterCol">
-              <h4>Community</h4>
-              <nav aria-label="Footer Community Navigation">
-                <a href="https://github.com/Arshit-Avanti/Kynisto" target="_blank" rel="noopener noreferrer">
-                  Open Source (GitHub)
-                </a>
-                <a href="/pricing">Partner Subscriptions</a>
-                <a href="mailto:support@kynisto.in">Help &amp; Support</a>
-                <a href="#places-heading">Verified Directory</a>
-              </nav>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <EfferdFooter3 />
 
       {customizing && (
         <div className="modalLayer" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && setCustomizing(false)}>
