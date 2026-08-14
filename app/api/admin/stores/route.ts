@@ -55,12 +55,11 @@ export async function GET(request: Request) {
         s.google_maps_url AS googleMapsUrl, s.phone, s.whatsapp, s.email, s.website,
         s.business_hours AS businessHours, s.opening_days AS openingDays,
         s.status, s.rating_average AS rating, s.rating_count AS reviewCount,
-        s.created_at AS createdAt, s.updated_at AS updatedAt, s.rejection_reason AS rejectionReason,
-        c.name AS category, s.owner_id AS ownerId, u.name AS ownerName, u.email AS ownerEmail
-        FROM stores s JOIN categories c ON c.id = s.category_id LEFT JOIN users u ON u.id = s.owner_id
+        COALESCE(c.name, s.business_type, 'Local Business') AS category, s.owner_id AS ownerId, u.name AS ownerName, u.email AS ownerEmail
+        FROM stores s LEFT JOIN categories c ON c.id = s.category_id LEFT JOIN users u ON u.id = s.owner_id
         WHERE ${where} ORDER BY CASE s.status WHEN 'pending' THEN 0 ELSE 1 END, s.created_at DESC
         LIMIT ? OFFSET ?`).bind(...bindings, limit, (page - 1) * limit).all(),
-      db.prepare(`SELECT COUNT(*) AS total FROM stores s JOIN categories c ON c.id = s.category_id WHERE ${where}`).bind(...bindings).first<{ total: number }>(),
+      db.prepare(`SELECT COUNT(*) AS total FROM stores s LEFT JOIN categories c ON c.id = s.category_id WHERE ${where}`).bind(...bindings).first<{ total: number }>(),
       db.prepare("SELECT id, name, email FROM users WHERE role = 'store_owner' AND status = 'active' ORDER BY name ASC LIMIT 200").all(),
     ]);
     return Response.json({ items: items.results ?? [], owners: owners.results ?? [], pagination: { page, limit, total: total?.total ?? 0 } }, { headers: { "Cache-Control": "no-store" } });

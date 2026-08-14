@@ -16,9 +16,8 @@ export async function GET(request: Request) {
             s.opening_days AS openingDays, s.logo_url AS logoUrl, s.banner_url AS bannerUrl,
             s.rating_average AS rating, s.rating_count AS reviewCount, s.status,
             s.rejection_reason AS rejectionReason, s.view_count AS viewCount,
-            s.category_id AS categoryId, s.subcategory_id AS subcategoryId,
-            c.name AS category, sc.name AS subcategory, s.created_at AS createdAt, s.updated_at AS updatedAt
-           FROM stores s JOIN categories c ON c.id = s.category_id
+            COALESCE(c.name, s.business_type, 'Local Business') AS category, sc.name AS subcategory, s.created_at AS createdAt, s.updated_at AS updatedAt
+           FROM stores s LEFT JOIN categories c ON c.id = s.category_id
            LEFT JOIN categories sc ON sc.id = s.subcategory_id
            WHERE s.owner_id = ? ORDER BY s.created_at DESC`,
         )

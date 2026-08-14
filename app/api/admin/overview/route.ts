@@ -18,7 +18,7 @@ export async function GET(request: Request) {
         (SELECT COUNT(*) FROM categories WHERE parent_id IS NULL) AS categories`).first(),
       db.prepare("SELECT date(created_at, 'unixepoch') AS day, COUNT(*) AS total FROM users WHERE created_at >= unixepoch() - 2592000 GROUP BY day ORDER BY day ASC").all(),
       db.prepare("SELECT event_type AS eventType, COUNT(*) AS total FROM analytics_events WHERE occurred_at >= unixepoch() - 2592000 GROUP BY event_type ORDER BY total DESC").all(),
-      db.prepare("SELECT s.id, s.name, s.slug, s.address, s.created_at AS createdAt, c.name AS category, u.name AS ownerName FROM stores s JOIN categories c ON c.id = s.category_id LEFT JOIN users u ON u.id = s.owner_id WHERE s.status = 'pending' ORDER BY s.created_at ASC LIMIT 8").all(),
+      db.prepare("SELECT s.id, s.name, s.slug, s.address, s.created_at AS createdAt, COALESCE(c.name, s.business_type, 'Local Business') AS category, u.name AS ownerName FROM stores s LEFT JOIN categories c ON c.id = s.category_id LEFT JOIN users u ON u.id = s.owner_id WHERE s.status = 'pending' ORDER BY s.created_at ASC LIMIT 8").all(),
       db.prepare("SELECT id, name, email, role, status, created_at AS createdAt FROM users ORDER BY created_at DESC LIMIT 8").all(),
     ]);
     return noStoreJson({
