@@ -2168,10 +2168,39 @@ export default function Home() {
 
 
 
-      <section className="trustStrip" aria-label="Why use Kynisto">
-        <div><Icons.Location /><p><b>Exact Location</b></p></div>
-        <div><span aria-hidden="true">✓</span><p><b>Live Hours & Ratings</b></p></div>
-        <div><Icons.Heart /><p><b>Saved Favorites</b></p></div>
+      <section className="trustStrip efferdFeaturesBlock" aria-label="Why use Kynisto">
+        <div className="efferdFeatureCard featureCardLocation">
+          <div className="efferdIconBadge">
+            <span className="radarPulse" />
+            <Icons.Location />
+          </div>
+          <div className="efferdFeatureContent">
+            <p><b>Exact Location</b></p>
+            <small>Verified GPS &amp; local directions</small>
+          </div>
+        </div>
+
+        <div className="efferdFeatureCard featureCardHours">
+          <div className="efferdIconBadge">
+            <span className="liveStatusDot" />
+            <span aria-hidden="true" className="checkMark">✓</span>
+          </div>
+          <div className="efferdFeatureContent">
+            <p><b>Live Hours &amp; Ratings</b></p>
+            <small>Real-time open status &amp; reviews</small>
+          </div>
+        </div>
+
+        <div className="efferdFeatureCard featureCardFavorites">
+          <div className="efferdIconBadge">
+            <span className="heartAura" />
+            <Icons.Heart />
+          </div>
+          <div className="efferdFeatureContent">
+            <p><b>Saved Favorites</b></p>
+            <small>1-click access to saved places</small>
+          </div>
+        </div>
       </section>
 
       <footer>

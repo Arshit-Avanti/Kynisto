@@ -2679,59 +2679,203 @@ img, video, iframe, embed, object {
   border: 1px solid rgba(255, 255, 255, 0.18) !important;
 }
 
-/* ── 4. EXACT LOCATION / LIVE HOURS / SAVED FAVORITES — trustStrip visible & compact ── */
-.trustStrip {
-  background: rgba(10, 16, 30, 0.6) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border-radius: 20px !important;
-  padding: 18px 32px !important;
-  margin: 24px auto !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+/* ── 4. EXACT LOCATION / LIVE HOURS / SAVED FAVORITES — Efferd Animated Features Block ── */
+.trustStrip.efferdFeaturesBlock {
+  width: min(1344px, calc(100% - 64px)) !important;
+  margin: 32px auto !important;
+  padding: 16px !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 20px !important;
+  background: rgba(10, 16, 30, 0.65) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  transition: all 0.3s ease !important;
 }
 
-.mode-light .trustStrip {
-  background: rgba(255, 255, 255, 0.55) !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+.mode-light .trustStrip.efferdFeaturesBlock {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
 }
 
-.trustStrip b {
+.efferdFeatureCard {
+  display: flex !important;
+  align-items: center !important;
+  gap: 18px !important;
+  padding: 18px 24px !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.mode-light .efferdFeatureCard {
+  background: rgba(248, 250, 252, 0.7) !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+
+.efferdFeatureCard:hover {
+  transform: translateY(-4px) scale(1.015) !important;
+  background: rgba(255, 255, 255, 0.09) !important;
+  border-color: rgba(56, 189, 248, 0.4) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), 0 0 20px rgba(56, 189, 248, 0.2) !important;
+}
+
+.mode-light .efferdFeatureCard:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(2, 132, 199, 0.35) !important;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12), 0 0 15px rgba(2, 132, 199, 0.15) !important;
+}
+
+.efferdIconBadge {
+  width: 52px !important;
+  height: 52px !important;
+  flex: 0 0 52px !important;
+  border-radius: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  transition: transform 0.3s ease !important;
+}
+
+.efferdFeatureCard:hover .efferdIconBadge {
+  transform: scale(1.1) rotate(-3deg) !important;
+}
+
+/* Feature 1: Exact Location badge */
+.featureCardLocation .efferdIconBadge {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(14, 165, 233, 0.4)) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.6) !important;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.35) !important;
+}
+.mode-light .featureCardLocation .efferdIconBadge {
+  background: linear-gradient(135deg, rgba(224, 242, 254, 0.9), rgba(186, 230, 253, 0.9)) !important;
+  color: #0284c7 !important;
+  border: 1.5px solid rgba(2, 132, 199, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25) !important;
+}
+
+/* Feature 2: Live Hours badge */
+.featureCardHours .efferdIconBadge {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(16, 185, 129, 0.4)) !important;
+  color: #4ade80 !important;
+  border: 1px solid rgba(74, 222, 128, 0.6) !important;
+  box-shadow: 0 0 20px rgba(74, 222, 128, 0.35) !important;
+}
+.mode-light .featureCardHours .efferdIconBadge {
+  background: linear-gradient(135deg, rgba(220, 252, 231, 0.9), rgba(187, 247, 208, 0.9)) !important;
+  color: #16a34a !important;
+  border: 1.5px solid rgba(22, 163, 74, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.25) !important;
+}
+
+/* Feature 3: Saved Favorites badge */
+.featureCardFavorites .efferdIconBadge {
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.25), rgba(225, 29, 72, 0.4)) !important;
+  color: #fb7185 !important;
+  border: 1px solid rgba(251, 113, 133, 0.6) !important;
+  box-shadow: 0 0 20px rgba(251, 113, 133, 0.35) !important;
+}
+.mode-light .featureCardFavorites .efferdIconBadge {
+  background: linear-gradient(135deg, rgba(255, 228, 230, 0.9), rgba(254, 205, 211, 0.9)) !important;
+  color: #e11d48 !important;
+  border: 1.5px solid rgba(225, 29, 72, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.25) !important;
+}
+
+/* Radar Ping & Aura Animations */
+.radarPulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 18px;
+  border: 2px solid rgba(56, 189, 248, 0.6);
+  animation: radarPing 2.4s infinite cubic-bezier(0, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.liveStatusDot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid #0A101E;
+  box-shadow: 0 0 8px #22c55e;
+  animation: statusPulse 1.8s infinite ease-in-out;
+}
+
+.heartAura {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.3) 0%, transparent 70%);
+  animation: heartPulse 2s infinite ease-in-out;
+}
+
+@keyframes radarPing {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  70%, 100% { transform: scale(1.35); opacity: 0; }
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+@keyframes heartPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.15); opacity: 0.9; }
+}
+
+.efferdFeatureContent {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+}
+
+.efferdFeatureContent p b {
   font-size: 16px !important;
-  font-weight: 900 !important;
+  font-weight: 850 !important;
   color: #FFFFFF !important;
   -webkit-text-fill-color: #FFFFFF !important;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8) !important;
   letter-spacing: -0.01em !important;
 }
 
-.mode-light .trustStrip b {
+.mode-light .efferdFeatureContent p b {
   color: #0F172A !important;
   -webkit-text-fill-color: #0F172A !important;
-  text-shadow: none !important;
 }
 
-.trustStrip small {
+.efferdFeatureContent small {
+  font-size: 12px !important;
+  font-weight: 550 !important;
   color: #94A3B8 !important;
   -webkit-text-fill-color: #94A3B8 !important;
-  font-size: 12px !important;
-  font-weight: 500 !important;
 }
 
-.mode-light .trustStrip small {
+.mode-light .efferdFeatureContent small {
   color: #475569 !important;
   -webkit-text-fill-color: #475569 !important;
 }
 
-/* Trust strip icon circles more prominent */
-.trustStrip > div > span {
-  width: 50px !important;
-  height: 50px !important;
-  background: rgba(56, 189, 248, 0.3) !important;
-  color: #38bdf8 !important;
-  border: 1.5px solid rgba(56, 189, 248, 0.6) !important;
-  box-shadow: 0 0 18px rgba(56, 189, 248, 0.35), 0 4px 14px rgba(0, 0, 0, 0.4) !important;
-  font-size: 20px !important;
-  font-weight: 800 !important;
+@media (max-width: 900px) {
+  .trustStrip.efferdFeaturesBlock {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 12px !important;
+  }
 }
 
 
