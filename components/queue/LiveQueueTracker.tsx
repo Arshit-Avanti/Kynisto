@@ -7,38 +7,51 @@ import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/client-api';
 import { PushNotificationManager } from '@/components/ui/PushNotificationManager';
 
+let _cachedAudioCtx: AudioContext | null = null;
+let _lastChimeTime = 0;
+
 function playTurnArrivalChime() {
   if (typeof window === "undefined") return;
+  const now = Date.now();
+  if (now - _lastChimeTime < 2500) return; // Prevent spamming within 2.5s
+  _lastChimeTime = now;
+
   try {
     const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
     if (!AudioContextClass) return;
-    const ctx = new AudioContextClass();
+    if (!_cachedAudioCtx || _cachedAudioCtx.state === "closed") {
+      _cachedAudioCtx = new AudioContextClass();
+    }
+    const ctx = _cachedAudioCtx;
+    if (ctx.state === "suspended") {
+      ctx.resume().catch(() => {});
+    }
     
     // Tone 1: High Bell (E5 - 659.25Hz)
     const osc1 = ctx.createOscillator();
     const gain1 = ctx.createGain();
     osc1.type = "sine";
     osc1.frequency.setValueAtTime(659.25, ctx.currentTime);
-    gain1.gain.setValueAtTime(0.5, ctx.currentTime);
-    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+    gain1.gain.setValueAtTime(0.4, ctx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
     osc1.connect(gain1);
     gain1.connect(ctx.destination);
     osc1.start(ctx.currentTime);
-    osc1.stop(ctx.currentTime + 0.6);
+    osc1.stop(ctx.currentTime + 0.5);
 
     // Tone 2: Warm Low Chime (C5 - 523.25Hz)
     const osc2 = ctx.createOscillator();
     const gain2 = ctx.createGain();
     osc2.type = "sine";
-    osc2.frequency.setValueAtTime(523.25, ctx.currentTime + 0.25);
-    gain2.gain.setValueAtTime(0.6, ctx.currentTime + 0.25);
-    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+    osc2.frequency.setValueAtTime(523.25, ctx.currentTime + 0.2);
+    gain2.gain.setValueAtTime(0.45, ctx.currentTime + 0.2);
+    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
     osc2.connect(gain2);
     gain2.connect(ctx.destination);
-    osc2.start(ctx.currentTime + 0.25);
-    osc2.stop(ctx.currentTime + 1.2);
+    osc2.start(ctx.currentTime + 0.2);
+    osc2.stop(ctx.currentTime + 0.9);
   } catch (e) {
-    console.warn("Audio chime playback notice:", e);
+    console.warn("Audio chime notice:", e);
   }
 }
 
@@ -217,6 +230,7 @@ export default function LiveQueueTracker() {
   const [entryStatus, setEntryStatus] = useState<'waiting' | 'called' | 'completed' | 'cancelled' | 'left' | 'expired'>('waiting');
   const [currentEntryId, setCurrentEntryId] = useState<string | null>(null);
   const [liveCompleted, setLiveCompleted] = useState<boolean>(false);
+  const [isTurnDismissed, setIsTurnDismissed] = useState<boolean>(false);
   const prevEntryStatusRef = useRef<string | null>(null);
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -259,6 +273,7 @@ export default function LiveQueueTracker() {
   entryStatusRef.current = entryStatus;
   const selectedQueueRef = useRef(selectedQueue);
   selectedQueueRef.current = selectedQueue;
+  const lastStateSignatureRef = useRef<string>("");
 
   // 2. Fetch exact patient queue state from DB for selected clinic (syncs with Owner Dashboard in real-time)
   const syncPatientStateWithStore = useCallback(async (storeId: string | number) => {
@@ -266,6 +281,14 @@ export default function LiveQueueTracker() {
       const res = await apiFetch<PatientQueueStateResponse>(`/api/healthcare/queue?storeId=${storeId}`);
       if (res && res.state) {
         const { state } = res;
+        
+        // Fast Delta Diffing (< 0.1ms) - skip duplicate re-renders on low networks
+        const signature = `${state.queueStatus}:${state.currentTokenNumber}:${state.waitingCount}:${state.entry?.status}:${state.entry?.position}:${state.entry?.tokenNumber}`;
+        if (lastStateSignatureRef.current === signature) {
+          return;
+        }
+        lastStateSignatureRef.current = signature;
+
         setIsQueueOpen(state.queueStatus !== 'closed');
         const curr = state.currentTokenNumber || 0;
         setCurrentToken(curr);
@@ -835,8 +858,8 @@ export default function LiveQueueTracker() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] bg-[radial-gradient(circle_at_center,_rgba(16,185,129,0.12)_0%,_rgba(6,182,212,0.06)_50%,_transparent_70%)] blur-3xl pointer-events-none" />
 
             {/* TURN ARRIVED BANNER */}
-            {isMyTurn && (
-              <div className="mb-8 p-6 bg-emerald-950/80 border-2 border-emerald-500/80 rounded-2xl flex items-start justify-between text-emerald-100 shadow-[0_0_40px_rgba(16,185,129,0.3)] animate-pulse flex-wrap gap-4">
+            {isMyTurn && !isTurnDismissed && (
+              <div className="mb-8 p-6 bg-emerald-950/90 border-2 border-emerald-500 rounded-2xl flex items-start justify-between text-emerald-100 shadow-[0_0_30px_rgba(16,185,129,0.25)] flex-wrap gap-4 transition-all duration-300">
                 <div className="flex items-start">
                   <CheckCircle2 className="w-8 h-8 text-emerald-400 mr-4 mt-0.5 shrink-0" />
                   <div>
@@ -846,13 +869,23 @@ export default function LiveQueueTracker() {
                     </p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => playTurnArrivalChime()}
-                  className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md self-center"
-                >
-                  🔔 Play Turn Chime
-                </button>
+                <div className="flex items-center gap-2 self-center flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => playTurnArrivalChime()}
+                    className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md cursor-pointer"
+                  >
+                    🔔 Play Chime
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsTurnDismissed(true)}
+                    className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-300 font-bold text-xs rounded-xl border border-emerald-500/30 transition-all cursor-pointer"
+                    aria-label="Dismiss turn notification"
+                  >
+                    ✕ Dismiss
+                  </button>
+                </div>
               </div>
             )}
 

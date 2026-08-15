@@ -503,12 +503,49 @@ const modernCleanTechStyles = `
     z-index: 10;
   }
   .glassCard3D:hover svg { transform: translateZ(40px) scale(1.1); }
-  .glassCard3D:hover b { transform: translateZ(50px) scale(1.05); }
-  
   .highContrastText {
     color: var(--text-primary) !important;
     -webkit-text-fill-color: var(--text-primary) !important;
     text-shadow: none !important;
+  }
+
+  .heroSearchBox {
+    width: 100%;
+    max-width: 660px;
+    margin: 20px auto 32px auto;
+    padding: 8px;
+    border-radius: 24px;
+    transform: translateZ(20px);
+    display: flex;
+    align-items: center;
+  }
+  .heroSearchInput {
+    font-size: 1.05rem;
+    padding: 16px 12px;
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+  }
+  .heroSearchButton {
+    padding: 12px 28px;
+    font-size: 1.05rem;
+    border-radius: 16px;
+  }
+  .smartSearchChipsContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    max-width: 750px;
+    margin: -12px auto 24px auto;
+    font-size: 0.85rem;
+  }
+  .smartSearchPromptChip {
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    white-space: nowrap;
   }
 
   @keyframes marquee {
@@ -870,134 +907,288 @@ const modernCleanTechStyles = `
     /* Hero Floating Action Cards ("Loyalty Card", "Queue Ticket", "Dashboard") */
     .floatingCardsContainer {
       height: auto !important;
+      display: flex !important;
       flex-direction: row !important;
       flex-wrap: nowrap !important;
-      justify-content: center !important;
+      justify-content: space-between !important;
       align-items: stretch !important;
-      gap: 8px !important;
-      margin: 20px 0 28px 0 !important;
-      padding: 0 4px !important;
+      gap: 6px !important;
+      margin: 14px auto 18px auto !important;
+      padding: 0 !important;
       width: 100% !important;
+      max-width: 480px !important;
     }
 
     .glassCard3D {
       flex: 1 1 0% !important;
       min-width: 0 !important;
-      max-width: 32% !important;
-      height: 105px !important;
-      padding: 12px 4px !important;
-      border-radius: 16px !important;
-      background: rgba(15, 23, 42, 0.88) !important;
-      border: 1px solid rgba(255, 255, 255, 0.16) !important;
+      max-width: 32.5% !important;
+      height: 68px !important;
+      padding: 8px 4px !important;
+      border-radius: 14px !important;
+      background: rgba(15, 23, 42, 0.82) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 3px !important;
     }
 
     .glassCard3D svg {
-      margin-bottom: 6px !important;
-      width: 20px !important;
-      height: 20px !important;
+      margin-bottom: 2px !important;
+      width: 18px !important;
+      height: 18px !important;
     }
 
     .glassCard3D b {
-      font-size: 0.8rem !important;
+      font-size: 0.74rem !important;
       font-weight: 700 !important;
-      line-height: 1.2 !important;
+      line-height: 1.15 !important;
       text-align: center !important;
-      white-space: normal !important;
-      word-break: normal !important;
+      white-space: nowrap !important;
+      letter-spacing: -0.01em !important;
       color: #FFFFFF !important;
       -webkit-text-fill-color: #FFFFFF !important;
     }
 
     /* Search box on mobile */
-    .searchBox {
-      margin: 16px auto 24px auto !important;
-      padding: 6px !important;
+    .searchBox,
+    .heroSearchBox {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 10px auto 14px auto !important;
+      padding: 4px 6px 4px 12px !important;
+      border-radius: 16px !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      box-sizing: border-box !important;
+      background: rgba(15, 23, 42, 0.85) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
     }
 
-    .searchBox input {
-      font-size: 0.95rem !important;
-      padding: 12px 8px !important;
+    .searchBox input,
+    .heroSearchInput {
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      font-size: 0.85rem !important;
+      padding: 8px 4px !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
     }
 
-    .searchSubmit {
-      padding: 10px 18px !important;
-      font-size: 0.9rem !important;
-      border-radius: 14px !important;
+    .searchSubmit,
+    .heroSearchButton {
+      flex-shrink: 0 !important;
+      padding: 8px 14px !important;
+      font-size: 0.84rem !important;
+      font-weight: 700 !important;
+      border-radius: 12px !important;
+      white-space: nowrap !important;
+      min-width: 64px !important;
     }
 
-    /* Feature Cards ("Universal Discovery", "Real-time Queues") Mobile Visibility */
+    /* Smart search horizontal scrolling carousel on mobile */
+    .smartSearchChipsContainer {
+      display: flex !important;
+      overflow-x: auto !important;
+      flex-wrap: nowrap !important;
+      gap: 6px !important;
+      padding: 2px 2px 8px 2px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 auto 12px auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+      justify-content: flex-start !important;
+    }
+    .smartSearchChipsContainer::-webkit-scrollbar {
+      display: none !important;
+    }
+    .smartSearchPromptChip {
+      flex-shrink: 0 !important;
+      font-size: 0.72rem !important;
+      padding: 4px 10px !important;
+      border-radius: 99px !important;
+      white-space: nowrap !important;
+    }
+
+    /* Feature Cards ("Universal Discovery", "Real-time Queues", "Unified Loyalty") */
     .featureGrid {
       grid-template-columns: 1fr !important;
-      gap: 16px !important;
-      margin: 40px auto !important;
-      padding: 0 16px !important;
+      gap: 10px !important;
+      margin: 20px auto !important;
+      padding: 0 !important;
     }
 
     .featureCard,
     .mode-light .featureCard,
     .mode-dark .featureCard {
-      background: rgba(15, 23, 42, 0.88) !important;
-      border: 1px solid rgba(255, 255, 255, 0.16) !important;
-      padding: 24px 20px !important;
-      border-radius: 20px !important;
+      background: rgba(15, 23, 42, 0.82) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      padding: 14px 16px !important;
+      border-radius: 16px !important;
       transform: translateZ(0) !important;
       will-change: transform, opacity !important;
       contain: layout style paint !important;
     }
 
+    .featureIconBadge {
+      width: 32px !important;
+      height: 32px !important;
+      border-radius: 8px !important;
+      font-size: 14px !important;
+    }
+
     .featureCard h3,
     .mode-light .featureCard h3,
     .mode-dark .featureCard h3 {
-      font-size: 1.3rem !important;
-      margin: 12px 0 8px 0 !important;
+      font-size: 1.05rem !important;
+      margin: 6px 0 4px 0 !important;
+      font-weight: 800 !important;
       color: #FFFFFF !important;
       -webkit-text-fill-color: #FFFFFF !important;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.8) !important;
     }
 
     .featureCard p,
     .mode-light .featureCard p,
     .mode-dark .featureCard p {
-      font-size: 0.95rem !important;
-      line-height: 1.55 !important;
-      color: #F1F5F9 !important;
-      -webkit-text-fill-color: #F1F5F9 !important;
+      font-size: 0.82rem !important;
+      line-height: 1.4 !important;
+      color: #94a3b8 !important;
+      -webkit-text-fill-color: #94a3b8 !important;
       opacity: 1 !important;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.7) !important;
     }
 
-    /* Store Cards & Category Grid on Mobile */
+    /* Category Section on Mobile */
+    .categorySection {
+      margin-top: 24px !important;
+      padding: 0 !important;
+    }
+
+    .sectionHeading.compactHeading {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: flex-end !important;
+      margin-bottom: 10px !important;
+    }
+
+    .sectionHeading h2,
+    #category-heading {
+      font-size: 1.25rem !important;
+      font-weight: 800 !important;
+      margin: 2px 0 0 0 !important;
+    }
+
+    .resetLink {
+      font-size: 0.72rem !important;
+      padding: 4px 8px !important;
+      border-radius: 6px !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+
     .categoryGrid {
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
-      gap: 10px !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 6px !important;
+      width: 100% !important;
     }
 
     .categoryTile {
-      padding: 14px 10px !important;
-      border-radius: 16px !important;
+      padding: 8px 4px !important;
+      border-radius: 12px !important;
+      min-height: 76px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 3px !important;
+      text-align: center !important;
+      background: rgba(15, 23, 42, 0.75) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .categoryArt {
+      width: 28px !important;
+      height: 28px !important;
+      border-radius: 8px !important;
+      font-size: 13px !important;
+      margin-bottom: 2px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
     }
 
     .categoryTile span {
-      font-size: 0.85rem !important;
+      font-size: 0.72rem !important;
+      font-weight: 700 !important;
+      line-height: 1.15 !important;
+      color: #FFFFFF !important;
+      -webkit-text-fill-color: #FFFFFF !important;
+    }
+
+    .categoryTile small {
+      font-size: 0.62rem !important;
+      color: #94a3b8 !important;
+      opacity: 0.8 !important;
+    }
+
+    /* Trust Strip / Bottom Feature Cards */
+    .efferdFeaturesBlock {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: 8px !important;
+      margin: 20px 0 !important;
+    }
+
+    .efferdFeatureCard {
+      padding: 10px 12px !important;
+      border-radius: 12px !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+      background: rgba(15, 23, 42, 0.75) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .efferdIconBadge {
+      width: 32px !important;
+      height: 32px !important;
+      border-radius: 8px !important;
+      flex-shrink: 0 !important;
+    }
+
+    .efferdFeatureContent p {
+      font-size: 0.84rem !important;
+      font-weight: 700 !important;
+      margin: 0 !important;
+      color: #FFFFFF !important;
+    }
+
+    .efferdFeatureContent small {
+      font-size: 0.72rem !important;
+      color: #94a3b8 !important;
+      margin: 0 !important;
     }
 
     .storesGrid {
       grid-template-columns: 1fr !important;
-      gap: 16px !important;
+      gap: 12px !important;
     }
 
     .storeCard {
-      padding: 16px !important;
-      border-radius: 20px !important;
+      padding: 14px !important;
+      border-radius: 16px !important;
     }
 
     .storeCard h3 {
-      font-size: 1.15rem !important;
+      font-size: 1.1rem !important;
     }
 
     .storeCard p {
-      font-size: 0.9rem !important;
-      line-height: 1.45 !important;
+      font-size: 0.85rem !important;
+      line-height: 1.4 !important;
       color: #F1F5F9 !important;
       -webkit-text-fill-color: #F1F5F9 !important;
     }
@@ -1009,7 +1200,15 @@ const modernCleanTechStyles = `
       font-size: 2.1rem !important;
     }
     .glassCard3D b {
-      font-size: 0.75rem !important;
+      font-size: 0.7rem !important;
+    }
+    .categoryGrid {
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 4px !important;
+    }
+    .categoryTile {
+      padding: 6px 2px !important;
+      min-height: 70px !important;
     }
   }
 `;
@@ -1955,42 +2154,31 @@ export default function Home() {
           </div>
 
           <form
-            className="searchBox"
+            className="searchBox heroSearchBox"
             role="search"
             onSubmit={(event) => {
               event.preventDefault();
               document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
             }}
-            style={{ width: "100%", maxWidth: "660px", margin: "20px auto 32px auto", padding: "8px", borderRadius: "24px", transform: "translateZ(20px)" }}
           >
-            <span className="searchIcon" aria-hidden="true" style={{ paddingLeft: "12px" }}><Icons.Search /></span>
+            <span className="searchIcon" aria-hidden="true" style={{ paddingLeft: "10px" }}><Icons.Search /></span>
             <label className="srOnly" htmlFor="store-search">Search nearby stores</label>
             <input
               id="store-search"
+              className="heroSearchInput highContrastText"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Try 'restaurant with dishes under 99' or 'cycle brake repair'..."
-              style={{ fontSize: "1.05rem", padding: "16px 12px" }}
-              className="highContrastText"
             />
             {query && (
               <button className="clearSearch highContrastText" type="button" aria-label="Clear search" onClick={() => setQuery("")}>×</button>
             )}
-            <button className="searchSubmit" type="submit" style={{ padding: "12px 28px", fontSize: "1.05rem", borderRadius: "16px" }}>Search</button>
+            <button className="searchSubmit heroSearchButton" type="submit">Search</button>
           </form>
 
           {/* Smart Conversational Search Suggestion Chips */}
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-            flexWrap: "wrap",
-            maxWidth: "750px",
-            margin: "-12px auto 24px auto",
-            fontSize: "0.85rem",
-          }}>
-            <span style={{ color: "#94a3b8", fontSize: "0.8rem", fontWeight: 600 }}>💡 Smart Search:</span>
+          <div className="smartSearchChipsContainer" role="region" aria-label="Smart Search suggestions">
+            <span style={{ color: "#94a3b8", fontSize: "0.8rem", fontWeight: 600, flexShrink: 0, alignSelf: "center", paddingRight: "4px" }}>💡 Smart:</span>
             {[
               "Restaurant with dishes under 99",
               "Cycle brake repair under 50rs",
@@ -1999,29 +2187,27 @@ export default function Home() {
             ].map((promptText) => (
               <button
                 key={promptText}
+                className="smartSearchPromptChip"
                 type="button"
                 onClick={() => {
                   setQuery(promptText);
                   document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
                 }}
                 style={{
-                  background: "rgba(255, 255, 255, 0.06)",
+                  background: "rgba(255, 255, 255, 0.07)",
                   border: "1px solid rgba(255, 255, 255, 0.12)",
                   color: "#cbd5e1",
                   borderRadius: "20px",
-                  padding: "4px 12px",
                   cursor: "pointer",
-                  fontSize: "0.78rem",
                   transition: "all 0.2s ease",
-                  whiteSpace: "nowrap"
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(255, 87, 34, 0.15)";
+                  e.currentTarget.style.background = "rgba(255, 87, 34, 0.18)";
                   e.currentTarget.style.borderColor = "#FF5722";
                   e.currentTarget.style.color = "#ffffff";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.06)";
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.07)";
                   e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)";
                   e.currentTarget.style.color = "#cbd5e1";
                 }}
