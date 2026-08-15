@@ -297,6 +297,7 @@ export default function LiveQueueTracker() {
           if (state.entry.status === 'waiting' || state.entry.status === 'called') {
             setEntryStatus(state.entry.status);
             setCurrentEntryId(state.entry.id);
+            currentEntryIdRef.current = state.entry.id;
             prevEntryStatusRef.current = state.entry.status;
             const pos = state.entry.position || 1;
             setUserPosition(pos);
@@ -316,8 +317,12 @@ export default function LiveQueueTracker() {
           } else {
             setEntryStatus(state.entry.status);
           }
-        } else if (currentEntryIdRef.current && (prevEntryStatusRef.current === 'waiting' || prevEntryStatusRef.current === 'called' || entryStatusRef.current === 'called' || entryStatusRef.current === 'waiting')) {
-          // Owner marked completed -> automatically transition to Thank You screen!
+        } else if (state.completedEntry && currentEntryIdRef.current && String(state.completedEntry.id) === String(currentEntryIdRef.current)) {
+          // Explicit completed entry matching our active consultation
+          setEntryStatus('completed');
+          setLiveCompleted(true);
+        } else if (prevEntryStatusRef.current === 'called' && myTokenNumber > 0 && curr > myTokenNumber) {
+          // Was actively called by doctor, and doctor advanced past our token -> Consultation systematically complete!
           setEntryStatus('completed');
           setLiveCompleted(true);
         } else if (selectedQueueRef.current) {
@@ -329,7 +334,7 @@ export default function LiveQueueTracker() {
     } catch {
       // Retain current snapshot
     }
-  }, []);
+  }, [myTokenNumber]);
 
   // 3. Auto-detect user's active joined queue in database on load
   useEffect(() => {
@@ -357,7 +362,10 @@ export default function LiveQueueTracker() {
             });
           }
           setMyTokenNumber(res.activeQueue.tokenNumber);
-          setEntryStatus(res.activeQueue.status as any);
+          const activeStatus = res.activeQueue.status as any;
+          const initialStatus = (activeStatus === 'waiting' || activeStatus === 'called') ? activeStatus : 'waiting';
+          setEntryStatus(initialStatus);
+          prevEntryStatusRef.current = initialStatus;
           setView('ticket');
           void syncPatientStateWithStore(storeId);
         }
@@ -409,13 +417,18 @@ export default function LiveQueueTracker() {
             if (state.entry) {
               setEntryStatus(state.entry.status);
               setCurrentEntryId(state.entry.id);
+              currentEntryIdRef.current = state.entry.id;
+              prevEntryStatusRef.current = state.entry.status;
               setUserPosition(state.entry.position || 1);
               setMyTokenNumber(state.entry.tokenNumber);
               setTotalInQueue(Math.max(1, state.waitingCount || state.entry.position || 1));
               if (state.entry.status === 'completed') {
                 setLiveCompleted(true);
               }
-            } else if (currentEntryIdRef.current && (entryStatusRef.current === 'waiting' || entryStatusRef.current === 'called')) {
+            } else if (state.completedEntry && currentEntryIdRef.current && String(state.completedEntry.id) === String(currentEntryIdRef.current)) {
+              setEntryStatus('completed');
+              setLiveCompleted(true);
+            } else if (prevEntryStatusRef.current === 'called' && myTokenNumber > 0 && (state.currentTokenNumber || 0) > myTokenNumber) {
               setEntryStatus('completed');
               setLiveCompleted(true);
             }
@@ -432,7 +445,7 @@ export default function LiveQueueTracker() {
       clearInterval(pollInterval);
       if (source) source.close();
     };
-  }, [view, selectedQueueId, isCancelled, syncPatientStateWithStore]);
+  }, [view, selectedQueueId, isCancelled, myTokenNumber, syncPatientStateWithStore]);
 
   // 🔔 Trigger Native Push Notification, Chime Sound, and Vibration ONLY when Turn Arrives
   useEffect(() => {
@@ -495,16 +508,23 @@ export default function LiveQueueTracker() {
     const optWait = optPos > 1 ? (optPos - 1) * ownerConsultationMins : 0;
 
     setSelectedQueue(item);
+    selectedQueueRef.current = item;
+    setCurrentEntryId(null);
+    currentEntryIdRef.current = null;
+    prevEntryStatusRef.current = 'waiting';
+    entryStatusRef.current = 'waiting';
+    setEntryStatus('waiting');
+    setLiveCompleted(false);
+    setIsCancelled(false);
+    setIsLate(false);
+    setIsTurnDismissed(false);
+    lastStateSignatureRef.current = "";
+
     setMyTokenNumber(optToken);
     setUserPosition(optPos);
     setTotalInQueue(Math.max(1, optPos));
     setEstimatedWait(optWait);
-    setEntryStatus('waiting');
-    prevEntryStatusRef.current = 'waiting';
     setIsQueueOpen(true);
-    setIsCancelled(false);
-    setIsLate(false);
-    setIsTurnDismissed(false);
     setView('ticket');
     window.scrollTo({ top: 0, behavior: 'instant' });
 
@@ -781,13 +801,17 @@ export default function LiveQueueTracker() {
           <button
             onClick={() => {
               setEntryStatus('waiting');
+              entryStatusRef.current = 'waiting';
+              prevEntryStatusRef.current = null;
               setCurrentEntryId(null);
+              currentEntryIdRef.current = null;
               setSelectedQueue(null);
+              selectedQueueRef.current = null;
               setMyTokenNumber(0);
               setUserPosition(0);
               setTotalInQueue(0);
               setLiveCompleted(false);
-              prevEntryStatusRef.current = null;
+              lastStateSignatureRef.current = "";
               setView('list');
             }}
             className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base rounded-2xl shadow-xl transition-all cursor-pointer"
