@@ -3575,20 +3575,14 @@ footer.efferdFooterBlock {
   -webkit-text-fill-color: #FFFFFF !important;
 }
 
-/* ⚡ ULTRA-FAST APK & WEB LOW-LATENCY GPU OPTIMIZATIONS (<20ms response) */
-html {
+/* ⚡ ULTRA-FAST APK & WEB LOW-LATENCY GPU OPTIMIZATIONS (<15ms response) */
+html, body {
   -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  scroll-behavior: smooth;
-}
-
-.storeGrid,
-.catalogGrid,
-.portalGrid,
-.healthcareGrid {
-  contain: layout style;
-  transform: translateZ(0);
-  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y pinch-zoom;
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 100%;
+  width: 100%;
 }
 
 .storeCard,
@@ -3597,8 +3591,6 @@ html {
   content-visibility: auto;
   contain-intrinsic-size: 1px 240px;
   transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 
 img, video {
@@ -3607,29 +3599,13 @@ img, video {
 
 /* 🚀 APPLE & STRIPE-TIER 120 FPS MOBILE DESIGN SYSTEM (<10ms & Smooth Scroll) */
 @media (max-width: 768px) {
-  body, html {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
-  }
-
-  .storeGrid,
-  .categoryGrid,
-  .featureGrid,
-  .efferdFeaturesBlock,
-  .floatingCardsContainer {
-    contain: layout style;
-    transform: translate3d(0, 0, 0);
-    will-change: transform;
-    -webkit-overflow-scrolling: touch;
-  }
-
   /* Tactile Apple Spring Active Physics on buttons & cards */
   button:active,
   a:active,
   .categoryTile:active,
   .glassCard3D:active,
   .smartSearchPromptChip:active {
-    transform: scale(0.96) translate3d(0, 0, 0) !important;
+    transform: scale(0.96) !important;
     transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
   }
 
