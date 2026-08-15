@@ -33,11 +33,11 @@ function Status({ value }: { value: unknown }) { const text=String(value??"pendi
 export function OwnerDashboard({ user }: { user: SessionUser }) {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") ?? "overview";
-  // Load initial cached overview data for instant 0ms load times
+  // Load initial cached overview data for instant 0ms load times across session and persistent storage
   const initialCache = useMemo(() => {
     if (typeof window === "undefined") return null;
     try {
-      const raw = sessionStorage.getItem("kynisto_owner_dash_cache");
+      const raw = sessionStorage.getItem("kynisto_owner_dash_cache") || localStorage.getItem("kynisto_owner_dash_cache");
       return raw ? JSON.parse(raw) : null;
     } catch {
       return null;
@@ -79,16 +79,18 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
     const activeId = selectedIdRef.current || (overview.stores[0] ? String(overview.stores[0].id) : "");
     if (!selectedIdRef.current && overview.stores[0]) setSelectedId(activeId);
 
-    // Save payload in sessionStorage for instant subsequent page renders
+    // Save payload in sessionStorage & localStorage for instant subsequent page renders (<15ms)
     try {
-      sessionStorage.setItem("kynisto_owner_dash_cache", JSON.stringify({
+      const payload = JSON.stringify({
         stores: overview.stores,
         analytics: overview.analytics,
         reviews: overview.recentReviews,
         categories: categoryData.items,
         subPlan: subRes?.plan ?? { id: "free", allowQueueManagement: false },
         selectedId: activeId
-      }));
+      });
+      sessionStorage.setItem("kynisto_owner_dash_cache", payload);
+      localStorage.setItem("kynisto_owner_dash_cache", payload);
     } catch {
       // Ignore storage quota errors
     }

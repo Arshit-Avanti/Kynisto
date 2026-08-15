@@ -42,11 +42,16 @@ export async function GET(request: Request) {
         .bind(session.user.id)
         .all(),
     ]);
-    return noStoreJson({
+    return Response.json({
       stores: stores.results ?? [],
       analytics: analytics.results ?? [],
       recentReviews: recentReviews.results ?? [],
-    }, { "Cache-Control": "private, max-age=30, stale-while-revalidate=60" });
+    }, {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "private, max-age=15, stale-while-revalidate=60",
+      },
+    });
   } catch (error) {
     return apiError(error);
   }
