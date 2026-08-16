@@ -257,9 +257,18 @@ export async function listCategories(module: "local" | "healthcare" | "all" = "l
       color: string;
     }>(),
   ]);
+  const childrenByParent = new Map<string, typeof children.results>();
+  for (const child of children.results ?? []) {
+    let list = childrenByParent.get(child.parentId);
+    if (!list) {
+      list = [];
+      childrenByParent.set(child.parentId, list);
+    }
+    list.push(child);
+  }
   const categories = (result.results ?? []).map((category) => ({
     ...category,
-    children: (children.results ?? []).filter((child) => child.parentId === category.id),
+    children: childrenByParent.get(category.id) ?? [],
   }));
   microCache.set(cacheKey, categories, 60_000);
   return categories;
@@ -316,18 +325,20 @@ export async function listStores(options: {
       if (parsed.maxPrice !== undefined) serviceBindings.push(parsed.maxPrice);
       else if (parsed.minPrice !== undefined) serviceBindings.push(parsed.minPrice);
 
-      const [productRows, serviceRows] = await Promise.all([
-        productQueryParts.length > 0
-          ? db.prepare(`SELECT DISTINCT store_id FROM products p WHERE p.status = 'active' AND (${productQueryParts.join(" OR ")}) ${priceProductCondition} LIMIT 100`).bind(...productBindings).all<{ store_id: string }>().catch(() => ({ results: [] }))
-          : Promise.resolve({ results: [] }),
-        serviceQueryParts.length > 0
-          ? db.prepare(`SELECT DISTINCT store_id FROM services sv WHERE sv.status = 'active' AND (${serviceQueryParts.join(" OR ")}) ${priceServiceCondition} LIMIT 100`).bind(...serviceBindings).all<{ store_id: string }>().catch(() => ({ results: [] }))
-          : Promise.resolve({ results: [] }),
-      ]);
-
-      const pIds = (productRows.results ?? []).map((r) => r.store_id);
-      const sIds = (serviceRows.results ?? []).map((r) => r.store_id);
-      matchedCatalogStoreIds = Array.from(new Set([...pIds, ...sIds]));
+      if (productQueryParts.length > 0 && serviceQueryParts.length > 0) {
+        const productStmt = db.prepare(`SELECT DISTINCT store_id FROM products p WHERE p.status = 'active' AND (${productQueryParts.join(" OR ")}) ${priceProductCondition} LIMIT 100`).bind(...productBindings);
+        const serviceStmt = db.prepare(`SELECT DISTINCT store_id FROM services sv WHERE sv.status = 'active' AND (${serviceQueryParts.join(" OR ")}) ${priceServiceCondition} LIMIT 100`).bind(...serviceBindings);
+        const batchResults = await db.batch<{ store_id: string }>([productStmt, serviceStmt]).catch(() => []);
+        const pIds = (batchResults[0]?.results ?? []).map((r) => r.store_id);
+        const sIds = (batchResults[1]?.results ?? []).map((r) => r.store_id);
+        matchedCatalogStoreIds = Array.from(new Set([...pIds, ...sIds]));
+      } else if (productQueryParts.length > 0) {
+        const productRows = await db.prepare(`SELECT DISTINCT store_id FROM products p WHERE p.status = 'active' AND (${productQueryParts.join(" OR ")}) ${priceProductCondition} LIMIT 100`).bind(...productBindings).all<{ store_id: string }>().catch(() => ({ results: [] }));
+        matchedCatalogStoreIds = (productRows.results ?? []).map((r) => r.store_id);
+      } else if (serviceQueryParts.length > 0) {
+        const serviceRows = await db.prepare(`SELECT DISTINCT store_id FROM services sv WHERE sv.status = 'active' AND (${serviceQueryParts.join(" OR ")}) ${priceServiceCondition} LIMIT 100`).bind(...serviceBindings).all<{ store_id: string }>().catch(() => ({ results: [] }));
+        matchedCatalogStoreIds = (serviceRows.results ?? []).map((r) => r.store_id);
+      }
     } catch {
       // Ignore catalog search error
     }
