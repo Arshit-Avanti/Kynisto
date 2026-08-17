@@ -39,6 +39,15 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
+  if (event.data && event.data.type === "CLEAR_OLD_CACHES") {
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((k) => k !== CACHE_NAME && k !== API_CACHE)
+          .map((k) => caches.delete(k))
+      )
+    );
+  }
 });
 
 // ⚡ Ultra-Fast Fetch Interceptor (Cache-First for Static Assets, SWR for Read APIs)
