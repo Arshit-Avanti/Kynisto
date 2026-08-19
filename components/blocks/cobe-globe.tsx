@@ -405,51 +405,6 @@ export function CobeGlobe({ className }: { className?: string }) {
         cursor: isInteracting ? "grabbing" : "grab",
         touchAction: "none",
       }}
-    >
-      {/* Live Geolocation Badge */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "12px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          display: "flex",
-          alignItems: "center",
-          gap: "6px",
-          padding: "5px 14px",
-          borderRadius: "20px",
-          background: "rgba(10, 16, 30, 0.85)",
-          border: "1px solid rgba(56, 189, 248, 0.5)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          boxShadow: "0 4px 16px rgba(0, 0, 0, 0.4)",
-          zIndex: 10,
-          pointerEvents: "none",
-          whiteSpace: "nowrap",
-        }}
-      >
-        <span
-          style={{
-            width: "8px",
-            height: "8px",
-            borderRadius: "50%",
-            background: "#38bdf8",
-            boxShadow: "0 0 10px #38bdf8",
-            display: "inline-block",
-          }}
-        />
-        <span
-          style={{
-            fontSize: "11px",
-            fontWeight: 750,
-            color: "#FFFFFF",
-            WebkitTextFillColor: "#FFFFFF",
-            letterSpacing: "0.02em",
-          }}
-        >
-          {locationName ? `${locationName} 📍 (Three.js 3D)` : "Global 3D Earth (Three.js)"}
-        </span>
-      </div>
-    </div>
+    />
   );
 }
