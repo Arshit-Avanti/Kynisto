@@ -12,73 +12,57 @@ export function VideoBackground({
   mobileVideoSrc = "/videos/mobile-9-16-hero.mp4",
 }: VideoBackgroundProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const video = videoRef.current;
-    const container = containerRef.current;
     if (!video) return;
 
-    let isIntersecting = true;
-    let isTabVisible = typeof document !== "undefined" ? !document.hidden : true;
+    // Modern Autoplay Compliance: defaultMuted and muted MUST be true for instant playback
+    video.defaultMuted = true;
+    video.muted = true;
+    video.playsInline = true;
 
-    const syncVideoPlayback = async () => {
-      if (!video) return;
-      const shouldPlay = isIntersecting && isTabVisible && (typeof document === "undefined" || !document.hidden);
-      if (shouldPlay) {
-        if (video.paused) {
-          try {
-            video.muted = true;
-            await video.play();
-          } catch (err) {
-            console.warn("Video background playback resume failed:", err);
-          }
-        }
-      } else {
-        if (!video.paused) {
-          video.pause();
-        }
+    const playVideo = () => {
+      if (video.paused) {
+        video.play().catch((err) => {
+          console.warn("Video play retry:", err);
+          video.muted = true;
+          video.play().catch(() => {});
+        });
       }
     };
 
-    let observer: IntersectionObserver | null = null;
-    const target = container || video;
-    if (typeof IntersectionObserver !== "undefined" && target) {
-      observer = new IntersectionObserver(
-        (entries) => {
-          const entry = entries[0];
-          isIntersecting = entry ? entry.isIntersecting : true;
-          void syncVideoPlayback();
-        },
-        { threshold: 0.05 }
-      );
-      observer.observe(target);
-    }
+    video.addEventListener("loadeddata", playVideo);
+    video.addEventListener("canplay", playVideo);
+    video.addEventListener("pause", playVideo);
 
-    const handleVisibilityChange = () => {
-      isTabVisible = typeof document !== "undefined" ? !document.hidden : true;
-      void syncVideoPlayback();
+    // Initial play trigger
+    playVideo();
+
+    // User first interaction trigger (fallback for strict browser policies)
+    const handleFirstInteraction = () => {
+      playVideo();
+      window.removeEventListener("touchstart", handleFirstInteraction);
+      window.removeEventListener("click", handleFirstInteraction);
+      window.removeEventListener("scroll", handleFirstInteraction);
     };
 
-    if (typeof document !== "undefined") {
-      document.addEventListener("visibilitychange", handleVisibilityChange);
-    }
-
-    void syncVideoPlayback();
+    window.addEventListener("touchstart", handleFirstInteraction, { passive: true });
+    window.addEventListener("click", handleFirstInteraction, { passive: true });
+    window.addEventListener("scroll", handleFirstInteraction, { passive: true });
 
     return () => {
-      if (typeof document !== "undefined") {
-        document.removeEventListener("visibilitychange", handleVisibilityChange);
-      }
-      if (observer) {
-        observer.disconnect();
-      }
+      video.removeEventListener("loadeddata", playVideo);
+      video.removeEventListener("canplay", playVideo);
+      video.removeEventListener("pause", playVideo);
+      window.removeEventListener("touchstart", handleFirstInteraction);
+      window.removeEventListener("click", handleFirstInteraction);
+      window.removeEventListener("scroll", handleFirstInteraction);
     };
   }, []);
 
   return (
     <div
-      ref={containerRef}
       className="fixed inset-0 w-full h-full min-h-[100dvh] overflow-hidden pointer-events-none z-[-1] mobile-9-16-video-container"
       style={{
         position: "fixed",
@@ -89,10 +73,11 @@ export function VideoBackground({
         minHeight: "100dvh",
         zIndex: -1,
         pointerEvents: "none",
-        backgroundColor: "#050507",
+        background: "transparent",
+        backgroundColor: "transparent",
       }}
     >
-      {/* High Performance Native Video Player (Optimized for 9:16 Vertical Mobile & Full-Page Coverage) */}
+      {/* High Performance Native Video Player (Optimized for Vertical Mobile & Full Desktop Coverage) */}
       <video
         ref={videoRef}
         autoPlay
@@ -111,24 +96,23 @@ export function VideoBackground({
           minWidth: "100vw",
           minHeight: "100dvh",
           objectFit: "cover",
-          objectPosition: "center top",
+          objectPosition: "center center",
           transform: "translateZ(0)",
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
         }}
       >
-        {/* Dedicated 9:16 Mobile Video Source (Google Drive Video Source for Mobile Only) */}
+        {/* Dedicated 9:16 Mobile Video Source */}
         <source src={mobileVideoSrc} media="(max-width: 768px)" type="video/mp4" />
         <source src={videoSrc} type="video/mp4" />
-        {videoSrc !== "/videos/drive-hero.mp4" && (
-          <source src="/videos/drive-hero.mp4" type="video/mp4" />
-        )}
+        <source src="/videos/drive-hero.mp4" type="video/mp4" />
         <source src="/videos/kynisto-hero.mp4" type="video/mp4" />
+        <source src="/videos/background-hero.mp4" type="video/mp4" />
+        <source src="/background-hero.mp4" type="video/mp4" />
       </video>
 
       {/* Crystal clear minimal overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/25 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20 pointer-events-none" />
     </div>
   );
 }
-
