@@ -208,7 +208,7 @@ export function Navbar3D({
         {!isRestrictedMode && <Link href="/products" style={{ color: navColor, WebkitTextFillColor: navColor, textDecoration: "none", transition: "all 0.15s" }}>Products</Link>}
         {!isRestrictedMode && <Link href="/healthcare" style={{ color: navColor, WebkitTextFillColor: navColor, textDecoration: "none", transition: "all 0.15s" }}>Healthcare</Link>}
         {!isRestrictedMode && <Link href="/services" style={{ color: navColor, WebkitTextFillColor: navColor, textDecoration: "none", transition: "all 0.15s" }}>Services</Link>}
-        {!isRestrictedMode && <Link href="/pricing" style={{ color: "#FF7A00", WebkitTextFillColor: "#FF7A00", textDecoration: "none", transition: "all 0.15s", fontWeight: 700 }}>Pricing &amp; Plans</Link>}
+        {!isRestrictedMode && <Link href="/pricing" style={{ color: "#FF7A00", WebkitTextFillColor: "#FF7A00", textDecoration: "none", transition: "all 0.15s", fontWeight: 700 }}>👑 Kynisto Membership</Link>}
         
         {(!isPricingMode) && (
           <button
@@ -555,7 +555,7 @@ export function Navbar3D({
                 fontWeight: 700,
               }}
             >
-              <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Pricing &amp; Plans</span>
+              <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>👑 Kynisto Membership</span>
               <span>⚡</span>
             </Link>
 

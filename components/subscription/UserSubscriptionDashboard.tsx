@@ -178,12 +178,28 @@ export function UserSubscriptionDashboard() {
                 borderRadius: "12px",
                 fontSize: "12px",
                 fontWeight: 800,
-                background: sub.status === "active" ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)",
-                color: sub.status === "active" ? "#22C55E" : "#EF4444",
-                border: `1px solid ${sub.status === "active" ? "#22C55E" : "#EF4444"}`,
+                background: (sub as any).isUnrestrictedByAdmin || (plan as any).isUnrestrictedByAdmin
+                  ? "rgba(245,158,11,0.2)"
+                  : sub.status === "active"
+                    ? "rgba(34,197,94,0.2)"
+                    : "rgba(239,68,68,0.2)",
+                color: (sub as any).isUnrestrictedByAdmin || (plan as any).isUnrestrictedByAdmin
+                  ? "#F59E0B"
+                  : sub.status === "active"
+                    ? "#22C55E"
+                    : "#EF4444",
+                border: `1px solid ${
+                  (sub as any).isUnrestrictedByAdmin || (plan as any).isUnrestrictedByAdmin
+                    ? "#F59E0B"
+                    : sub.status === "active"
+                      ? "#22C55E"
+                      : "#EF4444"
+                }`,
               }}
             >
-              ● {sub.status.toUpperCase()}
+              {(sub as any).isUnrestrictedByAdmin || (plan as any).isUnrestrictedByAdmin
+                ? "● ALL FEATURES UNLOCKED (FREE)"
+                : `● ${sub.status.toUpperCase()}`}
             </span>
           </div>
         </div>

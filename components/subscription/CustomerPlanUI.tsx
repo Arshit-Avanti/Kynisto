@@ -26,12 +26,14 @@ interface CustomerPlanUIProps {
   currentPlanId?: string;
   userEmail?: string;
   userName?: string;
+  isUnrestrictedByAdmin?: boolean;
 }
 
 export function CustomerPlanUI({
   currentPlanId = "free",
   userEmail = "",
   userName = "",
+  isUnrestrictedByAdmin = false,
 }: CustomerPlanUIProps) {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
@@ -102,8 +104,26 @@ export function CustomerPlanUI({
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 py-8 text-white font-sans">
+      {/* Unrestricted Admin Platform Banner */}
+      {isUnrestrictedByAdmin && (
+        <div className="mb-8 p-5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border-2 border-amber-500/40 flex items-center justify-between gap-4 backdrop-blur-md shadow-xl shadow-amber-500/10">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-amber-500/30 text-amber-300">
+              <Sparkles className="w-7 h-7" />
+            </div>
+            <div>
+              <h3 className="font-bold text-amber-300 text-lg">Platform Courtesy: All Premium VIP Features Unlocked!</h3>
+              <p className="text-xs text-amber-200/80">The platform administrator has removed all membership restrictions for customers. You have full access to unlimited favorites, priority access, and exclusive deals at zero cost.</p>
+            </div>
+          </div>
+          <span className="px-3.5 py-1.5 text-xs font-black rounded-full bg-amber-500 text-slate-950 uppercase tracking-wider">
+            UNRESTRICTED
+          </span>
+        </div>
+      )}
+
       {/* Active Plan Banner if already Premium */}
-      {isAlreadyPremium && (
+      {!isUnrestrictedByAdmin && isAlreadyPremium && (
         <div className="mb-8 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-4 backdrop-blur-md">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400">

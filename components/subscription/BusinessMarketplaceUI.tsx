@@ -226,12 +226,14 @@ interface BusinessMarketplaceUIProps {
   currentPlanId?: string;
   userEmail?: string;
   userName?: string;
+  isUnrestrictedByAdmin?: boolean;
 }
 
 export function BusinessMarketplaceUI({
   currentPlanId = "free",
   userEmail = "",
   userName = "",
+  isUnrestrictedByAdmin = false,
 }: BusinessMarketplaceUIProps) {
   const BASE_PRICE_MONTHLY = 199;
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
@@ -476,7 +478,25 @@ export function BusinessMarketplaceUI({
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-8 text-white font-sans">
-      {/* Top Banner Header */}
+      {/* Unrestricted Admin Platform Banner */}
+      {isUnrestrictedByAdmin && (
+        <div className="mb-8 p-5 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-indigo-500/20 border-2 border-cyan-500/40 flex items-center justify-between gap-4 backdrop-blur-md shadow-xl shadow-cyan-500/10">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-cyan-500/30 text-cyan-300">
+              <Sparkles className="w-7 h-7" />
+            </div>
+            <div>
+              <h3 className="font-bold text-cyan-300 text-lg">Platform Courtesy: All Business Features &amp; Add-Ons Unlocked!</h3>
+              <p className="text-xs text-cyan-200/80">The platform administrator has removed all membership restrictions for business owners. You have full access to unlimited stores, live queues, advanced analytics, staff accounts, and custom branding at zero cost.</p>
+            </div>
+          </div>
+          <span className="px-3.5 py-1.5 text-xs font-black rounded-full bg-cyan-500 text-slate-950 uppercase tracking-wider">
+            UNRESTRICTED
+          </span>
+        </div>
+      )}
+
+      {/* Header */}
       <div className="text-center max-w-3xl mx-auto mb-12">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-semibold tracking-wide uppercase mb-4 shadow-lg shadow-cyan-500/5">
           <Building2 className="w-3.5 h-3.5" />

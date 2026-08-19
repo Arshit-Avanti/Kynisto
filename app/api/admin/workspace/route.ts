@@ -77,6 +77,16 @@ const SETTING_DEFINITIONS = {
     type: "boolean",
     defaultValue: "false",
   },
+  kynisto_customer_membership_enabled: {
+    label: "Kynisto Customer Membership (Enforce plan tiers & restrictions for Customers)",
+    type: "boolean",
+    defaultValue: "true",
+  },
+  kynisto_owner_membership_enabled: {
+    label: "Kynisto Shop Owner Membership (Enforce plan tiers & restrictions for Shop Owners)",
+    type: "boolean",
+    defaultValue: "true",
+  },
   memberships_enabled: {
     label: "Allow store memberships across all pages",
     type: "boolean",

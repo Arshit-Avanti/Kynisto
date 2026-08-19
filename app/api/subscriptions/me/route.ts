@@ -8,6 +8,7 @@ import {
   calculateDaysRemaining,
   isSubscriptionExpiringSoon,
 } from "@/lib/subscriptions";
+import { isCustomerMembershipEnabled, isOwnerMembershipEnabled } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,18 @@ export async function GET() {
 
   await ensureSubscriptionTables();
   const welcomeReward = await grantWelcomeSubscriptionReward(session.user.id, session.user.role);
+
+  const [customerEnabled, ownerEnabled] = await Promise.all([
+    isCustomerMembershipEnabled(),
+    isOwnerMembershipEnabled(),
+  ]);
+
+  const isRoleMembershipDisabled =
+    session.user.role === "admin"
+      ? false
+      : session.user.role === "customer"
+        ? !customerEnabled
+        : !ownerEnabled;
 
   const db = getD1();
   const now = Math.floor(Date.now() / 1000);
@@ -54,7 +67,33 @@ export async function GET() {
 
   const defaultPlanId = session.user.role === "store_owner" ? "pro" : "premium";
   const planId = sub && sub.expiresAt > now ? sub.planId : defaultPlanId;
-  const activePlan = getPlanConfig(planId);
+  const rawPlan = getPlanConfig(planId) || getPlanConfig(defaultPlanId);
+
+  // When membership is disabled by admin for this role, grant all features with zero restrictions!
+  const activePlan = isRoleMembershipDisabled
+    ? {
+        ...rawPlan,
+        isUnrestrictedByAdmin: true,
+        maxStores: 100,
+        maxFavorites: Infinity,
+        maxDailyBookings: Infinity,
+        maxStaff: 50,
+        allowQueueManagement: true,
+        allowAppointmentBooking: true,
+        allowQrQueue: true,
+        allowVipQueue: true,
+        allowAnalytics: true,
+        allowCustomBranding: true,
+        allowWhatsappAlerts: true,
+        allowReportsExport: true,
+        allowCoupons: true,
+        allowStaffAccounts: true,
+        allowPromotions: true,
+      }
+    : {
+        ...rawPlan,
+        isUnrestrictedByAdmin: false,
+      };
 
   // Fetch transaction history for user
   const txnsResult = await db
@@ -72,6 +111,9 @@ export async function GET() {
   const expiringSoon = sub ? isSubscriptionExpiringSoon(sub.expiresAt, sub.status, now) : false;
 
   return NextResponse.json({
+    customerMembershipEnabled: customerEnabled,
+    ownerMembershipEnabled: ownerEnabled,
+    isUnrestrictedByAdmin: isRoleMembershipDisabled,
     subscription: sub
       ? {
           ...sub,
@@ -79,6 +121,7 @@ export async function GET() {
           isExpired: sub.expiresAt <= now,
           daysRemaining,
           isExpiringSoon: expiringSoon,
+          isUnrestrictedByAdmin: isRoleMembershipDisabled,
         }
       : {
           id: `sub_default_${session.user.id}`,
@@ -97,6 +140,7 @@ export async function GET() {
           isExpired: false,
           daysRemaining: 365,
           isExpiringSoon: false,
+          isUnrestrictedByAdmin: isRoleMembershipDisabled,
         },
     plan: activePlan,
     transactions: txnsResult.results || [],

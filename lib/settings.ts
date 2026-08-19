@@ -46,6 +46,14 @@ export async function isOrdersEnabled(): Promise<boolean> {
   return systemBoolean("orders_enabled", true);
 }
 
+export async function isCustomerMembershipEnabled(): Promise<boolean> {
+  return systemBoolean("kynisto_customer_membership_enabled", true);
+}
+
+export async function isOwnerMembershipEnabled(): Promise<boolean> {
+  return systemBoolean("kynisto_owner_membership_enabled", true);
+}
+
 export async function isMembershipsEnabled(): Promise<boolean> {
   return systemBoolean("memberships_enabled", true);
 }

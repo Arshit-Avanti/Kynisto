@@ -55,8 +55,10 @@ export function SubscriptionGate({
       typeof plan === "string" ? plan : planObj.id ?? "free"
     ).toLowerCase();
 
-    // Admin & Enterprise plans unlock everything
+    // Admin & Enterprise plans, or platform admin disabled membership restrictions
     if (
+      planObj.isUnrestrictedByAdmin === true ||
+      planObj.isMembershipDisabled === true ||
       planId === "enterprise" ||
       planId === "admin" ||
       planObj.role === "admin"

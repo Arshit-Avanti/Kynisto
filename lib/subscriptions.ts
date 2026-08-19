@@ -14,6 +14,7 @@ import {
 } from "./subscriptions-shared";
 import { getD1 } from "@/db/runtime";
 import { PaymentRequiredError } from "@/lib/security";
+import { isCustomerMembershipEnabled, isOwnerMembershipEnabled } from "@/lib/settings";
 
 export async function ensureSubscriptionTables() {
   try {
@@ -924,6 +925,26 @@ export async function checkUserFeaturePermission(userId: string, featureKey: str
 
     if (user?.role === "admin") {
       return true;
+    }
+
+    const isCustomer = user?.role === "customer";
+    const isOwner = user?.role === "store_owner" || user?.role === "owner";
+
+    // 2. Global Platform Admin Setting Override
+    // If admin has turned OFF membership for customers, all customer feature restrictions stop immediately!
+    if (isCustomer) {
+      const customerMembershipAllowed = await isCustomerMembershipEnabled();
+      if (!customerMembershipAllowed) {
+        return true;
+      }
+    }
+
+    // If admin has turned OFF membership for shop owners, all shop owner feature restrictions stop immediately!
+    if (isOwner) {
+      const ownerMembershipAllowed = await isOwnerMembershipEnabled();
+      if (!ownerMembershipAllowed) {
+        return true;
+      }
     }
 
     const normalizedKey = normalizeFeatureKey(featureKey);

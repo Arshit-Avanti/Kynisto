@@ -21,6 +21,21 @@ function PricingContent({ user }: { user: UserProfile | null }) {
   const roleParam = searchParams?.get("role");
   const tabParam = searchParams?.get("tab");
 
+  const [subData, setSubData] = useState<{
+    customerMembershipEnabled?: boolean;
+    ownerMembershipEnabled?: boolean;
+    isUnrestrictedByAdmin?: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/subscriptions/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) setSubData(data);
+      })
+      .catch(() => {});
+  }, []);
+
   // Determine initial view based on query params or logged in user's role
   const isOwnerDefault =
     roleParam === "store_owner" ||
@@ -44,6 +59,9 @@ function PricingContent({ user }: { user: UserProfile | null }) {
       setActiveTab("customer");
     }
   }, [roleParam, tabParam, user?.role]);
+
+  const isCustomerUnrestricted = subData?.customerMembershipEnabled === false;
+  const isOwnerUnrestricted = subData?.ownerMembershipEnabled === false;
 
   return (
     <div className="w-full">
@@ -84,12 +102,14 @@ function PricingContent({ user }: { user: UserProfile | null }) {
           currentPlanId={user?.plan || "free"}
           userName={user?.name || ""}
           userEmail={user?.email || ""}
+          isUnrestrictedByAdmin={isCustomerUnrestricted}
         />
       ) : (
         <BusinessMarketplaceUI
           currentPlanId={user?.plan || "free"}
           userName={user?.name || ""}
           userEmail={user?.email || ""}
+          isUnrestrictedByAdmin={isOwnerUnrestricted}
         />
       )}
     </div>
