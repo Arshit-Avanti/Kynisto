@@ -234,32 +234,7 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
   if (tabLoading && !["overview", "profile", "reviews", "subscription", "healthcare", "chat", "memberships", "loyalty"].includes(tab)) return <div className="tabSkeleton"><span /><span /><span /></div>;
   if (tab === "chat") return <ChatCenter user={user} />;
   if (tab === "subscription") return <UserSubscriptionDashboard />;
-  if (tab === "healthcare") {
-    return (
-      <SubscriptionGate
-        plan={subPlan}
-        feature="allowQueueManagement"
-        featureName="Live Real-Time Queue Management"
-        includedPlans={["STARTER", "PRO", "ENTERPRISE"]}
-        priceTag="From ₹299/month"
-        description="Free accounts are limited to basic storefront visibility. Upgrade to STARTER or PRO to enable digital tokens, real-time wait estimation, audio alerts, and QR code queue entry!"
-        benefits={[
-          "Unlimited Daily Queue Tokens",
-          "Real-Time Estimated Wait Time Ring",
-          "Audio Chime Notifications on Token Updates",
-          "QR Code Entry for Walk-in Customers",
-          "Business Dashboard & Reports",
-        ]}
-      >
-        {selected ? (
-          <OwnerHealthcarePanel storeId={String(selected.id)} />
-        ) : (
-          <p className="profileEmpty">No store selected.</p>
-        )}
-      </SubscriptionGate>
-    );
-  }
-  const title = tab === "overview" ? "Business overview" : tab === "subscription" ? "Premium & Plans" : tab.charAt(0).toUpperCase()+tab.slice(1);
+  const title = tab === "overview" ? "Business overview" : tab === "subscription" ? "Premium & Plans" : tab === "healthcare" ? "Live Queue Management" : tab.charAt(0).toUpperCase()+tab.slice(1);
   return (
     <>
       <SubscriptionExpiryBanner />
@@ -400,6 +375,25 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
           )}
           {tab === "loyalty" && selected && <OwnerLoyaltyManager storeId={String(selected.id)} />}
           {tab === "reviews" && selected && <ReviewsPanel items={storeReviews} storeId={String(selected.id)} mutate={mutate} pagination={reviewPagination} onPageChange={setReviewPage} />}
+          {tab === "healthcare" && selected && (
+            <SubscriptionGate
+              plan={subPlan}
+              feature="allowQueueManagement"
+              featureName="Live Real-Time Queue Management"
+              includedPlans={["STARTER", "PRO", "ENTERPRISE"]}
+              priceTag="From ₹299/month"
+              description="Free accounts are limited to basic storefront visibility. Upgrade to STARTER or PRO to enable digital tokens, real-time wait estimation, audio alerts, and QR code queue entry!"
+              benefits={[
+                "Unlimited Daily Queue Tokens",
+                "Real-Time Estimated Wait Time Ring",
+                "Audio Chime Notifications on Token Updates",
+                "QR Code Entry for Walk-in Customers",
+                "Business Dashboard & Reports",
+              ]}
+            >
+              <OwnerHealthcarePanel storeId={String(selected.id)} />
+            </SubscriptionGate>
+          )}
           {tab === "analytics" && (
             <SubscriptionGate
               plan={subPlan}

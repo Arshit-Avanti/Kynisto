@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, startTransition, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, startTransition, type FormEvent } from "react";
 import { apiFetch } from "@/lib/client-api";
 import { OwnerHealthcareQRCard } from "./OwnerHealthcareQRCard";
 
