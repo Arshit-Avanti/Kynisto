@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     if (!storeId) throw new HttpError(400, "Provider is required.", "VALIDATION_ERROR");
     await requireHealthcareStore(storeId);
     const doctors = await getD1()
-      .prepare(`SELECT id, name, specialization, consultation_minutes AS consultationMinutes, sort_order AS sortOrder
+      .prepare(`SELECT id, name, specialization, consultation_minutes AS consultationMinutes, COALESCE(consultation_fee, 500) AS consultationFee, sort_order AS sortOrder
         FROM healthcare_doctors WHERE store_id = ? AND status = 'active' ORDER BY sort_order ASC, name ASC`)
       .bind(storeId).all();
     return noStoreJson({ doctors: doctors.results ?? [] });
@@ -39,12 +39,13 @@ export async function POST(request: Request) {
       const name = cleanText(body.name, "Doctor name", { min: 2, max: 120 });
       const specialization = cleanText(body.specialization, "Specialization", { max: 120, required: false }) || null;
       const consultationMinutes = numberInput(body.consultationMinutes ?? 15, "Consultation time", { min: 5, max: 180, integer: true }) as number;
+      const consultationFee = numberInput(body.consultationFee ?? 500, "Consultation fee", { min: 0, max: 100000 }) as number;
       const id = crypto.randomUUID();
-      await db.prepare(`INSERT INTO healthcare_doctors (id, store_id, name, specialization, consultation_minutes, status, sort_order, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, 'active', (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM healthcare_doctors WHERE store_id = ?), ?, ?)`)
-        .bind(id, storeId, name, specialization, consultationMinutes, storeId, now, now).run();
-      await writeAudit(request, session.user.id, "healthcare.doctor.added", "store", storeId, { doctorId: id, name });
-      return noStoreJson({ ok: true, doctor: { id, name, specialization, consultationMinutes } }, { status: 201 });
+      await db.prepare(`INSERT INTO healthcare_doctors (id, store_id, name, specialization, consultation_minutes, consultation_fee, status, sort_order, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, 'active', (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM healthcare_doctors WHERE store_id = ?), ?, ?)`)
+        .bind(id, storeId, name, specialization, consultationMinutes, consultationFee, storeId, now, now).run();
+      await writeAudit(request, session.user.id, "healthcare.doctor.added", "store", storeId, { doctorId: id, name, consultationFee });
+      return noStoreJson({ ok: true, doctor: { id, name, specialization, consultationMinutes, consultationFee } }, { status: 201 });
     }
 
     if (action === "update") {
@@ -52,10 +53,11 @@ export async function POST(request: Request) {
       const name = cleanText(body.name, "Doctor name", { min: 2, max: 120 });
       const specialization = cleanText(body.specialization, "Specialization", { max: 120, required: false }) || null;
       const consultationMinutes = numberInput(body.consultationMinutes ?? 15, "Consultation time", { min: 5, max: 180, integer: true }) as number;
-      const result = await db.prepare("UPDATE healthcare_doctors SET name = ?, specialization = ?, consultation_minutes = ?, updated_at = ? WHERE id = ? AND store_id = ? RETURNING id")
-        .bind(name, specialization, consultationMinutes, now, doctorId, storeId).first();
+      const consultationFee = numberInput(body.consultationFee ?? 500, "Consultation fee", { min: 0, max: 100000 }) as number;
+      const result = await db.prepare("UPDATE healthcare_doctors SET name = ?, specialization = ?, consultation_minutes = ?, consultation_fee = ?, updated_at = ? WHERE id = ? AND store_id = ? RETURNING id")
+        .bind(name, specialization, consultationMinutes, consultationFee, now, doctorId, storeId).first();
       if (!result) throw new HttpError(404, "Doctor not found.", "DOCTOR_NOT_FOUND");
-      await writeAudit(request, session.user.id, "healthcare.doctor.updated", "store", storeId, { doctorId, name });
+      await writeAudit(request, session.user.id, "healthcare.doctor.updated", "store", storeId, { doctorId, name, consultationFee });
       return noStoreJson({ ok: true });
     }
 

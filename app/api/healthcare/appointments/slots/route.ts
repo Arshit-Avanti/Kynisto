@@ -13,7 +13,10 @@ export async function GET(request: Request) {
     if (!storeId) throw new HttpError(400, "Provider is required.", "VALIDATION_ERROR");
     if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new HttpError(400, "Valid date is required.", "VALIDATION_ERROR");
 
-    await requireHealthcareStore(storeId);
+    const provider = await requireHealthcareStore(storeId);
+    if (provider.allowAppointments === 0) {
+      return noStoreJson({ slots: [], allowAppointments: false, message: "Appointments are currently closed by the clinic." });
+    }
     const db = getD1();
 
     // Get queue settings for operating hours

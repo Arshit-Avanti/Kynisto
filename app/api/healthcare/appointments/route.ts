@@ -73,6 +73,9 @@ export async function POST(request: Request) {
     if ((provider.storeStatus !== "approved" && provider.storeStatus !== "active") || !provider.providerType) {
       throw new HttpError(409, "Provider is not available.", "PROVIDER_UNAVAILABLE");
     }
+    if (provider.allowAppointments === 0) {
+      throw new HttpError(403, "Doctor appointments are currently closed by this clinic.", "APPOINTMENTS_CLOSED");
+    }
     const db = getD1();
     const now = Math.floor(Date.now() / 1000);
     const today = indiaServiceDate();

@@ -52,6 +52,7 @@ export async function PATCH(request: Request) {
     if (action === "configure") {
       const enabled = booleanInput(body.ownerQueueEnabled);
       if (enabled && (provider.queueActivationStatus !== "approved" || !provider.adminQueueEnabled)) throw new HttpError(409, "An admin must approve and enable Live Queue first.", "ADMIN_APPROVAL_REQUIRED");
+      const allowAppointments = booleanInput(body.allowAppointments, true);
       const minutes = numberInput(body.consultationMinutes, "Consultation time", { min: 5, max: 180, integer: true }) as number;
       const openingTime = cleanText(body.openingTime ?? "09:00", "Queue opening time", { max: 5 });
       const closingTime = cleanText(body.closingTime ?? "18:00", "Queue closing time", { max: 5 });
@@ -61,15 +62,15 @@ export async function PATCH(request: Request) {
       const now = Math.floor(Date.now() / 1000);
       const db = getD1();
       const statements: D1PreparedStatement[] = [
-        db.prepare("UPDATE healthcare_provider_profiles SET owner_queue_enabled = ?, accepting_patients = ?, updated_at = ? WHERE store_id = ?")
-          .bind(enabled ? 1 : 0, booleanInput(body.acceptingPatients) ? 1 : 0, now, storeId),
+        db.prepare("UPDATE healthcare_provider_profiles SET owner_queue_enabled = ?, accepting_patients = ?, allow_appointments = ?, updated_at = ? WHERE store_id = ?")
+          .bind(enabled ? 1 : 0, booleanInput(body.acceptingPatients) ? 1 : 0, allowAppointments ? 1 : 0, now, storeId),
         db.prepare("UPDATE healthcare_queue_settings SET consultation_minutes = ?, opening_time = ?, closing_time = ?, maximum_daily_patients = ?, grace_period_minutes = ?, status = CASE WHEN ? = 0 THEN 'closed' ELSE status END, updated_by = ?, updated_at = ? WHERE store_id = ?")
           .bind(minutes, openingTime, closingTime, maximumDailyPatients, gracePeriodMinutes, enabled ? 1 : 0, session.user.id, now, storeId),
       ];
       if (!enabled) statements.push(db.prepare("UPDATE healthcare_queue_entries SET status = 'cancelled', active_key = NULL, left_at = ?, updated_at = ? WHERE store_id = ? AND status IN ('waiting','called','in_consultation')")
         .bind(now, now, storeId));
       await db.batch(statements);
-      await writeAudit(request, session.user.id, "healthcare.queue.configured", "store", storeId, { enabled, minutes, openingTime, closingTime, maximumDailyPatients, gracePeriodMinutes });
+      await writeAudit(request, session.user.id, "healthcare.queue.configured", "store", storeId, { enabled, allowAppointments, minutes, openingTime, closingTime, maximumDailyPatients, gracePeriodMinutes });
       return noStoreJson(await healthcareQueueDashboard(storeId));
     }
 

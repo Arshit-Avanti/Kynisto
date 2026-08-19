@@ -102,6 +102,8 @@ export async function ensureHealthcareTables() {
     `).run();
 
     const columnAlters = [
+      "ALTER TABLE healthcare_doctors ADD COLUMN consultation_fee REAL DEFAULT 500",
+      "ALTER TABLE healthcare_provider_profiles ADD COLUMN allow_appointments INTEGER DEFAULT 1",
       "ALTER TABLE healthcare_queue_entries ADD COLUMN late_minutes integer",
       "ALTER TABLE healthcare_queue_entries ADD COLUMN late_reported_at integer",
       "ALTER TABLE healthcare_queue_entries ADD COLUMN appointment_id text",
@@ -145,6 +147,7 @@ export async function requireHealthcareStore(storeId: string) {
           END
         ) AS providerType,
         COALESCE(hp.accepting_patients, 1) AS acceptingPatients,
+        COALESCE(hp.allow_appointments, 1) AS allowAppointments,
         COALESCE(hp.admin_queue_enabled, 1) AS adminQueueEnabled,
         COALESCE(hp.owner_queue_enabled, 1) AS ownerQueueEnabled,
         COALESCE(hp.verification_status, 'verified') AS verificationStatus,
@@ -167,6 +170,7 @@ export async function requireHealthcareStore(storeId: string) {
       storeStatus: string;
       providerType: HealthcareType | null;
       acceptingPatients: number | null;
+      allowAppointments: number | null;
       adminQueueEnabled: number | null;
       ownerQueueEnabled: number | null;
       verificationStatus: string | null;

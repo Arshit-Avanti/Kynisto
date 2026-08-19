@@ -11,6 +11,7 @@ interface Doctor {
   name: string;
   specialization?: string;
   consultationMinutes?: number;
+  consultationFee?: number;
 }
 
 interface Appointment {
@@ -195,12 +196,17 @@ export function AppointmentBooking({ storeId, storeName, onClose, onCheckedIn }:
                 onClick={() => { setSelectedDoctor(d); setStep('date'); }}
               >
                 <div className="apptDoctorIcon"><Stethoscope className="w-5 h-5" /></div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <strong>Dr. {d.name}</strong>
                   {d.specialization && <small>{d.specialization}</small>}
-                  {d.consultationMinutes && <small>{d.consultationMinutes}m consultation</small>}
+                  <div className="flex items-center gap-2 mt-1">
+                    {d.consultationMinutes && <small className="text-slate-400">{d.consultationMinutes}m</small>}
+                    <span style={{ background: "rgba(16, 185, 129, 0.15)", color: "#10B981", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 800, border: "1px solid rgba(16, 185, 129, 0.3)" }}>
+                      ₹{d.consultationFee ?? 500} fee
+                    </span>
+                  </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-500 ml-auto" />
+                <ChevronRight className="w-4 h-4 text-slate-500 ml-auto shrink-0" />
               </button>
             ))}
           </div>
@@ -285,6 +291,10 @@ export function AppointmentBooking({ storeId, storeName, onClose, onCheckedIn }:
         <div className="apptSummaryRow">
           <Stethoscope className="w-4 h-4 text-teal-400" />
           <span>{selectedDoctor ? `Dr. ${selectedDoctor.name}${selectedDoctor.specialization ? ` · ${selectedDoctor.specialization}` : ''}` : 'Any available doctor'}</span>
+        </div>
+        <div className="apptSummaryRow">
+          <span style={{ color: "#10B981", fontSize: "15px", fontWeight: 900, display: "inline-block", width: "16px", textAlign: "center" }}>₹</span>
+          <span>Consultation Fee: <b style={{ color: "#10B981" }}>₹{selectedDoctor?.consultationFee ?? 500}</b> (Pay at clinic)</span>
         </div>
         <div className="apptSummaryRow">
           <User className="w-4 h-4 text-blue-400" />

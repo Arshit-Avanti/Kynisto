@@ -18,6 +18,7 @@ export async function healthcareQueueDashboard(storeId: string, options: { inclu
 
   const coreQueries = [
     db.prepare(`SELECT hp.provider_type AS providerType, hp.accepting_patients AS acceptingPatients,
+      COALESCE(hp.allow_appointments, 1) AS allowAppointments,
       hp.emergency_available AS emergencyAvailable, hp.admin_queue_enabled AS adminQueueEnabled,
       hp.owner_queue_enabled AS ownerQueueEnabled, hp.verification_status AS verificationStatus,
       hp.queue_activation_status AS queueActivationStatus, hp.queue_requested_at AS queueRequestedAt,
@@ -56,7 +57,7 @@ export async function healthcareQueueDashboard(storeId: string, options: { inclu
       LEFT JOIN users u ON u.id = a.user_id
       WHERE a.store_id = ? AND a.appointment_date = ? AND a.status IN ('booked','confirmed','checked_in')
       ORDER BY a.time_slot ASC LIMIT 50`).bind(storeId, today).all(),
-    db.prepare(`SELECT id, name, specialization, consultation_minutes AS consultationMinutes, status, sort_order AS sortOrder
+    db.prepare(`SELECT id, name, specialization, consultation_minutes AS consultationMinutes, COALESCE(consultation_fee, 500) AS consultationFee, status, sort_order AS sortOrder
       FROM healthcare_doctors WHERE store_id = ? AND status = 'active' ORDER BY sort_order ASC, name ASC LIMIT 50`).bind(storeId).all(),
   ];
 

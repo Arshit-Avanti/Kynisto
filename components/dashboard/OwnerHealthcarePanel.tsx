@@ -5,7 +5,7 @@ import { apiFetch } from "@/lib/client-api";
 import { OwnerHealthcareQRCard } from "./OwnerHealthcareQRCard";
 
 type Item = Record<string, string | number | null | undefined>;
-type Doctor = { id: string; name: string; specialization?: string; consultationMinutes?: number; status?: string };
+type Doctor = { id: string; name: string; specialization?: string; consultationMinutes?: number; consultationFee?: number; status?: string };
 type Appointment = { id: string; appointmentDate: string; timeSlot: string; durationMinutes: number; status: string; doctorId?: string; doctorName?: string; patientName?: string; patientPhone?: string; queueEntryId?: string; userName?: string };
 type Data = { profile?: Item; entries?: Item[]; analytics?: Item[]; history?: Item[]; events?: Item[]; appointments?: Appointment[]; doctors?: Doctor[] };
 
@@ -148,6 +148,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
     void action("configure", {
       ownerQueueEnabled: form.get("ownerQueueEnabled") === "on",
       acceptingPatients: form.get("acceptingPatients") === "on",
+      allowAppointments: form.get("allowAppointments") === "on",
       consultationMinutes: Number(form.get("consultationMinutes")),
       openingTime: form.get("openingTime"),
       closingTime: form.get("closingTime"),
@@ -170,6 +171,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
     const name = String(form.get("name") ?? "").trim();
     const specialization = String(form.get("specialization") ?? "").trim() || undefined;
     const consultationMinutes = Number(form.get("consultationMinutes") ?? 15);
+    const consultationFee = Number(form.get("consultationFee") ?? 500);
     if (!name) { setError("Doctor name is required."); return; }
     setBusy("doctor");
     setError("");
@@ -178,8 +180,8 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
       await apiFetch("/api/healthcare/doctors", {
         method: "POST",
         json: editing
-          ? { action: "update", storeId, doctorId: editing.id, name, specialization, consultationMinutes }
-          : { action: "add", storeId, name, specialization, consultationMinutes },
+          ? { action: "update", storeId, doctorId: editing.id, name, specialization, consultationMinutes, consultationFee }
+          : { action: "add", storeId, name, specialization, consultationMinutes, consultationFee },
       });
       showToast(editing ? "Doctor updated" : "Doctor added");
       setDoctorForm({ open: false, editing: null });
@@ -357,7 +359,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
         <div>
           <strong>Dr. {d.name}</strong>
           {d.specialization && <small>{d.specialization}</small>}
-          <small>{d.consultationMinutes ?? 15}m per consultation</small>
+          <small>{d.consultationMinutes ?? 15}m per consultation · <b style={{ color: "#10b981", fontWeight: 700 }}>₹{d.consultationFee ?? 500}</b> fee</small>
         </div>
         <div className="tableActions">
           <button onClick={() => setDoctorForm({ open: true, editing: d })}>Edit</button>
@@ -574,6 +576,10 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
                 <span>Consultation time (min)</span>
                 <input name="consultationMinutes" type="number" min="5" max="180" defaultValue={doctorForm.editing?.consultationMinutes ?? 15} />
               </label>
+              <label>
+                <span>Consultation fee (₹)</span>
+                <input name="consultationFee" type="number" min="0" max="100000" step="1" placeholder="500" defaultValue={doctorForm.editing?.consultationFee ?? 500} />
+              </label>
               <div className="formActions">
                 <button className="portalButton" type="submit" disabled={busy === "doctor"}>{busy === "doctor" ? "Saving…" : doctorForm.editing ? "Save changes" : "Add doctor"}</button>
                 <button type="button" onClick={() => setDoctorForm({ open: false, editing: null })}>Cancel</button>
@@ -595,7 +601,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
             <small>{String(profile.verificationStatus ?? "")}</small>
           </div>
           <form
-            key={`${storeId}:${profile.consultationMinutes}:${profile.openingTime}:${profile.closingTime}:${profile.maximumDailyPatients}:${profile.gracePeriodMinutes}`}
+            key={`${storeId}:${profile.consultationMinutes}:${profile.openingTime}:${profile.closingTime}:${profile.maximumDailyPatients}:${profile.gracePeriodMinutes}:${profile.allowAppointments}`}
             className="toggleList"
             onSubmit={configure}
           >
@@ -606,6 +612,10 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
             <label>
               <span><b>Accepting patients</b><small>Controls new online joins</small></span>
               <input name="acceptingPatients" type="checkbox" defaultChecked={Boolean(profile.acceptingPatients)} />
+            </label>
+            <label>
+              <span><b>Allow appointments</b><small>Controls online doctor appointment booking</small></span>
+              <input name="allowAppointments" type="checkbox" defaultChecked={Boolean(profile.allowAppointments ?? true)} />
             </label>
             <label>
               <span><b>Consultation time</b><small>Minutes used for wait estimates</small></span>
