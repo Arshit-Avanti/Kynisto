@@ -104,7 +104,7 @@ export function VideoBackground({
         x5-playsinline="true"
         x5-video-player-type="h5"
         preload="auto"
-        className="absolute inset-0 w-full h-full object-cover opacity-90 scale-105 filter brightness-105 contrast-105 pointer-events-none mobile-9-16-video-player"
+        className="absolute inset-0 w-full h-full object-cover opacity-100 scale-105 filter brightness-105 contrast-105 pointer-events-none mobile-9-16-video-player"
         style={{
           width: "100%",
           height: "100%",
@@ -126,8 +126,8 @@ export function VideoBackground({
         <source src="/videos/kynisto-hero.mp4" type="video/mp4" />
       </video>
 
-      {/* Soft gradient overlay for optimal readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none" />
+      {/* Crystal clear minimal overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/25 pointer-events-none" />
     </div>
   );
 }

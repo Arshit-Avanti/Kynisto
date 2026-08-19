@@ -56,9 +56,8 @@ const modernCleanTechStyles = `
   .site {
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif !important;
     background-color: transparent !important;
-    background-image: radial-gradient(circle at 50% 15%, rgba(120, 119, 198, 0.12) 0%, transparent 45%),
-                      radial-gradient(circle at 15% 45%, rgba(255, 87, 34, 0.10) 0%, transparent 40%),
-                      radial-gradient(circle at 85% 75%, rgba(59, 130, 246, 0.10) 0%, transparent 45%) !important;
+    background-image: none !important;
+    background: transparent !important;
     color: #f8fafc !important;
   }
   
@@ -1704,7 +1703,6 @@ export default function Home() {
       <SubscriptionExpiryBanner />
       <WelcomeRewardModal userRole={userRole} userId={userId} />
       <VideoBackground />
-      <ShaderCanvas />
       <header className={`topbar ${isScrolled ? "topbarScrolled" : ""}`}>
         <a className="brand" href="#top" aria-label="Kynisto home"><KynistoLogo showTagline={false} /></a>
 
