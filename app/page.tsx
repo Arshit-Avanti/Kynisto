@@ -2229,30 +2229,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Feature Grid directly below Hero */}
-      <section className="featureGrid">
-        <div className="featureCard featureCardDiscovery">
-          <div className="featureIconBadge discoveryBadge">
-            <Icons.Search />
-          </div>
-          <h3 className="featureHeadingDiscovery">Universal Discovery</h3>
-          <p className="featureText">Find what you need, exactly when you need it. Intelligent search that understands intent and proximity.</p>
-        </div>
-        <div className="featureCard featureCardQueues">
-          <div className="featureIconBadge queuesBadge">
-            <Icons.Clock />
-          </div>
-          <h3 className="featureHeadingQueues">Real-time Queues</h3>
-          <p className="featureText">Skip the waiting room. Monitor your position in line from anywhere and arrive exactly when it's your turn.</p>
-        </div>
-        <div className="featureCard featureCardLoyalty">
-          <div className="featureIconBadge loyaltyBadge">
-            <Icons.Star />
-          </div>
-          <h3 className="featureHeadingLoyalty">Unified Loyalty</h3>
-          <p className="featureText">One wallet for every store. Earn, track, and redeem rewards seamlessly without juggling multiple apps.</p>
-        </div>
-      </section>
+      {/* Efferd Features Bento Grid above Category Section */}
+      <EfferdFeatures6 />
 
       <section className="categorySection" aria-labelledby="category-heading">
         <div className="sectionHeading compactHeading">
@@ -2429,8 +2407,6 @@ export default function Home() {
 
 
 
-
-      <EfferdFeatures6 />
 
       <EfferdFooter3 />
 
