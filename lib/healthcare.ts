@@ -56,10 +56,77 @@ export function indiaServiceDate(date = new Date()): string {
   return `${value("year")}-${value("month")}-${value("day")}`;
 }
 
+let _healthcareTablesEnsured = false;
+
+export async function ensureHealthcareTables() {
+  if (_healthcareTablesEnsured) return;
+  try {
+    const db = getD1();
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS healthcare_doctors (
+        id text PRIMARY KEY NOT NULL,
+        store_id text NOT NULL,
+        name text NOT NULL,
+        specialization text,
+        consultation_minutes integer DEFAULT 15 NOT NULL,
+        status text DEFAULT 'active' NOT NULL,
+        sort_order integer DEFAULT 0 NOT NULL,
+        created_at integer DEFAULT (unixepoch()) NOT NULL,
+        updated_at integer DEFAULT (unixepoch()) NOT NULL
+      )
+    `).run();
+
+    await db.prepare(`
+      CREATE TABLE IF NOT EXISTS healthcare_appointments (
+        id text PRIMARY KEY NOT NULL,
+        store_id text NOT NULL,
+        user_id text NOT NULL,
+        doctor_id text,
+        appointment_date text NOT NULL,
+        time_slot text NOT NULL,
+        duration_minutes integer DEFAULT 15 NOT NULL,
+        status text DEFAULT 'booked' NOT NULL,
+        queue_entry_id text,
+        patient_name text,
+        patient_phone text,
+        notes text,
+        cancellation_reason text,
+        rescheduled_from text,
+        confirmed_at integer,
+        checked_in_at integer,
+        completed_at integer,
+        cancelled_at integer,
+        created_at integer DEFAULT (unixepoch()) NOT NULL,
+        updated_at integer DEFAULT (unixepoch()) NOT NULL
+      )
+    `).run();
+
+    const columnAlters = [
+      "ALTER TABLE healthcare_queue_entries ADD COLUMN late_minutes integer",
+      "ALTER TABLE healthcare_queue_entries ADD COLUMN late_reported_at integer",
+      "ALTER TABLE healthcare_queue_entries ADD COLUMN appointment_id text",
+      "ALTER TABLE healthcare_queue_entries ADD COLUMN doctor_id text",
+      "ALTER TABLE healthcare_queue_settings ADD COLUMN grace_period_minutes integer DEFAULT 30",
+    ];
+
+    for (const sql of columnAlters) {
+      try {
+        await db.prepare(sql).run();
+      } catch {
+        // column already exists
+      }
+    }
+    _healthcareTablesEnsured = true;
+  } catch (err) {
+    console.warn("Healthcare tables check notice:", err);
+  }
+}
+
 let lastGlobalSweepAt = 0;
 
 export async function requireHealthcareStore(storeId: string) {
   await ensureSeeded();
+  await ensureHealthcareTables();
   const db = getD1();
 
   let provider = await db
