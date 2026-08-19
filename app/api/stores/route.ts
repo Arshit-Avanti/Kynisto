@@ -31,7 +31,7 @@ export async function GET(request: Request) {
       }).catch((error) => console.warn("Analytics error:", error));
     }
     return Response.json(result, {
-      headers: { "Cache-Control": "public, max-age=15, stale-while-revalidate=60" },
+      headers: { "Cache-Control": "public, max-age=30, s-maxage=120, stale-while-revalidate=600" },
     });
   } catch (error) {
     return apiError(error);

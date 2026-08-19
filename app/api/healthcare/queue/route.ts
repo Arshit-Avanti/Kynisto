@@ -16,8 +16,20 @@ export async function GET(request: Request) {
       if (!active) return noStoreJson({ state: null, activeStoreId: null });
       storeId = String(active.storeId);
     }
-    await requireHealthcareStore(storeId);
-    return noStoreJson({ state: await patientQueueState(storeId, session.user.id), activeStoreId: storeId });
+    const state = await patientQueueState(storeId, session.user.id);
+    const etag = `"${storeId}-${state?.status ?? 'none'}-${state?.currentTokenNumber ?? 0}-${state?.waitingCount ?? 0}-${state?.entry?.status ?? 'none'}-${state?.entry?.tokenNumber ?? 0}-${state?.entry?.position ?? 0}"`;
+    const ifNoneMatch = request.headers.get("if-none-match");
+    if (ifNoneMatch === etag) {
+      return new Response(null, { status: 304, headers: { ETag: etag, "Cache-Control": "no-cache" } });
+    }
+    return new Response(JSON.stringify({ state, activeStoreId: storeId }), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        ETag: etag,
+        "Cache-Control": "no-cache",
+      },
+    });
   } catch (error) { return apiError(error); }
 }
 

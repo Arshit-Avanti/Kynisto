@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const items = await listCategories(categoryModule);
     return microCacheJson(
       { items },
-      "public, max-age=60, stale-while-revalidate=300",
+      "public, max-age=120, s-maxage=600, stale-while-revalidate=86400",
     );
   } catch (error) {
     return apiError(error);

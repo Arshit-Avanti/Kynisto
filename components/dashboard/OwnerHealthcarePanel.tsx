@@ -101,8 +101,29 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
 
   useEffect(() => {
     void load(false);
-    // Sub-2-second fast polling (< 1200ms)
-    const pollInterval = setInterval(() => { void load(true); }, 1200);
+    let isDisposed = false;
+    let pollTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const scheduleNextPoll = () => {
+      if (isDisposed) return;
+      const isHidden = typeof document !== "undefined" && document.hidden;
+      const delay = isHidden ? 15000 : Math.floor(1300 + Math.random() * 400);
+      pollTimer = setTimeout(() => {
+        if (isDisposed) return;
+        void load(true);
+        scheduleNextPoll();
+      }, delay);
+    };
+    scheduleNextPoll();
+
+    const handleVisibility = () => {
+      if (!document.hidden && !isDisposed) {
+        void load(true);
+      }
+    };
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibility);
+    }
 
     let source: EventSource | null = null;
     try {
@@ -119,8 +140,15 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
     } catch {}
 
     return () => {
-      clearInterval(pollInterval);
-      if (source) source.close();
+      isDisposed = true;
+      if (pollTimer) clearTimeout(pollTimer);
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibility);
+      }
+      if (source) {
+        source.close();
+        source = null;
+      }
     };
   }, [load, storeId, handleIncomingData]);
 

@@ -406,11 +406,32 @@ export default function LiveQueueTracker() {
   useEffect(() => {
     if (view !== 'ticket' || !selectedQueueId || isCancelled) return;
     
-    // Initial fetch & sub-2-second fast polling backup
+    // Initial fetch & jittered adaptive polling (prevents 50k thundering herd)
     syncPatientStateWithStore(selectedQueueId);
-    const pollInterval = setInterval(() => {
-      syncPatientStateWithStore(selectedQueueId);
-    }, 1200);
+    let pollTimer: ReturnType<typeof setTimeout> | null = null;
+    let isDisposed = false;
+
+    const scheduleNextPoll = () => {
+      if (isDisposed) return;
+      const isHidden = typeof document !== "undefined" && document.hidden;
+      // In background tab, throttle polling to 15s. In foreground, 1.5s with +/- 300ms random jitter.
+      const delay = isHidden ? 15000 : Math.floor(1300 + Math.random() * 400);
+      pollTimer = setTimeout(() => {
+        if (isDisposed) return;
+        syncPatientStateWithStore(selectedQueueId);
+        scheduleNextPoll();
+      }, delay);
+    };
+    scheduleNextPoll();
+
+    const handleVisibility = () => {
+      if (!document.hidden && !isDisposed) {
+        syncPatientStateWithStore(selectedQueueId);
+      }
+    };
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibility);
+    }
 
     // Realtime SSE Stream for instant sub-second push updates
     let source: EventSource | null = null;
@@ -451,10 +472,17 @@ export default function LiveQueueTracker() {
     }
 
     return () => {
-      clearInterval(pollInterval);
-      if (source) source.close();
+      isDisposed = true;
+      if (pollTimer) clearTimeout(pollTimer);
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibility);
+      }
+      if (source) {
+        source.close();
+        source = null;
+      }
     };
-  }, [view, selectedQueueId, isCancelled, myTokenNumber, syncPatientStateWithStore]);
+  }, [view, selectedQueueId, isCancelled, syncPatientStateWithStore, myTokenNumber]);
 
   // 🔔 Trigger Native Push Notification, Chime Sound, and Vibration ONLY when Turn Arrives
   useEffect(() => {

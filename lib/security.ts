@@ -45,41 +45,64 @@ export async function hashedClientIp(request: Request): Promise<string> {
   return sha256(clientIp(request));
 }
 
+const _memoryRateLimitMap = new Map<string, { count: number; windowStart: number }>();
+
 export async function enforceRateLimit(
   request: Request,
   scope: string,
   limit: number,
   windowSeconds: number,
 ): Promise<void> {
-  try {
-    const db = getD1();
-    const now = Math.floor(Date.now() / 1000);
-    const key = await sha256(`${scope}:${clientIp(request)}`);
-    const record = await db
-      .prepare(
-        `INSERT INTO rate_limits (key, count, window_started_at, updated_at)
-         VALUES (?, 1, ?, ?)
-         ON CONFLICT(key) DO UPDATE SET
-           count = CASE
-             WHEN excluded.updated_at - rate_limits.window_started_at >= ? THEN 1
-             ELSE rate_limits.count + 1
-           END,
-           window_started_at = CASE
-             WHEN excluded.updated_at - rate_limits.window_started_at >= ? THEN excluded.window_started_at
-             ELSE rate_limits.window_started_at
-           END,
-           updated_at = excluded.updated_at
-         RETURNING count, window_started_at AS windowStartedAt`,
-      )
-      .bind(key, now, now, windowSeconds, windowSeconds)
-      .first<{ count: number; windowStartedAt: number }>();
+  const ip = clientIp(request);
+  const now = Math.floor(Date.now() / 1000);
+  const memKey = `${scope}:${ip}`;
 
-    if (record && record.count > limit) {
-      throw new HttpError(429, "Too many requests. Please try again shortly.", "RATE_LIMITED");
+  // In-memory fast path (0ms latency, zero D1 writes)
+  const mem = _memoryRateLimitMap.get(memKey);
+  if (mem) {
+    if (now - mem.windowStart < windowSeconds) {
+      mem.count += 1;
+      if (mem.count > limit) {
+        throw new HttpError(429, "Too many requests. Please try again shortly.", "RATE_LIMITED");
+      }
+    } else {
+      mem.count = 1;
+      mem.windowStart = now;
     }
-  } catch (err) {
-    if (err instanceof HttpError) throw err;
-    console.warn("Rate limit check warning:", err);
+  } else {
+    // Keep memory map bounded (max 5000 entries)
+    if (_memoryRateLimitMap.size > 5000) {
+      for (const [k, v] of _memoryRateLimitMap) {
+        if (now - v.windowStart > windowSeconds * 2) _memoryRateLimitMap.delete(k);
+      }
+    }
+    _memoryRateLimitMap.set(memKey, { count: 1, windowStart: now });
+  }
+
+  // Only sample 1 in 10 requests to persistent D1 to prevent write bottleneck
+  if (Math.random() < 0.1) {
+    try {
+      const db = getD1();
+      const key = await sha256(memKey);
+      await db
+        .prepare(
+          `INSERT INTO rate_limits (key, count, window_started_at, updated_at)
+           VALUES (?, 1, ?, ?)
+           ON CONFLICT(key) DO UPDATE SET
+             count = CASE
+               WHEN excluded.updated_at - rate_limits.window_started_at >= ? THEN 1
+               ELSE rate_limits.count + 1
+             END,
+             window_started_at = CASE
+               WHEN excluded.updated_at - rate_limits.window_started_at >= ? THEN excluded.window_started_at
+               ELSE rate_limits.window_started_at
+             END,
+             updated_at = excluded.updated_at`,
+        )
+        .bind(key, now, now, windowSeconds, windowSeconds)
+        .run()
+        .catch(() => {});
+    } catch {}
   }
 }
 

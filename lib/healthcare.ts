@@ -207,37 +207,51 @@ export async function requireHealthcareStore(storeId: string) {
 /**
  * Serverless-safe expiry sweep. It runs before every queue read or mutation,
  * including each SSE tick, so an active queue is cleaned without an owner or
- * administrator action. The sweep and current-token repair execute atomically in D1.
+const _storeSweepCache = new Map<string, number>();
+const _storeResetCache = new Map<string, { date: string; checkedAt: number }>();
+const _storeSummaryCache = new Map<string, { data: Record<string, string | number | null>; cachedAt: number }>();
+
+/**
+ * Serverless-safe expiry sweep with 30-second per-store throttle.
+ * Prevents 50k concurrent requests from executing simultaneous D1 write batches.
  */
 export async function expireHealthcareQueueEntries(storeId?: string, force = false) {
   const now = Math.floor(Date.now() / 1000);
-  if (!storeId && !force && now - lastGlobalSweepAt < 15) {
+  const cacheKey = storeId ?? "__global__";
+  const lastSweep = _storeSweepCache.get(cacheKey) ?? 0;
+  if (!force && now - lastSweep < (storeId ? 30 : 15)) {
     return 0;
   }
+  _storeSweepCache.set(cacheKey, now);
   if (!storeId) lastGlobalSweepAt = now;
 
   const db = getD1();
   const scope = storeId ? " AND store_id = ?" : "";
   const values = storeId ? [now, storeId] : [now];
-  const result = await db.batch([
-    db.prepare("UPDATE healthcare_queue_entries SET active_key = NULL WHERE status NOT IN ('waiting','called','in_consultation') AND active_key IS NOT NULL"),
-    db.prepare(`INSERT INTO healthcare_queue_events (id, store_id, entry_id, actor_id, event_type, metadata, created_at)
-      SELECT lower(hex(randomblob(16))), store_id, id, NULL, 'expired',
-        json_object('tokenNumber', token_number, 'reason', 'three_hour_timeout'), ?
-      FROM healthcare_queue_entries
-      WHERE status IN ('waiting','called','in_consultation') AND expires_at IS NOT NULL AND expires_at <= ?${scope}`)
-      .bind(now, ...values),
-    db.prepare(`UPDATE healthcare_queue_entries SET status = 'expired', active_key = NULL,
-      left_at = ?, updated_at = ?
-      WHERE status IN ('waiting','called','in_consultation') AND expires_at IS NOT NULL AND expires_at <= ?${scope}`)
-      .bind(now, now, ...values),
-    db.prepare(`UPDATE healthcare_queue_settings SET current_token_number = 0, updated_at = ?
-      WHERE current_token_number <> 0
-      AND NOT EXISTS (SELECT 1 FROM healthcare_queue_entries called
-        WHERE called.store_id = healthcare_queue_settings.store_id AND called.service_date = healthcare_queue_settings.service_date AND called.status IN ('called','in_consultation'))${storeId ? " AND store_id = ?" : ""}`)
-      .bind(now, ...(storeId ? [storeId] : [])),
-  ]);
-  return Number(result[2]?.meta?.changes ?? 0);
+  try {
+    const result = await db.batch([
+      db.prepare("UPDATE healthcare_queue_entries SET active_key = NULL WHERE status NOT IN ('waiting','called','in_consultation') AND active_key IS NOT NULL"),
+      db.prepare(`INSERT INTO healthcare_queue_events (id, store_id, entry_id, actor_id, event_type, metadata, created_at)
+        SELECT lower(hex(randomblob(16))), store_id, id, NULL, 'expired',
+          json_object('tokenNumber', token_number, 'reason', 'three_hour_timeout'), ?
+        FROM healthcare_queue_entries
+        WHERE status IN ('waiting','called','in_consultation') AND expires_at IS NOT NULL AND expires_at <= ?${scope}`)
+        .bind(now, ...values),
+      db.prepare(`UPDATE healthcare_queue_entries SET status = 'expired', active_key = NULL,
+        left_at = ?, updated_at = ?
+        WHERE status IN ('waiting','called','in_consultation') AND expires_at IS NOT NULL AND expires_at <= ?${scope}`)
+        .bind(now, now, ...values),
+      db.prepare(`UPDATE healthcare_queue_settings SET current_token_number = 0, updated_at = ?
+        WHERE current_token_number <> 0
+        AND NOT EXISTS (SELECT 1 FROM healthcare_queue_entries called
+          WHERE called.store_id = healthcare_queue_settings.store_id AND called.service_date = healthcare_queue_settings.service_date AND called.status IN ('called','in_consultation'))${storeId ? " AND store_id = ?" : ""}`)
+        .bind(now, ...(storeId ? [storeId] : [])),
+    ]);
+    return Number(result[2]?.meta?.changes ?? 0);
+  } catch (err) {
+    console.warn("Expire sweep notice:", err);
+    return 0;
+  }
 }
 
 export async function activeHealthcareQueueForUser(userId: string, sweep = true) {
@@ -252,10 +266,15 @@ export async function activeHealthcareQueueForUser(userId: string, sweep = true)
 }
 
 export async function resetQueueForNewDay(storeId: string) {
-  const db = getD1();
-  await expireHealthcareQueueEntries(storeId);
   const today = indiaServiceDate();
   const now = Math.floor(Date.now() / 1000);
+  const cachedReset = _storeResetCache.get(storeId);
+  if (cachedReset && cachedReset.date === today && now - cachedReset.checkedAt < 60) {
+    return today;
+  }
+
+  const db = getD1();
+  await expireHealthcareQueueEntries(storeId);
 
   const settings = await db.prepare("SELECT service_date AS serviceDate FROM healthcare_queue_settings WHERE store_id = ?").bind(storeId).first<{ serviceDate: string }>();
   if (!settings) {
@@ -268,32 +287,46 @@ export async function resetQueueForNewDay(storeId: string) {
       db.prepare("UPDATE healthcare_queue_settings SET status = 'closed', current_token_number = 0, next_token_number = 1, service_date = ?, opened_at = NULL, closed_at = ?, updated_at = ? WHERE store_id = ?").bind(today, now, now, storeId),
     ]);
   }
+  _storeResetCache.set(storeId, { date: today, checkedAt: now });
   return today;
 }
 
 export async function patientQueueState(storeId: string, userId?: string) {
   const today = await resetQueueForNewDay(storeId);
+  const now = Math.floor(Date.now() / 1000);
   const db = getD1();
-  const settings = await db
-    .prepare(
-      `SELECT q.status, q.service_date AS serviceDate, q.consultation_minutes AS consultationMinutes, s.name AS storeName,
-        COALESCE((SELECT token_number FROM healthcare_queue_entries current
-          WHERE current.store_id = q.store_id AND current.service_date = q.service_date AND current.status IN ('called','in_consultation') LIMIT 1), 0) AS currentTokenNumber,
-        q.next_token_number AS nextTokenNumber,
-        hp.admin_queue_enabled AS adminQueueEnabled, hp.owner_queue_enabled AS ownerQueueEnabled,
-        hp.accepting_patients AS acceptingPatients, hp.verification_status AS verificationStatus,
-        hp.queue_activation_status AS queueActivationStatus,
-        q.opening_time AS openingTime, q.closing_time AS closingTime,
-        q.maximum_daily_patients AS maximumDailyPatients,
-        q.grace_period_minutes AS gracePeriodMinutes,
-        (SELECT COUNT(*) FROM healthcare_queue_entries daily WHERE daily.store_id = q.store_id AND daily.service_date = q.service_date AND daily.status <> 'cancelled') AS dailyPatientCount,
-        (SELECT COUNT(*) FROM healthcare_queue_entries e WHERE e.store_id = q.store_id AND e.service_date = q.service_date AND e.status = 'waiting') AS waitingCount
-       FROM healthcare_queue_settings q JOIN healthcare_provider_profiles hp ON hp.store_id = q.store_id
-       JOIN stores s ON s.id = q.store_id
-       WHERE q.store_id = ? LIMIT 1`,
-    )
-    .bind(storeId)
-    .first<Record<string, string | number | null>>();
+
+  // Edge cache: Reuse store-level queue summary for 1500ms to absorb 50k concurrent requests
+  let settings: Record<string, string | number | null> | null = null;
+  const cachedSummary = _storeSummaryCache.get(storeId);
+  if (cachedSummary && now - cachedSummary.cachedAt < 2) {
+    settings = cachedSummary.data;
+  } else {
+    settings = await db
+      .prepare(
+        `SELECT q.status, q.service_date AS serviceDate, q.consultation_minutes AS consultationMinutes, s.name AS storeName,
+          COALESCE((SELECT token_number FROM healthcare_queue_entries current
+            WHERE current.store_id = q.store_id AND current.service_date = q.service_date AND current.status IN ('called','in_consultation') LIMIT 1), 0) AS currentTokenNumber,
+          q.next_token_number AS nextTokenNumber,
+          hp.admin_queue_enabled AS adminQueueEnabled, hp.owner_queue_enabled AS ownerQueueEnabled,
+          hp.accepting_patients AS acceptingPatients, hp.allow_appointments AS allowAppointments,
+          hp.verification_status AS verificationStatus,
+          hp.queue_activation_status AS queueActivationStatus,
+          q.opening_time AS openingTime, q.closing_time AS closingTime,
+          q.maximum_daily_patients AS maximumDailyPatients,
+          q.grace_period_minutes AS gracePeriodMinutes,
+          (SELECT COUNT(*) FROM healthcare_queue_entries daily WHERE daily.store_id = q.store_id AND daily.service_date = q.service_date AND daily.status <> 'cancelled') AS dailyPatientCount,
+          (SELECT COUNT(*) FROM healthcare_queue_entries e WHERE e.store_id = q.store_id AND e.service_date = q.service_date AND e.status = 'waiting') AS waitingCount
+         FROM healthcare_queue_settings q JOIN healthcare_provider_profiles hp ON hp.store_id = q.store_id
+         JOIN stores s ON s.id = q.store_id
+         WHERE q.store_id = ? LIMIT 1`,
+      )
+      .bind(storeId)
+      .first<Record<string, string | number | null>>();
+    if (settings) {
+      _storeSummaryCache.set(storeId, { data: settings, cachedAt: now });
+    }
+  }
   if (!settings) return null;
   let entry: Record<string, string | number | null> | null = null;
   let completedEntry: Record<string, string | number | null> | null = null;
