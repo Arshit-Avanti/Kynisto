@@ -21,24 +21,21 @@ const XIcon = () => (
   </svg>
 );
 
-export function EfferdFooter3() {
+export function EfferdFooter1() {
   return (
-    <footer className="efferdFooterBlock" aria-label="Site Footer" style={{ width: "min(1344px, calc(100% - 64px))", margin: "40px auto 32px", boxSizing: "border-box" }}>
-      <div className="efferdFooterGrid" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
-        <div className="efferdFooterBrandCol" style={{ flex: "0 0 280px", maxWidth: "300px" }}>
+    <footer className="efferdFooterBlock" aria-label="Site Footer">
+      <div className="flex flex-col gap-6 py-6">
+        <div className="flex items-center justify-between">
           <a className="brand footerBrand" href="#top" aria-label="Kynisto top">
             <KynistoLogo />
           </a>
-          <p className="efferdBrandDesc">
-            Universal hyper-local discovery, live clinic queue tracking, and smart community commerce for your neighborhood.
-          </p>
-          <div className="efferdSocialRow">
+          <div className="flex items-center gap-2">
             <a
               href="https://github.com/Arshit-Avanti/Kynisto"
               target="_blank"
               rel="noopener noreferrer"
               className="efferdSocialBtn"
-              aria-label="GitHub Repository"
+              aria-label="GitHub"
             >
               <GithubIcon />
             </a>
@@ -47,7 +44,7 @@ export function EfferdFooter3() {
               target="_blank"
               rel="noopener noreferrer"
               className="efferdSocialBtn"
-              aria-label="YouTube Channel"
+              aria-label="YouTube"
             >
               <YouTubeIcon />
             </a>
@@ -56,50 +53,24 @@ export function EfferdFooter3() {
               target="_blank"
               rel="noopener noreferrer"
               className="efferdSocialBtn"
-              aria-label="Twitter / X Profile"
+              aria-label="Twitter / X"
             >
               <XIcon />
             </a>
           </div>
         </div>
 
-        <div className="efferdFooterNavGroup" style={{ marginLeft: "auto", display: "flex", justifyContent: "flex-end", alignItems: "flex-start", gap: "80px" }}>
-          <div className="efferdFooterCol">
-            <h4>Explore</h4>
-            <nav aria-label="Footer Explore Navigation">
-              <a href="/">Homepage</a>
-              <a href="/products">Nearby Products</a>
-              <a href="/healthcare">Healthcare &amp; Clinics</a>
-              <a href="/services">Local Services</a>
-              <a href="/pricing" style={{ color: "#FF7A00", fontWeight: 750 }}>
-                Pricing &amp; Plans
-              </a>
-            </nav>
-          </div>
-
-          <div className="efferdFooterCol">
-            <h4>Portals &amp; Workspaces</h4>
-            <nav aria-label="Footer Portals Navigation">
-              <a href="/account">Customer Dashboard</a>
-              <a href="/owner">Business Workspace</a>
-              <a href="/admin">Admin Panel</a>
-              <a href="/q/demo">Live Queue Tracker</a>
-              <a href="/wallet">Kynisto Loyalty Wallet</a>
-            </nav>
-          </div>
-
-          <div className="efferdFooterCol">
-            <h4>Community</h4>
-            <nav aria-label="Footer Community Navigation">
-              <a href="https://github.com/Arshit-Avanti/Kynisto" target="_blank" rel="noopener noreferrer">
-                Open Source (GitHub)
-              </a>
-              <a href="/pricing">Partner Subscriptions</a>
-              <a href="mailto:support@kynisto.in">Help &amp; Support</a>
-              <a href="#places-heading">Verified Directory</a>
-            </nav>
-          </div>
-        </div>
+        <nav>
+          <ul className="flex flex-wrap gap-4 font-medium text-sm md:gap-6">
+            <li><a href="/">Homepage</a></li>
+            <li><a href="/products">Nearby Products</a></li>
+            <li><a href="/healthcare">Healthcare &amp; Clinics</a></li>
+            <li><a href="/services">Local Services</a></li>
+            <li><a href="/pricing" style={{ color: "#FF7A00" }}>Pricing &amp; Plans</a></li>
+            <li><a href="/account">Customer Dashboard</a></li>
+            <li><a href="/owner">Business Workspace</a></li>
+          </ul>
+        </nav>
       </div>
     </footer>
   );

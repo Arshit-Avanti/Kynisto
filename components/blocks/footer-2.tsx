@@ -21,11 +21,11 @@ const XIcon = () => (
   </svg>
 );
 
-export function EfferdFooter3() {
+export function EfferdFooter2() {
   return (
-    <footer className="efferdFooterBlock" aria-label="Site Footer" style={{ width: "min(1344px, calc(100% - 64px))", margin: "40px auto 32px", boxSizing: "border-box" }}>
-      <div className="efferdFooterGrid" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
-        <div className="efferdFooterBrandCol" style={{ flex: "0 0 280px", maxWidth: "300px" }}>
+    <footer className="efferdFooterBlock" aria-label="Site Footer">
+      <div className="efferdFooterGrid">
+        <div className="efferdFooterBrandCol">
           <a className="brand footerBrand" href="#top" aria-label="Kynisto top">
             <KynistoLogo />
           </a>
@@ -63,7 +63,7 @@ export function EfferdFooter3() {
           </div>
         </div>
 
-        <div className="efferdFooterNavGroup" style={{ marginLeft: "auto", display: "flex", justifyContent: "flex-end", alignItems: "flex-start", gap: "80px" }}>
+        <div className="efferdFooterNavGroup">
           <div className="efferdFooterCol">
             <h4>Explore</h4>
             <nav aria-label="Footer Explore Navigation">

@@ -2839,42 +2839,308 @@ img, video, iframe, embed, object {
   50% { transform: scale(1.15); opacity: 0.9; }
 }
 
-.efferdFeatureContent {
+/* ==========================================================================
+   EFFERD FEATURES 6 BENTO GRID — High-End Glassmorphic Feature Showcase
+   ========================================================================== */
+.efferdFeatures6Container {
+  width: min(1344px, calc(100% - 64px)) !important;
+  margin: 36px auto !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 3px !important;
+  gap: 16px !important;
+  box-sizing: border-box !important;
 }
 
-.efferdFeatureContent p b {
-  font-size: 16px !important;
-  font-weight: 850 !important;
+.efferdFeatures6TopGrid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 16px !important;
+  width: 100% !important;
+}
+
+.efferdFeatures6BottomGrid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 16px !important;
+  width: 100% !important;
+}
+
+.efferdBentoCard {
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 24px !important;
+  padding: 32px 28px !important;
+  background: rgba(10, 16, 30, 0.72) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 20px !important;
+}
+
+.efferdBentoCard:hover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+.mode-light .efferdBentoCard {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+.mode-light .efferdBentoCard:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Icon Badges with Colored Glows */
+.efferdIconGlowWrapper {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+  transition: transform 0.25s ease !important;
+}
+
+.efferdBentoCard:hover .efferdIconGlowWrapper {
+  transform: scale(1.06) !important;
+}
+
+.efferdIconGlowWrapper.searchGlow {
+  background: rgba(255, 122, 0, 0.14) !important;
+  border: 1px solid rgba(255, 122, 0, 0.35) !important;
+  box-shadow: 0 0 20px rgba(255, 122, 0, 0.25) !important;
+}
+
+.efferdIconGlowWrapper.clockGlow {
+  background: rgba(0, 212, 255, 0.14) !important;
+  border: 1px solid rgba(0, 212, 255, 0.35) !important;
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.25) !important;
+}
+
+.efferdIconGlowWrapper.starGlow {
+  background: rgba(0, 230, 118, 0.14) !important;
+  border: 1px solid rgba(0, 230, 118, 0.35) !important;
+  box-shadow: 0 0 20px rgba(0, 230, 118, 0.25) !important;
+}
+
+.efferdIconGlowWrapper.pointerGlow {
+  background: rgba(255, 145, 0, 0.14) !important;
+  border: 1px solid rgba(255, 145, 0, 0.35) !important;
+  box-shadow: 0 0 20px rgba(255, 145, 0, 0.25) !important;
+}
+
+.efferdIconGlowWrapper.globeGlow {
+  background: rgba(0, 229, 255, 0.14) !important;
+  border: 1px solid rgba(0, 229, 255, 0.35) !important;
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.25) !important;
+}
+
+/* Card Typography — Crisp Pure White in Light & Dark Mode */
+.efferdCardBody {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.efferdCardTitle {
+  font-size: 19px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.015em !important;
   color: #FFFFFF !important;
   -webkit-text-fill-color: #FFFFFF !important;
-  letter-spacing: -0.01em !important;
+  margin: 0 !important;
 }
 
-.mode-light .efferdFeatureContent p b {
-  color: #0F172A !important;
-  -webkit-text-fill-color: #0F172A !important;
+.efferdCardDesc {
+  font-size: 13.5px !important;
+  line-height: 1.6 !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.85) !important;
+  margin: 0 !important;
 }
 
-.efferdFeatureContent small {
-  font-size: 12px !important;
-  font-weight: 550 !important;
+.mode-light .efferdCardTitle {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45) !important;
+}
+
+.mode-light .efferdCardDesc {
+  color: rgba(255, 255, 255, 0.9) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.9) !important;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Bottom Bento Cards Layout */
+.efferdBentoCard.bottomCard {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 24px !important;
+  min-height: 240px !important;
+  padding: 32px !important;
+}
+
+.designCardContent, .globeCardContent {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  flex: 1.1 !important;
+  max-width: 300px !important;
+}
+
+/* Dashboard Mockup Component */
+.dashboardPreviewContainer {
+  flex: 1 !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+}
+
+.dashboardWindowMockup {
+  width: 100% !important;
+  max-width: 250px !important;
+  background: rgba(15, 23, 42, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5) !important;
+}
+
+.mockupHeader {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 8px 12px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.mockupHeader .dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+}
+
+.mockupHeader .dot.red { background: #ef4444 !important; }
+.mockupHeader .dot.yellow { background: #f59e0b !important; }
+.mockupHeader .dot.green { background: #10b981 !important; }
+
+.mockupTitle {
+  font-size: 11px !important;
   color: #94A3B8 !important;
-  -webkit-text-fill-color: #94A3B8 !important;
+  margin-left: 6px !important;
+  font-weight: 600 !important;
 }
 
-.mode-light .efferdFeatureContent small {
-  color: #475569 !important;
-  -webkit-text-fill-color: #475569 !important;
+.mockupBody {
+  padding: 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
 }
 
-@media (max-width: 900px) {
-  .trustStrip.efferdFeaturesBlock {
+.mockupStatsRow {
+  display: flex !important;
+  gap: 6px !important;
+}
+
+.statPill {
+  flex: 1 !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 8px !important;
+  padding: 6px 4px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.statPill.highlight {
+  border-color: rgba(255, 122, 0, 0.4) !important;
+  background: rgba(255, 122, 0, 0.08) !important;
+}
+
+.statVal {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+}
+
+.statLbl {
+  font-size: 9px !important;
+  color: #94A3B8 !important;
+}
+
+.mockupGraphLines {
+  display: flex !important;
+  align-items: flex-end !important;
+  gap: 6px !important;
+  height: 48px !important;
+  padding-top: 6px !important;
+}
+
+.graphLine {
+  flex: 1 !important;
+  border-radius: 4px !important;
+  background: linear-gradient(180deg, #FF7A00 0%, rgba(255, 122, 0, 0.2) 100%) !important;
+}
+
+.graphLine.bar1 { height: 35%; }
+.graphLine.bar2 { height: 60%; }
+.graphLine.bar3 { height: 45%; }
+.graphLine.bar4 { height: 85%; }
+.graphLine.bar5 { height: 65%; }
+.graphLine.bar6 { height: 95%; background: linear-gradient(180deg, #00D4FF 0%, rgba(0, 212, 255, 0.2) 100%) !important; }
+.graphLine.bar7 { height: 75%; }
+
+/* Globe Visual Container */
+.globeVisualWrapper {
+  flex: 1 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  position: relative !important;
+  max-width: 220px !important;
+  max-height: 220px !important;
+}
+
+.globeCanvas {
+  width: 200px !important;
+  height: 200px !important;
+  border-radius: 50% !important;
+  filter: drop-shadow(0 0 25px rgba(0, 212, 255, 0.35)) !important;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+  .efferdFeatures6TopGrid {
     grid-template-columns: 1fr !important;
-    gap: 12px !important;
-    padding: 12px !important;
+  }
+  .efferdFeatures6BottomGrid {
+    grid-template-columns: 1fr !important;
+  }
+  .efferdBentoCard.bottomCard {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .dashboardPreviewContainer, .globeVisualWrapper {
+    width: 100% !important;
+    justify-content: center !important;
+    max-width: 100% !important;
   }
 }
 
