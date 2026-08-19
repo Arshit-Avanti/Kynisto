@@ -5,10 +5,11 @@ import * as THREE from "three";
 
 /**
  * Three.js High-Fidelity 3D Earth Model
+ * - Scaled & Zoomed-out for Perfect Full-Planet Spherical Framing
  * - Realistic Earth Surface & Elevation Bump Mapping
- * - Atmospheric Cloud Layer with Independent Rotation
- * - Daylight Sunlight Directional Lighting & Ambient Glow
- * - Interactive Orbit Controls (Rotate, Pan, Zoom)
+ * - Atmospheric Cloud Layer with Realistic Transparency
+ * - Daylight Sunlight Directional Lighting & Atmospheric Glow
+ * - Interactive Orbit Controls (Smooth Drag, Pan, Clamped Zoom)
  * - User Geolocation 3D Marker Pinpoint
  * - Zero-Lag Hardware Accelerated WebGL Pipeline
  */
@@ -48,7 +49,8 @@ export function CobeGlobe({ className }: { className?: string }) {
     const height = container.clientHeight || 360;
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 5);
+    // Zoomed out perfectly for full spherical planetary framing
+    camera.position.set(0, 0, 4.8);
 
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
@@ -61,10 +63,7 @@ export function CobeGlobe({ className }: { className?: string }) {
     renderer.toneMappingExposure = 1.15;
     container.appendChild(renderer.domElement);
 
-    // 2. High Resolution Textures Setup (With high-definition procedural fallbacks)
-    const textureLoader = new THREE.TextureLoader();
-
-    // Create high-res procedural Earth map canvas for guaranteed instant rendering & crisp country borders
+    // 2. High Resolution Earth Map with Country Outlines & Continents
     const createRealisticEarthMap = () => {
       const canvas = document.createElement("canvas");
       canvas.width = 2048;
@@ -74,18 +73,17 @@ export function CobeGlobe({ className }: { className?: string }) {
 
       // Deep Ocean Base
       const oceanGrad = ctx.createLinearGradient(0, 0, 0, 1024);
-      oceanGrad.addColorStop(0, "#07162c");
-      oceanGrad.addColorStop(0.5, "#0b2545");
-      oceanGrad.addColorStop(1, "#07162c");
+      oceanGrad.addColorStop(0, "#08182b");
+      oceanGrad.addColorStop(0.5, "#0d2b4e");
+      oceanGrad.addColorStop(1, "#08182b");
       ctx.fillStyle = oceanGrad;
       ctx.fillRect(0, 0, 2048, 1024);
 
       // Continents & Country Landmass Outlines (Illuminated Geo-Grid)
-      ctx.fillStyle = "#1d3d63";
+      ctx.fillStyle = "#1e4069";
       ctx.strokeStyle = "#38bdf8";
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 1.8;
 
-      // Draw continent landmass approximations
       const drawLand = (pts: [number, number][]) => {
         ctx.beginPath();
         pts.forEach(([x, y], i) => {
@@ -138,19 +136,42 @@ export function CobeGlobe({ className }: { className?: string }) {
 
     const earthTexture = createRealisticEarthMap();
 
-    // 3. Create Sphere & Apply Materials with Bump Mapping
-    const earthGeometry = new THREE.SphereGeometry(1.6, 64, 64);
+    // 3. Create Sphere (Radius 1.22 for optimal full spherical shape visibility)
+    const earthGeometry = new THREE.SphereGeometry(1.22, 64, 64);
     const earthMaterial = new THREE.MeshStandardMaterial({
       map: earthTexture,
-      roughness: 0.55,
-      metalness: 0.15,
+      roughness: 0.52,
+      metalness: 0.12,
     });
+
+    // Try loading photorealistic textures progressively
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load(
+      "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg",
+      (texture) => {
+        earthMaterial.map = texture;
+        earthMaterial.needsUpdate = true;
+      },
+      undefined,
+      () => {
+        // Fallback to procedural high-res canvas map
+      }
+    );
+
+    textureLoader.load(
+      "https://unpkg.com/three-globe/example/img/earth-topology.png",
+      (bumpMap) => {
+        earthMaterial.bumpMap = bumpMap;
+        earthMaterial.bumpScale = 0.04;
+        earthMaterial.needsUpdate = true;
+      }
+    );
 
     const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
     scene.add(earthMesh);
 
-    // 4. Atmospheric Cloud Layer with Realistic Transparency
-    const cloudGeometry = new THREE.SphereGeometry(1.63, 64, 64);
+    // 4. Atmospheric Cloud Layer
+    const cloudGeometry = new THREE.SphereGeometry(1.245, 64, 64);
     const createCloudTexture = () => {
       const canvas = document.createElement("canvas");
       canvas.width = 1024;
@@ -159,11 +180,11 @@ export function CobeGlobe({ className }: { className?: string }) {
       if (!ctx) return new THREE.CanvasTexture(canvas);
       ctx.fillStyle = "rgba(0,0,0,0)";
       ctx.fillRect(0, 0, 1024, 512);
-      ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
-      for (let i = 0; i < 40; i++) {
+      ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
+      for (let i = 0; i < 45; i++) {
         const cx = Math.random() * 1024;
         const cy = Math.random() * 512;
-        const rad = 30 + Math.random() * 70;
+        const rad = 25 + Math.random() * 65;
         ctx.beginPath();
         ctx.arc(cx, cy, rad, 0, Math.PI * 2);
         ctx.fill();
@@ -174,14 +195,23 @@ export function CobeGlobe({ className }: { className?: string }) {
     const cloudMaterial = new THREE.MeshStandardMaterial({
       map: createCloudTexture(),
       transparent: true,
-      opacity: 0.45,
+      opacity: 0.4,
       blending: THREE.AdditiveBlending,
     });
+
+    textureLoader.load(
+      "https://unpkg.com/three-globe/example/img/earth-clouds.png",
+      (cloudTex) => {
+        cloudMaterial.map = cloudTex;
+        cloudMaterial.needsUpdate = true;
+      }
+    );
+
     const cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
     scene.add(cloudMesh);
 
     // 5. Atmospheric Outer Glow Aura
-    const glowGeometry = new THREE.SphereGeometry(1.72, 32, 32);
+    const glowGeometry = new THREE.SphereGeometry(1.31, 32, 32);
     const glowMaterial = new THREE.ShaderMaterial({
       vertexShader: `
         varying vec3 vNormal;
@@ -193,8 +223,8 @@ export function CobeGlobe({ className }: { className?: string }) {
       fragmentShader: `
         varying vec3 vNormal;
         void main() {
-          float intensity = pow(0.65 - dot(vNormal, vec3(0, 0, 1.0)), 2.5);
-          gl_FragColor = vec4(0.0, 0.75, 1.0, 1.0) * intensity * 0.9;
+          float intensity = pow(0.62 - dot(vNormal, vec3(0, 0, 1.0)), 2.8);
+          gl_FragColor = vec4(0.0, 0.72, 1.0, 1.0) * intensity * 0.95;
         }
       `,
       blending: THREE.AdditiveBlending,
@@ -209,10 +239,9 @@ export function CobeGlobe({ className }: { className?: string }) {
     scene.add(pinGroup);
 
     const updatePinLocation = (lat: number, lon: number) => {
-      // Convert lat/lon to 3D Cartesian spherical coordinates
       const phi = (90 - lat) * (Math.PI / 180);
       const theta = (lon + 180) * (Math.PI / 180);
-      const radius = 1.64;
+      const radius = 1.25;
 
       const x = -(radius * Math.sin(phi) * Math.cos(theta));
       const z = radius * Math.sin(phi) * Math.sin(theta);
@@ -221,20 +250,19 @@ export function CobeGlobe({ className }: { className?: string }) {
       pinGroup.position.set(x, y, z);
       pinGroup.lookAt(x * 2, y * 2, z * 2);
 
-      // Clear previous pin children
       while (pinGroup.children.length > 0) {
         pinGroup.remove(pinGroup.children[0]);
       }
 
-      // Radiant Pin Mesh
+      // Radiant Beacon Pin
       const pinSphere = new THREE.Mesh(
-        new THREE.SphereGeometry(0.055, 16, 16),
+        new THREE.SphereGeometry(0.045, 16, 16),
         new THREE.MeshBasicMaterial({ color: 0xff7a00 })
       );
       pinGroup.add(pinSphere);
 
       // Pulsing Beacon Ring
-      const ringGeo = new THREE.RingGeometry(0.07, 0.09, 32);
+      const ringGeo = new THREE.RingGeometry(0.055, 0.075, 32);
       const ringMat = new THREE.MeshBasicMaterial({
         color: 0xff9900,
         side: THREE.DoubleSide,
@@ -248,25 +276,23 @@ export function CobeGlobe({ className }: { className?: string }) {
     if (userLocation) {
       updatePinLocation(userLocation.lat, userLocation.lon);
     } else {
-      // Default Hub: Delhi, India [28.6139, 77.2090]
-      updatePinLocation(28.6139, 77.2090);
+      updatePinLocation(28.6139, 77.2090); // Delhi Hub
     }
 
     // 7. Daylight Lighting System
-    const sunLight = new THREE.DirectionalLight(0xffffff, 2.2);
+    const sunLight = new THREE.DirectionalLight(0xffffff, 2.3);
     sunLight.position.set(5, 3, 5);
     scene.add(sunLight);
 
-    const ambientLight = new THREE.AmbientLight(0x223355, 0.85);
+    const ambientLight = new THREE.AmbientLight(0x223355, 0.9);
     scene.add(ambientLight);
 
     const hemiLight = new THREE.HemisphereLight(0xffffff, 0x080820, 0.5);
     scene.add(hemiLight);
 
-    // 8. Interactive Orbit Controls (Smooth Drag, Pan, Zoom)
+    // 8. Smooth Orbit Controls (Drag to Rotate, Scroll to Zoom with bounds)
     let isDragging = false;
     let previousMousePosition = { x: 0, y: 0 };
-    let rotationVelocity = { x: 0, y: 0.003 };
 
     const onPointerDown = (e: MouseEvent | TouchEvent) => {
       isDragging = true;
@@ -289,7 +315,6 @@ export function CobeGlobe({ className }: { className?: string }) {
       cloudMesh.rotation.y += deltaX * 0.005;
       cloudMesh.rotation.x += deltaY * 0.005;
 
-      rotationVelocity = { x: deltaY * 0.0005, y: deltaX * 0.0005 };
       previousMousePosition = { x: clientX, y: clientY };
     };
 
@@ -300,7 +325,8 @@ export function CobeGlobe({ className }: { className?: string }) {
 
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
-      camera.position.z = THREE.MathUtils.clamp(camera.position.z + e.deltaY * 0.003, 2.5, 8.0);
+      // Clamped zoom extent so the Earth always maintains realistic spherical proportion
+      camera.position.z = THREE.MathUtils.clamp(camera.position.z + e.deltaY * 0.003, 3.8, 6.2);
     };
 
     const dom = renderer.domElement;
@@ -328,14 +354,14 @@ export function CobeGlobe({ className }: { className?: string }) {
     const ro = new ResizeObserver(handleResize);
     ro.observe(container);
 
-    // 10. Optimized Animation Loop
+    // 10. Animation Loop
     let animationFrameId: number;
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
 
       if (!isDragging) {
         earthMesh.rotation.y += 0.003;
-        cloudMesh.rotation.y += 0.0038; // Independent cloud drift
+        cloudMesh.rotation.y += 0.0038;
       }
 
       renderer.render(scene, camera);
