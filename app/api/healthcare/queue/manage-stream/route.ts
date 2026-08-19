@@ -17,10 +17,10 @@ export async function GET(request: Request) {
     if (!canManageAll) await requireOwnedStore(session.user.id, storeId);
 
     const queue = await healthcareQueueDashboard(storeId);
-    const payload = `retry: 3000\nevent: queue\ndata: ${JSON.stringify({ queue })}\n\n`;
+    const payload = `retry: 1000\nevent: queue\ndata: ${JSON.stringify({ queue })}\n\n`;
     return new Response(payload, {
       headers: {
-        "Content-Type": "text/event-stream",
+        "Content-Type": "text/event-stream; charset=utf-8",
         "Cache-Control": "no-store, no-transform",
         Connection: "keep-alive",
       },

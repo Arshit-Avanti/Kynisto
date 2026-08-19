@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireApiSession } from "@/lib/auth";
 import { getD1 } from "@/db/runtime";
+import { isMembershipsEnabled } from "@/lib/settings";
 
 async function ensurePurchaseTable(d1: any) {
   try {
@@ -30,6 +31,11 @@ async function ensurePurchaseTable(d1: any) {
 
 export async function POST(request: Request) {
   try {
+    const enabled = await isMembershipsEnabled();
+    if (!enabled) {
+      return NextResponse.json({ error: "Store memberships are temporarily disabled by the platform administrator." }, { status: 403 });
+    }
+
     const session = await requireApiSession(request);
     if (!session?.user) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });

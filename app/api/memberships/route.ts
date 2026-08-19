@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import { getD1 } from "@/db/runtime";
+import { isMembershipsEnabled } from "@/lib/settings";
 
 export async function GET(request: Request) {
   try {
+    const enabled = await isMembershipsEnabled();
+    if (!enabled) {
+      return NextResponse.json({ plans: [], enabled: false });
+    }
+
     const { searchParams } = new URL(request.url);
     const storeId = searchParams.get("storeId");
     if (!storeId) return NextResponse.json({ error: "storeId is required" }, { status: 400 });

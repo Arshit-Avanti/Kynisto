@@ -22,7 +22,10 @@ export function assertSameOrigin(request: Request): void {
   try {
     const originUrl = new URL(origin);
     const requestUrl = new URL(request.url);
-    if (originUrl.hostname !== requestUrl.hostname && !originUrl.hostname.endsWith("workers.dev")) {
+    const trusted = ["kynisto.in", "www.kynisto.in", "kynstio.in", "www.kynstio.in", "localhost", "127.0.0.1"];
+    const isOriginTrusted = trusted.includes(originUrl.hostname) || originUrl.hostname.endsWith("workers.dev");
+    const isRequestTrusted = trusted.includes(requestUrl.hostname) || requestUrl.hostname.endsWith("workers.dev");
+    if (originUrl.hostname !== requestUrl.hostname && (!isOriginTrusted || !isRequestTrusted)) {
       console.warn("Cross-origin request notice from:", origin, "to:", request.url);
     }
   } catch {

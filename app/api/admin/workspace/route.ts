@@ -3,7 +3,7 @@ import { requireApiPermission } from "@/lib/auth";
 import { writeAudit } from "@/lib/ownership";
 import type { Permission } from "@/lib/rbac";
 import { apiError, HttpError, noStoreJson } from "@/lib/security";
-import { systemCurrency } from "@/lib/settings";
+import { invalidateSettingsCache, systemCurrency } from "@/lib/settings";
 import { cleanText, d1SearchText, numberInput, safeJson, slugify, urlInput } from "@/lib/validation";
 
 type BindValue = string | number | null;
@@ -63,7 +63,8 @@ const SETTING_DEFINITIONS = {
   default_delivery_radius_km: {
     label: "Default delivery radius (km)",
     type: "number",
-    defaultValue: "5",
+    defaultValue: "25",
+    max: 500,
   },
   default_currency: { label: "Default currency", type: "currency", defaultValue: "INR" },
   reviews_require_moderation: {
@@ -75,6 +76,82 @@ const SETTING_DEFINITIONS = {
     label: "Automatically approve owner accounts",
     type: "boolean",
     defaultValue: "false",
+  },
+  memberships_enabled: {
+    label: "Allow store memberships across all pages",
+    type: "boolean",
+    defaultValue: "true",
+  },
+  membership_max_plans_per_store: {
+    label: "Maximum membership plans per store",
+    type: "number",
+    defaultValue: "20",
+    max: 100,
+  },
+  healthcare_queue_enabled: {
+    label: "Healthcare live queue enabled platform-wide",
+    type: "boolean",
+    defaultValue: "true",
+  },
+  healthcare_max_daily_patients: {
+    label: "Maximum daily queue patients per clinic",
+    type: "number",
+    defaultValue: "1000",
+    max: 5000,
+  },
+  appointments_enabled: {
+    label: "Healthcare doctor appointments booking enabled",
+    type: "boolean",
+    defaultValue: "true",
+  },
+  loyalty_program_enabled: {
+    label: "Loyalty points & rewards program enabled",
+    type: "boolean",
+    defaultValue: "true",
+  },
+  coupons_enabled: {
+    label: "Discount coupons & promotions enabled",
+    type: "boolean",
+    defaultValue: "true",
+  },
+  chat_enabled: {
+    label: "Live customer-store chat messaging enabled",
+    type: "boolean",
+    defaultValue: "true",
+  },
+  broadcast_enabled: {
+    label: "Store announcements & broadcasts enabled",
+    type: "boolean",
+    defaultValue: "true",
+  },
+  max_products_per_store: {
+    label: "Maximum products allowed per store",
+    type: "number",
+    defaultValue: "10000",
+    max: 50000,
+  },
+  max_services_per_store: {
+    label: "Maximum services allowed per store",
+    type: "number",
+    defaultValue: "1000",
+    max: 5000,
+  },
+  max_image_upload_mb: {
+    label: "Maximum image upload size (MB)",
+    type: "number",
+    defaultValue: "25",
+    max: 100,
+  },
+  adsense_enabled: {
+    label: "Google AdSense monetization enabled platform-wide",
+    type: "boolean",
+    defaultValue: "true",
+  },
+  queue_refresh_interval_ms: {
+    label: "Live queue real-time refresh rate (ms)",
+    type: "number",
+    defaultValue: "1200",
+    max: 10000,
   },
   privacy_policy_url: { label: "Privacy policy URL", type: "url", defaultValue: "" },
   terms_url: { label: "Terms URL", type: "url", defaultValue: "" },
@@ -1040,7 +1117,9 @@ function settingValue(key: SettingKey, raw: unknown): string {
     throw new HttpError(400, "Setting must be true or false.", "INVALID_SETTING_VALUE");
   }
   if (type === "number") {
-    return String(numberInput(raw, "Setting value", { min: 0, max: 100 }));
+    const def = SETTING_DEFINITIONS[key] as { max?: number };
+    const maxVal = def.max ?? 50000;
+    return String(numberInput(raw, "Setting value", { min: 0, max: maxVal }));
   }
   if (type === "email") {
     const email = cleanText(raw, "Email", { min: 3, max: 254 }).toLowerCase();
@@ -1067,6 +1146,7 @@ async function updateSetting(request: Request, body: Record<string, unknown>) {
   await getD1().prepare(
     "INSERT INTO system_settings (key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
   ).bind(key, value, now).run();
+  invalidateSettingsCache(key);
   await writeAudit(request, session.user.id, "setting.updated", "system_setting", key, { value });
   return noStoreJson({ ok: true, key, value });
 }

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import Script from "next/script";
 import "./globals.css";
 import "./kynisto-brand.css";
 import "./google-auth.css";
+import { AdSenseManager } from "@/components/ads/AdSenseManager";
 import { AppUpdateManager } from "@/components/AppUpdateManager";
 import { SupabaseAuthManager } from "@/components/auth/SupabaseAuthManager";
 import { AppReturnBanner } from "@/components/ui/AppReturnBanner";
@@ -60,8 +62,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="google-adsense-account" content="ca-pub-9178031569606873" />
-        <script
-          async
+        <Script
+          id="google-adsense"
+          strategy="afterInteractive"
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9178031569606873"
           crossOrigin="anonymous"
         />
@@ -76,11 +79,14 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
         <link rel="preconnect" href="https://kynisto.in" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://kynisto.in" />
+        <link rel="preconnect" href="https://kynstio.in" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://kynstio.in" />
       </head>
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
         <SupabaseAuthManager />
         <AppReturnBanner />
+        <AdSenseManager />
         {children}
         <AppUpdateManager />
         <AudioPermissionModal />

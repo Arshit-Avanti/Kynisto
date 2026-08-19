@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef, useMemo, startTransition } from 'react';
-import { Clock, MapPin, AlertCircle, XCircle, CheckCircle2, Navigation, User, Phone, Bell, ArrowLeft, Search, Building2, Stethoscope, Activity, Sparkles, Filter, ChevronRight, Lock, RefreshCw, AlertTriangle, PartyPopper } from 'lucide-react';
+import { Clock, MapPin, AlertCircle, XCircle, CheckCircle2, Navigation, User, Phone, Bell, ArrowLeft, Search, Building2, Stethoscope, Activity, Sparkles, Filter, ChevronRight, Lock, RefreshCw, AlertTriangle, PartyPopper, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/client-api';
 import { PushNotificationManager } from '@/components/ui/PushNotificationManager';
+import { AppointmentBooking } from '@/components/queue/AppointmentBooking';
 
 let _cachedAudioCtx: AudioContext | null = null;
 let _lastChimeTime = 0;
@@ -89,7 +90,7 @@ interface PatientQueueStateResponse {
     entry: {
       id: string;
       tokenNumber: number;
-      status: 'waiting' | 'called' | 'completed' | 'cancelled' | 'left' | 'expired';
+      status: 'waiting' | 'called' | 'in_consultation' | 'completed' | 'cancelled' | 'left' | 'no_show' | 'expired';
       arrivalStatus: string;
       position: number;
     } | null;
@@ -227,7 +228,7 @@ export default function LiveQueueTracker() {
   const [currentToken, setCurrentToken] = useState<number>(0);
   const [myTokenNumber, setMyTokenNumber] = useState<number>(0);
   const [isQueueOpen, setIsQueueOpen] = useState<boolean>(true);
-  const [entryStatus, setEntryStatus] = useState<'waiting' | 'called' | 'completed' | 'cancelled' | 'left' | 'expired'>('waiting');
+  const [entryStatus, setEntryStatus] = useState<'waiting' | 'called' | 'in_consultation' | 'completed' | 'cancelled' | 'left' | 'no_show' | 'expired'>('waiting');
   const [currentEntryId, setCurrentEntryId] = useState<string | null>(null);
   const [liveCompleted, setLiveCompleted] = useState<boolean>(false);
   const [isTurnDismissed, setIsTurnDismissed] = useState<boolean>(false);
@@ -237,9 +238,13 @@ export default function LiveQueueTracker() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
   const [isLate, setIsLate] = useState(false);
+  const [lateMinutes, setLateMinutes] = useState<number>(10);
   const [isCancelled, setIsCancelled] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isJoining, setIsJoining] = useState(false);
+
+  // Appointment booking modal state
+  const [bookingTarget, setBookingTarget] = useState<{ id: string; name: string } | null>(null);
 
   // Throttled / Debounced search input handler to keep responsiveness < 15ms
   useEffect(() => {
@@ -263,6 +268,10 @@ export default function LiveQueueTracker() {
 
   useEffect(() => {
     fetchHealthcareQueues();
+    const listInterval = setInterval(() => {
+      fetchHealthcareQueues();
+    }, 2000);
+    return () => clearInterval(listInterval);
   }, [fetchHealthcareQueues]);
 
   const userPositionRef = useRef(userPosition);
@@ -397,11 +406,11 @@ export default function LiveQueueTracker() {
   useEffect(() => {
     if (view !== 'ticket' || !selectedQueueId || isCancelled) return;
     
-    // Initial fetch & 4s polling backup
+    // Initial fetch & sub-2-second fast polling backup
     syncPatientStateWithStore(selectedQueueId);
     const pollInterval = setInterval(() => {
       syncPatientStateWithStore(selectedQueueId);
-    }, 4000);
+    }, 1200);
 
     // Realtime SSE Stream for instant sub-second push updates
     let source: EventSource | null = null;
@@ -496,8 +505,9 @@ export default function LiveQueueTracker() {
     setErrorMsg(null);
     notifiedTokenRef.current = null;
 
-    if (item.queueStatus === 'closed') {
-      setErrorMsg(`The live queue for ${item.name} is currently closed.`);
+    const isClosedNow = item.queueStatus === 'closed' || item.ownerQueueEnabled === false || item.acceptingPatients === false;
+    if (isClosedNow) {
+      setErrorMsg(`The live queue for ${item.name} is currently closed by the clinic.`);
       return;
     }
 
@@ -539,7 +549,13 @@ export default function LiveQueueTracker() {
 
       if (response && response.state && response.state.entry) {
         const { entry, consultationMinutes, queueStatus } = response.state;
-        setIsQueueOpen(queueStatus !== 'closed');
+        const open = queueStatus !== 'closed';
+        setIsQueueOpen(open);
+        if (!open) {
+          setView('list');
+          setErrorMsg(`The live queue for ${item.name} is closed.`);
+          return;
+        }
         setCurrentEntryId(entry.id);
         
         const initialStatus = entry.status === 'completed' ? 'waiting' : entry.status;
@@ -569,6 +585,14 @@ export default function LiveQueueTracker() {
         router.push(`/login?returnTo=${encodeURIComponent(window.location.pathname)}`);
         return;
       }
+      if (msg.includes('closed') || msg.includes('not open') || msg.includes('disabled') || msg.includes('CLOSED')) {
+        setView('list');
+        setSelectedQueue(null);
+        setErrorMsg(`The live queue for ${item.name} is currently closed by the clinic.`);
+        // Refresh local list state
+        fetchHealthcareQueues();
+        return;
+      }
       if (msg.includes('already in an active') || msg.includes('existing')) {
         await syncPatientStateWithStore(item.id);
       } else {
@@ -580,30 +604,43 @@ export default function LiveQueueTracker() {
   }, [router, syncPatientStateWithStore]);
 
   const handleRunningLate = useCallback(async () => {
+    if (!selectedQueue) return;
+    const mins = parseInt(window.prompt('How many minutes late are you? (5–60)', '10') ?? '10', 10);
+    const validMins = Math.min(60, Math.max(5, isNaN(mins) ? 10 : mins));
+    setLateMinutes(validMins);
     setIsLate(true);
-    if (selectedQueue) {
-      try {
-        await apiFetch('/api/healthcare/queue', {
-          method: 'POST',
-          json: { action: 'update_arrival', storeId: String(selectedQueue.id), arrivalStatus: 'running_late', lateMinutes: 10 },
-        });
-      } catch {
-        // Fallback UI indication
-      }
+    try {
+      await apiFetch('/api/healthcare/queue', {
+        method: 'POST',
+        json: { action: 'update_arrival', storeId: String(selectedQueue.id), arrivalStatus: 'running_late', lateMinutes: validMins },
+      });
+    } catch {
+      // Fallback UI indication
     }
     setTimeout(() => setIsLate(false), 6000);
   }, [selectedQueue]);
 
-  const handleCancelVisit = useCallback(async () => {
+  const handleLeaveQueue = useCallback(async () => {
     if (selectedQueue) {
       try {
         await apiFetch('/api/healthcare/queue', {
           method: 'POST',
           json: { action: 'leave', storeId: String(selectedQueue.id) },
         });
-      } catch {
-        // Fallback
-      }
+      } catch { /* Fallback */ }
+    }
+    setIsCancelled(true);
+  }, [selectedQueue]);
+
+  const handleCancelVisit = useCallback(async () => {
+    if (!window.confirm('Cancel your visit? You will lose your place in the queue.')) return;
+    if (selectedQueue) {
+      try {
+        await apiFetch('/api/healthcare/queue', {
+          method: 'POST',
+          json: { action: 'cancel', storeId: String(selectedQueue.id) },
+        });
+      } catch { /* Fallback */ }
     }
     setIsCancelled(true);
   }, [selectedQueue]);
@@ -737,6 +774,15 @@ export default function LiveQueueTracker() {
               <span>Profile</span>
             </Link>
 
+            {/* Book Appointment — always shown for healthcare providers */}
+            <button
+              className="bookApptBtn"
+              onClick={() => setBookingTarget({ id: String(item.id), name: item.name })}
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              <span>Book Appt</span>
+            </button>
+
             {hasLiveQueue && (
               <button
                 onClick={() => handleJoinQueue(item)}
@@ -755,7 +801,7 @@ export default function LiveQueueTracker() {
         </div>
       );
     });
-  }, [filteredQueues, isJoining, handleJoinQueue]);
+  }, [filteredQueues, isJoining, handleJoinQueue, setBookingTarget]);
 
   const isCompleted = entryStatus === 'completed';
 
@@ -1005,20 +1051,37 @@ export default function LiveQueueTracker() {
               <div className="mb-8 p-4 bg-amber-500/10 border-l-4 border-amber-500 rounded-xl flex items-start text-amber-200">
                 <AlertCircle className="w-5 h-5 text-amber-400 mr-3 mt-0.5 shrink-0" />
                 <p className="text-sm font-medium">
-                  We notified the clinic that you are running late. Your position will be preserved for an extra 10 minutes.
+                  We notified the clinic that you are running <strong>{lateMinutes} minutes</strong> late. Your position is preserved.
                 </p>
               </div>
             )}
 
+            {/* In Consultation Banner */}
+            {entryStatus === 'in_consultation' && (
+              <div className="mb-8 p-4 bg-blue-500/10 border-l-4 border-blue-500 rounded-xl flex items-start text-blue-200">
+                <CheckCircle2 className="w-5 h-5 text-blue-400 mr-3 mt-0.5 shrink-0" />
+                <p className="text-sm font-bold">You are currently in consultation. Please wait — the doctor will see you shortly.</p>
+              </div>
+            )}
+
             {/* Action Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
               <button
                 onClick={handleRunningLate}
-                disabled={isLate || isClosed || isMyTurn}
+                disabled={isLate || isClosed || isMyTurn || entryStatus === 'in_consultation'}
                 className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-extrabold text-base shadow-lg transition-all disabled:opacity-50 cursor-pointer"
               >
                 <Navigation className="w-5 h-5 mr-3 text-white fill-white/20" />
                 <span>Running Late</span>
+              </button>
+
+              <button
+                onClick={handleLeaveQueue}
+                disabled={isMyTurn || entryStatus === 'in_consultation'}
+                className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-extrabold text-base shadow-lg transition-all disabled:opacity-50 cursor-pointer"
+              >
+                <ArrowLeft className="w-5 h-5 mr-3 text-white" />
+                <span>Leave Queue</span>
               </button>
 
               <button
@@ -1057,6 +1120,7 @@ export default function LiveQueueTracker() {
 
   // 4. ALL HEALTHCARE QUEUES LIST VIEW
   return (
+    <>
     <div className="min-h-screen bg-slate-950 text-white flex flex-col font-sans">
       {/* Header Bar */}
       <div className="bg-slate-900/95 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-40 px-3 sm:px-6 py-2.5 sm:py-3.5">
@@ -1149,5 +1213,29 @@ export default function LiveQueueTracker() {
         </div>
       </div>
     </div>
+
+    {/* Appointment Booking Modal Overlay */}
+    {bookingTarget && (
+      <div
+        className="apptOverlay"
+        onClick={(e) => { if (e.target === e.currentTarget) setBookingTarget(null); }}
+      >
+        <div className="apptSheet">
+          <AppointmentBooking
+            storeId={bookingTarget.id}
+            storeName={bookingTarget.name}
+            onClose={() => setBookingTarget(null)}
+            onCheckedIn={(tokenNumber) => {
+              setBookingTarget(null);
+              if (selectedQueue && String(selectedQueue.id) === bookingTarget.id) {
+                setMyTokenNumber(tokenNumber);
+                setView('ticket');
+              }
+            }}
+          />
+        </div>
+      </div>
+    )}
+    </>
   );
 }

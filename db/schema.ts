@@ -970,6 +970,7 @@ export const healthcareQueueSettings = sqliteTable("healthcare_queue_settings", 
   openingTime: text("opening_time").notNull().default("09:00"),
   closingTime: text("closing_time").notNull().default("18:00"),
   maximumDailyPatients: integer("maximum_daily_patients").notNull().default(100),
+  gracePeriodMinutes: integer("grace_period_minutes").notNull().default(30),
   currentTokenNumber: integer("current_token_number").notNull().default(0),
   nextTokenNumber: integer("next_token_number").notNull().default(1),
   serviceDate: text("service_date").notNull(),
@@ -978,6 +979,23 @@ export const healthcareQueueSettings = sqliteTable("healthcare_queue_settings", 
   updatedBy: text("updated_by").references(() => users.id, { onDelete: "set null" }),
   updatedAt: integer("updated_at").notNull().default(sql`(unixepoch())`),
 });
+
+export const healthcareDoctors = sqliteTable(
+  "healthcare_doctors",
+  {
+    id: text("id").primaryKey(),
+    storeId: text("store_id")
+      .notNull()
+      .references(() => stores.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    specialization: text("specialization"),
+    consultationMinutes: integer("consultation_minutes").notNull().default(15),
+    status: text("status", { enum: ["active", "inactive"] }).notNull().default("active"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    ...timestamps,
+  },
+  (table) => [index("healthcare_doctors_store_idx").on(table.storeId, table.status)],
+);
 
 export const healthcareQueueEntries = sqliteTable(
   "healthcare_queue_entries",
@@ -992,16 +1010,20 @@ export const healthcareQueueEntries = sqliteTable(
     serviceDate: text("service_date").notNull(),
     tokenNumber: integer("token_number").notNull(),
     activeKey: text("active_key"),
-    status: text("status", { enum: ["waiting", "called", "skipped", "completed", "left", "cancelled", "removed", "expired"] })
+    status: text("status", { enum: ["waiting", "called", "in_consultation", "skipped", "completed", "left", "cancelled", "removed", "expired", "no_show"] })
       .notNull()
       .default("waiting"),
-    arrivalStatus: text("arrival_status", { enum: ["waiting", "leaving_now", "running_late"] }).notNull().default("waiting"),
+    arrivalStatus: text("arrival_status", { enum: ["waiting", "leaving_now", "running_late", "arrived"] }).notNull().default("waiting"),
     isEmergency: integer("is_emergency", { mode: "boolean" }).notNull().default(false),
     isWalkIn: integer("is_walk_in", { mode: "boolean" }).notNull().default(false),
     patientName: text("patient_name"),
     contactDetails: text("contact_details"),
     emergencyPatientName: text("emergency_patient_name"),
     emergencyPatientPhone: text("emergency_patient_phone"),
+    lateMinutes: integer("late_minutes"),
+    lateReportedAt: integer("late_reported_at"),
+    appointmentId: text("appointment_id"),
+    doctorId: text("doctor_id"),
     joinedAt: integer("joined_at").notNull().default(sql`(unixepoch())`),
     expiresAt: integer("expires_at"),
     reminderSentAt: integer("reminder_sent_at"),
@@ -1056,6 +1078,42 @@ export const healthcareQueueReports = sqliteTable(
     ...timestamps,
   },
   (table) => [index("healthcare_queue_reports_status_date_idx").on(table.status, table.createdAt)],
+);
+
+export const healthcareAppointments = sqliteTable(
+  "healthcare_appointments",
+  {
+    id: text("id").primaryKey(),
+    storeId: text("store_id")
+      .notNull()
+      .references(() => stores.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    doctorId: text("doctor_id").references(() => healthcareDoctors.id, { onDelete: "set null" }),
+    appointmentDate: text("appointment_date").notNull(),
+    timeSlot: text("time_slot").notNull(),
+    durationMinutes: integer("duration_minutes").notNull().default(15),
+    status: text("status", { enum: ["booked", "confirmed", "checked_in", "completed", "rescheduled", "cancelled", "no_show"] })
+      .notNull()
+      .default("booked"),
+    queueEntryId: text("queue_entry_id").references(() => healthcareQueueEntries.id, { onDelete: "set null" }),
+    patientName: text("patient_name"),
+    patientPhone: text("patient_phone"),
+    notes: text("notes"),
+    cancellationReason: text("cancellation_reason"),
+    rescheduledFrom: text("rescheduled_from"),
+    confirmedAt: integer("confirmed_at"),
+    checkedInAt: integer("checked_in_at"),
+    completedAt: integer("completed_at"),
+    cancelledAt: integer("cancelled_at"),
+    ...timestamps,
+  },
+  (table) => [
+    index("healthcare_appt_store_date_idx").on(table.storeId, table.appointmentDate, table.status),
+    index("healthcare_appt_user_date_idx").on(table.userId, table.appointmentDate),
+    index("healthcare_appt_doctor_date_idx").on(table.doctorId, table.appointmentDate, table.status),
+  ],
 );
 
 export const kynistoWallets = sqliteTable("kynisto_wallets", {

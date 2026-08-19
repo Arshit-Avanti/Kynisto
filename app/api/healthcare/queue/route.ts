@@ -2,6 +2,7 @@ import { getD1 } from "@/db/runtime";
 import { requireApiPermission } from "@/lib/auth";
 import { activeHealthcareQueueForUser, indiaServiceDate, patientQueueState, QUEUE_ENTRY_TTL_SECONDS, requireHealthcareStore } from "@/lib/healthcare";
 import { apiError, enforceRateLimit, HttpError, noStoreJson } from "@/lib/security";
+import { isHealthcareQueueEnabled } from "@/lib/settings";
 import { requireFeaturePermission } from "@/lib/subscriptions";
 import { cleanText, safeJson } from "@/lib/validation";
 
@@ -22,6 +23,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const enabled = await isHealthcareQueueEnabled();
+    if (!enabled) throw new HttpError(403, "Live healthcare queue is temporarily disabled by the platform administrator.", "QUEUE_DISABLED_BY_ADMIN");
     const session = await requireApiPermission(request, "queue.join", { csrf: true });
     await requireFeaturePermission(session.user.id, "queue");
     await enforceRateLimit(request, `queue:${session.user.id}`, 20, 300);
@@ -38,7 +41,7 @@ export async function POST(request: Request) {
 
     if (action === "join") {
       // Clean up any stale active keys from old completed/cancelled sessions for this user
-      await db.prepare("UPDATE healthcare_queue_entries SET active_key = NULL WHERE user_id = ? AND status IN ('completed','cancelled','left','expired','removed') AND active_key IS NOT NULL")
+      await db.prepare("UPDATE healthcare_queue_entries SET active_key = NULL WHERE user_id = ? AND status IN ('completed','cancelled','left','expired','removed','no_show') AND active_key IS NOT NULL")
         .bind(session.user.id).run().catch(() => {});
 
       // Ensure queue settings exist and are open for today
@@ -53,7 +56,7 @@ export async function POST(request: Request) {
       `).bind(storeId, today, now, today, today, now).run().catch(() => {});
 
       const state = await patientQueueState(storeId, session.user.id);
-      if (state?.entry && (state.entry.status === 'waiting' || state.entry.status === 'called')) {
+      if (state?.entry && (state.entry.status === 'waiting' || state.entry.status === 'called' || state.entry.status === 'in_consultation')) {
         return noStoreJson({ state, existing: true });
       }
       if (state?.activeQueue && state.activeQueue.storeId !== storeId) {
@@ -76,7 +79,7 @@ export async function POST(request: Request) {
           LEFT JOIN healthcare_provider_profiles hp ON hp.store_id = q.store_id
           WHERE q.store_id = ?
           AND COALESCE(hp.accepting_patients, 1) = 1
-          AND NOT EXISTS (SELECT 1 FROM healthcare_queue_entries active WHERE active.active_key = ? AND active.status IN ('waiting','called'))
+          AND NOT EXISTS (SELECT 1 FROM healthcare_queue_entries active WHERE active.active_key = ? AND active.status IN ('waiting','called','in_consultation'))
           AND (SELECT COUNT(*) FROM healthcare_queue_entries e WHERE e.store_id = q.store_id
             AND e.service_date = ? AND e.status NOT IN ('cancelled','expired')) < COALESCE(q.maximum_daily_patients, 100)
           ON CONFLICT(active_key) DO NOTHING RETURNING id, token_number AS tokenNumber, status,
@@ -104,13 +107,17 @@ export async function POST(request: Request) {
     }
 
     if (action === "leave" || action === "cancel") {
-      const entry = await db.prepare("SELECT id FROM healthcare_queue_entries WHERE store_id = ? AND user_id = ? AND active_key IS NOT NULL LIMIT 1").bind(storeId, session.user.id).first<{ id: string }>();
+      const entry = await db.prepare("SELECT id, token_number AS tokenNumber FROM healthcare_queue_entries WHERE store_id = ? AND user_id = ? AND active_key IS NOT NULL AND status IN ('waiting','called','in_consultation') LIMIT 1").bind(storeId, session.user.id).first<{ id: string; tokenNumber: number }>();
       if (!entry) throw new HttpError(404, "You are not in this queue.", "QUEUE_ENTRY_NOT_FOUND");
+      const finalStatus = action === "cancel" ? "cancelled" : "left";
+      const reason = action === "cancel" ? (cleanText(body.reason, "Reason", { max: 500, required: false }) || null) : null;
       await db.batch([
-        db.prepare("UPDATE healthcare_queue_entries SET status = 'left', active_key = NULL, left_at = ?, updated_at = ? WHERE id = ? AND user_id = ?").bind(now, now, entry.id, session.user.id),
-        db.prepare("UPDATE healthcare_queue_settings SET current_token_number = CASE WHEN current_token_number = (SELECT token_number FROM healthcare_queue_entries WHERE id = ?) THEN 0 ELSE current_token_number END, updated_at = ? WHERE store_id = ?")
-          .bind(entry.id, now, storeId),
-        db.prepare("INSERT INTO healthcare_queue_events (id, store_id, entry_id, actor_id, event_type, created_at) VALUES (?, ?, ?, ?, 'left', ?)").bind(crypto.randomUUID(), storeId, entry.id, session.user.id, now),
+        db.prepare(`UPDATE healthcare_queue_entries SET status = ?, active_key = NULL, left_at = ?, updated_at = ? WHERE id = ? AND user_id = ? AND status IN ('waiting','called','in_consultation')`).bind(finalStatus, now, now, entry.id, session.user.id),
+        db.prepare("UPDATE healthcare_queue_settings SET current_token_number = CASE WHEN current_token_number = ? THEN 0 ELSE current_token_number END, updated_at = ? WHERE store_id = ?")
+          .bind(entry.tokenNumber, now, storeId),
+        db.prepare("INSERT INTO healthcare_queue_events (id, store_id, entry_id, actor_id, event_type, metadata, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)").bind(crypto.randomUUID(), storeId, entry.id, session.user.id, finalStatus, JSON.stringify({ tokenNumber: entry.tokenNumber, reason }), now),
+        ...(provider.ownerId && action === "cancel" ? [db.prepare("INSERT INTO notifications (id, user_id, audience, type, title, message, link, created_at) VALUES (?, ?, 'user', 'queue', 'Patient cancelled', ?, '/owner?tab=healthcare', ?)")
+          .bind(crypto.randomUUID(), provider.ownerId, `Token #${entry.tokenNumber} cancelled their queue visit.`, now)] : []),
       ]);
       return noStoreJson({ state: await patientQueueState(storeId, session.user.id) });
     }
@@ -119,11 +126,12 @@ export async function POST(request: Request) {
       const arrivalStatus = body.arrivalStatus;
       const lateMinutes = typeof body.lateMinutes === "number" ? Math.min(120, Math.max(5, Math.round(body.lateMinutes))) : null;
       if (!["waiting", "leaving_now", "running_late"].includes(String(arrivalStatus))) throw new HttpError(400, "Choose a valid arrival update.", "INVALID_ARRIVAL_STATUS");
-      const entry = await db.prepare("SELECT id, token_number AS tokenNumber FROM healthcare_queue_entries WHERE store_id = ? AND user_id = ? AND active_key IS NOT NULL AND status IN ('waiting','called') LIMIT 1")
+      const entry = await db.prepare("SELECT id, token_number AS tokenNumber FROM healthcare_queue_entries WHERE store_id = ? AND user_id = ? AND active_key IS NOT NULL AND status IN ('waiting','called','in_consultation') LIMIT 1")
         .bind(storeId, session.user.id).first<{ id: string; tokenNumber: number }>();
       if (!entry) throw new HttpError(404, "You are not in this queue.", "QUEUE_ENTRY_NOT_FOUND");
       const statements: D1PreparedStatement[] = [
-        db.prepare("UPDATE healthcare_queue_entries SET arrival_status = ?, updated_at = ? WHERE id = ? AND user_id = ?").bind(arrivalStatus, now, entry.id, session.user.id),
+        db.prepare("UPDATE healthcare_queue_entries SET arrival_status = ?, late_minutes = CASE WHEN ? = 'running_late' THEN ? ELSE NULL END, late_reported_at = CASE WHEN ? = 'running_late' THEN ? ELSE late_reported_at END, updated_at = ? WHERE id = ? AND user_id = ? AND status IN ('waiting','called','in_consultation')")
+          .bind(arrivalStatus, arrivalStatus, lateMinutes, arrivalStatus, now, now, entry.id, session.user.id),
         db.prepare("INSERT INTO healthcare_queue_events (id, store_id, entry_id, actor_id, event_type, metadata, created_at) VALUES (?, ?, ?, ?, 'arrival_updated', ?, ?)")
           .bind(crypto.randomUUID(), storeId, entry.id, session.user.id, JSON.stringify({ arrivalStatus, lateMinutes, tokenNumber: entry.tokenNumber }), now),
       ];

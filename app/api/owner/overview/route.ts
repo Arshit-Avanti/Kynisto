@@ -26,8 +26,9 @@ export async function GET(request: Request) {
       db
         .prepare(
           `SELECT ae.event_type AS eventType, COUNT(*) AS total
-           FROM analytics_events ae JOIN stores s ON s.id = ae.store_id
-           WHERE s.owner_id = ? AND ae.occurred_at >= unixepoch() - 2592000
+           FROM analytics_events ae
+           WHERE ae.store_id IN (SELECT id FROM stores WHERE owner_id = ?)
+             AND ae.occurred_at >= unixepoch() - 2592000
            GROUP BY ae.event_type`,
         )
         .bind(session.user.id)

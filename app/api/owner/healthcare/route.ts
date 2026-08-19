@@ -19,9 +19,11 @@ export async function GET(request: Request) {
   try {
     const session = await requireApiPermission(request, "queue.manage_own");
     await requireFeaturePermission(session.user.id, "healthcare");
-    const storeId = cleanText(new URL(request.url).searchParams.get("storeId"), "Provider", { max: 80 });
+    const url = new URL(request.url);
+    const storeId = cleanText(url.searchParams.get("storeId"), "Provider", { max: 80 });
+    const isFast = url.searchParams.get("fast") === "1";
     await ownerContext(session.user.id, storeId);
-    return noStoreJson(await healthcareQueueDashboard(storeId));
+    return noStoreJson(await healthcareQueueDashboard(storeId, { includeAnalytics: !isFast }));
   } catch (error) { return apiError(error); }
 }
 
@@ -55,18 +57,19 @@ export async function PATCH(request: Request) {
       const closingTime = cleanText(body.closingTime ?? "18:00", "Queue closing time", { max: 5 });
       if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(openingTime) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(closingTime)) throw new HttpError(400, "Use a valid 24-hour queue schedule.", "INVALID_QUEUE_TIME");
       const maximumDailyPatients = numberInput(body.maximumDailyPatients ?? 100, "Maximum daily patients", { min: 1, max: 1000, integer: true }) as number;
+      const gracePeriodMinutes = numberInput(body.gracePeriodMinutes ?? 30, "Grace period", { min: 5, max: 120, integer: true }) as number;
       const now = Math.floor(Date.now() / 1000);
       const db = getD1();
       const statements: D1PreparedStatement[] = [
         db.prepare("UPDATE healthcare_provider_profiles SET owner_queue_enabled = ?, accepting_patients = ?, updated_at = ? WHERE store_id = ?")
           .bind(enabled ? 1 : 0, booleanInput(body.acceptingPatients) ? 1 : 0, now, storeId),
-        db.prepare("UPDATE healthcare_queue_settings SET consultation_minutes = ?, opening_time = ?, closing_time = ?, maximum_daily_patients = ?, status = CASE WHEN ? = 0 THEN 'closed' ELSE status END, updated_by = ?, updated_at = ? WHERE store_id = ?")
-          .bind(minutes, openingTime, closingTime, maximumDailyPatients, enabled ? 1 : 0, session.user.id, now, storeId),
+        db.prepare("UPDATE healthcare_queue_settings SET consultation_minutes = ?, opening_time = ?, closing_time = ?, maximum_daily_patients = ?, grace_period_minutes = ?, status = CASE WHEN ? = 0 THEN 'closed' ELSE status END, updated_by = ?, updated_at = ? WHERE store_id = ?")
+          .bind(minutes, openingTime, closingTime, maximumDailyPatients, gracePeriodMinutes, enabled ? 1 : 0, session.user.id, now, storeId),
       ];
-      if (!enabled) statements.push(db.prepare("UPDATE healthcare_queue_entries SET status = 'cancelled', active_key = NULL, left_at = ?, updated_at = ? WHERE store_id = ? AND status IN ('waiting','called')")
+      if (!enabled) statements.push(db.prepare("UPDATE healthcare_queue_entries SET status = 'cancelled', active_key = NULL, left_at = ?, updated_at = ? WHERE store_id = ? AND status IN ('waiting','called','in_consultation')")
         .bind(now, now, storeId));
       await db.batch(statements);
-      await writeAudit(request, session.user.id, "healthcare.queue.configured", "store", storeId, { enabled, minutes, openingTime, closingTime, maximumDailyPatients });
+      await writeAudit(request, session.user.id, "healthcare.queue.configured", "store", storeId, { enabled, minutes, openingTime, closingTime, maximumDailyPatients, gracePeriodMinutes });
       return noStoreJson(await healthcareQueueDashboard(storeId));
     }
 

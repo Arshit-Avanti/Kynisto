@@ -8,7 +8,9 @@
   ],
   "routes": [
     { "pattern": "kynisto.in", "custom_domain": true },
-    { "pattern": "www.kynisto.in", "custom_domain": true }
+    { "pattern": "www.kynisto.in", "custom_domain": true },
+    { "pattern": "kynstio.in", "custom_domain": true },
+    { "pattern": "www.kynstio.in", "custom_domain": true }
   ],
   "assets": {
     "directory": "./dist/client",

@@ -32,15 +32,15 @@ function applySecurityHeaders(res: Response): Response {
   headers.set(
     "Content-Security-Policy",
     "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob: data: https://*.google.com https://*.googlesyndication.com https://*.google-analytics.com https://pagead2.googlesyndication.com https://adservice.google.com https://tpc.googlesyndication.com; " +
-    "script-src-elem 'self' 'unsafe-inline' https: blob: data: https://*.google.com https://*.googlesyndication.com https://*.google-analytics.com https://pagead2.googlesyndication.com https://adservice.google.com https://tpc.googlesyndication.com; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob: data: https://*.google.com https://*.google.co.in https://*.googlesyndication.com https://*.google-analytics.com https://pagead2.googlesyndication.com https://*.googleadservices.com https://*.googletagservices.com https://*.googletagmanager.com https://adservice.google.com https://tpc.googlesyndication.com https://ep2.adtrafficquality.google; " +
+    "script-src-elem 'self' 'unsafe-inline' https: blob: data: https://*.google.com https://*.google.co.in https://*.googlesyndication.com https://*.google-analytics.com https://pagead2.googlesyndication.com https://*.googleadservices.com https://*.googletagservices.com https://*.googletagmanager.com https://adservice.google.com https://tpc.googlesyndication.com https://ep2.adtrafficquality.google; " +
     "worker-src 'self' blob: https:; " +
     "style-src 'self' 'unsafe-inline' https: https://*.google.com https://*.googleapis.com; " +
     "style-src-elem 'self' 'unsafe-inline' https: https://*.google.com https://*.googleapis.com; " +
-    "img-src 'self' data: blob: https: https://*.google.com https://*.googlesyndication.com https://*.google-analytics.com https://*.doubleclick.net https://pagead2.googlesyndication.com; " +
+    "img-src 'self' data: blob: https: https://*.google.com https://*.google.co.in https://*.googlesyndication.com https://*.google-analytics.com https://*.doubleclick.net https://pagead2.googlesyndication.com https://*.googleadservices.com https://*.gstatic.com; " +
     "font-src 'self' data: https: https://*.gstatic.com https://*.googleapis.com; " +
-    "connect-src 'self' https: wss: data: blob: https://*.google.com https://*.googlesyndication.com https://pagead2.googlesyndication.com https://*.google-analytics.com https://*.doubleclick.net https://adservice.google.com; " +
-    "frame-src 'self' https: data: blob: https://*.google.com https://*.googlesyndication.com https://*.googleusercontent.com https://*.doubleclick.net https://tpc.googlesyndication.com https://*.admob.com; " +
+    "connect-src 'self' https: wss: data: blob: https://*.google.com https://*.google.co.in https://*.googlesyndication.com https://pagead2.googlesyndication.com https://*.google-analytics.com https://*.doubleclick.net https://adservice.google.com https://*.googleadservices.com https://*.googletagservices.com https://*.googletagmanager.com https://ep2.adtrafficquality.google https://*.supabase.co; " +
+    "frame-src 'self' https: data: blob: https://*.google.com https://*.googlesyndication.com https://*.googleusercontent.com https://*.doubleclick.net https://tpc.googlesyndication.com https://*.admob.com https://*.googleadservices.com; " +
     "frame-ancestors 'self' https://*.google.com https://*.googlesyndication.com https://*.googleusercontent.com https://*.admob.com https://*.adsense.com https://adsense.google.com https://admob.google.com *; " +
     "object-src 'none';"
   );
