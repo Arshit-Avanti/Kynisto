@@ -53,9 +53,9 @@ export function EfferdFeatures6() {
             </svg>
           </div>
           <div className="efferdCardBody">
-            <h3 className="efferdCardTitle">Real-time Queues</h3>
+            <h3 className="efferdCardTitle">Live Queues &amp; Appointments</h3>
             <p className="efferdCardDesc">
-              Skip the waiting room. Monitor your position in line from anywhere and arrive exactly when it&apos;s your turn.
+              Skip waiting rooms. Book doctor consultations with transparent pricing, track live tokens in real-time, and arrive just in time.
             </p>
           </div>
         </div>
