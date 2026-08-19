@@ -3350,14 +3350,14 @@ footer.efferdFooterBlock {
 @media (max-width: 960px) {
   .efferdFooterGrid {
     flex-direction: column !important;
-    gap: 32px !important;
+    gap: 28px !important;
   }
   .efferdFooterNavGroup {
-    flex-wrap: wrap !important;
-    gap: 32px !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 24px 20px !important;
     margin-left: 0 !important;
     width: 100% !important;
-    justify-content: space-between !important;
   }
   .efferdFooterBottom {
     justify-content: center !important;
@@ -3370,12 +3370,35 @@ footer.efferdFooterBlock {
 
 @media (max-width: 600px) {
   footer.efferdFooterBlock {
-    padding: 32px 20px 20px !important;
+    padding: 28px 18px 24px !important;
     margin: 24px auto !important;
+    border-radius: 22px !important;
+  }
+  .efferdFooterBrandCol {
+    max-width: 100% !important;
+    flex: none !important;
+    gap: 12px !important;
+  }
+  .efferdBrandDesc {
+    font-size: 12px !important;
+    line-height: 1.5 !important;
   }
   .efferdFooterNavGroup {
-    flex-direction: column !important;
-    gap: 24px !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px 14px !important;
+    width: 100% !important;
+  }
+  .efferdFooterCol h4 {
+    font-size: 13px !important;
+    margin-bottom: 8px !important;
+  }
+  .efferdFooterCol nav {
+    gap: 6px !important;
+  }
+  .efferdFooterCol nav a {
+    font-size: 12.5px !important;
+    padding: 2px 0 !important;
   }
 }
 
