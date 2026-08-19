@@ -2834,9 +2834,43 @@ img, video, iframe, embed, object {
   50% { opacity: 0.4; transform: scale(0.85); }
 }
 
-@keyframes heartPulse {
-  0%, 100% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.15); opacity: 0.9; }
+.efferdFeatureContent {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+}
+
+.efferdFeatureContent p b {
+  font-size: 16px !important;
+  font-weight: 850 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  letter-spacing: -0.01em !important;
+}
+
+.mode-light .efferdFeatureContent p b {
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+}
+
+.efferdFeatureContent small {
+  font-size: 12px !important;
+  font-weight: 550 !important;
+  color: #94A3B8 !important;
+  -webkit-text-fill-color: #94A3B8 !important;
+}
+
+.mode-light .efferdFeatureContent small {
+  color: #475569 !important;
+  -webkit-text-fill-color: #475569 !important;
+}
+
+@media (max-width: 900px) {
+  .trustStrip.efferdFeaturesBlock {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 12px !important;
+  }
 }
 
 /* ==========================================================================
