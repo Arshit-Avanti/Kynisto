@@ -3921,5 +3921,409 @@ img, video {
   }
 }
 
+/* ==========================================================================
+   DEDICATED DUAL NAVIGATION SYSTEM (DESKTOP & MOBILE)
+   ========================================================================== */
+
+/* Responsive SSR wrappers */
+@media (min-width: 769px) {
+  .mobileOnlyNavWrapper,
+  .mobileTopAppBar,
+  .mobileBottomAppDock,
+  .mobileFullDrawer {
+    display: none !important;
+  }
+  .desktopOnlyNavWrapper {
+    display: block !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .desktopOnlyNavWrapper,
+  .desktopNavContainer {
+    display: none !important;
+  }
+  .mobileOnlyNavWrapper {
+    display: block !important;
+  }
+
+  /* Extra bottom padding on mobile so bottom dock doesn't overlap content */
+  body {
+    padding-bottom: 74px !important;
+  }
+}
+
+/* --- 1. MOBILE TOP APP BAR --- */
+.mobileTopAppBar {
+  position: fixed !important;
+  top: 10px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: min(calc(100% - 20px), 480px) !important;
+  height: 52px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0 12px !important;
+  background: rgba(10, 16, 30, 0.85) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  z-index: 9999 !important;
+  box-sizing: border-box !important;
+  transition: all 0.25s ease !important;
+}
+
+.mode-light .mobileTopAppBar {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+.mobileLocalityPill {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: rgba(255, 87, 34, 0.15) !important;
+  border: 1px solid rgba(255, 87, 34, 0.4) !important;
+  border-radius: 12px !important;
+  padding: 4px 10px !important;
+  cursor: pointer !important;
+  max-width: 120px !important;
+}
+
+.mobileLocalityDot {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background: #FF5722 !important;
+  box-shadow: 0 0 8px #FF5722 !important;
+  flex: 0 0 6px !important;
+}
+
+.mobileLocalityText {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.mode-light .mobileLocalityText {
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+}
+
+.mobileSavedBadge {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 10px !important;
+  padding: 6px 8px !important;
+  cursor: pointer !important;
+  color: #FFFFFF !important;
+}
+
+.mode-light .mobileSavedBadge {
+  background: rgba(241, 245, 249, 0.8) !important;
+  border-color: rgba(203, 213, 225, 0.8) !important;
+  color: #0F172A !important;
+}
+
+.mobileSavedNum {
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  color: #FF8A00 !important;
+  background: rgba(255, 138, 0, 0.2) !important;
+  padding: 1px 5px !important;
+  border-radius: 8px !important;
+}
+
+.mobileMenuToggleBtn {
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 10px !important;
+  color: #FFFFFF !important;
+  cursor: pointer !important;
+}
+
+.mode-light .mobileMenuToggleBtn {
+  background: rgba(241, 245, 249, 0.9) !important;
+  border-color: rgba(203, 213, 225, 0.8) !important;
+  color: #0F172A !important;
+}
+
+/* --- 2. MOBILE FULL SCREEN / SLIDE DRAWER --- */
+.mobileFullDrawer {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99999 !important;
+  background: rgba(10, 15, 30, 0.96) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 20px 20px 80px 20px !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+
+.mode-light .mobileFullDrawer {
+  background: rgba(255, 255, 255, 0.96) !important;
+}
+
+.drawerCloseCircleBtn {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #FFFFFF !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+
+.mode-light .drawerCloseCircleBtn {
+  background: rgba(241, 245, 249, 0.9) !important;
+  border-color: rgba(203, 213, 225, 0.8) !important;
+  color: #0F172A !important;
+}
+
+.drawerLocalityCard {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: linear-gradient(135deg, rgba(255, 87, 34, 0.15) 0%, rgba(255, 138, 0, 0.1) 100%) !important;
+  border: 1px solid rgba(255, 87, 34, 0.35) !important;
+  border-radius: 16px !important;
+  padding: 12px 16px !important;
+  margin-bottom: 12px !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  width: 100% !important;
+}
+
+.drawerDot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: #FF5722 !important;
+  box-shadow: 0 0 10px #FF5722 !important;
+  display: inline-block !important;
+}
+
+.drawerSubLabel {
+  font-size: 10px !important;
+  color: #FF8A00 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  font-weight: 700 !important;
+}
+
+.drawerMainLabel {
+  font-size: 14px !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  font-weight: 750 !important;
+}
+
+.mode-light .drawerMainLabel {
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+}
+
+.drawerChangeBtn {
+  font-size: 12px !important;
+  color: #FF5722 !important;
+  font-weight: 700 !important;
+}
+
+.drawerAccountCard {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: linear-gradient(135deg, #FF5722 0%, #E53935 100%) !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  margin-bottom: 14px !important;
+  text-decoration: none !important;
+  box-shadow: 0 8px 24px rgba(255, 87, 34, 0.35) !important;
+}
+
+.drawerAccountIcon {
+  font-size: 20px !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.drawerNavList {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  flex: 1 !important;
+}
+
+.drawerNavItem {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 14px 16px !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  text-decoration: none !important;
+  font-size: 15px !important;
+  font-weight: 650 !important;
+}
+
+.mode-light .drawerNavItem {
+  background: rgba(248, 250, 252, 0.8) !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+}
+
+.drawerNavItem.drawerButton {
+  cursor: pointer !important;
+  text-align: left !important;
+  width: 100% !important;
+}
+
+.drawerNavIcon {
+  font-size: 18px !important;
+}
+
+.drawerNavArrow {
+  opacity: 0.5 !important;
+  color: inherit !important;
+}
+
+.drawerMembershipItem {
+  background: rgba(255, 122, 0, 0.1) !important;
+  border-color: rgba(255, 122, 0, 0.35) !important;
+}
+
+.drawerVipBadge {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: #FF8A00 !important;
+  background: rgba(255, 138, 0, 0.2) !important;
+  padding: 2px 8px !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(255, 138, 0, 0.4) !important;
+}
+
+.drawerSavedCountBadge {
+  background: rgba(255, 87, 34, 0.25) !important;
+  color: #FF8A00 !important;
+  -webkit-text-fill-color: #FF8A00 !important;
+  border: 1px solid rgba(255, 138, 0, 0.4) !important;
+  padding: 2px 10px !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+}
+
+.drawerFooter {
+  margin-top: 20px !important;
+  padding-top: 16px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.mode-light .drawerFooter {
+  border-top-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* --- 3. MOBILE FLOATING BOTTOM APP DOCK --- */
+.mobileBottomAppDock {
+  position: fixed !important;
+  bottom: 12px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: min(calc(100% - 24px), 440px) !important;
+  height: 56px !important;
+  background: rgba(10, 16, 30, 0.88) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  border-radius: 22px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-around !important;
+  padding: 4px 8px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+  z-index: 9998 !important;
+  box-sizing: border-box !important;
+}
+
+.mode-light .mobileBottomAppDock {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+
+.mobileDockTab {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  flex: 1 !important;
+  height: 100% !important;
+  text-decoration: none !important;
+  border-radius: 14px !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  color: #94A3B8 !important;
+  -webkit-text-fill-color: #94A3B8 !important;
+}
+
+.mode-light .mobileDockTab {
+  color: #64748B !important;
+  -webkit-text-fill-color: #64748B !important;
+}
+
+.mobileDockTab:hover,
+.mobileDockTab:active,
+.mobileDockTab.activeTab {
+  color: #FF5722 !important;
+  -webkit-text-fill-color: #FF5722 !important;
+}
+
+.mobileDockIcon {
+  font-size: 17px !important;
+  line-height: 1 !important;
+}
+
+.mobileDockLabel {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+}
+
+
 
 
