@@ -1621,7 +1621,7 @@ textarea:focus {
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
 }
 
-footer {
+footer:not(.efferdFooterBlock) {
   width: min(1344px, calc(100% - 96px));
   min-height: 160px;
   margin: 0 auto;
@@ -3150,7 +3150,7 @@ img, video, iframe, embed, object {
 footer.efferdFooterBlock {
   width: min(1344px, calc(100% - 64px)) !important;
   margin: 40px auto 32px !important;
-  padding: 44px 40px !important;
+  padding: 44px 48px !important;
   background: rgba(10, 16, 30, 0.75) !important;
   backdrop-filter: blur(24px) !important;
   -webkit-backdrop-filter: blur(24px) !important;
@@ -3158,6 +3158,8 @@ footer.efferdFooterBlock {
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
   box-sizing: border-box !important;
+  display: block !important;
+  grid-template-columns: none !important;
 }
 
 .mode-light footer.efferdFooterBlock {
@@ -3172,21 +3174,22 @@ footer.efferdFooterBlock {
   align-items: flex-start !important;
   width: 100% !important;
   gap: 48px !important;
+  box-sizing: border-box !important;
 }
 
 .efferdFooterBrandCol {
   display: flex !important;
   flex-direction: column !important;
   gap: 16px !important;
-  flex: 0 0 320px !important;
-  max-width: 340px !important;
+  flex: 0 0 280px !important;
+  max-width: 300px !important;
 }
 
 .efferdFooterNavGroup {
   display: flex !important;
   align-items: flex-start !important;
   justify-content: flex-end !important;
-  gap: 64px !important;
+  gap: 80px !important;
   margin-left: auto !important;
   flex: 1 !important;
 }
