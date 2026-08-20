@@ -8,8 +8,8 @@ interface VideoBackgroundProps {
 }
 
 export function VideoBackground({
-  videoSrc = "/videos/kynisto-hero.mp4",
-  mobileVideoSrc = "/videos/kynisto-hero.mp4",
+  videoSrc = "/videos/drive-hero.mp4",
+  mobileVideoSrc = "/videos/mobile-9-16-hero.mp4",
 }: VideoBackgroundProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -17,57 +17,49 @@ export function VideoBackground({
     const video = videoRef.current;
     if (!video) return;
 
-    // Detect mobile viewport
-    const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
-    const activeSrc = isMobile ? (mobileVideoSrc || "/videos/kynisto-hero.mp4") : videoSrc;
-
+    // Modern Autoplay Compliance: defaultMuted and muted MUST be true for instant playback
     video.defaultMuted = true;
     video.muted = true;
     video.playsInline = true;
-    video.autoplay = true;
-    video.loop = true;
-
-    // Direct src assignment ensures instant decoding without source-tag stalling
-    if (video.src !== activeSrc && !video.src.endsWith(activeSrc)) {
-      video.src = activeSrc;
-      video.load();
-    }
 
     const playVideo = () => {
-      video.play().catch(() => {
-        video.muted = true;
-        video.play().catch(() => {});
-      });
+      if (video.paused) {
+        video.play().catch((err) => {
+          console.warn("Video play retry:", err);
+          video.muted = true;
+          video.play().catch(() => {});
+        });
+      }
     };
 
     video.addEventListener("loadeddata", playVideo);
     video.addEventListener("canplay", playVideo);
+    video.addEventListener("pause", playVideo);
 
-    // Force play immediately
+    // Initial play trigger
     playVideo();
 
-    // Fallback user interaction triggers
-    const triggerPlay = () => {
-      if (video.paused) {
-        video.play().catch(() => {});
-      }
-      window.removeEventListener("touchstart", triggerPlay);
-      window.removeEventListener("click", triggerPlay);
-      window.removeEventListener("scroll", triggerPlay);
+    // User first interaction trigger (fallback for strict browser policies)
+    const handleFirstInteraction = () => {
+      playVideo();
+      window.removeEventListener("touchstart", handleFirstInteraction);
+      window.removeEventListener("click", handleFirstInteraction);
+      window.removeEventListener("scroll", handleFirstInteraction);
     };
 
-    window.addEventListener("touchstart", triggerPlay, { passive: true });
-    window.addEventListener("click", triggerPlay, { passive: true });
-    window.addEventListener("scroll", triggerPlay, { passive: true });
+    window.addEventListener("touchstart", handleFirstInteraction, { passive: true });
+    window.addEventListener("click", handleFirstInteraction, { passive: true });
+    window.addEventListener("scroll", handleFirstInteraction, { passive: true });
 
     return () => {
       video.removeEventListener("loadeddata", playVideo);
       video.removeEventListener("canplay", playVideo);
-      window.removeEventListener("touchstart", triggerPlay);
-      window.removeEventListener("click", triggerPlay);
-      window.removeEventListener("scroll", triggerPlay);
+      video.removeEventListener("pause", playVideo);
+      window.removeEventListener("touchstart", handleFirstInteraction);
+      window.removeEventListener("click", handleFirstInteraction);
+      window.removeEventListener("scroll", handleFirstInteraction);
     };
-  }, [videoSrc, mobileVideoSrc]);
+  }, []);
 
   return (
     <div
@@ -85,7 +77,7 @@ export function VideoBackground({
         backgroundColor: "transparent",
       }}
     >
-      {/* High-Resolution Live Cinematic Video Wallpaper (100% Exposed & Fully Visible) */}
+      {/* High Performance Native Video Player (Optimized for Vertical Mobile & Full Desktop Coverage) */}
       <video
         ref={videoRef}
         autoPlay
@@ -97,7 +89,7 @@ export function VideoBackground({
         x5-playsinline="true"
         x5-video-player-type="h5"
         preload="auto"
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none mobile-9-16-video-player"
+        className="absolute inset-0 w-full h-full object-cover opacity-100 scale-105 filter brightness-105 contrast-105 pointer-events-none mobile-9-16-video-player"
         style={{
           width: "100%",
           height: "100%",
@@ -105,26 +97,22 @@ export function VideoBackground({
           minHeight: "100dvh",
           objectFit: "cover",
           objectPosition: "center center",
-          transform: "scale(1.02) translateZ(0)",
-          filter: "brightness(1.15) contrast(1.05) saturate(1.1)",
+          transform: "translateZ(0)",
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
-          opacity: 1,
         }}
       >
+        {/* Dedicated 9:16 Mobile Video Source */}
+        <source src={mobileVideoSrc} media="(max-width: 768px)" type="video/mp4" />
         <source src={videoSrc} type="video/mp4" />
+        <source src="/videos/drive-hero.mp4" type="video/mp4" />
         <source src="/videos/kynisto-hero.mp4" type="video/mp4" />
-        <source src="/videos/google-flow-38057267.mp4" type="video/mp4" />
-        <source src="/videos/google-flow-7cc84028.mp4" type="video/mp4" />
+        <source src="/videos/background-hero.mp4" type="video/mp4" />
+        <source src="/background-hero.mp4" type="video/mp4" />
       </video>
 
-      {/* Crystal-clear minimal overlay — zero dark solid screen */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: "linear-gradient(180deg, rgba(0,0,0,0.05) 0%, transparent 50%, rgba(0,0,0,0.12) 100%)",
-        }}
-      />
+      {/* Crystal clear minimal overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20 pointer-events-none" />
     </div>
   );
 }
