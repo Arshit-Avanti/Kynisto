@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface VideoBackgroundProps {
   videoSrc?: string;
@@ -12,54 +12,68 @@ export function VideoBackground({
   mobileVideoSrc = "/videos/mobile-9-16-hero.mp4",
 }: VideoBackgroundProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Modern Autoplay Compliance: defaultMuted and muted MUST be true for instant playback
+    // Detect mobile viewport
+    const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+    const activeSrc = isMobile ? mobileVideoSrc : videoSrc;
+
     video.defaultMuted = true;
     video.muted = true;
     video.playsInline = true;
+    video.autoplay = true;
+    video.loop = true;
 
-    const playVideo = () => {
+    // Direct src assignment ensures instant decoding without source-tag stalling
+    if (video.src !== activeSrc && !video.src.endsWith(activeSrc)) {
+      video.src = activeSrc;
+      video.load();
+    }
+
+    const handleLoaded = () => {
+      setIsLoaded(true);
+      video.play().catch(() => {
+        video.muted = true;
+        video.play().catch(() => {});
+      });
+    };
+
+    video.addEventListener("loadeddata", handleLoaded);
+    video.addEventListener("canplay", handleLoaded);
+    video.addEventListener("playing", () => setIsLoaded(true));
+
+    // Force play immediately
+    video.play().catch(() => {
+      video.muted = true;
+      video.play().catch(() => {});
+    });
+
+    // Fallback user interaction triggers
+    const triggerPlay = () => {
       if (video.paused) {
-        video.play().catch((err) => {
-          console.warn("Video play retry:", err);
-          video.muted = true;
-          video.play().catch(() => {});
-        });
+        video.play().catch(() => {});
       }
+      window.removeEventListener("touchstart", triggerPlay);
+      window.removeEventListener("click", triggerPlay);
+      window.removeEventListener("scroll", triggerPlay);
     };
 
-    video.addEventListener("loadeddata", playVideo);
-    video.addEventListener("canplay", playVideo);
-    video.addEventListener("pause", playVideo);
-
-    // Initial play trigger
-    playVideo();
-
-    // User first interaction trigger (fallback for strict browser policies)
-    const handleFirstInteraction = () => {
-      playVideo();
-      window.removeEventListener("touchstart", handleFirstInteraction);
-      window.removeEventListener("click", handleFirstInteraction);
-      window.removeEventListener("scroll", handleFirstInteraction);
-    };
-
-    window.addEventListener("touchstart", handleFirstInteraction, { passive: true });
-    window.addEventListener("click", handleFirstInteraction, { passive: true });
-    window.addEventListener("scroll", handleFirstInteraction, { passive: true });
+    window.addEventListener("touchstart", triggerPlay, { passive: true });
+    window.addEventListener("click", triggerPlay, { passive: true });
+    window.addEventListener("scroll", triggerPlay, { passive: true });
 
     return () => {
-      video.removeEventListener("loadeddata", playVideo);
-      video.removeEventListener("canplay", playVideo);
-      video.removeEventListener("pause", playVideo);
-      window.removeEventListener("touchstart", handleFirstInteraction);
-      window.removeEventListener("click", handleFirstInteraction);
-      window.removeEventListener("scroll", handleFirstInteraction);
+      video.removeEventListener("loadeddata", handleLoaded);
+      video.removeEventListener("canplay", handleLoaded);
+      window.removeEventListener("touchstart", triggerPlay);
+      window.removeEventListener("click", triggerPlay);
+      window.removeEventListener("scroll", triggerPlay);
     };
-  }, []);
+  }, [videoSrc, mobileVideoSrc]);
 
   return (
     <div
@@ -77,7 +91,7 @@ export function VideoBackground({
         backgroundColor: "transparent",
       }}
     >
-      {/* High Performance Native Video Player (Optimized for Vertical Mobile & Full Desktop Coverage) */}
+      {/* High-Resolution Live Video Wallpaper (Positioned & Scaled to Highlight Scenic Horizon & Atmosphere) */}
       <video
         ref={videoRef}
         autoPlay
@@ -89,30 +103,35 @@ export function VideoBackground({
         x5-playsinline="true"
         x5-video-player-type="h5"
         preload="auto"
-        className="absolute inset-0 w-full h-full object-cover opacity-100 scale-105 filter brightness-105 contrast-105 pointer-events-none mobile-9-16-video-player"
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none mobile-9-16-video-player"
         style={{
           width: "100%",
           height: "100%",
           minWidth: "100vw",
           minHeight: "100dvh",
           objectFit: "cover",
-          objectPosition: "center center",
-          transform: "translateZ(0)",
+          objectPosition: "center 25%", // Positioned so mountain/sky horizon spans hero and topbar
+          transform: "scale(1.04) translateZ(0)",
+          filter: "brightness(1.18) contrast(1.08) saturate(1.12)", // Vivid, crisp live scenery
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
+          opacity: 1,
+          transition: "opacity 0.5s ease",
         }}
       >
-        {/* Dedicated 9:16 Mobile Video Source */}
         <source src={mobileVideoSrc} media="(max-width: 768px)" type="video/mp4" />
         <source src={videoSrc} type="video/mp4" />
         <source src="/videos/drive-hero.mp4" type="video/mp4" />
         <source src="/videos/kynisto-hero.mp4" type="video/mp4" />
-        <source src="/videos/background-hero.mp4" type="video/mp4" />
-        <source src="/background-hero.mp4" type="video/mp4" />
       </video>
 
-      {/* Crystal clear minimal overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20 pointer-events-none" />
+      {/* Crystal clear subtle atmospheric overlay — zero darkening */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "linear-gradient(180deg, rgba(0,0,0,0.08) 0%, transparent 40%, rgba(0,0,0,0.18) 100%)",
+        }}
+      />
     </div>
   );
 }

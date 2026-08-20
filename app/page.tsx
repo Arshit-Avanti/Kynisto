@@ -2134,7 +2134,7 @@ export default function Home() {
             </Link>
             <Link href="/healthcare" className="glassCard3D" style={{ cursor: "pointer", pointerEvents: "auto", position: "relative", zIndex: 10 }}>
               <Icons.Clock />
-              <b>Live Queue &amp; Doctor Appt</b>
+              <b>Queue Ticket</b>
             </Link>
             <Link
               href="/dashboard"
