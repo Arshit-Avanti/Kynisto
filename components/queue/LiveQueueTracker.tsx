@@ -659,32 +659,53 @@ export default function LiveQueueTracker() {
     }
   }, [router, syncPatientStateWithStore]);
 
-  const handleCancelEntry = useCallback(async () => {
+  const handleRunningLate = useCallback(async () => {
     if (!selectedQueue) return;
+    const input = typeof window !== 'undefined' ? window.prompt('How many minutes late are you? (5–60)', '10') : '10';
+    const mins = parseInt(input ?? '10', 10);
+    const validMins = Math.min(60, Math.max(5, isNaN(mins) ? 10 : mins));
+    setLateMinutes(validMins);
+    setIsLate(true);
     try {
       await apiFetch('/api/healthcare/queue', {
         method: 'POST',
-        json: { action: 'cancel', storeId: String(selectedQueue.id) },
+        json: { action: 'update_arrival', storeId: String(selectedQueue.id), arrivalStatus: 'running_late', lateMinutes: validMins },
       });
-      setIsCancelled(true);
-      setEntryStatus('cancelled');
-    } catch (err: any) {
-      setErrorMsg(err?.message || 'Failed to cancel entry.');
+    } catch {
+      // UI fallback
     }
   }, [selectedQueue]);
 
-  const handleReportLate = useCallback(async () => {
-    if (!selectedQueue) return;
-    try {
-      await apiFetch('/api/healthcare/queue', {
-        method: 'POST',
-        json: { action: 'update_arrival', storeId: String(selectedQueue.id), arrivalStatus: 'running_late', lateMinutes },
-      });
-      setIsLate(true);
-    } catch (err: any) {
-      setErrorMsg(err?.message || 'Failed to report arrival status.');
+  const handleLeaveQueue = useCallback(async () => {
+    if (selectedQueue) {
+      try {
+        await apiFetch('/api/healthcare/queue', {
+          method: 'POST',
+          json: { action: 'leave', storeId: String(selectedQueue.id) },
+        });
+      } catch { /* Fallback */ }
     }
-  }, [selectedQueue, lateMinutes]);
+    setIsCancelled(true);
+    setView('list');
+  }, [selectedQueue]);
+
+  const handleCancelVisit = useCallback(async () => {
+    if (typeof window !== 'undefined' && !window.confirm('Cancel your visit? You will lose your place in the queue.')) return;
+    if (selectedQueue) {
+      try {
+        await apiFetch('/api/healthcare/queue', {
+          method: 'POST',
+          json: { action: 'cancel', storeId: String(selectedQueue.id) },
+        });
+      } catch { /* Fallback */ }
+    }
+    setIsCancelled(true);
+    setView('list');
+  }, [selectedQueue]);
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, []);
 
   const handleFilterSelect = useCallback((filter: string) => {
     startTransition(() => {

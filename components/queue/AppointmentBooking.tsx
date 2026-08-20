@@ -14,6 +14,11 @@ interface Doctor {
   consultationFee?: number;
 }
 
+interface SlotItem {
+  time: string;
+  available: boolean;
+}
+
 interface Appointment {
   id: string;
   storeId: string;
@@ -41,18 +46,44 @@ interface Props {
 
 // ---- Helper ---------------------------------------------------------------
 
-function formatDate(d: string) {
-  return new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'long' });
+function todayIst() {
+  try {
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+  } catch {
+    return new Date().toISOString().slice(0, 10);
+  }
 }
 
-function todayIst() {
-  return new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })).toISOString().slice(0, 10);
+function formatDate(d: string) {
+  if (!d) return '';
+  try {
+    const parts = d.split('-').map(Number);
+    if (parts.length < 3 || isNaN(parts[0]) || isNaN(parts[1]) || isNaN(parts[2])) return d;
+    const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+    return dateObj.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'long' });
+  } catch {
+    return d;
+  }
 }
 
 function addDays(dateStr: string, n: number) {
-  const d = new Date(dateStr + 'T00:00:00');
-  d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0, 10);
+  try {
+    const parts = dateStr.split('-').map(Number);
+    const d = new Date(parts[0], parts[1] - 1, parts[2] + n);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const da = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${da}`;
+  } catch {
+    const d = new Date();
+    d.setDate(d.getDate() + n);
+    return d.toISOString().slice(0, 10);
+  }
 }
 
 function next14Days() {
@@ -68,7 +99,7 @@ export function AppointmentBooking({ storeId, storeName, onClose, onCheckedIn }:
   const [loadingDoctors, setLoadingDoctors] = useState(true);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>('');
-  const [slots, setSlots] = useState<string[]>([]);
+  const [slots, setSlots] = useState<SlotItem[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<string>('');
   const [patientName, setPatientName] = useState('');
@@ -93,8 +124,18 @@ export function AppointmentBooking({ storeId, storeName, onClose, onCheckedIn }:
     setLoadingSlots(true);
     const params = new URLSearchParams({ storeId, date: selectedDate });
     if (selectedDoctor) params.set('doctorId', selectedDoctor.id);
-    apiFetch<{ slots: string[] }>(`/api/healthcare/appointments/slots?${params}`)
-      .then((res) => setSlots(res.slots ?? []))
+    apiFetch<{ slots: Array<{ time: string; available?: boolean } | string> }>(`/api/healthcare/appointments/slots?${params}`)
+      .then((res) => {
+        if (!res || !res.slots) {
+          setSlots([]);
+          return;
+        }
+        const normalized: SlotItem[] = res.slots.map((s) => {
+          if (typeof s === 'string') return { time: s, available: true };
+          return { time: s.time, available: s.available !== false };
+        });
+        setSlots(normalized);
+      })
       .catch(() => setSlots([]))
       .finally(() => setLoadingSlots(false));
   }, [storeId, selectedDoctor, selectedDate]);
@@ -223,10 +264,18 @@ export function AppointmentBooking({ storeId, storeName, onClose, onCheckedIn }:
       <p className="apptStepHint">Choose an appointment date</p>
       <div className="apptDateGrid">
         {dates.map((d) => {
-          const dayObj = new Date(d + 'T00:00:00');
-          const dayName = dayObj.toLocaleDateString('en-IN', { weekday: 'short' });
-          const dayNum = dayObj.getDate();
-          const monthName = dayObj.toLocaleDateString('en-IN', { month: 'short' });
+          let dayName = d;
+          let dayNum: string | number = '';
+          let monthName = '';
+          try {
+            const parts = d.split('-').map(Number);
+            const dayObj = new Date(parts[0], parts[1] - 1, parts[2]);
+            dayName = dayObj.toLocaleDateString('en-IN', { weekday: 'short' });
+            dayNum = dayObj.getDate();
+            monthName = dayObj.toLocaleDateString('en-IN', { month: 'short' });
+          } catch {
+            dayName = d;
+          }
           const isToday = d === todayIst();
           return (
             <button
@@ -260,16 +309,22 @@ export function AppointmentBooking({ storeId, storeName, onClose, onCheckedIn }:
         </div>
       ) : (
         <>
-          <p className="apptStepHint">{slots.length} slots available</p>
+          <p className="apptStepHint">{slots.filter((s) => s.available).length} slots available</p>
           <div className="apptSlotGrid">
             {slots.map((slot) => (
               <button
-                key={slot}
-                className={`apptSlotCard ${selectedSlot === slot ? 'selected' : ''}`}
-                onClick={() => { setSelectedSlot(slot); setStep('confirm'); }}
+                key={slot.time}
+                disabled={!slot.available}
+                className={`apptSlotCard ${selectedSlot === slot.time ? 'selected' : ''} ${!slot.available ? 'opacity-40 cursor-not-allowed bg-slate-950 border-slate-800' : ''}`}
+                onClick={() => {
+                  if (slot.available) {
+                    setSelectedSlot(slot.time);
+                    setStep('confirm');
+                  }
+                }}
               >
                 <Clock className="w-3.5 h-3.5" />
-                {slot}
+                {slot.time}
               </button>
             ))}
           </div>
