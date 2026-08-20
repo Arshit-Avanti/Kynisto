@@ -12,19 +12,18 @@ import { AudioPermissionModal } from "@/components/ui/AudioPermissionModal";
 import { NotificationPermissionModal } from "@/components/ui/NotificationPermissionModal";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const requestHeaders = await headers();
-  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "kynisto.app";
-  const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
-  const origin = `${protocol}://${host}`;
+  const canonicalBase = "https://kynisto.in";
   const description = "Discover trusted salons, groceries, clinics, home services and local professionals near you with verified addresses, hours, ratings and directions.";
   return {
-    metadataBase: new URL(origin),
+    metadataBase: new URL(canonicalBase),
     applicationName: "Kynisto",
     title: { default: "Kynisto – Everything Around You, Smarter.", template: "%s | Kynisto" },
     description,
     keywords: ["local businesses", "home services", "nearby stores", "salon", "grocery", "clinic", "plumber", "electrician"],
     authors: [{ name: "Kynisto" }],
-    alternates: { canonical: "/" },
+    alternates: {
+      canonical: "https://kynisto.in/",
+    },
     manifest: "/manifest.webmanifest",
     robots: { index: true, follow: true },
     openGraph: {
@@ -32,11 +31,11 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: "Kynisto",
       title: "Kynisto – Everything Around You, Smarter.",
       description,
-      url: origin,
+      url: "https://kynisto.in/",
       locale: "en_IN",
-      images: [{ url: `${origin}/og.svg`, width: 1200, height: 630, alt: "Kynisto — Everything Around You, Smarter." }],
+      images: [{ url: "https://kynisto.in/og.svg", width: 1200, height: 630, alt: "Kynisto — Everything Around You, Smarter." }],
     },
-    twitter: { card: "summary_large_image", title: "Kynisto – Everything Around You, Smarter.", description, images: [`${origin}/og.svg`] },
+    twitter: { card: "summary_large_image", title: "Kynisto – Everything Around You, Smarter.", description, images: ["https://kynisto.in/og.svg"] },
   };
 }
 
@@ -44,8 +43,8 @@ const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "Kynisto",
+  url: "https://kynisto.in/",
   description: "Discover salons, groceries, clinics, stationery shops and more in your locality.",
-  potentialAction: { "@type": "SearchAction", target: "/?q={search_term_string}", "query-input": "required name=search_term_string" },
 };
 
 export default function RootLayout({

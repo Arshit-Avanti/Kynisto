@@ -6,9 +6,9 @@ function xml(value: string) {
   return value.replace(/[<>&'\"]/g, (character) => entities[character] ?? character);
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   await ensureSeeded();
-  const origin = new URL(request.url).origin;
+  const origin = "https://kynisto.in";
   const stores = await getD1().prepare("SELECT slug, updated_at AS updatedAt FROM stores WHERE status IN ('approved', 'active') ORDER BY updated_at DESC").all<{ slug: string; updatedAt: number }>();
   const urls = [
     `<url><loc>${xml(`${origin}/`)}</loc><changefreq>daily</changefreq><priority>1.0</priority></url>`,

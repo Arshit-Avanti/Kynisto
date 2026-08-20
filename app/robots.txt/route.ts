@@ -1,11 +1,15 @@
-export function GET(request: Request) {
-  const origin = new URL(request.url).origin;
+export function GET() {
+  const origin = "https://kynisto.in";
   const content = `User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /owner/
 Disallow: /account/
 Disallow: /api/
+Disallow: /*?*q=*
+Disallow: /*{search_term_string}*
+Disallow: /*?*fbclid=*
+Disallow: /*?*gclid=*
 
 User-agent: Mediapartners-Google
 Allow: /
@@ -18,6 +22,12 @@ Allow: /
 
 User-agent: Googlebot
 Allow: /
+Disallow: /admin/
+Disallow: /owner/
+Disallow: /account/
+Disallow: /api/
+Disallow: /*?*q=*
+Disallow: /*{search_term_string}*
 
 User-agent: Googlebot-Image
 Allow: /
