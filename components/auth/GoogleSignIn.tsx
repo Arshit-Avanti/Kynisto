@@ -63,9 +63,9 @@ export function GoogleSignIn({ returnTo: _propReturnTo }: { returnTo?: string } 
   return (
     <section className="googleAuth" aria-labelledby="google-auth-title">
       <div className="googleAuthIntro">
-        <span className="authKicker">Customers &amp; Shop Owners</span>
-        <h2 id="google-auth-title">Welcome to Kynisto</h2>
-        <p>Sign in securely with your Google account.</p>
+        <span className="authKicker" style={{ color: "#2457ff", fontWeight: 800 }}>Customers &amp; Shop Owners</span>
+        <h2 id="google-auth-title" style={{ color: "#0b1736", fontWeight: 800 }}>Welcome to Kynisto</h2>
+        <p style={{ color: "#475569", fontWeight: 500 }}>Sign in securely with your Google account.</p>
       </div>
       {error && (
         <p className="authError" role="alert">
@@ -83,7 +83,7 @@ export function GoogleSignIn({ returnTo: _propReturnTo }: { returnTo?: string } 
         {busy && <i className="googleButtonSpinner" aria-hidden="true" />}
       </button>
 
-      <small className="googleSecurityNote" style={{ marginTop: "1rem", display: "block" }}>
+      <small className="googleSecurityNote" style={{ color: "#64748b", marginTop: "1rem", display: "block" }}>
         Google verifies your identity. Kynisto securely determines your saved role and permissions.
       </small>
     </section>

@@ -11,9 +11,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <section className="authStory">
         <AuthVideoBackground />
         <Link className="authBrand" href="/"><KynistoLogo showTagline /></Link>
-        <div className="authStoryCopy">
-          <h1>Kynisto is<br />for<br /><em className="goldAccent">everyone</em></h1>
-        </div>
       </section>
       <section className="authPanel">{children}</section>
       <AudioPermissionModal />
