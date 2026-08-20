@@ -82,6 +82,11 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://kynstio.in" />
       </head>
       <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(window.location.hostname.endsWith(".workers.dev")){window.location.replace("https://kynisto.in"+window.location.pathname+window.location.search+window.location.hash);}}catch(e){}})();`,
+          }}
+        />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
         <SupabaseAuthManager />
         <AppReturnBanner />

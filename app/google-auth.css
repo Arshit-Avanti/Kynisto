@@ -330,102 +330,86 @@
   color: #12306b !important;
 }
 
-/* DARK MODE CONTRAST OVERRIDES FOR GOOGLE AUTH COMPONENT */
-.dark-theme .googleAuthIntro p,
-.dark-theme .roleOnboarding > div > p,
-.mode-dark .googleAuthIntro p,
-.mode-dark .roleOnboarding > div > p {
-  color: #94a3b8;
+/* PERMANENT CRISP LIGHT MODE FOR AUTH COMPONENTS */
+.googleAuthIntro h2 {
+  color: #0b1736 !important;
 }
 
-.dark-theme .googleSecurityNote,
-.mode-dark .googleSecurityNote {
-  color: #94a3b8;
+.googleAuthIntro p,
+.roleOnboarding > div > p {
+  color: #475569 !important;
 }
 
-.dark-theme .authDivider,
-.mode-dark .authDivider {
-  color: #94a3b8;
+.googleSecurityNote {
+  color: #64748b !important;
 }
 
-.dark-theme .authDivider::before,
-.dark-theme .authDivider::after,
-.mode-dark .authDivider::before,
-.mode-dark .authDivider::after {
-  background: #334155;
+.authDivider {
+  color: #64748b !important;
 }
 
-.dark-theme .adminLoginDisclosure,
-.mode-dark .adminLoginDisclosure {
-  border-color: #334155;
-  background: rgba(30, 41, 59, 0.7);
+.authDivider::before,
+.authDivider::after {
+  background: #cbd5e1 !important;
 }
 
-.dark-theme .adminLoginDisclosure summary,
-.mode-dark .adminLoginDisclosure summary {
-  color: #f8fafc;
+.adminLoginDisclosure {
+  border-color: #cbd5e1 !important;
+  background: #ffffff !important;
 }
 
-.dark-theme .adminLoginForm > p,
-.mode-dark .adminLoginForm > p {
-  color: #94a3b8;
+.adminLoginDisclosure summary {
+  color: #0f172a !important;
 }
 
-.dark-theme .googleProfile,
-.mode-dark .googleProfile {
-  border-color: #334155;
-  background: #1e293b;
-  color: #f8fafc;
+.adminLoginForm > p {
+  color: #64748b !important;
 }
 
-.dark-theme .googleProfile strong,
-.mode-dark .googleProfile strong {
-  color: #f8fafc;
+.googleProfile {
+  border-color: #cbd5e1 !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
 }
 
-.dark-theme .googleProfile small,
-.mode-dark .googleProfile small {
-  color: #94a3b8;
+.googleProfile strong {
+  color: #0f172a !important;
 }
 
-.dark-theme .onboardingRoleGrid button,
-.mode-dark .onboardingRoleGrid button {
-  border-color: #334155;
-  background: #1e293b;
-  color: #f8fafc;
+.googleProfile small {
+  color: #64748b !important;
 }
 
-.dark-theme .onboardingRoleGrid b,
-.mode-dark .onboardingRoleGrid b {
-  color: #f8fafc;
+.onboardingRoleGrid button {
+  border-color: #cbd5e1 !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
 }
 
-.dark-theme .onboardingRoleGrid small,
-.mode-dark .onboardingRoleGrid small {
-  color: #94a3b8;
+.onboardingRoleGrid b {
+  color: #0f172a !important;
 }
 
-.dark-theme .authCompletionCard,
-.dark-theme .authOverlayCard,
-.mode-dark .authCompletionCard,
-.mode-dark .authOverlayCard {
-  border-color: #334155;
-  background: #0f172a;
-  color: #f8fafc;
+.onboardingRoleGrid small {
+  color: #64748b !important;
 }
 
-.dark-theme .authCompletionCard h2,
-.dark-theme .authOverlayCard h2,
-.mode-dark .authCompletionCard h2,
-.mode-dark .authOverlayCard h2 {
-  color: #f8fafc;
+.authCompletionCard,
+.authOverlayCard {
+  border-color: #cbd5e1 !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
 }
 
-.dark-theme .authSecondaryButton,
-.mode-dark .authSecondaryButton {
-  border-color: #475569 !important;
-  background: #1e293b !important;
-  color: #f8fafc !important;
+.authCompletionCard h2,
+.authOverlayCard h2 {
+  color: #0f172a !important;
+}
+
+.authSecondaryButton {
+  border-color: #cfd9ec !important;
+  background: #ffffff !important;
+  color: #12306b !important;
 }
 
 @keyframes authSpin {

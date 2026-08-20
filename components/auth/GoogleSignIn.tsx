@@ -24,10 +24,12 @@ export function GoogleSignIn({ returnTo: _propReturnTo }: { returnTo?: string } 
     setError("");
     try {
       const supabase = await getSupabaseBrowserClient();
-      const redirectTo =
-        typeof window !== "undefined"
-          ? `${window.location.origin}/auth/confirm`
-          : "https://kynisto.in/auth/confirm";
+      const isLocalhost =
+        typeof window !== "undefined" &&
+        (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+      const redirectTo = isLocalhost
+        ? `${window.location.origin}/auth/confirm`
+        : "https://kynisto.in/auth/confirm";
       try {
         window.sessionStorage.setItem(PENDING_KEY, "1");
         window.sessionStorage.setItem(RETURNTO_KEY, "/");

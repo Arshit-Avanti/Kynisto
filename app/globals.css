@@ -1981,16 +1981,17 @@ footer > p { color: var(--muted); font-size: 11px; }
 }
 
 .googleAuthIntro h2 {
-  margin: 4px 0 6px;
-  font-size: 22px;
+  margin: 0;
+  font-size: clamp(32px, 4vw, 42px);
   font-weight: 800;
-  color: var(--ink, #ffffff);
+  color: #0b1736 !important;
+  letter-spacing: -0.04em;
 }
 
 .googleAuthIntro p {
   margin: 0;
   font-size: 13px;
-  color: var(--muted, #cbd5e1);
+  color: #475569 !important;
 }
 
 .googleSignInButton {
@@ -2001,19 +2002,21 @@ footer > p { color: var(--muted); font-size: 11px; }
   align-items: center;
   justify-content: center;
   gap: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid #cbd5e1 !important;
   border-radius: 14px;
-  background: #ffffff;
-  color: #0f172a;
+  background: #ffffff !important;
+  color: #0f172a !important;
   font-size: 15px;
   font-weight: 750;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 16px rgba(36, 87, 255, 0.08);
   transition: all 0.2s ease;
 }
 
 .googleSignInButton:hover {
-  background: #f8fafc;
+  background: #f8fafc !important;
+  border-color: #2457ff !important;
+  box-shadow: 0 8px 24px rgba(36, 87, 255, 0.14);
   transform: translateY(-1px);
 }
 
@@ -2025,9 +2028,9 @@ footer > p { color: var(--muted); font-size: 11px; }
 
 .googleSecurityNote {
   font-size: 11px;
-  color: #94a3b8;
+  color: #64748b !important;
   text-align: center;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .authCompletionLayer {

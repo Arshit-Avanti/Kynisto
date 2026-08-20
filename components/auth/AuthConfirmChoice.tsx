@@ -33,6 +33,16 @@ export default function AuthConfirmChoice({ hash: propHash, accessToken: propTok
           }
         }
 
+        function resolveFinalDestination(targetPath: string) {
+          const isWorkersDev =
+            typeof window !== "undefined" && window.location.hostname.endsWith("workers.dev");
+          const safePath = targetPath.startsWith("/") ? targetPath : `/${targetPath}`;
+          if (isWorkersDev) {
+            return `https://kynisto.in${safePath}`;
+          }
+          return safePath;
+        }
+
         if (token) {
           setStatusText("Authenticating your Google session…");
           const res = await apiFetch<{
@@ -45,7 +55,7 @@ export default function AuthConfirmChoice({ hash: propHash, accessToken: propTok
           });
 
           const target = res?.redirectTo || (res?.needsOnboarding ? "/onboarding" : "/");
-          window.location.replace(target);
+          window.location.replace(resolveFinalDestination(target));
           return;
         }
 
@@ -55,7 +65,7 @@ export default function AuthConfirmChoice({ hash: propHash, accessToken: propTok
           if (meRes?.user) {
             const role = meRes.user.role;
             const target = role === "store_owner" || role === "shop_owner" ? "/owner" : role === "admin" ? "/admin" : "/";
-            window.location.replace(target);
+            window.location.replace(resolveFinalDestination(target));
             return;
           }
         } catch {
@@ -63,12 +73,12 @@ export default function AuthConfirmChoice({ hash: propHash, accessToken: propTok
         }
 
         // If genuinely unauthenticated, redirect to onboarding/login
-        window.location.replace("/onboarding");
+        window.location.replace(resolveFinalDestination("/onboarding"));
       } catch (err) {
         console.error("Auth confirm error:", err);
         setError("Authentication failed. Redirecting…");
         setTimeout(() => {
-          window.location.replace("/onboarding");
+          window.location.replace("https://kynisto.in/onboarding");
         }, 1200);
       }
     })();

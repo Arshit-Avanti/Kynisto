@@ -151,7 +151,7 @@ export function SupabaseAuthManager() {
             return;
           }
 
-          if (currentSession?.access_token && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+          if (currentSession?.access_token && (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED")) {
             if (timeoutId) clearTimeout(timeoutId);
             syncSupabaseAccessCookie(currentSession);
             await processAccessToken(currentSession.access_token);
@@ -209,7 +209,13 @@ export function SupabaseAuthManager() {
           } catch {}
         }
 
-        window.location.replace(res.redirectTo || "/account");
+        const isWorkersDev =
+          typeof window !== "undefined" && window.location.hostname.endsWith("workers.dev");
+        const dest = res.redirectTo || "/account";
+        const safePath = dest.startsWith("/") ? dest : `/${dest}`;
+        const finalUrl = isWorkersDev ? `https://kynisto.in${safePath}` : safePath;
+
+        window.location.replace(finalUrl);
       } catch (completionError) {
         console.error("Post-login routing failed:", completionError);
         completionStarted.current = false;
