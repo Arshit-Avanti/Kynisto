@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 interface VideoBackgroundProps {
   videoSrc?: string;
@@ -8,11 +8,10 @@ interface VideoBackgroundProps {
 }
 
 export function VideoBackground({
-  videoSrc = "/videos/drive-hero.mp4",
-  mobileVideoSrc = "/videos/mobile-9-16-hero.mp4",
+  videoSrc = "/videos/kynisto-hero.mp4",
+  mobileVideoSrc = "/videos/kynisto-hero.mp4",
 }: VideoBackgroundProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -20,7 +19,7 @@ export function VideoBackground({
 
     // Detect mobile viewport
     const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
-    const activeSrc = isMobile ? mobileVideoSrc : videoSrc;
+    const activeSrc = isMobile ? (mobileVideoSrc || "/videos/kynisto-hero.mp4") : videoSrc;
 
     video.defaultMuted = true;
     video.muted = true;
@@ -34,23 +33,18 @@ export function VideoBackground({
       video.load();
     }
 
-    const handleLoaded = () => {
-      setIsLoaded(true);
+    const playVideo = () => {
       video.play().catch(() => {
         video.muted = true;
         video.play().catch(() => {});
       });
     };
 
-    video.addEventListener("loadeddata", handleLoaded);
-    video.addEventListener("canplay", handleLoaded);
-    video.addEventListener("playing", () => setIsLoaded(true));
+    video.addEventListener("loadeddata", playVideo);
+    video.addEventListener("canplay", playVideo);
 
     // Force play immediately
-    video.play().catch(() => {
-      video.muted = true;
-      video.play().catch(() => {});
-    });
+    playVideo();
 
     // Fallback user interaction triggers
     const triggerPlay = () => {
@@ -67,8 +61,8 @@ export function VideoBackground({
     window.addEventListener("scroll", triggerPlay, { passive: true });
 
     return () => {
-      video.removeEventListener("loadeddata", handleLoaded);
-      video.removeEventListener("canplay", handleLoaded);
+      video.removeEventListener("loadeddata", playVideo);
+      video.removeEventListener("canplay", playVideo);
       window.removeEventListener("touchstart", triggerPlay);
       window.removeEventListener("click", triggerPlay);
       window.removeEventListener("scroll", triggerPlay);
@@ -91,7 +85,7 @@ export function VideoBackground({
         backgroundColor: "transparent",
       }}
     >
-      {/* High-Resolution Live Video Wallpaper (Positioned & Scaled to Highlight Scenic Horizon & Atmosphere) */}
+      {/* High-Resolution Live Cinematic Video Wallpaper (100% Exposed & Fully Visible) */}
       <video
         ref={videoRef}
         autoPlay
@@ -110,26 +104,25 @@ export function VideoBackground({
           minWidth: "100vw",
           minHeight: "100dvh",
           objectFit: "cover",
-          objectPosition: "center 25%", // Positioned so mountain/sky horizon spans hero and topbar
-          transform: "scale(1.04) translateZ(0)",
-          filter: "brightness(1.18) contrast(1.08) saturate(1.12)", // Vivid, crisp live scenery
+          objectPosition: "center center",
+          transform: "scale(1.02) translateZ(0)",
+          filter: "brightness(1.15) contrast(1.05) saturate(1.1)",
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
           opacity: 1,
-          transition: "opacity 0.5s ease",
         }}
       >
-        <source src={mobileVideoSrc} media="(max-width: 768px)" type="video/mp4" />
         <source src={videoSrc} type="video/mp4" />
-        <source src="/videos/drive-hero.mp4" type="video/mp4" />
         <source src="/videos/kynisto-hero.mp4" type="video/mp4" />
+        <source src="/videos/google-flow-38057267.mp4" type="video/mp4" />
+        <source src="/videos/google-flow-7cc84028.mp4" type="video/mp4" />
       </video>
 
-      {/* Crystal clear subtle atmospheric overlay — zero darkening */}
+      {/* Crystal-clear minimal overlay — zero dark solid screen */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "linear-gradient(180deg, rgba(0,0,0,0.08) 0%, transparent 40%, rgba(0,0,0,0.18) 100%)",
+          background: "linear-gradient(180deg, rgba(0,0,0,0.05) 0%, transparent 50%, rgba(0,0,0,0.12) 100%)",
         }}
       />
     </div>
