@@ -1,4 +1,5 @@
 import { getD1 } from "@/db/runtime";
+import { requireApiPermission } from "@/lib/auth";
 import { invalidateHealthcareCache, isQueueEligibleHealthcareType, requireHealthcareStore } from "@/lib/healthcare";
 import { healthcareQueueDashboard, isQueueOperation, operateHealthcareQueue } from "@/lib/healthcare-queue-management";
 import { requireOwnedStore, writeAudit } from "@/lib/ownership";
