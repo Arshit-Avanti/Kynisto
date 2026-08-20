@@ -40,6 +40,7 @@ type BookingStep = 'doctor' | 'date' | 'slot' | 'confirm' | 'success';
 interface Props {
   storeId: string;
   storeName: string;
+  allowAppointments?: boolean;
   onClose: () => void;
   onCheckedIn?: (tokenNumber: number) => void;
 }
@@ -93,8 +94,10 @@ function next14Days() {
 
 // ---- Component ------------------------------------------------------------
 
-export function AppointmentBooking({ storeId, storeName, onClose, onCheckedIn }: Props) {
+export function AppointmentBooking({ storeId, storeName, allowAppointments, onClose, onCheckedIn }: Props) {
   const [step, setStep] = useState<BookingStep>('doctor');
+  const [appointmentsDisabled, setAppointmentsDisabled] = useState<boolean>(allowAppointments === false);
+  const [disabledMessage, setDisabledMessage] = useState<string>('This clinic is not accepting online appointments at this time.');
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loadingDoctors, setLoadingDoctors] = useState(true);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
@@ -110,22 +113,32 @@ export function AppointmentBooking({ storeId, storeName, onClose, onCheckedIn }:
 
   // Load doctors on mount
   useEffect(() => {
+    if (allowAppointments === false) {
+      setAppointmentsDisabled(true);
+      setLoadingDoctors(false);
+      return;
+    }
     apiFetch<{ doctors: Doctor[] }>(`/api/healthcare/doctors?storeId=${encodeURIComponent(storeId)}`)
       .then((res) => setDoctors(res.doctors ?? []))
       .catch(() => setDoctors([]))
       .finally(() => setLoadingDoctors(false));
-  }, [storeId]);
+  }, [storeId, allowAppointments]);
 
   // Load slots when doctor + date selected
   useEffect(() => {
-    if (!selectedDate) return;
+    if (!selectedDate || appointmentsDisabled) return;
     setSlots([]);
     setSelectedSlot('');
     setLoadingSlots(true);
     const params = new URLSearchParams({ storeId, date: selectedDate });
     if (selectedDoctor) params.set('doctorId', selectedDoctor.id);
-    apiFetch<{ slots: Array<{ time: string; available?: boolean } | string> }>(`/api/healthcare/appointments/slots?${params}`)
+    apiFetch<{ slots: Array<{ time: string; available?: boolean } | string>; allowAppointments?: boolean; message?: string }>(`/api/healthcare/appointments/slots?${params}`)
       .then((res) => {
+        if (res && res.allowAppointments === false) {
+          setAppointmentsDisabled(true);
+          if (res.message) setDisabledMessage(res.message);
+          return;
+        }
         if (!res || !res.slots) {
           setSlots([]);
           return;
@@ -138,7 +151,7 @@ export function AppointmentBooking({ storeId, storeName, onClose, onCheckedIn }:
       })
       .catch(() => setSlots([]))
       .finally(() => setLoadingSlots(false));
-  }, [storeId, selectedDoctor, selectedDate]);
+  }, [storeId, selectedDoctor, selectedDate, appointmentsDisabled]);
 
   const handleBook = useCallback(async () => {
     setError('');
@@ -206,6 +219,30 @@ export function AppointmentBooking({ storeId, storeName, onClose, onCheckedIn }:
       </button>
     </div>
   );
+
+  // Appointments Disabled View
+  if (appointmentsDisabled) {
+    return (
+      <div className="apptBooking">
+        {renderHeader('Book Appointment', storeName)}
+        <div className="flex flex-col items-center justify-center text-center py-6 sm:py-8 px-2 sm:px-4">
+          <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 mb-4 shadow-lg shadow-amber-500/10">
+            <Calendar className="w-7 h-7" />
+          </div>
+          <h3 className="text-lg sm:text-xl font-extrabold text-white mb-2">Appointments Not Allowed</h3>
+          <p className="text-slate-300 text-xs sm:text-sm font-medium max-w-sm mb-6 leading-relaxed">
+            {disabledMessage || "This clinic is not accepting online appointments at this time."}
+          </p>
+          <button
+            onClick={onClose}
+            className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition-all cursor-pointer border border-slate-700"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Step 1: Select Doctor
   if (step === 'doctor') return (

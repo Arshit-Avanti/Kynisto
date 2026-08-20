@@ -77,6 +77,7 @@ interface HealthcareQueueItem {
   acceptingPatients?: number | boolean;
   ownerQueueEnabled?: number | boolean;
   adminQueueEnabled?: number | boolean;
+  allowAppointments?: number | boolean;
 }
 
 interface PatientQueueStateResponse {
@@ -244,7 +245,7 @@ export default function LiveQueueTracker() {
   const [isJoining, setIsJoining] = useState(false);
 
   // Appointment booking modal state
-  const [bookingTarget, setBookingTarget] = useState<{ id: string; name: string } | null>(null);
+  const [bookingTarget, setBookingTarget] = useState<{ id: string; name: string; allowAppointments?: boolean } | null>(null);
 
   // Throttled / Debounced search input handler to keep responsiveness < 15ms
   useEffect(() => {
@@ -841,14 +842,26 @@ export default function LiveQueueTracker() {
               <span>Profile</span>
             </Link>
 
-            {/* Book Appointment — always shown for healthcare providers */}
-            <button
-              className="bookApptBtn"
-              onClick={() => setBookingTarget({ id: String(item.id), name: item.name })}
-            >
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Book Appt</span>
-            </button>
+            {/* Book Appointment button */}
+            {item.allowAppointments === 0 || item.allowAppointments === false ? (
+              <button
+                type="button"
+                className="bookApptBtn opacity-60 cursor-pointer text-slate-400 border-slate-700/60 bg-slate-800/60 hover:bg-slate-800"
+                onClick={() => setBookingTarget({ id: String(item.id), name: item.name, allowAppointments: false })}
+                title="This clinic does not allow online appointments"
+              >
+                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                <span className="text-slate-400">No Appts</span>
+              </button>
+            ) : (
+              <button
+                className="bookApptBtn"
+                onClick={() => setBookingTarget({ id: String(item.id), name: item.name, allowAppointments: true })}
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                <span>Book Appt</span>
+              </button>
+            )}
 
             {hasLiveQueue && (
               <button
@@ -1291,6 +1304,7 @@ export default function LiveQueueTracker() {
           <AppointmentBooking
             storeId={bookingTarget.id}
             storeName={bookingTarget.name}
+            allowAppointments={bookingTarget.allowAppointments}
             onClose={() => setBookingTarget(null)}
             onCheckedIn={(tokenNumber) => {
               setBookingTarget(null);

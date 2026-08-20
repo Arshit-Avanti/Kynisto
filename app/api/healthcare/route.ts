@@ -130,6 +130,7 @@ export async function GET(request: Request) {
         COALESCE(hp.admin_queue_enabled, 1) AS adminQueueEnabled,
         COALESCE(hp.owner_queue_enabled, 1) AS ownerQueueEnabled,
         COALESCE(hp.queue_activation_status, 'approved') AS queueActivationStatus,
+        COALESCE(hp.allow_appointments, 1) AS allowAppointments,
         CASE
           WHEN COALESCE(hp.owner_queue_enabled, 1) = 0 OR COALESCE(hp.admin_queue_enabled, 1) = 0 THEN 'no_queue'
           WHEN COALESCE(hp.accepting_patients, 1) = 0 THEN 'closed'
