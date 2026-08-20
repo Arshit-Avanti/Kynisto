@@ -52,20 +52,23 @@ export async function POST(request: Request) {
     const today = indiaServiceDate();
 
     if (action === "join") {
+      if (!provider.ownerQueueEnabled || !provider.adminQueueEnabled) {
+        throw new HttpError(403, "Live queue is not enabled for this clinic.", "QUEUE_DISABLED");
+      }
+      if (!provider.acceptingPatients) {
+        throw new HttpError(403, "This clinic is not currently accepting new patients.", "QUEUE_NOT_ACCEPTING");
+      }
+
+      // Check real-time queue settings status
+      const settings = await db.prepare("SELECT status, maximum_daily_patients AS maxDaily FROM healthcare_queue_settings WHERE store_id = ? LIMIT 1")
+        .bind(storeId).first<{ status: string; maxDaily: number }>();
+      if (!settings || settings.status !== "open") {
+        throw new HttpError(403, "The live queue for this clinic is currently closed.", "QUEUE_CLOSED");
+      }
+
       // Clean up any stale active keys from old completed/cancelled sessions for this user
       await db.prepare("UPDATE healthcare_queue_entries SET active_key = NULL WHERE user_id = ? AND status IN ('completed','cancelled','left','expired','removed','no_show') AND active_key IS NOT NULL")
         .bind(session.user.id).run().catch(() => {});
-
-      // Ensure queue settings exist and are open for today
-      await db.prepare(`
-        INSERT INTO healthcare_queue_settings 
-          (store_id, status, consultation_minutes, current_token_number, next_token_number, service_date, opening_time, closing_time, maximum_daily_patients, updated_at)
-        VALUES (?, 'open', 15, 0, 1, ?, '09:00', '21:00', 100, ?)
-        ON CONFLICT(store_id) DO UPDATE SET
-          service_date = CASE WHEN service_date <> ? THEN ? ELSE service_date END,
-          status = CASE WHEN status = 'closed' THEN 'open' ELSE status END,
-          updated_at = ?
-      `).bind(storeId, today, now, today, today, now).run().catch(() => {});
 
       const state = await patientQueueState(storeId, session.user.id);
       if (state?.entry && (state.entry.status === 'waiting' || state.entry.status === 'called' || state.entry.status === 'in_consultation')) {
@@ -90,6 +93,9 @@ export async function POST(request: Request) {
           FROM healthcare_queue_settings q
           LEFT JOIN healthcare_provider_profiles hp ON hp.store_id = q.store_id
           WHERE q.store_id = ?
+          AND q.status = 'open'
+          AND COALESCE(hp.owner_queue_enabled, 0) = 1
+          AND COALESCE(hp.admin_queue_enabled, 0) = 1
           AND COALESCE(hp.accepting_patients, 1) = 1
           AND NOT EXISTS (SELECT 1 FROM healthcare_queue_entries active WHERE active.active_key = ? AND active.status IN ('waiting','called','in_consultation'))
           AND (SELECT COUNT(*) FROM healthcare_queue_entries e WHERE e.store_id = q.store_id

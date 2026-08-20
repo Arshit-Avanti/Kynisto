@@ -61,12 +61,12 @@ export async function GET(request: Request) {
       AND NOT EXISTS (SELECT 1 FROM healthcare_provider_profiles hp WHERE hp.store_id = s.id)
     `).run().catch(() => {});
 
-    // Auto-sync: Ensure all healthcare stores have queue settings
+    // Auto-sync: Ensure all healthcare stores have queue settings (default to closed until owner starts queue)
     const today = new Date().toISOString().slice(0, 10);
     await db.prepare(`
       INSERT INTO healthcare_queue_settings 
         (store_id, status, consultation_minutes, current_token_number, next_token_number, service_date, opening_time, closing_time, maximum_daily_patients, updated_at)
-      SELECT s.id, 'open', 15, 0, 1, ?, '09:00', '21:00', 100, unixepoch()
+      SELECT s.id, 'closed', 15, 0, 1, ?, '09:00', '21:00', 100, unixepoch()
       FROM stores s 
       JOIN healthcare_provider_profiles hp ON hp.store_id = s.id
       WHERE NOT EXISTS (SELECT 1 FROM healthcare_queue_settings qs WHERE qs.store_id = s.id)
@@ -105,7 +105,7 @@ export async function GET(request: Request) {
       bindings.push(pattern, pattern, pattern, pattern);
     }
     if (params.get("queue") === "true") {
-      conditions.push("COALESCE(hp.admin_queue_enabled, 1) = 1 AND COALESCE(hp.owner_queue_enabled, 1) = 1 AND COALESCE(qs.status, 'open') = 'open'");
+      conditions.push("COALESCE(hp.admin_queue_enabled, 1) = 1 AND COALESCE(hp.owner_queue_enabled, 1) = 1 AND COALESCE(qs.status, 'closed') = 'open'");
     }
 
     const result = await db.prepare(
@@ -130,7 +130,11 @@ export async function GET(request: Request) {
         COALESCE(hp.admin_queue_enabled, 1) AS adminQueueEnabled,
         COALESCE(hp.owner_queue_enabled, 1) AS ownerQueueEnabled,
         COALESCE(hp.queue_activation_status, 'approved') AS queueActivationStatus,
-        COALESCE(qs.status, 'open') AS queueStatus,
+        CASE
+          WHEN COALESCE(hp.owner_queue_enabled, 1) = 0 OR COALESCE(hp.admin_queue_enabled, 1) = 0 THEN 'no_queue'
+          WHEN COALESCE(hp.accepting_patients, 1) = 0 THEN 'closed'
+          ELSE COALESCE(qs.status, 'closed')
+        END AS queueStatus,
         COALESCE((SELECT current.token_number FROM healthcare_queue_entries current
           WHERE current.store_id = s.id AND current.service_date = qs.service_date AND current.status = 'called' LIMIT 1), 0) AS currentTokenNumber,
         COALESCE(qs.consultation_minutes, 15) AS consultationMinutes,
@@ -143,16 +147,20 @@ export async function GET(request: Request) {
        LEFT JOIN healthcare_provider_profiles hp ON hp.store_id = s.id
        LEFT JOIN healthcare_queue_settings qs ON qs.store_id = s.id
        WHERE ${conditions.join(" AND ")}
-       ORDER BY CASE COALESCE(qs.status, 'open') WHEN 'open' THEN 0 WHEN 'paused' THEN 1 ELSE 2 END,
-         s.rating_average DESC, s.rating_count DESC LIMIT 100`,
+       ORDER BY CASE 
+         WHEN COALESCE(hp.owner_queue_enabled, 1) = 1 AND COALESCE(hp.admin_queue_enabled, 1) = 1 AND COALESCE(qs.status, 'closed') = 'open' THEN 0 
+         WHEN COALESCE(hp.owner_queue_enabled, 1) = 1 AND COALESCE(hp.admin_queue_enabled, 1) = 1 AND COALESCE(qs.status, 'closed') = 'paused' THEN 1 
+         ELSE 2 
+       END,
+       s.rating_average DESC, s.rating_count DESC LIMIT 100`,
     ).bind(...bindings).all();
 
     const data = {
       items: result.results ?? [],
       types: HEALTHCARE_TYPES.map((value) => ({ value, label: HEALTHCARE_LABELS[value] })),
     };
-    microCache.set(cacheKey, data, 5_000);
-    return microCacheJson(data, "public, max-age=10, stale-while-revalidate=30");
+    microCache.set(cacheKey, data, 1_000);
+    return microCacheJson(data, "public, max-age=1, stale-while-revalidate=5");
   } catch (error) { return apiError(error); }
 }
 

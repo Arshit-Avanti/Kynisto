@@ -267,12 +267,41 @@ export default function LiveQueueTracker() {
   }, []);
 
   useEffect(() => {
+    if (view !== 'list') return;
     fetchHealthcareQueues();
-    const listInterval = setInterval(() => {
-      fetchHealthcareQueues();
-    }, 2000);
-    return () => clearInterval(listInterval);
-  }, [fetchHealthcareQueues]);
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let isDisposed = false;
+
+    const scheduleNext = () => {
+      if (isDisposed) return;
+      const isHidden = typeof document !== 'undefined' && document.hidden;
+      const delay = isHidden ? 20000 : Math.floor(4500 + Math.random() * 1000);
+      timer = setTimeout(() => {
+        if (isDisposed) return;
+        fetchHealthcareQueues();
+        scheduleNext();
+      }, delay);
+    };
+    scheduleNext();
+
+    const handleVisibility = () => {
+      if (!document.hidden && !isDisposed) {
+        fetchHealthcareQueues();
+      }
+    };
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibility);
+    }
+
+    return () => {
+      isDisposed = true;
+      if (timer) clearTimeout(timer);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibility);
+      }
+    };
+  }, [fetchHealthcareQueues, view]);
 
   const userPositionRef = useRef(userPosition);
   userPositionRef.current = userPosition;
@@ -533,7 +562,12 @@ export default function LiveQueueTracker() {
     setErrorMsg(null);
     notifiedTokenRef.current = null;
 
-    const isClosedNow = item.queueStatus === 'closed' || item.ownerQueueEnabled === false || item.acceptingPatients === false;
+    const ownerEnabled = item.ownerQueueEnabled === 1 || item.ownerQueueEnabled === true;
+    const adminEnabled = item.adminQueueEnabled === 1 || item.adminQueueEnabled === true;
+    const accepting = item.acceptingPatients === 1 || item.acceptingPatients === true || item.acceptingPatients === undefined;
+    const hasLiveQueue = ownerEnabled && adminEnabled && item.queueStatus !== 'no_queue';
+    const isClosedNow = !hasLiveQueue || !accepting || item.queueStatus === 'closed' || item.queueStatus === 'paused';
+
     if (isClosedNow) {
       setErrorMsg(`The live queue for ${item.name} is currently closed by the clinic.`);
       return;
@@ -617,12 +651,6 @@ export default function LiveQueueTracker() {
         setView('list');
         setSelectedQueue(null);
         setErrorMsg(`The live queue for ${item.name} is currently closed by the clinic.`);
-        // Refresh local list state
-        fetchHealthcareQueues();
-        return;
-      }
-      if (msg.includes('already in an active') || msg.includes('existing')) {
-        await syncPatientStateWithStore(item.id);
       } else {
         setErrorMsg(msg);
       }
@@ -631,51 +659,32 @@ export default function LiveQueueTracker() {
     }
   }, [router, syncPatientStateWithStore]);
 
-  const handleRunningLate = useCallback(async () => {
+  const handleCancelEntry = useCallback(async () => {
     if (!selectedQueue) return;
-    const mins = parseInt(window.prompt('How many minutes late are you? (5–60)', '10') ?? '10', 10);
-    const validMins = Math.min(60, Math.max(5, isNaN(mins) ? 10 : mins));
-    setLateMinutes(validMins);
-    setIsLate(true);
     try {
       await apiFetch('/api/healthcare/queue', {
         method: 'POST',
-        json: { action: 'update_arrival', storeId: String(selectedQueue.id), arrivalStatus: 'running_late', lateMinutes: validMins },
+        json: { action: 'cancel', storeId: String(selectedQueue.id) },
       });
-    } catch {
-      // Fallback UI indication
+      setIsCancelled(true);
+      setEntryStatus('cancelled');
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Failed to cancel entry.');
     }
-    setTimeout(() => setIsLate(false), 6000);
   }, [selectedQueue]);
 
-  const handleLeaveQueue = useCallback(async () => {
-    if (selectedQueue) {
-      try {
-        await apiFetch('/api/healthcare/queue', {
-          method: 'POST',
-          json: { action: 'leave', storeId: String(selectedQueue.id) },
-        });
-      } catch { /* Fallback */ }
+  const handleReportLate = useCallback(async () => {
+    if (!selectedQueue) return;
+    try {
+      await apiFetch('/api/healthcare/queue', {
+        method: 'POST',
+        json: { action: 'update_arrival', storeId: String(selectedQueue.id), arrivalStatus: 'running_late', lateMinutes },
+      });
+      setIsLate(true);
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Failed to report arrival status.');
     }
-    setIsCancelled(true);
-  }, [selectedQueue]);
-
-  const handleCancelVisit = useCallback(async () => {
-    if (!window.confirm('Cancel your visit? You will lose your place in the queue.')) return;
-    if (selectedQueue) {
-      try {
-        await apiFetch('/api/healthcare/queue', {
-          method: 'POST',
-          json: { action: 'cancel', storeId: String(selectedQueue.id) },
-        });
-      } catch { /* Fallback */ }
-    }
-    setIsCancelled(true);
-  }, [selectedQueue]);
-
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  }, []);
+  }, [selectedQueue, lateMinutes]);
 
   const handleFilterSelect = useCallback((filter: string) => {
     startTransition(() => {
@@ -718,8 +727,12 @@ export default function LiveQueueTracker() {
 
   const renderedQueuesGrid = useMemo(() => {
     return filteredQueues.map((item) => {
-      const hasLiveQueue = item.ownerQueueEnabled !== false && item.adminQueueEnabled !== false && item.queueStatus && item.queueStatus !== 'no_queue';
-      const isClosed = item.queueStatus === 'closed';
+      const ownerEnabled = item.ownerQueueEnabled === 1 || item.ownerQueueEnabled === true;
+      const adminEnabled = item.adminQueueEnabled === 1 || item.adminQueueEnabled === true;
+      const accepting = item.acceptingPatients === 1 || item.acceptingPatients === true || item.acceptingPatients === undefined;
+      const hasLiveQueue = ownerEnabled && adminEnabled && item.queueStatus !== 'no_queue';
+      const isPaused = hasLiveQueue && item.queueStatus === 'paused';
+      const isClosed = !hasLiveQueue || !accepting || item.queueStatus === 'closed' || isPaused;
       const consultationMins = item.consultationMinutes || 15;
 
       return (
@@ -742,14 +755,19 @@ export default function LiveQueueTracker() {
               </div>
 
               {!hasLiveQueue ? (
-                <span className="inline-flex items-center text-[11px] font-bold text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20 whitespace-nowrap shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mr-1.5" />
-                  Verified
+                <span className="inline-flex items-center text-[11px] font-bold text-slate-400 bg-slate-800/80 px-2.5 py-0.5 rounded-full border border-slate-700 whitespace-nowrap shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 mr-1.5" />
+                  No Live Queue
+                </span>
+              ) : isPaused ? (
+                <span className="inline-flex items-center text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 whitespace-nowrap shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5" />
+                  Queue Paused
                 </span>
               ) : isClosed ? (
                 <span className="inline-flex items-center text-[11px] font-bold text-rose-400 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20 whitespace-nowrap shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-rose-400 mr-1.5" />
-                  Closed
+                  Queue Closed
                 </span>
               ) : (
                 <span className="inline-flex items-center text-[11px] font-bold text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30 whitespace-nowrap shrink-0">
@@ -815,13 +833,13 @@ export default function LiveQueueTracker() {
               <button
                 onClick={() => handleJoinQueue(item)}
                 disabled={isClosed || isJoining}
-                className={`flex-1 py-2 sm:py-2.5 px-3 font-bold text-xs sm:text-sm rounded-xl transition-all shadow-md flex items-center justify-center space-x-1.5 group/btn cursor-pointer ${
+                className={`flex-1 py-2 sm:py-2.5 px-3 font-bold text-xs sm:text-sm rounded-xl transition-all shadow-md flex items-center justify-center space-x-1.5 group/btn ${
                   isClosed
-                    ? 'bg-slate-800/60 text-slate-400 cursor-not-allowed border border-slate-700/50'
-                    : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-600/20'
+                    ? 'bg-slate-800/60 text-slate-500 cursor-not-allowed border border-slate-700/50 opacity-70'
+                    : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-600/20 cursor-pointer'
                 }`}
               >
-                <span>{isClosed ? 'Closed' : isJoining ? 'Joining...' : 'Visit Live Queue'}</span>
+                <span>{isPaused ? 'Queue Paused' : isClosed ? 'Queue Closed' : isJoining ? 'Joining...' : 'Visit Live Queue'}</span>
                 {!isClosed && !isJoining && <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />}
               </button>
             )}

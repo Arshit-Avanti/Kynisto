@@ -1,6 +1,5 @@
 import { getD1 } from "@/db/runtime";
-import { requireApiPermission } from "@/lib/auth";
-import { isQueueEligibleHealthcareType, requireHealthcareStore } from "@/lib/healthcare";
+import { invalidateHealthcareCache, isQueueEligibleHealthcareType, requireHealthcareStore } from "@/lib/healthcare";
 import { healthcareQueueDashboard, isQueueOperation, operateHealthcareQueue } from "@/lib/healthcare-queue-management";
 import { requireOwnedStore, writeAudit } from "@/lib/ownership";
 import { apiError, HttpError, noStoreJson } from "@/lib/security";
@@ -45,6 +44,7 @@ export async function PATCH(request: Request) {
         queue_requested_at = ?, queue_reviewed_at = NULL, queue_reviewed_by = NULL,
         queue_decision_reason = NULL, admin_queue_enabled = 0, owner_queue_enabled = 0, updated_at = ? WHERE store_id = ?`)
         .bind(now, now, storeId).run();
+      invalidateHealthcareCache(storeId);
       await writeAudit(request, session.user.id, "healthcare.queue_activation.requested", "store", storeId);
       return noStoreJson(await healthcareQueueDashboard(storeId));
     }
@@ -70,6 +70,7 @@ export async function PATCH(request: Request) {
       if (!enabled) statements.push(db.prepare("UPDATE healthcare_queue_entries SET status = 'cancelled', active_key = NULL, left_at = ?, updated_at = ? WHERE store_id = ? AND status IN ('waiting','called','in_consultation')")
         .bind(now, now, storeId));
       await db.batch(statements);
+      invalidateHealthcareCache(storeId);
       await writeAudit(request, session.user.id, "healthcare.queue.configured", "store", storeId, { enabled, allowAppointments, minutes, openingTime, closingTime, maximumDailyPatients, gracePeriodMinutes });
       return noStoreJson(await healthcareQueueDashboard(storeId));
     }

@@ -204,12 +204,21 @@ export async function requireHealthcareStore(storeId: string) {
   return provider;
 }
 
-/**
- * Serverless-safe expiry sweep. It runs before every queue read or mutation,
- * including each SSE tick, so an active queue is cleaned without an owner or
 const _storeSweepCache = new Map<string, number>();
 const _storeResetCache = new Map<string, { date: string; checkedAt: number }>();
 const _storeSummaryCache = new Map<string, { data: Record<string, string | number | null>; cachedAt: number }>();
+
+export function invalidateHealthcareCache(storeId?: string) {
+  if (storeId) {
+    _storeSummaryCache.delete(storeId);
+    _storeSweepCache.delete(storeId);
+    _storeResetCache.delete(storeId);
+  } else {
+    _storeSummaryCache.clear();
+    _storeSweepCache.clear();
+    _storeResetCache.clear();
+  }
+}
 
 /**
  * Serverless-safe expiry sweep with 30-second per-store throttle.
@@ -408,10 +417,16 @@ export async function patientQueueState(storeId: string, userId?: string) {
     ...settings,
     withinOperatingHours,
     capacityAvailable,
-    // Start/Resume Queue is an explicit owner/admin action, so an open queue
-    // remains joinable even when operated outside its usual published hours.
-    // The schedule remains available to the UI as guidance.
-    queueAvailable: Boolean(settings.queueActivationStatus === "approved" && settings.adminQueueEnabled && settings.ownerQueueEnabled && settings.acceptingPatients && settings.verificationStatus === "verified" && settings.status === "open" && capacityAvailable),
+    queueAvailable: Boolean(
+      (settings.queueActivationStatus === "approved" || !settings.queueActivationStatus) &&
+      (settings.adminQueueEnabled === 1 || settings.adminQueueEnabled === true) &&
+      (settings.ownerQueueEnabled === 1 || settings.ownerQueueEnabled === true) &&
+      (settings.acceptingPatients === 1 || settings.acceptingPatients === true) &&
+      (settings.verificationStatus === "verified" || settings.verificationStatus === "approved" || !settings.verificationStatus) &&
+      settings.status === "open" &&
+      capacityAvailable
+    ),
+    queueStatus: String(settings.status || "closed"),
     activeQueue,
     appointment,
     arrivalReminder,

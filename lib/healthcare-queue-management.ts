@@ -1,5 +1,5 @@
 import { getD1 } from "@/db/runtime";
-import { indiaServiceDate, isQueueEligibleHealthcareType, QUEUE_ENTRY_TTL_SECONDS, requireHealthcareStore, resetQueueForNewDay } from "@/lib/healthcare";
+import { indiaServiceDate, invalidateHealthcareCache, isQueueEligibleHealthcareType, QUEUE_ENTRY_TTL_SECONDS, requireHealthcareStore, resetQueueForNewDay } from "@/lib/healthcare";
 import { HttpError } from "@/lib/security";
 
 export const QUEUE_OPERATIONS = ["open", "pause", "resume", "close", "reset", "call_next", "recall", "skip", "complete", "remove", "add_walk_in", "add_emergency", "mark_arrived", "mark_no_show", "start_consultation"] as const;
@@ -116,6 +116,7 @@ export async function operateHealthcareQueue(options: {
     throw new HttpError(409, "Live Queue is not available for this healthcare type.", "QUEUE_TYPE_UNAVAILABLE");
   }
   const today = await resetQueueForNewDay(storeId);
+  invalidateHealthcareCache(storeId);
   const db = getD1();
   const now = Math.floor(Date.now() / 1000);
 
@@ -128,6 +129,7 @@ export async function operateHealthcareQueue(options: {
       db.prepare("INSERT INTO healthcare_queue_events (id, store_id, actor_id, event_type, metadata, created_at) VALUES (?, ?, ?, 'queue_reset', ?, ?)")
         .bind(crypto.randomUUID(), storeId, actorId, JSON.stringify({ serviceDate: today }), now),
     ]);
+    invalidateHealthcareCache(storeId);
     return { ok: true, status: "closed" };
   }
 
