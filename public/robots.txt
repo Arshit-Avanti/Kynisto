@@ -1,5 +1,13 @@
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /owner/
+Disallow: /account/
+Disallow: /api/
+Disallow: /*?*q=*
+Disallow: /*{search_term_string}*
+Disallow: /*?*fbclid=*
+Disallow: /*?*gclid=*
 
 User-agent: Mediapartners-Google
 Allow: /
@@ -8,6 +16,15 @@ User-agent: Google-AdSense-AdsBot
 Allow: /
 
 User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /owner/
+Disallow: /account/
+Disallow: /api/
+Disallow: /*?*q=*
+Disallow: /*{search_term_string}*
+
+User-agent: Googlebot-Image
 Allow: /
 
 Sitemap: https://kynisto.in/sitemap.xml
