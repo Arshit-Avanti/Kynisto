@@ -1420,6 +1420,7 @@ export default function Home() {
   const [hasMore, setHasMore] = useState(false);
   const [userRole, setUserRole] = useState<"admin" | "store_owner" | "customer" | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const [accent, setAccent] = useState<Accent>("royal");
   const [density, setDensity] = useState<Density>("comfortable");
   const [themeMode, setThemeMode] = useState<ThemeMode>("dark");
@@ -1497,7 +1498,7 @@ export default function Home() {
       try {
         const [categoryData, sessionData] = await Promise.all([
           apiFetch<{ items: Array<{ name: string; icon?: string; storeCount?: number }> }>("/api/categories"),
-          apiFetch<{ user: { id: string; role: "admin" | "store_owner" | "customer" } | null }>("/api/auth/me"),
+          apiFetch<{ user: { id: string; name?: string; role: "admin" | "store_owner" | "customer" } | null }>("/api/auth/me"),
         ]);
         if (!active) return;
         const palette = ["coral", "green", "blue", "yellow", "mint", "peach", "lilac", "sky", "lime", "sand"];
@@ -1509,6 +1510,7 @@ export default function Home() {
         })));
         setUserRole(sessionData.user?.role ?? null);
         setUserId(sessionData.user?.id ?? null);
+        setUserName(sessionData.user?.name ?? null);
         if (sessionData.user?.role === "customer" || sessionData.user?.role === "admin") {
           const favoriteData = await apiFetch<{ items: Array<{ storeId: string }> }>("/api/favorites");
           if (active) setSaved(favoriteData.items.map((item) => item.storeId));
@@ -1715,7 +1717,7 @@ export default function Home() {
       <style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
       <NanoBannerPro />
       <ScrollSyncedVideoBackground desktopSrc="/videos/google-flow-7cc84028.mp4" mobileSrc="/videos/google-flow-38057267.mp4" />
-      <Navbar3D />
+      <Navbar3D user={userId ? { id: userId, name: userName || undefined, role: userRole || undefined } : null} />
       <SubscriptionExpiryBanner />
       <WelcomeRewardModal userRole={userRole} userId={userId} />
 
