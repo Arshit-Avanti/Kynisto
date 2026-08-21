@@ -1714,7 +1714,7 @@ export default function Home() {
     <main className={`site theme-${accent} density-${density} mode-${themeMode} landing3dShell`}>
       <style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
       <NanoBannerPro />
-      <ScrollSyncedVideoBackground desktopSrc="/videos/drive-hero.mp4" mobileSrc="/videos/mobile-9-16-hero.mp4" />
+      <ScrollSyncedVideoBackground desktopSrc="/videos/google-flow-7cc84028.mp4" mobileSrc="/videos/google-flow-38057267.mp4" />
       <Navbar3D />
       <SubscriptionExpiryBanner />
       <WelcomeRewardModal userRole={userRole} userId={userId} />

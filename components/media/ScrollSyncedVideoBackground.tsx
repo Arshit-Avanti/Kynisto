@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Sparkles, Layers } from "lucide-react";
 
 interface ScrollSyncedVideoBackgroundProps {
   desktopSrc?: string;
@@ -8,24 +9,35 @@ interface ScrollSyncedVideoBackgroundProps {
   overlayOpacity?: number;
 }
 
+const FLOW_VIDEOS = [
+  { id: "flow-1", label: "Gemini Flow Horizon", src: "/videos/google-flow-7cc84028.mp4" },
+  { id: "flow-2", label: "Google Kinetic Stream", src: "/videos/google-flow-38057267.mp4" },
+  { id: "cyber-1", label: "Cyber Highway", src: "/videos/drive-hero.mp4" },
+];
+
 export function ScrollSyncedVideoBackground({
-  desktopSrc = "/videos/drive-hero.mp4",
-  mobileSrc = "/videos/mobile-9-16-hero.mp4",
+  desktopSrc = "/videos/google-flow-7cc84028.mp4",
+  mobileSrc = "/videos/google-flow-38057267.mp4",
   overlayOpacity = 0.55,
 }: ScrollSyncedVideoBackgroundProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [activeVideo, setActiveVideo] = useState(desktopSrc);
+  const [showSelector, setShowSelector] = useState(false);
 
   useEffect(() => {
-    // Check screen orientation / width for mobile video
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile && activeVideo === desktopSrc) {
+        setActiveVideo(mobileSrc);
+      }
     };
     checkMobile();
     window.addEventListener("resize", checkMobile, { passive: true });
     return () => window.removeEventListener("resize", checkMobile);
-  }, []);
+  }, [desktopSrc, mobileSrc, activeVideo]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -34,7 +46,6 @@ export function ScrollSyncedVideoBackground({
     video.defaultMuted = true;
     video.muted = true;
     video.playsInline = true;
-    video.pause();
 
     const onLoadedMetadata = () => {
       setIsReady(true);
@@ -45,6 +56,19 @@ export function ScrollSyncedVideoBackground({
     let animationFrameId: number;
     let targetTime = 0;
     let currentTime = 0;
+    let lastScrollY = window.scrollY;
+    let isScrolling = false;
+    let scrollTimeout: NodeJS.Timeout;
+
+    const handleScrollEvent = () => {
+      isScrolling = true;
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        isScrolling = false;
+      }, 150);
+    };
+
+    window.addEventListener("scroll", handleScrollEvent, { passive: true });
 
     const updateScrollSync = () => {
       if (video.duration && !isNaN(video.duration)) {
@@ -73,9 +97,11 @@ export function ScrollSyncedVideoBackground({
 
     return () => {
       cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("scroll", handleScrollEvent);
+      clearTimeout(scrollTimeout);
       video.removeEventListener("loadedmetadata", onLoadedMetadata);
     };
-  }, [isMobile]);
+  }, [activeVideo]);
 
   return (
     <div
@@ -94,7 +120,8 @@ export function ScrollSyncedVideoBackground({
     >
       <video
         ref={videoRef}
-        src={isMobile ? mobileSrc : desktopSrc}
+        key={activeVideo}
+        src={activeVideo}
         preload="auto"
         muted
         playsInline
@@ -105,7 +132,7 @@ export function ScrollSyncedVideoBackground({
           objectPosition: "center",
           opacity: isReady ? 1 : 0,
           transition: "opacity 0.8s ease",
-          filter: "brightness(1.05) contrast(1.02) saturate(1.1)",
+          filter: "brightness(1.04) contrast(1.02) saturate(1.15)",
         }}
       />
 
@@ -114,13 +141,13 @@ export function ScrollSyncedVideoBackground({
         style={{
           position: "absolute",
           inset: 0,
-          background: `linear-gradient(180deg, rgba(248, 250, 252, 0.72) 0%, rgba(248, 250, 252, 0.52) 40%, rgba(248, 250, 252, 0.82) 100%)`,
+          background: `linear-gradient(180deg, rgba(248, 250, 252, 0.72) 0%, rgba(248, 250, 252, 0.48) 40%, rgba(248, 250, 252, 0.84) 100%)`,
           backdropFilter: "blur(4px)",
           WebkitBackdropFilter: "blur(4px)",
         }}
       />
 
-      {/* Subtle Cyan and Indigo Ambient Edge Glows */}
+      {/* Subtle Gemini Flow Holographic Aura */}
       <div
         style={{
           position: "absolute",
@@ -129,7 +156,7 @@ export function ScrollSyncedVideoBackground({
           transform: "translateX(-50%)",
           width: "60vw",
           height: "30vw",
-          background: "radial-gradient(ellipse at center, rgba(2, 132, 199, 0.1) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse at center, rgba(2, 132, 199, 0.12) 0%, rgba(99, 102, 241, 0.08) 50%, transparent 70%)",
           filter: "blur(60px)",
         }}
       />
