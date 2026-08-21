@@ -12,7 +12,7 @@ import { SubscriptionExpiryBanner } from "@/components/subscription/Subscription
 import { EfferdFeatures6 } from "@/components/blocks/features-6";
 import { EfferdFooter3 } from "@/components/blocks/footer-3";
 import "./3d-landing.css";
-import { ThreeSceneCanvas } from "@/components/3d/ThreeSceneCanvas";
+import { ScrollSyncedVideoBackground } from "@/components/media/ScrollSyncedVideoBackground";
 import { Navbar3D } from "@/components/landing/Navbar3D";
 import { HeroSection3D } from "@/components/landing/HeroSection3D";
 import { ProductIntroSection } from "@/components/landing/ProductIntroSection";
@@ -1714,9 +1714,7 @@ export default function Home() {
     <main className={`site theme-${accent} density-${density} mode-${themeMode} landing3dShell`}>
       <style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
       <NanoBannerPro />
-      <ThreeSceneCanvas />
-      <div className="ambientGlowTop" />
-      <div className="ambientGlowBottom" />
+      <ScrollSyncedVideoBackground desktopSrc="/videos/drive-hero.mp4" mobileSrc="/videos/mobile-9-16-hero.mp4" />
       <Navbar3D />
       <SubscriptionExpiryBanner />
       <WelcomeRewardModal userRole={userRole} userId={userId} />
