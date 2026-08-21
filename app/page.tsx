@@ -23,6 +23,7 @@ import { BenefitsSection } from "@/components/landing/BenefitsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { FinalCtaSection } from "@/components/landing/FinalCtaSection";
 import { Footer3D } from "@/components/landing/Footer3D";
+import { NanoBannerPro } from "@/components/landing/NanoBannerPro";
 
 type Category = {
   name: string;
@@ -1713,6 +1714,7 @@ export default function Home() {
   return (
     <main className={`site theme-${accent} density-${density} mode-${themeMode} landing3dShell`}>
       <style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
+      <NanoBannerPro />
       <ThreeSceneCanvas />
       <div className="ambientGlowTop" />
       <div className="ambientGlowBottom" />

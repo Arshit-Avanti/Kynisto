@@ -1,28 +1,32 @@
 ﻿"use client";
 
-import { CheckCircle2, TrendingUp, Clock, Users } from "lucide-react";
+import { CheckCircle2, XCircle, TrendingUp, Clock, Users, Shield, Zap, Sparkles } from "lucide-react";
 
 export function BenefitsSection() {
-  const benefits = [
+  const comparisonRows = [
     {
-      title: "For Customers & Patients",
-      highlight: "Save 45+ mins per visit",
-      points: [
-        "Never wait in crowded clinic waiting rooms again",
-        "Search verified prices and live stock before stepping out",
-        "Direct chat with store owners and doctor staff",
-        "Earn digital coins redeemable at all neighborhood stores",
-      ],
+      feature: "Clinic & Hospital Wait Times",
+      traditional: "45–90 min physical waiting room delay",
+      kynisto: "Live mobile queue token with exact ETA",
+      highlight: true,
     },
     {
-      title: "For Clinic & Store Owners",
-      highlight: "3.2x Average Revenue Lift",
-      points: [
-        "Eliminate counter congestion and manage patient flow effortlessly",
-        "Automated WhatsApp & Web Push appointment reminders",
-        "Broadcast promotions to verified neighborhood residents",
-        "Multi-user staff access with role permissions and analytics",
-      ],
+      feature: "Local Store Inventory & Pricing",
+      traditional: "Manual phone calls or walk-ins required",
+      kynisto: "Instant real-time catalog search & chat",
+      highlight: false,
+    },
+    {
+      feature: "Appointment Confirmation",
+      traditional: "Manual paper slips or missed callbacks",
+      kynisto: "1-Click automated slot reservation",
+      highlight: true,
+    },
+    {
+      feature: "Customer Loyalty & Rewards",
+      traditional: "Lost physical punch cards",
+      kynisto: "Digital wallet points across neighborhood",
+      highlight: false,
     },
   ];
 
@@ -30,33 +34,46 @@ export function BenefitsSection() {
     <section className="py-24">
       <div className="max-w-3xl mx-auto text-center mb-16">
         <span className="text-[#10b981] font-bold text-xs uppercase tracking-widest block mb-2">
-          Measurable Impact
+          Measurable Impact &amp; Architecture
         </span>
         <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white mb-4">
-          Transforming Local Daily Commerce
+          Why Modern Cities Choose Kynisto Pro Max
         </h2>
         <p className="text-slate-400 text-base">
-          Proven metrics delivering tangible time-savings and higher business throughput.
+          Proven metrics delivering tangible time-savings and 3.2x higher merchant throughput.
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-        {benefits.map((card) => (
-          <div key={card.title} className="p-8 rounded-3xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl hover:border-slate-700 transition-all duration-300">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-[#38bdf8] bg-sky-950/60 px-3 py-1 rounded-full inline-block mb-4 border border-sky-800/40">
-              {card.highlight}
-            </span>
-            <h3 className="text-2xl font-bold text-white mb-6">{card.title}</h3>
-            <ul className="space-y-4">
-              {card.points.map((pt) => (
-                <li key={pt} className="flex items-start gap-3 text-sm text-slate-300">
-                  <CheckCircle2 className="w-5 h-5 text-[#10b981] shrink-0 mt-0.5" />
-                  <span>{pt}</span>
-                </li>
+      {/* Comparison Matrix Table */}
+      <div className="max-w-4xl mx-auto mb-16 p-6 sm:p-8 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-xl shadow-2xl">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-800">
+                <th className="pb-4 text-xs font-bold uppercase tracking-wider text-slate-400">Capability</th>
+                <th className="pb-4 text-xs font-bold uppercase tracking-wider text-slate-500">Traditional Directory</th>
+                <th className="pb-4 text-xs font-bold uppercase tracking-wider text-[#00f0ff]">Kynisto Pro Max</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/60 text-sm">
+              {comparisonRows.map((row) => (
+                <tr key={row.feature} className="hover:bg-slate-800/30 transition-colors">
+                  <td className="py-4 font-semibold text-white">{row.feature}</td>
+                  <td className="py-4 text-slate-400 flex items-center gap-2">
+                    <XCircle className="w-4 h-4 text-red-400 shrink-0" />
+                    <span>{row.traditional}</span>
+                  </td>
+                  <td className="py-4 text-cyan-300 font-medium">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-[#10b981] shrink-0" />
+                      <span>{row.kynisto}</span>
+                    </div>
+                  </td>
+                </tr>
               ))}
-            </ul>
-          </div>
-        ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   );

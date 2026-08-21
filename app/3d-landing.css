@@ -1,5 +1,5 @@
 ﻿/* ==========================================================================
-   KYNISTO FUTURISTIC 3D LANDING PAGE STYLES
+   KYNISTO UI PRO MAX & 3D DESIGN SYSTEM
    ========================================================================== */
 
 :root {
@@ -7,6 +7,7 @@
   --kyn-glow-blue: #2457ff;
   --kyn-glow-purple: #7928ca;
   --kyn-glow-gold: #ff9900;
+  --kyn-glow-emerald: #10b981;
   --kyn-dark-bg: #030712;
   --kyn-glass-bg: rgba(15, 23, 42, 0.65);
   --kyn-glass-border: rgba(255, 255, 255, 0.12);
@@ -22,6 +23,103 @@
   overflow-x: hidden;
 }
 
+/* ==========================================================================
+   🌟 NANO BANNER PRO
+   ========================================================================== */
+
+.nanoBannerPro {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 38px;
+  background: linear-gradient(90deg, rgba(3, 7, 18, 0.95) 0%, rgba(15, 23, 42, 0.9) 50%, rgba(3, 7, 18, 0.95) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+  z-index: 101;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 20px rgba(0, 240, 255, 0.1);
+  overflow: hidden;
+}
+
+.nanoBannerPro::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.15), transparent);
+  animation: nanoShimmer 6s infinite;
+}
+
+@keyframes nanoShimmer {
+  0% { left: -100%; }
+  40%, 100% { left: 200%; }
+}
+
+.nanoBannerInner {
+  width: 100%;
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nanoBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  border: 1px solid;
+}
+
+.nanoActionChip {
+  margin-left: 12px;
+  padding: 3px 10px;
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.nanoActionChip:hover {
+  background: rgba(0, 240, 255, 0.22);
+  border-color: #00f0ff;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+.nanoCloseBtn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.nanoCloseBtn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ==========================================================================
+   🌌 3D CANVAS & AMBIENT AURA
+   ========================================================================== */
+
 .canvas3dContainer {
   position: fixed;
   inset: 0;
@@ -30,10 +128,6 @@
   pointer-events: none;
   z-index: 1;
   transition: opacity 0.6s ease;
-}
-
-.canvas3dContainer.interactiveMode {
-  pointer-events: auto;
 }
 
 .canvas3dContainer canvas {
@@ -67,22 +161,9 @@
   filter: blur(80px);
 }
 
-.scrollProgressTrack {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.06);
-  z-index: 999;
-}
-
-.scrollProgressBar {
-  height: 100%;
-  background: linear-gradient(90deg, #2457ff, #00f0ff, #7928ca);
-  box-shadow: 0 0 12px rgba(0, 240, 255, 0.8);
-  transition: width 0.1s linear;
-}
+/* ==========================================================================
+   🧭 FLOATING NAV 3D PRO MAX
+   ========================================================================== */
 
 .landingContent {
   position: relative;
@@ -95,19 +176,19 @@
 
 .nav3d {
   position: fixed;
-  top: 20px;
+  top: 50px;
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 48px);
   max-width: 1200px;
-  height: 66px;
+  height: 64px;
   padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(11, 19, 38, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(11, 19, 38, 0.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 20px;
   z-index: 100;
@@ -116,10 +197,10 @@
 }
 
 .nav3dScrolled {
-  top: 12px;
-  background: rgba(7, 13, 26, 0.88);
-  border-color: rgba(36, 87, 255, 0.3);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(36, 87, 255, 0.2);
+  top: 44px;
+  background: rgba(7, 13, 26, 0.9);
+  border-color: rgba(0, 240, 255, 0.3);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.15);
 }
 
 .navLinks {
@@ -142,35 +223,6 @@
   text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
 }
 
-.liveStatusPill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 12px;
-  background: rgba(36, 87, 255, 0.15);
-  border: 1px solid rgba(36, 87, 255, 0.35);
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #38bdf8;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.pulseDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #00f0ff;
-  box-shadow: 0 0 8px #00f0ff;
-  animation: pulseCore 1.8s infinite;
-}
-
-@keyframes pulseCore {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.6); opacity: 0.5; }
-}
-
 .btnPrimary3d {
   position: relative;
   display: inline-flex;
@@ -178,7 +230,7 @@
   justify-content: center;
   gap: 10px;
   padding: 13px 28px;
-  background: linear-gradient(135deg, #2457ff 0%, #1e40af 100%);
+  background: linear-gradient(135deg, #2457ff 0%, #00d2ff 100%);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 14px;
   color: #ffffff;
@@ -191,25 +243,10 @@
   cursor: pointer;
 }
 
-.btnPrimary3d::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.6s ease;
-}
-
 .btnPrimary3d:hover {
   transform: translateY(-2px);
   box-shadow: 0 14px 34px rgba(36, 87, 255, 0.6), 0 0 20px rgba(0, 240, 255, 0.4);
   border-color: #00f0ff;
-}
-
-.btnPrimary3d:hover::before {
-  left: 100%;
 }
 
 .btnSecondary3d {
@@ -240,10 +277,14 @@
   color: #ffffff;
 }
 
+/* ==========================================================================
+   🚀 HERO SECTION PRO MAX
+   ========================================================================== */
+
 .heroSection3d {
-  min-height: 100vh;
-  padding-top: 160px;
-  padding-bottom: 80px;
+  min-height: 95vh;
+  padding-top: 170px;
+  padding-bottom: 60px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -256,24 +297,25 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 16px;
+  padding: 6px 18px;
   background: rgba(36, 87, 255, 0.12);
-  border: 1px solid rgba(0, 240, 255, 0.3);
+  border: 1px solid rgba(0, 240, 255, 0.35);
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 750;
   color: #38bdf8;
   margin-bottom: 24px;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
 }
 
 .heroTitle {
-  font-size: clamp(38px, 6vw, 82px);
+  font-size: clamp(40px, 6.5vw, 86px);
   font-weight: 850;
   line-height: 1.05;
   letter-spacing: -0.045em;
   margin: 0 0 24px;
-  max-width: 960px;
+  max-width: 1000px;
 }
 
 .gradientTextHero {
@@ -286,7 +328,7 @@
   font-size: clamp(16px, 2vw, 21px);
   line-height: 1.6;
   color: #94a3b8;
-  max-width: 720px;
+  max-width: 740px;
   margin: 0 0 38px;
 }
 
@@ -323,6 +365,24 @@
   color: #00f0ff;
   font-weight: 800;
 }
+
+.pulseDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00f0ff;
+  box-shadow: 0 0 8px #00f0ff;
+  animation: pulseCore 1.8s infinite;
+}
+
+@keyframes pulseCore {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.6); opacity: 0.5; }
+}
+
+/* ==========================================================================
+   📦 ASYMMETRIC BENTO GRID PRO MAX
+   ========================================================================== */
 
 .bentoGrid {
   display: grid;
@@ -391,37 +451,9 @@
   margin: 0;
 }
 
-.processPipeline {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  margin-top: 48px;
-}
-
-.pipelineStep {
-  position: relative;
-  padding: 28px;
-  background: rgba(15, 23, 42, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  backdrop-filter: blur(12px);
-  transition: all 0.3s ease;
-}
-
-.pipelineStep:hover {
-  border-color: rgba(36, 87, 255, 0.4);
-  transform: translateY(-4px);
-}
-
-.stepNumber {
-  display: inline-block;
-  font-size: 32px;
-  font-weight: 900;
-  background: linear-gradient(135deg, #00f0ff, #2457ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 12px;
-}
+/* ==========================================================================
+   🎮 3D INTERACTIVE SHOWCASE
+   ========================================================================== */
 
 .showcasePlayground {
   position: relative;
@@ -471,6 +503,10 @@
   gap: 8px;
 }
 
+/* ==========================================
+   📊 METRICS & COMPARISON MATRIX
+   ========================================== */
+
 .metricCard {
   padding: 32px;
   background: rgba(15, 23, 42, 0.6);
@@ -501,6 +537,38 @@
   font-weight: 600;
 }
 
+.processPipeline {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 48px;
+}
+
+.pipelineStep {
+  position: relative;
+  padding: 28px;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+}
+
+.pipelineStep:hover {
+  border-color: rgba(36, 87, 255, 0.4);
+  transform: translateY(-4px);
+}
+
+.stepNumber {
+  display: inline-block;
+  font-size: 32px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #00f0ff, #2457ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+
 @media (max-width: 1024px) {
   .bentoGrid {
     grid-template-columns: repeat(2, 1fr);
@@ -513,18 +581,19 @@
 @media (max-width: 768px) {
   .nav3d {
     width: calc(100% - 24px);
-    height: 58px;
+    height: 56px;
     padding: 0 16px;
+    top: 42px;
   }
   .navLinks {
     display: none;
   }
   .heroSection3d {
-    padding-top: 110px;
+    padding-top: 130px;
     padding-bottom: 40px;
   }
   .heroTitle {
-    font-size: 34px;
+    font-size: 36px;
   }
   .heroSubtitle {
     font-size: 15px;
