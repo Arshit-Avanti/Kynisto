@@ -11,6 +11,18 @@ import { WelcomeRewardModal } from "@/components/subscription/WelcomeRewardModal
 import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
 import { EfferdFeatures6 } from "@/components/blocks/features-6";
 import { EfferdFooter3 } from "@/components/blocks/footer-3";
+import "./3d-landing.css";
+import { ThreeSceneCanvas } from "@/components/3d/ThreeSceneCanvas";
+import { InteractiveShowcase3D } from "@/components/3d/InteractiveShowcase3D";
+import { Navbar3D } from "@/components/landing/Navbar3D";
+import { HeroSection3D } from "@/components/landing/HeroSection3D";
+import { ProductIntroSection } from "@/components/landing/ProductIntroSection";
+import { FeaturesSection3D } from "@/components/landing/FeaturesSection3D";
+import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
+import { BenefitsSection } from "@/components/landing/BenefitsSection";
+import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
+import { FinalCtaSection } from "@/components/landing/FinalCtaSection";
+import { Footer3D } from "@/components/landing/Footer3D";
 
 type Category = {
   name: string;
@@ -1699,96 +1711,57 @@ export default function Home() {
   };
 
   return (
-    <main className={`site theme-${accent} density-${density} mode-${themeMode}`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
+    <main className={`site theme-${accent} density-${density} mode-${themeMode} landing3dShell`}>
+      <style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
+      <ThreeSceneCanvas />
+      <div className="ambientGlowTop" />
+      <div className="ambientGlowBottom" />
+      <Navbar3D />
       <SubscriptionExpiryBanner />
       <WelcomeRewardModal userRole={userRole} userId={userId} />
-      <VideoBackground />
-      <header className={`topbar ${isScrolled ? "topbarScrolled" : ""}`}>
-        <a className="brand" href="#top" aria-label="Kynisto home"><KynistoLogo showTagline={false} /></a>
 
+      {/* Floating Locality & Mobile Navigation Control */}
+      <div style={{ position: "relative", zIndex: 50, display: "flex", justifyContent: "center", alignItems: "center", gap: "12px", paddingTop: "96px" }}>
         <button className="locationPill" type="button" aria-label="Use current location" onClick={useCurrentLocation}>
           <span className="locationDot" aria-hidden="true" />
           <span>
-            <small>Your locality</small>
+            <small>Your Locality</small>
             <strong>{locationLabel}</strong>
           </span>
           <span aria-hidden="true">⌄</span>
         </button>
 
-        <div className="headerActions">
-          <Link className="textButton accountButton" href={userRole ? (userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account") : "/login"}>
-            {userRole === "admin" ? "Admin Panel" : userRole === "store_owner" ? "Owner Dashboard" : userRole === "customer" ? "My Account" : "Log in"}
-          </Link>
-          <Link className="textButton accountButton" href="/products">Products</Link>
-          <Link className="textButton accountButton" href="/healthcare">Healthcare</Link>
-          <Link className="textButton accountButton" href="/services">Services</Link>
+        <div className="mobileNav" style={{ display: "inline-block" }}>
           <button
-            className="textButton savedButton"
             type="button"
-            onClick={() => {
-              if (userRole !== "customer" && userRole !== "admin") {
-                window.location.assign("/login?returnTo=%2Faccount%3Ftab%3Dfavorites");
-                return;
-              }
-              setCategory("All");
-              setQuery("");
-              setSortMode("all");
-              document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
-              setToast(saved.length ? `${saved.length} saved place${saved.length === 1 ? "" : "s"}` : "No saved places yet");
+            className="mobileNavBtn"
+            aria-label="Open Kynisto navigation"
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((prev) => !prev)}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "4px",
+              width: "42px",
+              height: "42px",
+              padding: "8px",
+              background: "rgba(255, 255, 255, 0.12)",
+              border: "1px solid rgba(255, 255, 255, 0.25)",
+              borderRadius: "12px",
+              cursor: "pointer",
+              color: "#FFFFFF",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
             }}
           >
-            <Icons.Heart />
-            Saved <b>{saved.length}</b>
+            <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
+            <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
+            <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
           </button>
-          <button className="customizeButton" type="button" onClick={() => setCustomizing(true)}>
-            <span className="sliders" aria-hidden="true">☷</span>
-            Customize
-          </button>
-          <div className="mobileNav" style={{ display: "inline-block" }}>
-            <button
-              type="button"
-              className="mobileNavBtn"
-              aria-label="Open Kynisto navigation"
-              aria-expanded={mobileOpen}
-              onClick={() => setMobileOpen((prev) => !prev)}
-              style={{
-                position: "relative",
-                zIndex: 99999,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "4px",
-                width: "42px",
-                height: "42px",
-                padding: "8px",
-                background: "rgba(255, 255, 255, 0.12)",
-                border: "1px solid rgba(255, 255, 255, 0.25)",
-                borderRadius: "12px",
-                cursor: "pointer",
-                color: "#FFFFFF",
-                backdropFilter: "blur(8px)",
-                WebkitBackdropFilter: "blur(8px)",
-                boxShadow: "0 4px 14px rgba(0, 0, 0, 0.25)",
-                pointerEvents: "auto",
-              }}
-            >
-              {mobileOpen ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              ) : (
-                <>
-                  <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
-                  <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
-                  <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
-                </>
-              )}
-            </button>
-          </div>
         </div>
-      </header>
+      </div>
 
       {mobileOpen && (
         <div
@@ -2101,57 +2074,34 @@ export default function Home() {
         </div>
       )}
 
-      <section className="hero" id="top" style={{ textAlign: "center", padding: "120px 20px 40px 20px", display: "flex", flexDirection: "column", alignItems: "center", position: "relative", minHeight: "90vh", justifyContent: "center" }}>
-        <div className="ambientMesh" />
-        {/* Apple Ambient Aura Backlight */}
-        <div style={{ position: "absolute", top: "15%", width: "600px", height: "300px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,87,34,0.15) 0%, rgba(120,119,198,0.1) 50%, transparent 75%)", filter: "blur(90px)", pointerEvents: "none", zIndex: 1 }} />
+      <div className="landingContent">
+        <HeroSection3D
+          onExploreClick={() => {
+            document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
+          }}
+        />
 
-        <div className="heroCopy" style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "950px", position: "relative", zIndex: 2, width: "100%" }}>
-          {/* Crystal Clear Pure White Hero Title: Kynisto */}
-          <h1 className="highContrastText" style={{ 
-            fontSize: "clamp(2.2rem, 10.5vw, 9rem)", 
-            fontWeight: 850, 
-            letterSpacing: "-0.06em", 
-            lineHeight: 1, 
-            margin: "0 0 20px 0", 
-            whiteSpace: "nowrap",
-            wordBreak: "keep-all",
-            overflowWrap: "normal",
-            maxWidth: "100%",
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif"
-          }}>
-            Kynisto
-          </h1>
-          
-          <p className="highContrastText" style={{ fontSize: "clamp(1.1rem, 3vw, 1.8rem)", fontWeight: 500, margin: "0 0 40px 0", opacity: 0.9, letterSpacing: "-0.01em" }}>
-            The infrastructure of efficiency.
-          </p>
+        <ProductIntroSection />
+        <FeaturesSection3D />
+        <HowItWorksSection />
 
-          <div className="floatingCardsContainer" style={{ position: "relative", zIndex: 10, pointerEvents: "auto" }}>
-            <Link href="/wallet" className="glassCard3D" style={{ cursor: "pointer", pointerEvents: "auto", position: "relative", zIndex: 10 }}>
-              <Icons.Star />
-              <b>Loyalty Card</b>
-            </Link>
-            <Link href="/healthcare" className="glassCard3D" style={{ cursor: "pointer", pointerEvents: "auto", position: "relative", zIndex: 10 }}>
-              <Icons.Clock />
-              <b>Queue Ticket</b>
-            </Link>
-            <Link
-              href="/dashboard"
-              className="glassCard3D"
-              style={{ cursor: "pointer", pointerEvents: "auto", position: "relative", zIndex: 10 }}
-              onClick={(e) => {
-                // Ensure instant navigation even if event bubbling is intercepted by 3D transform layers
-                if (typeof window !== "undefined") {
-                  window.location.href = "/dashboard";
-                }
-              }}
-            >
-              <Icons.Search />
-              <b>Dashboard</b>
-            </Link>
+        <section className="py-24" id="interactive-showcase">
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <span className="text-[#00f0ff] font-bold text-xs uppercase tracking-widest block mb-2">
+              Interactive 3D Core
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white mb-4">
+              Inspect the Quantum Locality Nexus
+            </h2>
+            <p className="text-slate-400 text-base">
+              Real-time WebGL shader model with 360° rotational freedom and dynamic photonic wavelength shift.
+            </p>
           </div>
+          <InteractiveShowcase3D />
+        </section>
 
+        {/* Global Search Bar in Landing Flow */}
+        <div className="max-w-2xl mx-auto mb-16 px-4">
           <form
             className="searchBox heroSearchBox"
             role="search"
@@ -2167,68 +2117,14 @@ export default function Home() {
               className="heroSearchInput highContrastText"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Try 'restaurant with dishes under 99' or 'cycle brake repair'..."
+              placeholder="Try '5 star clinic near me' or 'restaurant under 99'..."
             />
             {query && (
               <button className="clearSearch highContrastText" type="button" aria-label="Clear search" onClick={() => setQuery("")}>×</button>
             )}
             <button className="searchSubmit heroSearchButton" type="submit">Search</button>
           </form>
-
-          {/* Smart Conversational Search Suggestion Chips */}
-          <div className="smartSearchChipsContainer" role="region" aria-label="Smart Search suggestions">
-            <span style={{ color: "#94a3b8", fontSize: "0.8rem", fontWeight: 600, flexShrink: 0, alignSelf: "center", paddingRight: "4px" }}>💡 Smart:</span>
-            {[
-              "Restaurant with dishes under 99",
-              "Cycle brake repair under 50rs",
-              "5 star clinic near me",
-              "Home electrician near me",
-            ].map((promptText) => (
-              <button
-                key={promptText}
-                className="smartSearchPromptChip"
-                type="button"
-                onClick={() => {
-                  setQuery(promptText);
-                  document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                style={{
-                  background: "rgba(255, 255, 255, 0.07)",
-                  border: "1px solid rgba(255, 255, 255, 0.12)",
-                  color: "#cbd5e1",
-                  borderRadius: "20px",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(255, 87, 34, 0.18)";
-                  e.currentTarget.style.borderColor = "#FF5722";
-                  e.currentTarget.style.color = "#ffffff";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.07)";
-                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)";
-                  e.currentTarget.style.color = "#cbd5e1";
-                }}
-              >
-                {promptText}
-              </button>
-            ))}
-          </div>
-
-          <div className="quickProof" aria-label="Kynisto highlights" style={{ marginTop: "16px" }}>
-            <span className="highContrastText"><b>100+</b> Places</span>
-            <span className="highContrastText"><b>20</b> Categories</span>
-            <span className="highContrastText"><b>Live</b> Status</span>
-          </div>
-
-          {/* Vertical Guide Line indicating scroll */}
-          <div style={{ width: "2px", height: "80px", background: "linear-gradient(180deg, var(--text-primary) 0%, transparent 100%)", margin: "60px auto 0 auto", opacity: 0.3 }} />
         </div>
-      </section>
-
-      {/* Efferd Features Bento Grid above Category Section */}
-      <EfferdFeatures6 />
 
       <section className="categorySection" aria-labelledby="category-heading">
         <div className="sectionHeading compactHeading">
@@ -2406,43 +2302,12 @@ export default function Home() {
 
 
 
-      {/* Exact Location, Live Hours & Ratings, Saved Favorites features strip */}
-      <section className="trustStrip efferdFeaturesBlock" aria-label="Why use Kynisto">
-        <div className="efferdFeatureCard featureCardLocation">
-          <div className="efferdIconBadge">
-            <span className="radarPulse" />
-            <Icons.Location />
-          </div>
-          <div className="efferdFeatureContent">
-            <p><b>Exact Location</b></p>
-            <small>Verified GPS &amp; local directions</small>
-          </div>
-        </div>
+        <BenefitsSection />
+        <TestimonialsSection />
+        <FinalCtaSection />
+      </div>
 
-        <div className="efferdFeatureCard featureCardHours">
-          <div className="efferdIconBadge">
-            <span className="liveStatusDot" />
-            <span aria-hidden="true" className="checkMark">✓</span>
-          </div>
-          <div className="efferdFeatureContent">
-            <p><b>Live Hours &amp; Ratings</b></p>
-            <small>Real-time open status &amp; reviews</small>
-          </div>
-        </div>
-
-        <div className="efferdFeatureCard featureCardFavorites">
-          <div className="efferdIconBadge">
-            <span className="heartAura" />
-            <Icons.Heart />
-          </div>
-          <div className="efferdFeatureContent">
-            <p><b>Saved Favorites</b></p>
-            <small>1-click access to saved places</small>
-          </div>
-        </div>
-      </section>
-
-      <EfferdFooter3 />
+      <Footer3D />
 
       {customizing && (
         <div className="modalLayer" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && setCustomizing(false)}>
