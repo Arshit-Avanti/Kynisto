@@ -1,17 +1,21 @@
 ﻿/* ==========================================================================
-   KYNISTO UI PRO MAX & 3D DESIGN SYSTEM
+   KYNISTO MODERN DESIGN SYSTEM (GOOGLE WHISK / DEEPMIND AESTHETIC)
    ========================================================================== */
 
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;850&family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
-  --kyn-glow-cyan: #00f0ff;
-  --kyn-glow-blue: #2457ff;
-  --kyn-glow-purple: #7928ca;
-  --kyn-glow-gold: #ff9900;
-  --kyn-glow-emerald: #10b981;
+  --kyn-cyan: #00f0ff;
+  --kyn-blue: #3b82f6;
+  --kyn-indigo: #6366f1;
+  --kyn-purple: #8b5cf6;
+  --kyn-emerald: #10b981;
+  --kyn-amber: #f59e0b;
   --kyn-dark-bg: #030712;
-  --kyn-glass-bg: rgba(15, 23, 42, 0.65);
-  --kyn-glass-border: rgba(255, 255, 255, 0.12);
-  --kyn-glass-highlight: rgba(255, 255, 255, 0.22);
+  --kyn-surface-1: rgba(15, 23, 42, 0.65);
+  --kyn-surface-2: rgba(30, 41, 59, 0.55);
+  --kyn-border-glass: rgba(255, 255, 255, 0.1);
+  --kyn-border-active: rgba(0, 240, 255, 0.4);
 }
 
 .landing3dShell {
@@ -21,10 +25,11 @@
   color: #f8fafc;
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow-x: hidden;
+  letter-spacing: -0.01em;
 }
 
 /* ==========================================================================
-   🌟 NANO BANNER PRO
+   ✨ NANO BANNER PRO (WHISK TICKER)
    ========================================================================== */
 
 .nanoBannerPro {
@@ -34,14 +39,13 @@
   right: 0;
   width: 100%;
   height: 38px;
-  background: linear-gradient(90deg, rgba(3, 7, 18, 0.95) 0%, rgba(15, 23, 42, 0.9) 50%, rgba(3, 7, 18, 0.95) 100%);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+  background: rgba(3, 7, 18, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 240, 255, 0.18);
   z-index: 101;
   display: flex;
   align-items: center;
-  box-shadow: 0 4px 20px rgba(0, 240, 255, 0.1);
   overflow: hidden;
 }
 
@@ -76,9 +80,9 @@
   align-items: center;
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   border: 1px solid;
 }
 
@@ -94,8 +98,8 @@
 
 .nanoActionChip:hover {
   background: rgba(0, 240, 255, 0.22);
-  border-color: #00f0ff;
-  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  border-color: var(--kyn-cyan);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
 }
 
 .nanoCloseBtn {
@@ -117,7 +121,7 @@
 }
 
 /* ==========================================================================
-   🌌 3D CANVAS & AMBIENT AURA
+   🌌 3D CANVAS & AMBIENT GLOW
    ========================================================================== */
 
 .canvas3dContainer {
@@ -146,7 +150,7 @@
   background: radial-gradient(ellipse at center, rgba(36, 87, 255, 0.18) 0%, rgba(121, 40, 202, 0.1) 45%, transparent 70%);
   pointer-events: none;
   z-index: 0;
-  filter: blur(60px);
+  filter: blur(70px);
 }
 
 .ambientGlowBottom {
@@ -158,11 +162,11 @@
   background: radial-gradient(ellipse at center, rgba(0, 240, 255, 0.12) 0%, rgba(36, 87, 255, 0.08) 50%, transparent 70%);
   pointer-events: none;
   z-index: 0;
-  filter: blur(80px);
+  filter: blur(90px);
 }
 
 /* ==========================================================================
-   🧭 FLOATING NAV 3D PRO MAX
+   🧭 FLOATING CAPSULE NAVBAR
    ========================================================================== */
 
 .landingContent {
@@ -176,31 +180,31 @@
 
 .nav3d {
   position: fixed;
-  top: 50px;
+  top: 48px;
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 48px);
   max-width: 1200px;
   height: 64px;
-  padding: 0 24px;
+  padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(11, 19, 38, 0.72);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: rgba(11, 19, 38, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
+  border-radius: 999px;
   z-index: 100;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .nav3dScrolled {
-  top: 44px;
-  background: rgba(7, 13, 26, 0.9);
-  border-color: rgba(0, 240, 255, 0.3);
-  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.15);
+  top: 42px;
+  background: rgba(7, 13, 26, 0.92);
+  border-color: rgba(0, 240, 255, 0.35);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 24px rgba(0, 240, 255, 0.18);
 }
 
 .navLinks {
@@ -219,7 +223,7 @@
 }
 
 .navLink:hover {
-  color: #00f0ff;
+  color: var(--kyn-cyan);
   text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
 }
 
@@ -228,16 +232,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 13px 28px;
-  background: linear-gradient(135deg, #2457ff 0%, #00d2ff 100%);
+  gap: 8px;
+  padding: 11px 24px;
+  background: linear-gradient(135deg, #00d2ff 0%, #2457ff 100%);
   border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 14px;
+  border-radius: 999px;
   color: #ffffff;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 750;
   text-decoration: none;
-  box-shadow: 0 8px 24px rgba(36, 87, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: 0 8px 24px rgba(36, 87, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
   cursor: pointer;
@@ -245,8 +249,8 @@
 
 .btnPrimary3d:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 34px rgba(36, 87, 255, 0.6), 0 0 20px rgba(0, 240, 255, 0.4);
-  border-color: #00f0ff;
+  box-shadow: 0 14px 34px rgba(36, 87, 255, 0.6), 0 0 24px rgba(0, 240, 255, 0.5);
+  border-color: #ffffff;
 }
 
 .btnSecondary3d {
@@ -254,31 +258,30 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 13px 26px;
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  gap: 8px;
+  padding: 11px 22px;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 14px;
+  border-radius: 999px;
   color: #f8fafc;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 700;
   text-decoration: none;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
 
 .btnSecondary3d:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.14);
   border-color: rgba(255, 255, 255, 0.35);
   transform: translateY(-2px);
   color: #ffffff;
 }
 
 /* ==========================================================================
-   🚀 HERO SECTION PRO MAX
+   🚀 MODERN HERO SECTION
    ========================================================================== */
 
 .heroSection3d {
@@ -349,7 +352,7 @@
   background: rgba(15, 23, 42, 0.7);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 18px;
+  border-radius: 999px;
 }
 
 .telemetryItem {
@@ -381,7 +384,7 @@
 }
 
 /* ==========================================================================
-   📦 ASYMMETRIC BENTO GRID PRO MAX
+   📦 MODERN BENTO GRID
    ========================================================================== */
 
 .bentoGrid {
@@ -395,8 +398,8 @@
   position: relative;
   padding: 32px;
   background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 24px;
   overflow: hidden;
