@@ -33,13 +33,13 @@ export function HowItWorksSection() {
   return (
     <section className="py-24" id="how-it-works">
       <div className="max-w-3xl mx-auto text-center mb-12">
-        <span className="text-[#00f0ff] font-bold text-xs uppercase tracking-widest block mb-2">
+        <span className="text-[#0284c7] font-bold text-xs uppercase tracking-widest block mb-2">
           Operational Pipeline
         </span>
-        <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white mb-4">
+        <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-900 mb-4">
           How Kynisto Powers Seamless Flow
         </h2>
-        <p className="text-slate-400 text-base">
+        <p className="text-slate-600 text-base">
           From initial local discovery to finished appointment in 4 effortless steps.
         </p>
       </div>
@@ -51,12 +51,12 @@ export function HowItWorksSection() {
             <div key={step.num} className="pipelineStep">
               <div className="flex items-center justify-between mb-4">
                 <span className="stepNumber">{step.num}</span>
-                <div className="w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700/50 flex items-center justify-center text-[#38bdf8]">
+                <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200/60 flex items-center justify-center text-sky-600">
                   <Icon className="w-5 h-5" />
                 </div>
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">{step.title}</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">{step.desc}</p>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">{step.title}</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">{step.desc}</p>
             </div>
           );
         })}

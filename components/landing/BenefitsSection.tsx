@@ -33,39 +33,39 @@ export function BenefitsSection() {
   return (
     <section className="py-24">
       <div className="max-w-3xl mx-auto text-center mb-16">
-        <span className="text-[#10b981] font-bold text-xs uppercase tracking-widest block mb-2">
+        <span className="text-[#0284c7] font-bold text-xs uppercase tracking-widest block mb-2">
           Measurable Impact &amp; Architecture
         </span>
-        <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white mb-4">
-          Why Modern Cities Choose Kynisto Pro Max
+        <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-900 mb-4">
+          Why Modern Cities Choose Kynisto
         </h2>
-        <p className="text-slate-400 text-base">
+        <p className="text-slate-600 text-base">
           Proven metrics delivering tangible time-savings and 3.2x higher merchant throughput.
         </p>
       </div>
 
       {/* Comparison Matrix Table */}
-      <div className="max-w-4xl mx-auto mb-16 p-6 sm:p-8 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-xl shadow-2xl">
+      <div className="max-w-4xl mx-auto mb-16 p-6 sm:p-8 rounded-3xl bg-white/90 border border-slate-200/90 backdrop-blur-xl shadow-lg">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-800">
-                <th className="pb-4 text-xs font-bold uppercase tracking-wider text-slate-400">Capability</th>
-                <th className="pb-4 text-xs font-bold uppercase tracking-wider text-slate-500">Traditional Directory</th>
-                <th className="pb-4 text-xs font-bold uppercase tracking-wider text-[#00f0ff]">Kynisto Pro Max</th>
+              <tr className="border-b border-slate-200">
+                <th className="pb-4 text-xs font-bold uppercase tracking-wider text-slate-500">Capability</th>
+                <th className="pb-4 text-xs font-bold uppercase tracking-wider text-slate-400">Traditional Directory</th>
+                <th className="pb-4 text-xs font-bold uppercase tracking-wider text-[#0284c7]">Kynisto Modern</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-sm">
+            <tbody className="divide-y divide-slate-100 text-sm">
               {comparisonRows.map((row) => (
-                <tr key={row.feature} className="hover:bg-slate-800/30 transition-colors">
-                  <td className="py-4 font-semibold text-white">{row.feature}</td>
-                  <td className="py-4 text-slate-400 flex items-center gap-2">
-                    <XCircle className="w-4 h-4 text-red-400 shrink-0" />
+                <tr key={row.feature} className="hover:bg-slate-50/60 transition-colors">
+                  <td className="py-4 font-semibold text-slate-900">{row.feature}</td>
+                  <td className="py-4 text-slate-500 flex items-center gap-2">
+                    <XCircle className="w-4 h-4 text-red-500 shrink-0" />
                     <span>{row.traditional}</span>
                   </td>
-                  <td className="py-4 text-cyan-300 font-medium">
+                  <td className="py-4 text-sky-700 font-medium">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-[#10b981] shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                       <span>{row.kynisto}</span>
                     </div>
                   </td>

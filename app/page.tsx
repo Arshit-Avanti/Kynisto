@@ -13,7 +13,6 @@ import { EfferdFeatures6 } from "@/components/blocks/features-6";
 import { EfferdFooter3 } from "@/components/blocks/footer-3";
 import "./3d-landing.css";
 import { ThreeSceneCanvas } from "@/components/3d/ThreeSceneCanvas";
-import { InteractiveShowcase3D } from "@/components/3d/InteractiveShowcase3D";
 import { Navbar3D } from "@/components/landing/Navbar3D";
 import { HeroSection3D } from "@/components/landing/HeroSection3D";
 import { ProductIntroSection } from "@/components/landing/ProductIntroSection";
@@ -2087,20 +2086,6 @@ export default function Home() {
         <FeaturesSection3D />
         <HowItWorksSection />
 
-        <section className="py-24" id="interactive-showcase">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <span className="text-[#00f0ff] font-bold text-xs uppercase tracking-widest block mb-2">
-              Interactive 3D Core
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white mb-4">
-              Inspect the Quantum Locality Nexus
-            </h2>
-            <p className="text-slate-400 text-base">
-              Real-time WebGL shader model with 360° rotational freedom and dynamic photonic wavelength shift.
-            </p>
-          </div>
-          <InteractiveShowcase3D />
-        </section>
 
         {/* Global Search Bar in Landing Flow */}
         <div className="max-w-2xl mx-auto mb-16 px-4">
