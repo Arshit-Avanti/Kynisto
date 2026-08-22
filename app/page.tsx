@@ -1733,14 +1733,12 @@ export default function Home() {
 
   return (
     <main className={`site theme-${accent} density-${density} mode-${themeMode}`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
-      <div className="top-banner-wrapper arise-on-scroll">
-        <SubscriptionExpiryBanner />
-        <WelcomeRewardModal userRole={userRole} userId={userId} />
-      </div>
-      <header className={`topbar ${isScrolled ? "topbarScrolled" : ""} arise-on-scroll arise-delay-1`}>
-        <a className="brand arise-on-scroll arise-delay-1" href="#top" aria-label="Kynisto home"><KynistoLogo showTagline={false} /></a>
+      <SubscriptionExpiryBanner />
+      <WelcomeRewardModal userRole={userRole} userId={userId} />
+      <header className={`topbar ${isScrolled ? "topbarScrolled" : ""}`}>
+        <a className="brand" href="#top" aria-label="Kynisto home"><KynistoLogo showTagline={false} /></a>
 
-        <button className="locationPill arise-on-scroll arise-delay-2" type="button" aria-label="Use current location" onClick={useCurrentLocation}>
+        <button className="locationPill" type="button" aria-label="Use current location" onClick={useCurrentLocation}>
           <span className="locationDot" aria-hidden="true" />
           <span>
             <small>Your locality</small>
@@ -1749,7 +1747,7 @@ export default function Home() {
           <span aria-hidden="true">⌄</span>
         </button>
 
-        <div className="headerActions arise-on-scroll arise-delay-3">
+        <div className="headerActions">
           <Link className="textButton accountButton" href={userRole ? (userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account") : "/login"}>
             {userRole === "admin" ? "Admin Panel" : userRole === "store_owner" ? "Owner Dashboard" : userRole === "customer" ? "My Account" : "Log in"}
           </Link>
