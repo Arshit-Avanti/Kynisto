@@ -15,6 +15,12 @@ export async function GET() {
     `<url><loc>${xml(`${origin}/healthcare`)}</loc><changefreq>daily</changefreq><priority>0.9</priority></url>`,
     `<url><loc>${xml(`${origin}/products`)}</loc><changefreq>daily</changefreq><priority>0.9</priority></url>`,
     `<url><loc>${xml(`${origin}/services`)}</loc><changefreq>daily</changefreq><priority>0.8</priority></url>`,
+    `<url><loc>${xml(`${origin}/guide`)}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>`,
+    `<url><loc>${xml(`${origin}/faq`)}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>`,
+    `<url><loc>${xml(`${origin}/about`)}</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>`,
+    `<url><loc>${xml(`${origin}/contact`)}</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>`,
+    `<url><loc>${xml(`${origin}/privacy`)}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>`,
+    `<url><loc>${xml(`${origin}/terms`)}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>`,
     `<url><loc>${xml(`${origin}/pricing`)}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`,
     ...(stores.results ?? []).map((store) => `<url><loc>${xml(`${origin}/stores/${store.slug}`)}</loc><lastmod>${new Date(store.updatedAt * 1000).toISOString()}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`),
   ];
