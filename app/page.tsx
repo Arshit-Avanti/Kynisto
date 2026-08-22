@@ -1450,6 +1450,35 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Scroll-Triggered "Arise / Emerge" Animation Observer
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("arisen");
+          }
+        });
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -30px 0px" }
+    );
+
+    const observeAll = () => {
+      const elements = document.querySelectorAll(".arise-on-scroll:not(.arisen)");
+      elements.forEach((el) => observer.observe(el));
+    };
+
+    observeAll();
+    const timer = setTimeout(observeAll, 300);
+
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
+  }, [catalogStores, category, query, sortMode]);
+
   useEffect(() => {
     const stored = window.localStorage.getItem("kynisto-preferences");
     if (!stored) return;
@@ -2110,14 +2139,14 @@ export default function Home() {
 
         <div className="heroCopy" style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "1020px", position: "relative", zIndex: 2, width: "100%" }}>
           {/* Futuristic Credix-Style Pill Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.08] border border-white/20 text-xs font-bold text-orange-400 mb-5 backdrop-blur-md shadow-lg shadow-orange-500/10 tracking-wide uppercase">
+          <div className="arise-on-scroll arise-delay-1 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.08] border border-white/20 text-xs font-bold text-orange-400 mb-5 backdrop-blur-md shadow-lg shadow-orange-500/10 tracking-wide uppercase">
             <span className="w-2 h-2 rounded-full bg-orange-400 animate-ping" />
             <span className="w-2 h-2 rounded-full bg-orange-400 -ml-4" />
             <span>THE INFRASTRUCTURE OF EFFICIENCY • 2026</span>
           </div>
 
           {/* Crystal Clear Pure White Hero Title: Kynisto */}
-          <h1 className="highContrastText" style={{ 
+          <h1 className="highContrastText arise-on-scroll arise-delay-2" style={{ 
             fontSize: "clamp(2.2rem, 10.5vw, 8.5rem)", 
             fontWeight: 850, 
             letterSpacing: "-0.06em", 
@@ -2132,11 +2161,11 @@ export default function Home() {
             Kynisto
           </h1>
           
-          <p className="highContrastText" style={{ fontSize: "clamp(1.1rem, 3vw, 1.7rem)", fontWeight: 500, margin: "0 0 35px 0", opacity: 0.9, letterSpacing: "-0.01em", maxWidth: "750px" }}>
+          <p className="highContrastText arise-on-scroll arise-delay-3" style={{ fontSize: "clamp(1.1rem, 3vw, 1.7rem)", fontWeight: 500, margin: "0 0 35px 0", opacity: 0.9, letterSpacing: "-0.01em", maxWidth: "750px" }}>
             The infrastructure of efficiency.
           </p>
 
-          <div className="floatingCardsContainer" style={{ position: "relative", zIndex: 10, pointerEvents: "auto" }}>
+          <div className="floatingCardsContainer arise-on-scroll arise-delay-4" style={{ position: "relative", zIndex: 10, pointerEvents: "auto" }}>
             <Link href="/wallet" className="glassCard3D" style={{ cursor: "pointer", pointerEvents: "auto", position: "relative", zIndex: 10 }}>
               <Icons.Star />
               <b>Loyalty Card</b>
@@ -2161,7 +2190,7 @@ export default function Home() {
           </div>
 
           <form
-            className="searchBox heroSearchBox"
+            className="searchBox heroSearchBox arise-on-scroll arise-delay-5"
             role="search"
             onSubmit={(event) => {
               event.preventDefault();
@@ -2239,7 +2268,7 @@ export default function Home() {
       <CredixShowcaseSection />
 
       <section className="categorySection" aria-labelledby="category-heading">
-        <div className="sectionHeading compactHeading">
+        <div className="sectionHeading compactHeading arise-on-scroll">
           <div>
             <span className="kicker">Browse by need</span>
             <h2 id="category-heading">What are you looking for?</h2>
@@ -2247,12 +2276,12 @@ export default function Home() {
           <button className="resetLink" type="button" onClick={resetFilters}>Reset filters <span aria-hidden="true">↗</span></button>
         </div>
         <div className="categoryGrid">
-          {catalogCategories.map((item) => {
+          {catalogCategories.map((item, index) => {
             const active = category === item.name;
             return (
               <button
                 key={item.name}
-                className={`categoryTile tone-${item.tone}`}
+                className={`categoryTile tone-${item.tone} arise-on-scroll arise-delay-${(index % 6) + 1}`}
                 type="button"
                 aria-pressed={active}
                 onClick={() => {
@@ -2269,17 +2298,15 @@ export default function Home() {
         </div>
       </section>
 
-
-
       {/* Places Section */}
 
       <section className="placesSection" id="places" aria-labelledby="places-heading">
-        <div className="sectionHeading placesHeading">
+        <div className="sectionHeading placesHeading arise-on-scroll">
           <div>
             <span className="kicker" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>Handy places around you</span>
             <h2 id="places-heading" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>{category === "All" ? "Popular near you" : `${category} near you`}</h2>
           </div>
-          <div className="filterGroup" aria-label="Sort and filter stores">
+          <div className="filterGroup arise-on-scroll arise-delay-2" aria-label="Sort and filter stores">
             {([
               ["all", "All places"],
               ["open", "Open now"],
@@ -2300,7 +2327,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="advancedFilters" aria-label="Detailed business filters">
+        <div className="advancedFilters arise-on-scroll arise-delay-3" aria-label="Detailed business filters">
           <label>
             <span>Area or neighbourhood</span>
             <input value={areaFilter} onChange={(event) => setAreaFilter(event.target.value)} placeholder="Search area..." />
@@ -2315,7 +2342,7 @@ export default function Home() {
           </label>
         </div>
 
-        <div className="sectionHeading" style={{ marginTop: "36px", marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div className="sectionHeading arise-on-scroll" style={{ marginTop: "36px", marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <span className="kicker" style={{ color: "#FFFFFF", fontWeight: 700 }}>📍 Verified Local Services</span>
             <h2 className="highContrastText" style={{ fontSize: "1.8rem", fontWeight: 800, margin: "4px 0 0 0", color: "#FFFFFF" }}>Recommended Stores Nearby Me</h2>
@@ -2332,8 +2359,8 @@ export default function Home() {
         ) : results.length > 0 ? (
           <>
           <div className="storeGrid">
-            {results.map((store) => (
-              <article className="storeCard" key={store.id}>
+            {results.map((store, index) => (
+              <article className={`storeCard arise-on-scroll arise-delay-${(index % 6) + 1}`} key={store.id}>
                 <button
                   type="button"
                   className={`storeVisual tone-${store.tone}`}
