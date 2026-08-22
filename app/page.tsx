@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
+import { VideoBackground } from "@/components/media/VideoBackground";
 import { HeroVideoBackground } from "@/components/media/HeroVideoBackground";
 import { CredixInteractiveHeroFeatures } from "@/components/dashboard/CredixInteractiveHeroFeatures";
 import { ShaderCanvas } from "@/components/ui/ShaderCanvas";
@@ -1733,6 +1734,7 @@ export default function Home() {
 
   return (
     <main className={`site theme-${accent} density-${density} mode-${themeMode}`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
+      <VideoBackground videoSrc="/videos/hero-flow.mp4" mobileVideoSrc="/videos/hero-flow.mp4" />
       <SubscriptionExpiryBanner />
       <WelcomeRewardModal userRole={userRole} userId={userId} />
       <header className={`topbar ${isScrolled ? "topbarScrolled" : ""}`}>

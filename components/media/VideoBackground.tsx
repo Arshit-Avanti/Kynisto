@@ -8,8 +8,8 @@ interface VideoBackgroundProps {
 }
 
 export function VideoBackground({
-  videoSrc = "/videos/drive-hero.mp4",
-  mobileVideoSrc = "/videos/mobile-9-16-hero.mp4",
+  videoSrc = "/videos/hero-flow.mp4",
+  mobileVideoSrc = "/videos/hero-flow.mp4",
 }: VideoBackgroundProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
