@@ -1450,7 +1450,7 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Scroll-Triggered "Arise / Emerge" Animation Observer
+  // Continuous Scroll-Triggered "Arise / Emerge" Animation Observer (Re-triggers dynamically on every scroll in/out)
   useEffect(() => {
     if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") return;
 
@@ -1459,14 +1459,17 @@ export default function Home() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("arisen");
+          } else {
+            // Remove arisen class when out of view so it arises again on every scroll!
+            entry.target.classList.remove("arisen");
           }
         });
       },
-      { threshold: 0.08, rootMargin: "0px 0px -30px 0px" }
+      { threshold: 0.05, rootMargin: "0px 0px -20px 0px" }
     );
 
     const observeAll = () => {
-      const elements = document.querySelectorAll(".arise-on-scroll:not(.arisen)");
+      const elements = document.querySelectorAll(".arise-on-scroll");
       elements.forEach((el) => observer.observe(el));
     };
 
