@@ -2,7 +2,6 @@
 
 import React from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
-import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
 
 const GithubIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -34,7 +33,6 @@ export function EfferdFooter3() {
             Universal hyper-local discovery, live clinic queue tracking, and smart community commerce for your neighborhood.
           </p>
           <div className="efferdSocialRow">
-            <ThemeSwitcher size="sm" />
             <a
               href="https://github.com/Arshit-Avanti/Kynisto"
               target="_blank"

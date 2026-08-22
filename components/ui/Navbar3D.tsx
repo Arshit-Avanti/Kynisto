@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useRef, useState, useCallback, useMemo, startTransition } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { BackButton } from "@/components/ui/BackButton";
-import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
 import { RoleSwitcherButton } from "@/components/auth/RoleSwitcherButton";
 
 export interface Navbar3DProps {
@@ -235,7 +234,6 @@ function DesktopNavbar({
             Customize
           </button>
         )}
-        <ThemeSwitcher size="sm" />
       </nav>
 
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -521,10 +519,9 @@ function MobileNavbar({
             )}
           </nav>
 
-          {/* Drawer Footer with Theme Switcher */}
+          {/* Drawer Footer */}
           <div className="drawerFooter">
             <span style={{ fontSize: "12px", color: "#94A3B8" }}>Kynisto 2.0 • Mobile Suite</span>
-            <ThemeSwitcher size="sm" />
           </div>
         </div>
       )}
