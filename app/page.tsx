@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { HeroVideoBackground } from "@/components/media/HeroVideoBackground";
-import { CredixShowcaseSection } from "@/components/dashboard/CredixShowcaseSection";
+import { HeroDashboardMockup } from "@/components/dashboard/HeroDashboardMockup";
 import { ShaderCanvas } from "@/components/ui/ShaderCanvas";
 import { apiFetch } from "@/lib/client-api";
 import { getSupabaseBrowserClient, syncSupabaseAccessCookie } from "@/lib/supabase-browser";
@@ -2140,7 +2140,7 @@ export default function Home() {
         {/* Apple Ambient Aura Backlight */}
         <div style={{ position: "absolute", top: "15%", width: "600px", height: "300px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,87,34,0.15) 0%, rgba(120,119,198,0.1) 50%, transparent 75%)", filter: "blur(90px)", pointerEvents: "none", zIndex: 1 }} />
 
-        <div className="heroCopy" style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "1020px", position: "relative", zIndex: 2, width: "100%" }}>
+        <div className="heroCopy" style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "1200px", position: "relative", zIndex: 2, width: "100%" }}>
           {/* Futuristic Credix-Style Pill Badge */}
           <div className="arise-on-scroll arise-delay-1 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.08] border border-white/20 text-xs font-bold text-orange-400 mb-5 backdrop-blur-md shadow-lg shadow-orange-500/10 tracking-wide uppercase">
             <span className="w-2 h-2 rounded-full bg-orange-400 animate-ping" />
@@ -2280,11 +2280,11 @@ export default function Home() {
               </button>
             ))}
           </div>
+
+          {/* Centerpiece 3D Credix Dashboard directly inside Hero Section under Search Bar */}
+          <HeroDashboardMockup />
         </div>
       </section>
-
-      {/* Credix-Style Scroll-Driven Showcase: Central Sliding Dashboard with Flanking Features & 3D Earth */}
-      <CredixShowcaseSection />
 
       <section className="categorySection" aria-labelledby="category-heading">
         <div className="sectionHeading compactHeading arise-on-scroll">
