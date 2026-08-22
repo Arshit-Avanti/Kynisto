@@ -2164,36 +2164,12 @@ export default function Home() {
             Kynisto
           </h1>
           
-          <p className="highContrastText arise-on-scroll arise-delay-3" style={{ fontSize: "clamp(1.1rem, 3vw, 1.7rem)", fontWeight: 500, margin: "0 0 35px 0", opacity: 0.9, letterSpacing: "-0.01em", maxWidth: "750px" }}>
+          <p className="highContrastText arise-on-scroll arise-delay-3" style={{ fontSize: "clamp(1.1rem, 3vw, 1.7rem)", fontWeight: 500, margin: "0 0 32px 0", opacity: 0.9, letterSpacing: "-0.01em", maxWidth: "750px" }}>
             The infrastructure of efficiency.
           </p>
 
-          <div className="floatingCardsContainer arise-on-scroll arise-delay-4" style={{ position: "relative", zIndex: 10, pointerEvents: "auto" }}>
-            <Link href="/wallet" className="glassCard3D" style={{ cursor: "pointer", pointerEvents: "auto", position: "relative", zIndex: 10 }}>
-              <Icons.Star />
-              <b>Loyalty Card</b>
-            </Link>
-            <Link href="/healthcare" className="glassCard3D" style={{ cursor: "pointer", pointerEvents: "auto", position: "relative", zIndex: 10 }}>
-              <Icons.Clock />
-              <b>Queue Ticket</b>
-            </Link>
-            <Link
-              href="/dashboard"
-              className="glassCard3D"
-              style={{ cursor: "pointer", pointerEvents: "auto", position: "relative", zIndex: 10 }}
-              onClick={(e) => {
-                if (typeof window !== "undefined") {
-                  window.location.href = "/dashboard";
-                }
-              }}
-            >
-              <Icons.Search />
-              <b>Dashboard</b>
-            </Link>
-          </div>
-
           <form
-            className="searchBox heroSearchBox arise-on-scroll arise-delay-5"
+            className="searchBox heroSearchBox arise-on-scroll arise-delay-4"
             role="search"
             onSubmit={(event) => {
               event.preventDefault();
@@ -2215,14 +2191,33 @@ export default function Home() {
             <button className="searchSubmit heroSearchButton" type="submit">Search</button>
           </form>
 
-          {/* Smart Conversational Search Suggestion Chips */}
-          <div className="smartSearchChipsContainer" role="region" aria-label="Smart Search suggestions">
-            <span style={{ color: "#94a3b8", fontSize: "0.8rem", fontWeight: 600, flexShrink: 0, alignSelf: "center", paddingRight: "4px" }}>💡 Smart:</span>
+          {/* Smart Conversational Search Suggestion Chips - Single Line Horizontal Slider */}
+          <div
+            className="smartSearchChipsContainer arise-on-scroll arise-delay-5"
+            role="region"
+            aria-label="Smart Search suggestions"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              flexWrap: "nowrap",
+              overflowX: "auto",
+              maxWidth: "750px",
+              width: "100%",
+              margin: "-8px auto 0 auto",
+              padding: "6px 8px",
+              scrollbarWidth: "none",
+              WebkitOverflowScrolling: "touch",
+            }}
+          >
+            <span style={{ color: "#94a3b8", fontSize: "0.8rem", fontWeight: 600, flexShrink: 0, paddingRight: "4px" }}>💡 Smart:</span>
             {[
               "Restaurant with dishes under 99",
               "Cycle brake repair under 50rs",
               "5 star clinic near me",
               "Home electrician near me",
+              "24/7 emergency pharmacy",
+              "Fresh organic bakery",
             ].map((promptText) => (
               <button
                 key={promptText}
@@ -2239,6 +2234,8 @@ export default function Home() {
                   borderRadius: "20px",
                   cursor: "pointer",
                   transition: "all 0.2s ease",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = "rgba(255, 87, 34, 0.18)";
@@ -2255,15 +2252,6 @@ export default function Home() {
               </button>
             ))}
           </div>
-
-          <div className="quickProof" aria-label="Kynisto highlights" style={{ marginTop: "16px" }}>
-            <span className="highContrastText"><b>100+</b> Places</span>
-            <span className="highContrastText"><b>20</b> Categories</span>
-            <span className="highContrastText"><b>Live</b> Status</span>
-          </div>
-
-          {/* Vertical Guide Line indicating scroll */}
-          <div style={{ width: "2px", height: "70px", background: "linear-gradient(180deg, var(--text-primary) 0%, transparent 100%)", margin: "40px auto 0 auto", opacity: 0.35 }} />
         </div>
       </section>
 
