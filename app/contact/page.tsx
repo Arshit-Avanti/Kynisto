@@ -37,7 +37,7 @@ export default function ContactPage() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 mb-16">
-          {/* Card 1 */}
+          {/* Card 1: Official Email Support */}
           <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
             <div>
               <div className="w-12 h-12 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center mb-4">
@@ -45,15 +45,24 @@ export default function ContactPage() {
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-1">Email Support</h3>
               <p className="text-xs text-slate-500 mb-4">Response within 24 hours</p>
-              <div className="space-y-1.5 text-sm text-slate-700">
-                <p><strong>General:</strong> support@kynisto.in</p>
-                <p><strong>Merchants:</strong> business@kynisto.in</p>
-                <p><strong>Privacy:</strong> privacy@kynisto.in</p>
+              <div className="space-y-2 text-sm text-slate-700">
+                <div>
+                  <span className="text-xs text-slate-500 block">Primary Email:</span>
+                  <a href="mailto:nxt.arshit@gmail.com" className="font-bold text-sky-600 hover:underline">
+                    nxt.arshit@gmail.com
+                  </a>
+                </div>
+                <div>
+                  <span className="text-xs text-slate-500 block">Official Desk:</span>
+                  <a href="mailto:kynisto.in@gmail.com" className="font-bold text-sky-600 hover:underline">
+                    kynisto.in@gmail.com
+                  </a>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Card 2 */}
+          {/* Card 2: Operating Hours */}
           <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
             <div>
               <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
@@ -69,7 +78,7 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* Card 3 */}
+          {/* Card 3: Registered Address */}
           <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
             <div>
               <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-4">
@@ -77,10 +86,10 @@ export default function ContactPage() {
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-1">Registered Address</h3>
               <p className="text-xs text-slate-500 mb-4">Headquarters</p>
-              <p className="text-sm text-slate-700 leading-relaxed">
+              <p className="text-sm text-slate-700 leading-relaxed font-medium">
                 Kynisto Technologies Inc.<br />
-                Technology Innovation Park, Delhi NCR,<br />
-                India – 201102
+                B-5/13, DLF Ankur Vihar, Loni,<br />
+                Ghaziabad, Uttar Pradesh, India – 201102
               </p>
             </div>
           </div>

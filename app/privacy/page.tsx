@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Navbar3D } from "@/components/landing/Navbar3D";
 import { Footer3D } from "@/components/landing/Footer3D";
@@ -129,9 +129,9 @@ export default function PrivacyPolicyPage() {
             <div className="mt-4 p-4 rounded-xl bg-sky-50 border border-sky-200 text-sm">
               <p><strong>Grievance Officer:</strong> Data Privacy Desk</p>
               <p><strong>Entity:</strong> Kynisto Technologies Inc.</p>
-              <p><strong>Email:</strong> privacy@kynisto.in / support@kynisto.in</p>
+              <p><strong>Email:</strong> kynisto.in@gmail.com / nxt.arshit@gmail.com</p>
               <p><strong>Website:</strong> https://kynisto.in</p>
-              <p><strong>Location:</strong> Delhi NCR, India</p>
+              <p><strong>Location:</strong> B-5/13, DLF Ankur Vihar, Loni, Ghaziabad, UP, India - 201102</p>
             </div>
           </section>
         </article>

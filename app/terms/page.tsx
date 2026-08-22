@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Navbar3D } from "@/components/landing/Navbar3D";
 import { Footer3D } from "@/components/landing/Footer3D";
@@ -83,7 +83,7 @@ export default function TermsPage() {
           <section className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
             <h2 className="text-xl font-bold text-slate-900 mb-3">6. Governing Law &amp; Dispute Resolution</h2>
             <p>
-              These Terms shall be governed by and construed in accordance with the laws of India. Any disputes arising out of or in connection with these terms shall be subject to the exclusive jurisdiction of the competent courts in Delhi NCR, India.
+              These Terms shall be governed by and construed in accordance with the laws of India. Any disputes arising out of or in connection with these terms shall be subject to the exclusive jurisdiction of the competent courts in Ghaziabad / Delhi NCR, Uttar Pradesh, India.
             </p>
           </section>
         </article>

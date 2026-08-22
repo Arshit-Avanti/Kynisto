@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import "./kynisto-brand.css";
 import "./google-auth.css";
+import "./3d-landing.css";
 import { AdSenseManager } from "@/components/ads/AdSenseManager";
 import { AppUpdateManager } from "@/components/AppUpdateManager";
 import { SupabaseAuthManager } from "@/components/auth/SupabaseAuthManager";

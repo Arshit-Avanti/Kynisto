@@ -20,7 +20,6 @@ import { FeaturesSection3D } from "@/components/landing/FeaturesSection3D";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { BenefitsSection } from "@/components/landing/BenefitsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
-import { FinalCtaSection } from "@/components/landing/FinalCtaSection";
 import { EditorialFaqSection } from "@/components/landing/EditorialFaqSection";
 import { Footer3D } from "@/components/landing/Footer3D";
 import { NanoBannerPro } from "@/components/landing/NanoBannerPro";
@@ -2293,7 +2292,6 @@ export default function Home() {
         <BenefitsSection />
         <TestimonialsSection />
         <EditorialFaqSection />
-        <FinalCtaSection />
       </div>
 
       <Footer3D />

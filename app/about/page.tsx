@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Navbar3D } from "@/components/landing/Navbar3D";
 import { Footer3D } from "@/components/landing/Footer3D";
@@ -86,11 +86,11 @@ export default function AboutPage() {
             <div>
               <p><strong>Operating Entity:</strong> Kynisto Technologies Inc.</p>
               <p><strong>Primary Domain:</strong> https://kynisto.in</p>
-              <p><strong>Headquarters:</strong> Delhi NCR, India</p>
+              <p><strong>Headquarters:</strong> B-5/13, DLF Ankur Vihar, Loni, Ghaziabad, UP, India - 201102</p>
             </div>
             <div>
-              <p><strong>Editorial Contact:</strong> editorial@kynisto.in</p>
-              <p><strong>Support &amp; Inquiries:</strong> support@kynisto.in</p>
+              <p><strong>Editorial &amp; Founder Desk:</strong> nxt.arshit@gmail.com</p>
+              <p><strong>Support &amp; Inquiries:</strong> kynisto.in@gmail.com</p>
               <p><strong>Network Coverage:</strong> 50+ Municipalities &amp; Localities</p>
             </div>
           </div>
