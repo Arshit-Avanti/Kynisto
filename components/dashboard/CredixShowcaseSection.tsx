@@ -71,10 +71,13 @@ export function CredixShowcaseSection() {
       const rect = sectionRef.current.getBoundingClientRect();
       const windowHeight = window.innerHeight || 800;
 
-      // Calculate scroll progress (0 when entering view, 1 when centered)
-      const start = windowHeight * 0.85;
-      const end = -rect.height * 0.2;
-      const progress = Math.max(0, Math.min(1, (start - rect.top) / (start - end)));
+      // Calculate progress starting from top of hero (0 = top, 1 = scrolled through showcase)
+      // When at top of page, progress is 0 (dashboard centered in hero)
+      // When scrolled down, progress moves to 1 (dashboard shifts right and tilts)
+      const topOffset = rect.top;
+      const scrollDistance = windowHeight * 0.7;
+      const rawProgress = (windowHeight * 0.35 - topOffset) / scrollDistance;
+      const progress = Math.max(0, Math.min(1, rawProgress));
       setScrollProgress(progress);
     };
 
@@ -84,17 +87,17 @@ export function CredixShowcaseSection() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 3D Perspective Calculations based on scroll:
-  // Right side lifts upward, Left side tilts inward into the screen
-  const rotY = -4 - scrollProgress * 13;   // -4deg to -17deg (left side sinks deep into screen)
-  const rotX = 3 + scrollProgress * 7.5;   // +3deg to +10.5deg (top-right lifts)
-  const rotZ = -1 - scrollProgress * 2.8;  // -1deg to -3.8deg (right tilts upward)
-  const transY = Math.max(0, (1 - scrollProgress) * 35);
-  const scale = 0.95 + scrollProgress * 0.05;
+  // Continuous Scroll 3D Dynamics:
+  // At scrollProgress = 0 (in hero): Centered, gentle preview angle (rotateY: 0deg, rotateX: 6deg, rotateZ: 0deg)
+  // At scrollProgress = 1 (scrolled down): Shifts right, tilts with left side sinking deep into screen and right side lifting up!
+  const rotY = 0 - scrollProgress * 16;      // 0deg -> -16deg (left side tilts inward)
+  const rotX = 6 + scrollProgress * 4.5;    // 6deg -> +10.5deg (top tilts back)
+  const rotZ = 0 - scrollProgress * 3.5;    // 0deg -> -3.5deg (right side lifts up)
+  const scale = 0.96 + scrollProgress * 0.04;
 
-  // Left Content emergence
-  const leftTranslateX = Math.max(0, (1 - scrollProgress) * -40);
-  const leftOpacity = Math.min(1, 0.2 + scrollProgress * 0.9);
+  // Left Content emergence (fades in and slides in as you scroll down)
+  const leftTranslateX = Math.max(0, (1 - scrollProgress) * -45);
+  const leftOpacity = Math.min(1, Math.max(0, (scrollProgress - 0.05) * 1.3));
 
   const handleDashboardClick = () => {
     // Navigate to /dashboard (which automatically opens account if logged in, or redirects to /login?returnTo=/dashboard if not)
@@ -104,28 +107,30 @@ export function CredixShowcaseSection() {
   return (
     <section
       ref={sectionRef}
-      className="w-full max-w-7xl mx-auto px-4 py-16 lg:py-24 relative overflow-hidden"
+      className="w-full max-w-7xl mx-auto px-4 pt-4 pb-20 lg:pb-28 relative overflow-hidden -mt-6 sm:-mt-10"
       style={{ perspective: "1400px" }}
       aria-label="Kynisto Live System Showcase"
     >
       {/* Ambient background aura backlight */}
       <div
-        className="absolute -right-10 top-1/4 w-[520px] h-[520px] rounded-full pointer-events-none"
+        className="absolute -right-10 top-1/4 w-[520px] h-[520px] rounded-full pointer-events-none transition-opacity duration-700"
         style={{
           background: "radial-gradient(circle, rgba(255, 87, 34, 0.15) 0%, rgba(0, 229, 255, 0.08) 45%, transparent 70%)",
           filter: "blur(95px)",
+          opacity: 0.4 + scrollProgress * 0.6,
           zIndex: 0,
         }}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center relative z-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center relative z-10">
         
-        {/* LEFT COLUMN: Clean Credix-Style Typography & Capabilities */}
+        {/* LEFT COLUMN: Clean Credix-Style Typography & Capabilities (Slides in as user scrolls) */}
         <div
           className="lg:col-span-5 flex flex-col items-start text-left transition-all duration-700 ease-out"
           style={{
             transform: `translateX(-${leftTranslateX}px)`,
             opacity: leftOpacity,
+            pointerEvents: leftOpacity > 0.3 ? "auto" : "none",
           }}
         >
           {/* Badge */}
@@ -177,9 +182,11 @@ export function CredixShowcaseSection() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: 3D Tilted Real Kynisto Dashboard Mockup (Interactive Click to Login/Dashboard) */}
+        {/* RIGHT COLUMN: Starts in Hero & Moves into Right-Tilted Showcase on Scroll */}
         <div
-          className="lg:col-span-7 w-full flex justify-center lg:justify-end transition-all duration-700 ease-out cursor-pointer group"
+          className={`w-full flex justify-center transition-all duration-700 ease-out cursor-pointer group ${
+            scrollProgress > 0.3 ? "lg:col-span-7 lg:justify-end" : "lg:col-span-12 lg:justify-center"
+          }`}
           onClick={handleDashboardClick}
           role="button"
           tabIndex={0}
@@ -189,14 +196,13 @@ export function CredixShowcaseSection() {
           aria-label="Click to open full Kynisto Account Dashboard"
           style={{
             transformStyle: "preserve-3d",
-            transform: `translateY(${transY}px) scale(${scale})`,
           }}
         >
-          {/* Main 3D Tilted Dashboard Window Container */}
+          {/* Main 3D Dashboard Window Container */}
           <div
-            className="w-full max-w-2xl rounded-3xl border border-white/15 bg-[#0b1220]/95 backdrop-blur-2xl text-slate-100 overflow-hidden shadow-2xl shadow-black/90 transition-all duration-300 ease-out group-hover:border-orange-500/50 group-hover:shadow-orange-500/10 relative"
+            className="w-full max-w-3xl rounded-3xl border border-white/15 bg-[#0b1220]/95 backdrop-blur-2xl text-slate-100 overflow-hidden shadow-2xl shadow-black/90 transition-all duration-500 ease-out group-hover:border-orange-500/50 group-hover:shadow-orange-500/10 relative"
             style={{
-              transform: `perspective(1200px) rotateY(${rotY}deg) rotateX(${rotX}deg) rotateZ(${rotZ}deg)`,
+              transform: `perspective(1200px) rotateY(${rotY}deg) rotateX(${rotX}deg) rotateZ(${rotZ}deg) scale(${scale})`,
               transformOrigin: "center center",
               boxShadow: "0 35px 80px -15px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.12), -20px 20px 40px rgba(0,0,0,0.5)",
             }}

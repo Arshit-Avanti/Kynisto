@@ -2133,7 +2133,7 @@ export default function Home() {
         </div>
       )}
 
-      <section className="hero" id="top" style={{ textAlign: "center", padding: "120px 20px 40px 20px", display: "flex", flexDirection: "column", alignItems: "center", position: "relative", minHeight: "100vh", justifyContent: "center", overflow: "hidden" }}>
+      <section className="hero" id="top" style={{ textAlign: "center", padding: "105px 20px 20px 20px", display: "flex", flexDirection: "column", alignItems: "center", position: "relative", justifyContent: "flex-start", overflow: "hidden" }}>
         {/* Scoped Google Flow Live Video Background (Exclusively within Hero Section) */}
         <HeroVideoBackground />
         <div className="ambientMesh" />
