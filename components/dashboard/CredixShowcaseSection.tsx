@@ -5,57 +5,42 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CobeGlobe } from "@/components/blocks/cobe-globe";
 
-interface DashboardActivity {
+interface TransactionItem {
   id: string;
   icon: string;
   title: string;
-  subtitle: string;
-  time: string;
-  status: string;
-  badgeColor: string;
-  badgeBg: string;
+  date: string;
+  amount: string;
 }
 
-const recentActivities: DashboardActivity[] = [
+const recentTransactions: TransactionItem[] = [
   {
-    id: "act-1",
-    icon: "🏥",
-    title: "Apex Clinic & Multi-Specialty",
-    subtitle: "Dr. Sarah Rao • Token #14 Serving",
-    time: "Just now",
-    status: "Wait ~3m",
-    badgeColor: "#00E5FF",
-    badgeBg: "rgba(0, 229, 255, 0.15)",
+    id: "tx-1",
+    icon: "🚖",
+    title: "Taxi Trips",
+    date: "05 Aug 2026, 10:15",
+    amount: "₹56.50",
   },
   {
-    id: "act-2",
-    icon: "💳",
-    title: "Artisan Coffee Roasters",
-    subtitle: "Kynisto Loyalty Pass Cashback",
-    time: "2m ago",
-    status: "₹150 Saved",
-    badgeColor: "#10B981",
-    badgeBg: "rgba(16, 185, 129, 0.15)",
+    id: "tx-2",
+    icon: "🚆",
+    title: "Public Transport",
+    date: "01 Aug 2026, 12:01",
+    amount: "₹2.50",
   },
   {
-    id: "act-3",
-    icon: "🏪",
-    title: "Urban Tech & Electronics",
-    subtitle: "Fast Track Express Pickup Ready",
-    time: "15m ago",
-    status: "Token #29",
-    badgeColor: "#F59E0B",
-    badgeBg: "rgba(245, 158, 11, 0.15)",
+    id: "tx-3",
+    icon: "✈️",
+    title: "Plane Tickets",
+    date: "28 Jul 2026, 21:40",
+    amount: "₹70.00",
   },
   {
-    id: "act-4",
-    icon: "💊",
-    title: "MedPlus 24/7 Super Pharmacy",
-    subtitle: "Prescription QR Order Verified",
-    time: "1h ago",
-    status: "Ready for Pickup",
-    badgeColor: "#3B82F6",
-    badgeBg: "rgba(59, 130, 246, 0.15)",
+    id: "tx-4",
+    icon: "⛽",
+    title: "Gas Station",
+    date: "28 Jul 2026, 09:28",
+    amount: "₹30.75",
   },
 ];
 
@@ -71,9 +56,7 @@ export function CredixShowcaseSection() {
       const rect = sectionRef.current.getBoundingClientRect();
       const windowHeight = window.innerHeight || 800;
 
-      // Calculate progress starting from top of hero (0 = top, 1 = scrolled through showcase)
-      // When at top of page, progress is 0 (dashboard centered in hero)
-      // When scrolled down, progress moves to 1 (dashboard shifts right and tilts)
+      // Calculate progress starting from top of hero (0 = top, 1 = scrolled into showcase)
       const topOffset = rect.top;
       const scrollDistance = windowHeight * 0.7;
       const rawProgress = (windowHeight * 0.35 - topOffset) / scrollDistance;
@@ -109,7 +92,7 @@ export function CredixShowcaseSection() {
       ref={sectionRef}
       className="w-full max-w-7xl mx-auto px-4 pt-4 pb-20 lg:pb-28 relative overflow-hidden -mt-6 sm:-mt-10"
       style={{ perspective: "1400px" }}
-      aria-label="Kynisto Live System Showcase"
+      aria-label="Credix SaaS Showcase"
     >
       {/* Ambient background aura backlight */}
       <div
@@ -141,12 +124,12 @@ export function CredixShowcaseSection() {
 
           {/* Headline */}
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.15] mb-5">
-            Banking, Queues & Loyalty, Wherever You Are
+            Banking, Anytime, Wherever You Are
           </h2>
 
           {/* Subtitle */}
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-8 max-w-lg">
-            Manage your hospital tokens, local store cashbacks, and universal payments on the go with a seamless intelligent experience. Everything is connected in one unified canvas.
+            Manage your finances, doctor OPD tokens, and loyalty cashbacks on the go with a seamless mobile experience. Whether you&apos;re transferring money, booking clinic tokens, or tracking expenses, everything is connected in one unified canvas.
           </p>
 
           {/* Key Quick Badges / CTAs */}
@@ -155,13 +138,13 @@ export function CredixShowcaseSection() {
               href="/wallet"
               className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-sm shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-105 transition-all"
             >
-              Open Loyalty Wallet
+              Open Account
             </Link>
             <Link
               href="/healthcare"
               className="px-5 py-2.5 rounded-xl bg-white/[0.06] border border-white/15 text-slate-200 hover:text-white hover:bg-white/[0.1] font-semibold text-sm transition-all"
             >
-              Live OPD Queues →
+              Live Queues →
             </Link>
           </div>
 
@@ -182,7 +165,7 @@ export function CredixShowcaseSection() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Starts in Hero & Moves into Right-Tilted Showcase on Scroll */}
+        {/* RIGHT COLUMN: Exact Credix 3-Zone Dashboard (Starts in Hero & Moves into Right-Tilted Showcase on Scroll) */}
         <div
           className={`w-full flex justify-center transition-all duration-700 ease-out cursor-pointer group ${
             scrollProgress > 0.3 ? "lg:col-span-7 lg:justify-end" : "lg:col-span-12 lg:justify-center"
@@ -198,9 +181,9 @@ export function CredixShowcaseSection() {
             transformStyle: "preserve-3d",
           }}
         >
-          {/* Main 3D Dashboard Window Container */}
+          {/* Main 3D Dashboard Window Container matching Credix design */}
           <div
-            className="w-full max-w-3xl rounded-3xl border border-white/15 bg-[#0b1220]/95 backdrop-blur-2xl text-slate-100 overflow-hidden shadow-2xl shadow-black/90 transition-all duration-500 ease-out group-hover:border-orange-500/50 group-hover:shadow-orange-500/10 relative"
+            className="w-full max-w-4xl rounded-3xl border border-white/15 bg-[#0e1628]/95 backdrop-blur-2xl text-slate-100 overflow-hidden shadow-2xl shadow-black/90 transition-all duration-500 ease-out group-hover:border-orange-500/50 group-hover:shadow-orange-500/10 relative"
             style={{
               transform: `perspective(1200px) rotateY(${rotY}deg) rotateX(${rotX}deg) rotateZ(${rotZ}deg) scale(${scale})`,
               transformOrigin: "center center",
@@ -213,184 +196,225 @@ export function CredixShowcaseSection() {
               <span>↗</span>
             </div>
 
-            {/* Dashboard Internal 2-Column Grid: Left Sidebar + Right Workspace */}
-            <div className="grid grid-cols-12 min-h-[470px]">
+            {/* Dashboard Internal 3-Zone Grid: Left Sidebar + Center Content + Right Metrics */}
+            <div className="grid grid-cols-12 min-h-[480px]">
               
-              {/* Internal Sidebar */}
-              <div className="col-span-3 border-r border-white/10 bg-white/[0.02] p-4 flex flex-col justify-between hidden sm:flex">
+              {/* 1. LEFT SIDEBAR */}
+              <div className="col-span-12 sm:col-span-3 lg:col-span-2 border-r border-white/10 bg-white/[0.02] p-4 flex flex-col justify-between hidden sm:flex">
                 <div>
                   {/* Brand Header */}
                   <div className="flex items-center gap-2 mb-6 px-1">
                     <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-orange-500 to-amber-400 flex items-center justify-center font-black text-xs text-white shadow-md shadow-orange-500/30">
                       K
                     </div>
-                    <span className="font-extrabold text-sm text-white tracking-wide">Kynisto OS</span>
+                    <span className="font-extrabold text-sm text-white tracking-wide">Credix</span>
                   </div>
 
-                  {/* Real Dashboard Tabs */}
+                  {/* Nav Menu */}
                   <div className="flex flex-col gap-1">
                     {[
-                      { name: "Overview", icon: "📊" },
-                      { name: "My Wallet", icon: "💳" },
-                      { name: "Live OPD", icon: "🏥" },
-                      { name: "My Orders", icon: "📦" },
-                      { name: "Favorites", icon: "❤️" },
-                      { name: "Reviews", icon: "⭐" },
+                      { name: "Overview", icon: "🏠" },
+                      { name: "Messages", icon: "✉️", badge: "!" },
+                      { name: "Community", icon: "👥" },
+                      { name: "Payments", icon: "💳" },
+                      { name: "Statistics", icon: "📈" },
+                      { name: "Referrals", icon: "✨" },
                     ].map((item) => (
                       <div
                         key={item.name}
-                        className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-left ${
+                        className={`flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-semibold transition-all text-left ${
                           activeTab === item.name
                             ? "bg-white/15 text-white font-bold"
                             : "text-slate-400 group-hover:text-slate-200"
                         }`}
                       >
-                        <span className="text-xs">{item.icon}</span>
-                        <span>{item.name}</span>
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-xs">{item.icon}</span>
+                          <span>{item.name}</span>
+                        </div>
+                        {item.badge && (
+                          <span className="w-4 h-4 rounded-full bg-orange-500 text-white text-[9px] font-bold flex items-center justify-center">
+                            {item.badge}
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Bottom Sidebar User Info */}
-                <div className="flex flex-col gap-1.5 pt-4 border-t border-white/10">
-                  <div className="flex items-center gap-2 px-1">
-                    <div className="w-6 h-6 rounded-full bg-orange-500/20 border border-orange-500/40 flex items-center justify-center text-[10px] font-bold text-orange-400">
-                      👤
-                    </div>
-                    <div className="overflow-hidden">
-                      <div className="text-[11px] font-bold text-white truncate">Member Portal</div>
-                      <div className="text-[9px] text-emerald-400 font-semibold">● Signed In</div>
-                    </div>
+                {/* Bottom Sidebar User Navigation */}
+                <div className="flex flex-col gap-1 pt-4 border-t border-white/10">
+                  <div className="flex items-center gap-2 px-2.5 py-1 text-xs text-slate-400">
+                    <span>👤</span>
+                    <span>Account</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-2.5 py-1 text-xs text-slate-400">
+                    <span>⚙️</span>
+                    <span>Settings</span>
                   </div>
                 </div>
               </div>
 
-              {/* Main Real Dashboard Workspace Canvas */}
-              <div className="col-span-12 sm:col-span-9 p-4 sm:p-5 flex flex-col gap-4">
+              {/* 2. CENTER CONTENT: Dashboard Card + Upcoming Payments + Recent Transactions */}
+              <div className="col-span-12 sm:col-span-9 lg:col-span-6 p-4 sm:p-5 flex flex-col gap-4 border-r border-white/10">
                 
-                {/* Search & Top Telemetry Bar */}
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex-1 relative">
-                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
-                    <input
-                      type="text"
-                      readOnly
-                      value="Search my doctor tokens, orders, cards..."
-                      className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-300 outline-none pointer-events-none"
-                    />
-                  </div>
-                  <div className="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-full border border-white/10 text-[11px]">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                    <span className="font-bold text-emerald-400">D1 Sync</span>
-                  </div>
+                {/* Search Bar at Top of Center Content */}
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
+                  <input
+                    type="text"
+                    readOnly
+                    value="Search..."
+                    className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-300 outline-none pointer-events-none"
+                  />
                 </div>
 
-                {/* Top Tiles: Digital Universal Pass & Live OPD Queue Card */}
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-                  
-                  {/* Real Kynisto Universal Member Card */}
-                  <div className="sm:col-span-7 rounded-2xl p-4 relative overflow-hidden bg-gradient-to-br from-slate-900 via-[#131d36] to-slate-900 border border-white/20 shadow-xl flex flex-col justify-between min-h-[145px]">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/20 rounded-full blur-2xl pointer-events-none" />
-                    <div className="flex items-center justify-between relative z-10">
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-amber-400" />
-                        <span className="text-[10px] font-bold tracking-widest text-slate-300 uppercase">KYNISTO DIGITAL PASS</span>
+                {/* Dashboard Title & Cards Grid */}
+                <div className="flex flex-col gap-2">
+                  <div className="text-xs font-bold text-white">Dashboard</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                    
+                    {/* Glowing Digital Card */}
+                    <div className="sm:col-span-7 rounded-2xl p-4 relative overflow-hidden bg-gradient-to-br from-indigo-900/90 via-slate-900 to-indigo-950/90 border border-white/20 shadow-xl flex flex-col justify-between min-h-[135px]">
+                      <div className="flex items-center justify-between relative z-10">
+                        <span className="text-[9px] font-bold tracking-widest text-slate-300 uppercase">Credix Platinum</span>
+                        <span className="text-xs text-slate-300">⚡</span>
                       </div>
-                      <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                        ★ PLATINUM VIP
-                      </span>
-                    </div>
 
-                    <div className="my-2 relative z-10">
-                      <div className="text-sm font-mono tracking-wider text-white font-bold">KYN-8821-4901-2026</div>
-                      <div className="text-[10px] text-slate-400 mt-0.5">Verified Account Member</div>
-                    </div>
+                      <div className="my-1.5 relative z-10">
+                        <div className="text-xs sm:text-sm font-mono tracking-widest text-white font-bold">2506 5633 7859 4841</div>
+                        <div className="text-[9px] text-slate-400 mt-0.5">Patrick Parker</div>
+                      </div>
 
-                    <div className="flex items-center justify-between text-[11px] font-semibold text-slate-200 relative z-10">
-                      <div>
-                        <span className="text-[9px] text-slate-400 block -mb-0.5">Cashback Balance</span>
-                        <span className="text-xs font-bold text-emerald-400">₹4,250.00</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-[10px] text-slate-300 bg-white/10 px-2 py-0.5 rounded-md">
-                        <span>QR Code Active</span>
-                        <span>📱</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Live Active OPD Consultation & Appointment Card */}
-                  <div className="sm:col-span-5 flex flex-col gap-2">
-                    <div className="p-2.5 rounded-xl bg-white/[0.04] border border-cyan-500/30 flex items-center justify-between shadow-lg shadow-cyan-500/5">
-                      <div>
-                        <div className="text-[9px] text-cyan-400 font-bold uppercase tracking-wider">⚡ Live OPD Token</div>
-                        <div className="text-xs font-bold text-white mt-0.5">Apex Multi-Specialty</div>
-                        <div className="text-[10px] text-slate-300">Dr. Sarah Rao (OPD 02)</div>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs font-extrabold px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 block">
-                          #14
-                        </span>
-                        <span className="text-[9px] text-emerald-400 font-semibold block mt-1">
-                          Wait ~3m
-                        </span>
+                      <div className="flex items-center justify-between text-[10px] text-slate-300 relative z-10">
+                        <span>Valid 08/29</span>
+                        <div className="flex -space-x-1">
+                          <span className="w-3.5 h-3.5 rounded-full bg-red-500/90 inline-block" />
+                          <span className="w-3.5 h-3.5 rounded-full bg-amber-400/90 inline-block" />
+                        </div>
                       </div>
                     </div>
 
-                    <div className="p-2 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-between">
-                      <div>
-                        <div className="text-[9px] text-slate-400 font-semibold">Store Reward Points</div>
-                        <div className="text-xs font-bold text-amber-300 mt-0.5">1,450 Pts Available</div>
-                      </div>
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                        100% Redeemable
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bottom Section: Recent Logged-In Activity & Store Visits */}
-                <div className="flex flex-col gap-2 pt-1">
-                  <div className="flex items-center justify-between px-1">
-                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <span>Recent Activity & Token Log</span>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-white/10 text-slate-300">Live</span>
-                    </span>
-                    <span className="text-[10px] text-orange-400 font-semibold group-hover:underline">
-                      Click to View All →
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col gap-1.5 max-h-36 overflow-hidden">
-                    {recentActivities.map((act) => (
-                      <div
-                        key={act.id}
-                        className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 flex items-center justify-between gap-3 text-xs transition-colors"
-                      >
-                        <div className="flex items-center gap-2.5 overflow-hidden">
-                          <span
-                            className="w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0"
-                            style={{ background: act.badgeBg, color: act.badgeColor }}
-                          >
-                            {act.icon}
-                          </span>
-                          <div className="overflow-hidden">
-                            <div className="font-semibold text-white truncate text-[11px]">{act.title}</div>
-                            <div className="text-[9px] text-slate-400 truncate">{act.subtitle}</div>
+                    {/* Upcoming Payments (2 Square Tiles) */}
+                    <div className="sm:col-span-5 flex flex-col gap-2">
+                      <div className="text-[11px] font-semibold text-slate-300">Upcoming payments</div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="p-2.5 rounded-xl bg-white/[0.04] border border-white/10 flex flex-col justify-between">
+                          <div className="w-5 h-5 rounded-lg bg-white/10 flex items-center justify-center text-[10px]">💼</div>
+                          <div className="mt-1">
+                            <div className="text-[8px] text-slate-400 font-medium">Freelance</div>
+                            <div className="text-[11px] font-bold text-white">$1,500</div>
                           </div>
                         </div>
 
-                        <div className="text-right flex-shrink-0">
-                          <div
-                            className="text-[10px] font-bold px-1.5 py-0.5 rounded"
-                            style={{ background: act.badgeBg, color: act.badgeColor }}
-                          >
-                            {act.status}
+                        <div className="p-2.5 rounded-xl bg-white/[0.04] border border-white/10 flex flex-col justify-between">
+                          <div className="w-5 h-5 rounded-lg bg-white/10 flex items-center justify-center text-[10px]">💰</div>
+                          <div className="mt-1">
+                            <div className="text-[8px] text-slate-400 font-medium">Salary</div>
+                            <div className="text-[11px] font-bold text-white">$4,000</div>
                           </div>
-                          <div className="text-[8px] text-slate-500 mt-0.5">{act.time}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Recent Transactions List with Sort Dropdown */}
+                <div className="flex flex-col gap-2 pt-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">Recent transactions</span>
+                    <span className="text-[10px] text-slate-400 bg-white/5 px-2 py-0.5 rounded border border-white/10">Sort by ⌄</span>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    {recentTransactions.map((tx) => (
+                      <div
+                        key={tx.id}
+                        className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 flex items-center justify-between gap-3 text-xs transition-colors"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <span className="w-6 h-6 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[11px]">
+                            {tx.icon}
+                          </span>
+                          <div>
+                            <div className="font-semibold text-white text-[11px]">{tx.title}</div>
+                            <div className="text-[8px] text-slate-400">{tx.date}</div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-bold text-white">{tx.amount}</span>
+                          <span className="text-slate-500 text-[10px]">•••</span>
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* 3. RIGHT METRICS SIDEBAR: Spent This Day + Wave Visualizer + Available Cards */}
+              <div className="col-span-12 lg:col-span-4 p-4 sm:p-5 flex flex-col gap-4 bg-white/[0.01] hidden lg:flex">
+                
+                {/* Top Spent This Day Tile */}
+                <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col gap-2">
+                  <div className="flex items-center justify-between text-[10px] text-slate-400">
+                    <span>Spent this day</span>
+                    <span className="bg-white/5 px-1.5 py-0.5 rounded border border-white/10 text-slate-300">Weekly ⌄</span>
+                  </div>
+                  <div className="text-xl font-black text-white">$259.75</div>
+
+                  {/* Interactive Multi-Curve Wave Graph */}
+                  <div className="w-full h-20 relative flex items-end mt-1">
+                    <svg className="w-full h-full overflow-visible" viewBox="0 0 200 70" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="credixWaveGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="#00E5FF" stopOpacity="0.3" />
+                          <stop offset="100%" stopColor="#00E5FF" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M 0 55 Q 30 10, 60 40 T 100 20 T 140 50 T 200 25 L 200 70 L 0 70 Z"
+                        fill="url(#credixWaveGrad)"
+                      />
+                      <path
+                        d="M 0 55 Q 30 10, 60 40 T 100 20 T 140 50 T 200 25"
+                        fill="none"
+                        stroke="#00E5FF"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <circle cx="100" cy="20" r="3" fill="#00E5FF" />
+                      <circle cx="100" cy="20" r="6" fill="#00E5FF" fillOpacity="0.3" className="animate-ping" />
+                    </svg>
+                  </div>
+                  <div className="flex justify-between text-[8px] text-slate-500 px-1">
+                    <span>Mon</span>
+                    <span className="text-cyan-400 font-bold">Tue</span>
+                    <span>Wed</span>
+                    <span>Thu</span>
+                    <span>Fri</span>
+                    <span>Sat</span>
+                    <span>Sun</span>
+                  </div>
+                </div>
+
+                {/* Available Cards Tile */}
+                <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col gap-2">
+                  <div className="flex items-center justify-between text-[10px] text-slate-400">
+                    <span className="font-semibold text-white text-[11px]">Available cards</span>
+                    <span className="text-[9px] text-slate-400">See all</span>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-gradient-to-r from-slate-900 to-indigo-950 border border-white/10 flex items-center justify-between">
+                    <div>
+                      <div className="text-xs font-bold text-white">98,500 <span className="text-[9px] text-slate-400">USD</span></div>
+                      <div className="text-[8px] text-slate-400 mt-0.5">•••• 6367</div>
+                    </div>
+                    <div className="w-6 h-4 rounded bg-white/10 flex items-center justify-center text-[8px] text-slate-300">
+                      VISA
+                    </div>
                   </div>
                 </div>
 

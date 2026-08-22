@@ -2148,24 +2148,21 @@ export default function Home() {
             <span>THE INFRASTRUCTURE OF EFFICIENCY • 2026</span>
           </div>
 
-          {/* Crystal Clear Pure White Hero Title: Kynisto */}
+          {/* Crystal Clear Pure White Hero Title matching Credix Inspiration */}
           <h1 className="highContrastText arise-on-scroll arise-delay-2" style={{ 
-            fontSize: "clamp(2.2rem, 10.5vw, 8.5rem)", 
-            fontWeight: 850, 
-            letterSpacing: "-0.06em", 
-            lineHeight: 1, 
-            margin: "0 0 18px 0", 
-            whiteSpace: "nowrap",
-            wordBreak: "keep-all",
-            overflowWrap: "normal",
-            maxWidth: "100%",
+            fontSize: "clamp(2.5rem, 6.8vw, 5.8rem)", 
+            fontWeight: 800, 
+            letterSpacing: "-0.04em", 
+            lineHeight: 1.08, 
+            margin: "0 0 16px 0", 
+            maxWidth: "850px",
             fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif"
           }}>
-            Kynisto
+            Your Money. Your Sky. Your Future is here.
           </h1>
           
-          <p className="highContrastText arise-on-scroll arise-delay-3" style={{ fontSize: "clamp(1.1rem, 3vw, 1.7rem)", fontWeight: 500, margin: "0 0 32px 0", opacity: 0.9, letterSpacing: "-0.01em", maxWidth: "750px" }}>
-            The infrastructure of efficiency.
+          <p className="highContrastText arise-on-scroll arise-delay-3" style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)", fontWeight: 400, margin: "0 0 32px 0", opacity: 0.85, letterSpacing: "-0.01em", maxWidth: "680px", lineHeight: 1.6 }}>
+            Built on a foundation of trust and security, we ensure that your healthcare tokens, finances, and store rewards are always protected.
           </p>
 
           <form
@@ -2175,20 +2172,51 @@ export default function Home() {
               event.preventDefault();
               document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
             }}
+            style={{
+              background: "rgba(255, 255, 255, 0.08)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid rgba(255, 255, 255, 0.18)",
+              borderRadius: "50px",
+              padding: "6px 6px 6px 18px",
+              boxShadow: "0 15px 35px -5px rgba(0, 0, 0, 0.3)",
+              maxWidth: "540px",
+              width: "100%",
+            }}
           >
-            <span className="searchIcon" aria-hidden="true" style={{ paddingLeft: "10px" }}><Icons.Search /></span>
             <label className="srOnly" htmlFor="store-search">Search nearby stores</label>
             <input
               id="store-search"
               className="heroSearchInput highContrastText"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Try 'restaurant with dishes under 99' or 'cycle brake repair'..."
+              placeholder="Email@example.com or Search stores..."
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "#ffffff",
+                fontSize: "0.95rem",
+                outline: "none",
+                flex: 1,
+              }}
             />
-            {query && (
-              <button className="clearSearch highContrastText" type="button" aria-label="Clear search" onClick={() => setQuery("")}>×</button>
-            )}
-            <button className="searchSubmit heroSearchButton" type="submit">Search</button>
+            <button
+              className="searchSubmit heroSearchButton"
+              type="submit"
+              style={{
+                background: "#ffffff",
+                color: "#0f172a",
+                fontWeight: 700,
+                fontSize: "0.9rem",
+                borderRadius: "40px",
+                padding: "10px 24px",
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                transition: "all 0.2s ease",
+              }}
+            >
+              Open Account
+            </button>
           </form>
 
           {/* Smart Conversational Search Suggestion Chips - Single Line Horizontal Slider */}
