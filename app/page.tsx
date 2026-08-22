@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { HeroVideoBackground } from "@/components/media/HeroVideoBackground";
-import { HeroDashboardMockup } from "@/components/dashboard/HeroDashboardMockup";
+import { CredixShowcaseSection } from "@/components/dashboard/CredixShowcaseSection";
 import { ShaderCanvas } from "@/components/ui/ShaderCanvas";
 import { apiFetch } from "@/lib/client-api";
 import { getSupabaseBrowserClient, syncSupabaseAccessCookie } from "@/lib/supabase-browser";
@@ -2230,16 +2230,13 @@ export default function Home() {
             <span className="highContrastText"><b>Live</b> Status</span>
           </div>
 
-          {/* Credix-Style 3D Scrolling Dashboard Showcase */}
-          <HeroDashboardMockup />
-
           {/* Vertical Guide Line indicating scroll */}
-          <div style={{ width: "2px", height: "60px", background: "linear-gradient(180deg, var(--text-primary) 0%, transparent 100%)", margin: "30px auto 0 auto", opacity: 0.3 }} />
+          <div style={{ width: "2px", height: "70px", background: "linear-gradient(180deg, var(--text-primary) 0%, transparent 100%)", margin: "40px auto 0 auto", opacity: 0.35 }} />
         </div>
       </section>
 
-      {/* Efferd Features Bento Grid above Category Section */}
-      <EfferdFeatures6 />
+      {/* Credix-Style Scroll-Driven Showcase: Central Sliding Dashboard with Flanking Features & 3D Earth */}
+      <CredixShowcaseSection />
 
       <section className="categorySection" aria-labelledby="category-heading">
         <div className="sectionHeading compactHeading">
