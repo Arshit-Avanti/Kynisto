@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { VideoBackground } from "@/components/media/VideoBackground";
 import { HeroVideoBackground } from "@/components/media/HeroVideoBackground";
-import { CredixInteractiveHeroFeatures } from "@/components/dashboard/CredixInteractiveHeroFeatures";
+import { CredixShowcaseSection } from "@/components/dashboard/CredixShowcaseSection";
 import { ShaderCanvas } from "@/components/ui/ShaderCanvas";
 import { apiFetch } from "@/lib/client-api";
 import { getSupabaseBrowserClient, syncSupabaseAccessCookie } from "@/lib/supabase-browser";
@@ -13,6 +13,8 @@ import { WelcomeRewardModal } from "@/components/subscription/WelcomeRewardModal
 import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
 import { EfferdFeatures6 } from "@/components/blocks/features-6";
 import { EfferdFooter3 } from "@/components/blocks/footer-3";
+import { Navbar3D } from "@/components/landing/Navbar3D";
+import { EditorialFaqSection } from "@/components/landing/EditorialFaqSection";
 
 type Category = {
   name: string;
@@ -1410,6 +1412,7 @@ export default function Home() {
   const [hasMore, setHasMore] = useState(false);
   const [userRole, setUserRole] = useState<"admin" | "store_owner" | "customer" | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const [accent, setAccent] = useState<Accent>("royal");
   const [density, setDensity] = useState<Density>("comfortable");
   const [themeMode, setThemeMode] = useState<ThemeMode>("dark");
@@ -1519,7 +1522,7 @@ export default function Home() {
       try {
         const [categoryData, sessionData] = await Promise.all([
           apiFetch<{ items: Array<{ name: string; icon?: string; storeCount?: number }> }>("/api/categories"),
-          apiFetch<{ user: { id: string; role: "admin" | "store_owner" | "customer" } | null }>("/api/auth/me"),
+          apiFetch<{ user: { id: string; name?: string; role: "admin" | "store_owner" | "customer" } | null }>("/api/auth/me"),
         ]);
         if (!active) return;
         const palette = ["coral", "green", "blue", "yellow", "mint", "peach", "lilac", "sky", "lime", "sand"];
@@ -1531,6 +1534,7 @@ export default function Home() {
         })));
         setUserRole(sessionData.user?.role ?? null);
         setUserId(sessionData.user?.id ?? null);
+        setUserName(sessionData.user?.name ?? null);
         if (sessionData.user?.role === "customer" || sessionData.user?.role === "admin") {
           const favoriteData = await apiFetch<{ items: Array<{ storeId: string }> }>("/api/favorites");
           if (active) setSaved(favoriteData.items.map((item) => item.storeId));
@@ -1737,92 +1741,10 @@ export default function Home() {
       <VideoBackground videoSrc="/videos/hero-flow.mp4" mobileVideoSrc="/videos/hero-flow.mp4" />
       <SubscriptionExpiryBanner />
       <WelcomeRewardModal userRole={userRole} userId={userId} />
-      <header className={`topbar ${isScrolled ? "topbarScrolled" : ""}`}>
-        <a className="brand" href="#top" aria-label="Kynisto home"><KynistoLogo showTagline={false} /></a>
-
-        <button className="locationPill" type="button" aria-label="Use current location" onClick={useCurrentLocation}>
-          <span className="locationDot" aria-hidden="true" />
-          <span>
-            <small>Your locality</small>
-            <strong>{locationLabel}</strong>
-          </span>
-          <span aria-hidden="true">⌄</span>
-        </button>
-
-        <div className="headerActions">
-          <Link className="textButton accountButton" href={userRole ? (userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account") : "/login"}>
-            {userRole === "admin" ? "Admin Panel" : userRole === "store_owner" ? "Owner Dashboard" : userRole === "customer" ? "My Account" : "Log in"}
-          </Link>
-          <Link className="textButton accountButton" href="/products">Products</Link>
-          <Link className="textButton accountButton" href="/healthcare">Healthcare</Link>
-          <Link className="textButton accountButton" href="/services">Services</Link>
-          <button
-            className="textButton savedButton"
-            type="button"
-            onClick={() => {
-              if (userRole !== "customer" && userRole !== "admin") {
-                window.location.assign("/login?returnTo=%2Faccount%3Ftab%3Dfavorites");
-                return;
-              }
-              setCategory("All");
-              setQuery("");
-              setSortMode("all");
-              document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
-              setToast(saved.length ? `${saved.length} saved place${saved.length === 1 ? "" : "s"}` : "No saved places yet");
-            }}
-          >
-            <Icons.Heart />
-            Saved <b>{saved.length}</b>
-          </button>
-          <button className="customizeButton" type="button" onClick={() => setCustomizing(true)}>
-            <span className="sliders" aria-hidden="true">☷</span>
-            Customize
-          </button>
-          <div className="mobileNav" style={{ display: "inline-block" }}>
-            <button
-              type="button"
-              className="mobileNavBtn"
-              aria-label="Open Kynisto navigation"
-              aria-expanded={mobileOpen}
-              onClick={() => setMobileOpen((prev) => !prev)}
-              style={{
-                position: "relative",
-                zIndex: 99999,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "4px",
-                width: "42px",
-                height: "42px",
-                padding: "8px",
-                background: "rgba(255, 255, 255, 0.12)",
-                border: "1px solid rgba(255, 255, 255, 0.25)",
-                borderRadius: "12px",
-                cursor: "pointer",
-                color: "#FFFFFF",
-                backdropFilter: "blur(8px)",
-                WebkitBackdropFilter: "blur(8px)",
-                boxShadow: "0 4px 14px rgba(0, 0, 0, 0.25)",
-                pointerEvents: "auto",
-              }}
-            >
-              {mobileOpen ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              ) : (
-                <>
-                  <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
-                  <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
-                  <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
+      <Navbar3D user={userId ? { id: userId, name: userName || undefined, role: userRole || undefined } : null} />
+      <div className="mobileNav" style={{ display: "none" }} aria-hidden="true">
+        <button type="button" aria-label="Open Kynisto navigation" />
+      </div>
 
       {mobileOpen && (
         <div
@@ -2136,7 +2058,7 @@ export default function Home() {
       )}
 
       {/* Interactive Credix Hero + Features Section with Continuous Scroll-Driven 3D Dashboard Motion */}
-      <CredixInteractiveHeroFeatures query={query} setQuery={setQuery} />
+      <CredixShowcaseSection />
 
       <section className="categorySection" aria-labelledby="category-heading">
         <div className="sectionHeading compactHeading arise-on-scroll">
@@ -2347,6 +2269,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <EditorialFaqSection />
 
       <EfferdFooter3 />
 

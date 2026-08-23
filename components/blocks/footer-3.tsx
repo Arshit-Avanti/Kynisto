@@ -1,7 +1,9 @@
-"use client";
+﻿"use client";
 
 import React from "react";
+import Link from "next/link";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
+import { MapPin, Mail, Shield } from "lucide-react";
 
 const GithubIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -26,12 +28,22 @@ export function EfferdFooter3() {
     <footer className="efferdFooterBlock" aria-label="Site Footer">
       <div className="efferdFooterGrid">
         <div className="efferdFooterBrandCol">
-          <a className="brand footerBrand" href="#top" aria-label="Kynisto top">
-            <KynistoLogo />
-          </a>
+          <Link className="brand footerBrand" href="/" aria-label="Kynisto top">
+            <KynistoLogo showTagline variant="light" />
+          </Link>
           <p className="efferdBrandDesc">
             Universal hyper-local discovery, live clinic queue tracking, and smart community commerce for your neighborhood.
           </p>
+          <div className="text-xs text-slate-400 space-y-1.5 pt-2 mb-4">
+            <p className="flex items-center gap-2">
+              <MapPin className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+              <span>B-5/13, DLF Ankur Vihar, Loni, Ghaziabad, UP, India - 201102</span>
+            </p>
+            <p className="flex items-center gap-2">
+              <Mail className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+              <span>kynisto.in@gmail.com • nxt.arshit@gmail.com</span>
+            </p>
+          </div>
           <div className="efferdSocialRow">
             <a
               href="https://github.com/Arshit-Avanti/Kynisto"
@@ -65,41 +77,48 @@ export function EfferdFooter3() {
 
         <div className="efferdFooterNavGroup">
           <div className="efferdFooterCol">
-            <h4>Explore</h4>
+            <h4>Ecosystem</h4>
             <nav aria-label="Footer Explore Navigation">
-              <a href="/">Homepage</a>
-              <a href="/products">Nearby Products</a>
-              <a href="/healthcare">Healthcare &amp; Clinics</a>
-              <a href="/services">Local Services</a>
-              <a href="/pricing" style={{ color: "#FF7A00", fontWeight: 750 }}>
+              <Link href="/">Homepage</Link>
+              <Link href="/services">Local Services</Link>
+              <Link href="/healthcare">Healthcare Queues</Link>
+              <Link href="/products">Nearby Products</Link>
+              <Link href="/pricing" style={{ color: "#FF7A00", fontWeight: 750 }}>
                 Pricing &amp; Plans
-              </a>
+              </Link>
+              <Link href="/wallet">Digital Wallet</Link>
             </nav>
           </div>
 
           <div className="efferdFooterCol">
-            <h4>Portals &amp; Workspaces</h4>
-            <nav aria-label="Footer Portals Navigation">
-              <a href="/account">Customer Dashboard</a>
-              <a href="/owner">Business Workspace</a>
-              <a href="/admin">Admin Panel</a>
-              <a href="/q/demo">Live Queue Tracker</a>
-              <a href="/wallet">Kynisto Loyalty Wallet</a>
+            <h4>Resources</h4>
+            <nav aria-label="Footer Resources Navigation">
+              <Link href="/about">About Us</Link>
+              <Link href="/guide">Locality Guide</Link>
+              <Link href="/faq">FAQ &amp; Help Center</Link>
+              <Link href="/contact">Contact Support</Link>
+              <Link href="/downloads/Kynisto-2.1.0-release.apk">Android APK</Link>
             </nav>
           </div>
 
           <div className="efferdFooterCol">
-            <h4>Community</h4>
-            <nav aria-label="Footer Community Navigation">
-              <a href="https://github.com/Arshit-Avanti/Kynisto" target="_blank" rel="noopener noreferrer">
-                Open Source (GitHub)
-              </a>
-              <a href="/pricing">Partner Subscriptions</a>
-              <a href="mailto:support@kynisto.in">Help &amp; Support</a>
-              <a href="#places-heading">Verified Directory</a>
+            <h4>Security &amp; Legal</h4>
+            <nav aria-label="Footer Legal Navigation">
+              <Link href="/privacy">Privacy Policy</Link>
+              <Link href="/terms">Terms of Service</Link>
+              <Link href="/owner">Merchant Workspace</Link>
+              <Link href="/admin">Admin Gateway</Link>
+              <span className="inline-flex items-center gap-1 text-emerald-400 text-xs mt-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" /> Systems Operational
+              </span>
             </nav>
           </div>
         </div>
+      </div>
+
+      <div className="border-t border-white/10 pt-6 mt-8 max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3">
+        <p>© {new Date().getFullYear()} Kynisto Technologies Inc. All rights reserved.</p>
+        <p>Verified Publisher Content • Google AdSense &amp; Privacy Compliant</p>
       </div>
     </footer>
   );
