@@ -1741,10 +1741,92 @@ export default function Home() {
       <VideoBackground videoSrc="/videos/hero-flow.mp4" mobileVideoSrc="/videos/hero-flow.mp4" />
       <SubscriptionExpiryBanner />
       <WelcomeRewardModal userRole={userRole} userId={userId} />
-      <Navbar3D user={userId ? { id: userId, name: userName || undefined, role: userRole || undefined } : null} />
-      <div className="mobileNav" style={{ display: "none" }} aria-hidden="true">
-        <button type="button" aria-label="Open Kynisto navigation" />
-      </div>
+      <header className={`topbar ${isScrolled ? "topbarScrolled" : ""}`}>
+        <a className="brand" href="#top" aria-label="Kynisto home"><KynistoLogo showTagline={false} /></a>
+
+        <button className="locationPill" type="button" aria-label="Use current location" onClick={useCurrentLocation}>
+          <span className="locationDot" aria-hidden="true" />
+          <span>
+            <small>Your locality</small>
+            <strong>{locationLabel}</strong>
+          </span>
+          <span aria-hidden="true">⌄</span>
+        </button>
+
+        <div className="headerActions">
+          <Link className="textButton accountButton" href={userRole ? (userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account") : "/login"}>
+            {userRole === "admin" ? "Admin Panel" : userRole === "store_owner" ? "Owner Dashboard" : userRole === "customer" ? (userName ? `Welcome, ${userName.trim().split(" ")[0]}` : "My Account") : "Log in"}
+          </Link>
+          <Link className="textButton accountButton" href="/products">Products</Link>
+          <Link className="textButton accountButton" href="/healthcare">Healthcare</Link>
+          <Link className="textButton accountButton" href="/services">Services</Link>
+          <button
+            className="textButton savedButton"
+            type="button"
+            onClick={() => {
+              if (userRole !== "customer" && userRole !== "admin") {
+                window.location.assign("/login?returnTo=%2Faccount%3Ftab%3Dfavorites");
+                return;
+              }
+              setCategory("All");
+              setQuery("");
+              setSortMode("all");
+              document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
+              setToast(saved.length ? `${saved.length} saved place${saved.length === 1 ? "" : "s"}` : "No saved places yet");
+            }}
+          >
+            <Icons.Heart />
+            Saved <b>{saved.length}</b>
+          </button>
+          <button className="customizeButton" type="button" onClick={() => setCustomizing(true)}>
+            <span className="sliders" aria-hidden="true">☷</span>
+            Customize
+          </button>
+          <div className="mobileNav" style={{ display: "inline-block" }}>
+            <button
+              type="button"
+              className="mobileNavBtn"
+              aria-label="Open Kynisto navigation"
+              aria-expanded={mobileOpen}
+              onClick={() => setMobileOpen((prev) => !prev)}
+              style={{
+                position: "relative",
+                zIndex: 99999,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "4px",
+                width: "42px",
+                height: "42px",
+                padding: "8px",
+                background: "rgba(255, 255, 255, 0.12)",
+                border: "1px solid rgba(255, 255, 255, 0.25)",
+                borderRadius: "12px",
+                cursor: "pointer",
+                color: "#FFFFFF",
+                backdropFilter: "blur(8px)",
+                WebkitBackdropFilter: "blur(8px)",
+                boxShadow: "0 4px 14px rgba(0, 0, 0, 0.25)",
+                pointerEvents: "auto",
+              }}
+            >
+              {mobileOpen ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              ) : (
+                <>
+                  <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
+                  <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
+                  <span style={{ width: "18px", height: "2px", background: "#FFFFFF", borderRadius: "2px", display: "block" }} />
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </header>
 
       {mobileOpen && (
         <div
@@ -2056,6 +2138,157 @@ export default function Home() {
           </nav>
         </div>
       )}
+
+      {/* Hero Section matching Image 1 */}
+      <section className="hero" id="top" style={{ textAlign: "center", padding: "105px 20px 20px 20px", display: "flex", flexDirection: "column", alignItems: "center", position: "relative", justifyContent: "flex-start", overflow: "hidden" }}>
+        {/* Scoped Google Flow Live Video Background */}
+        <HeroVideoBackground />
+        <div className="ambientMesh" />
+        {/* Apple Ambient Aura Backlight */}
+        <div style={{ position: "absolute", top: "15%", width: "600px", height: "300px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,87,34,0.15) 0%, rgba(120,119,198,0.1) 50%, transparent 75%)", filter: "blur(90px)", pointerEvents: "none", zIndex: 1 }} />
+
+        <div className="heroCopy" style={{ display: "flex", flexDirection: "column", alignItems: "center", maxWidth: "1020px", position: "relative", zIndex: 2, width: "100%" }}>
+          {/* Futuristic Credix-Style Pill Badge */}
+          <div className="arise-on-scroll arise-delay-1 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.08] border border-white/20 text-xs font-bold text-orange-400 mb-5 backdrop-blur-md shadow-lg shadow-orange-500/10 tracking-wide uppercase">
+            <span className="w-2 h-2 rounded-full bg-orange-400 animate-ping" />
+            <span className="w-2 h-2 rounded-full bg-orange-400 -ml-4" />
+            <span>THE INFRASTRUCTURE OF EFFICIENCY • 2026</span>
+          </div>
+
+          {/* Crystal Clear Pure White Hero Title */}
+          <h1 className="highContrastText arise-on-scroll arise-delay-2" style={{ 
+            fontSize: "clamp(2.5rem, 6.8vw, 5.8rem)", 
+            fontWeight: 800, 
+            letterSpacing: "-0.04em", 
+            lineHeight: 1.08, 
+            margin: "0 0 16px 0", 
+            maxWidth: "850px",
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif"
+          }}>
+            Your Money. Your Sky. Your Future is here.
+          </h1>
+          
+          <p className="highContrastText arise-on-scroll arise-delay-3" style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)", fontWeight: 400, margin: "0 0 32px 0", opacity: 0.85, letterSpacing: "-0.01em", maxWidth: "680px", lineHeight: 1.6 }}>
+            Built on a foundation of trust and security, we ensure that your healthcare tokens, finances, and store rewards are always protected.
+          </p>
+
+          <form
+            className="searchBox heroSearchBox arise-on-scroll arise-delay-4"
+            role="search"
+            onSubmit={(event) => {
+              event.preventDefault();
+              document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
+            }}
+            style={{
+              background: "rgba(255, 255, 255, 0.08)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid rgba(255, 255, 255, 0.18)",
+              borderRadius: "50px",
+              padding: "6px 6px 6px 18px",
+              boxShadow: "0 15px 35px -5px rgba(0, 0, 0, 0.3)",
+              maxWidth: "540px",
+              width: "100%",
+            }}
+          >
+            <label className="srOnly" htmlFor="store-search">Search nearby stores</label>
+            <input
+              id="store-search"
+              className="heroSearchInput highContrastText"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Email@example.com or Search stores..."
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "#ffffff",
+                fontSize: "0.95rem",
+                outline: "none",
+                flex: 1,
+              }}
+            />
+            <button
+              className="searchSubmit heroSearchButton"
+              type="submit"
+              style={{
+                background: "#ffffff",
+                color: "#0f172a",
+                fontWeight: 700,
+                fontSize: "0.9rem",
+                borderRadius: "40px",
+                padding: "10px 24px",
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                transition: "all 0.2s ease",
+              }}
+            >
+              Open Account
+            </button>
+          </form>
+
+          {/* Smart Conversational Search Suggestion Chips */}
+          <div
+            className="smartSearchChipsContainer arise-on-scroll arise-delay-5"
+            role="region"
+            aria-label="Smart Search suggestions"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              flexWrap: "nowrap",
+              overflowX: "auto",
+              maxWidth: "750px",
+              width: "100%",
+              margin: "-8px auto 0 auto",
+              padding: "6px 8px",
+              scrollbarWidth: "none",
+              WebkitOverflowScrolling: "touch",
+            }}
+          >
+            <span style={{ color: "#94a3b8", fontSize: "0.8rem", fontWeight: 600, flexShrink: 0, paddingRight: "4px" }}>💡 Smart:</span>
+            {[
+              "Restaurant with dishes under 99",
+              "Cycle brake repair under 50rs",
+              "5 star clinic near me",
+              "Home electrician near me",
+              "24/7 emergency pharmacy",
+              "Fresh organic bakery",
+            ].map((promptText) => (
+              <button
+                key={promptText}
+                className="smartSearchPromptChip"
+                type="button"
+                onClick={() => {
+                  setQuery(promptText);
+                  document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                style={{
+                  background: "rgba(255, 255, 255, 0.07)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  color: "#cbd5e1",
+                  borderRadius: "20px",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(255, 87, 34, 0.18)";
+                  e.currentTarget.style.borderColor = "#FF5722";
+                  e.currentTarget.style.color = "#ffffff";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.07)";
+                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)";
+                  e.currentTarget.style.color = "#cbd5e1";
+                }}
+              >
+                {promptText}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Interactive Credix Hero + Features Section with Continuous Scroll-Driven 3D Dashboard Motion */}
       <CredixShowcaseSection />
