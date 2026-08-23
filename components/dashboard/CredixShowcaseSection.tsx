@@ -49,6 +49,14 @@ export function CredixShowcaseSection() {
   const router = useRouter();
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("Overview");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -70,12 +78,13 @@ export function CredixShowcaseSection() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Continuous Scroll 3D Dynamics:
+  // Continuous Scroll 3D Dynamics (hardware-accelerated with 2.5D mobile clamping):
   // At scrollProgress = 0 (in hero): Centered, gentle preview angle (rotateY: 0deg, rotateX: 6deg, rotateZ: 0deg)
   // At scrollProgress = 1 (scrolled down): Shifts right, tilts with left side sinking deep into screen and right side lifting up!
-  const rotY = 0 - scrollProgress * 16;      // 0deg -> -16deg (left side tilts inward)
-  const rotX = 6 + scrollProgress * 4.5;    // 6deg -> +10.5deg (top tilts back)
-  const rotZ = 0 - scrollProgress * 3.5;    // 0deg -> -3.5deg (right side lifts up)
+  const rotMultiplier = isMobile ? 0.35 : 1.0;
+  const rotY = (0 - scrollProgress * 16) * rotMultiplier;      // 0deg -> -16deg (left side tilts inward)
+  const rotX = 6 + (scrollProgress * 4.5) * rotMultiplier;    // 6deg -> +10.5deg (top tilts back)
+  const rotZ = (0 - scrollProgress * 3.5) * rotMultiplier;    // 0deg -> -3.5deg (right side lifts up)
   const scale = 0.96 + scrollProgress * 0.04;
 
   // Left Content emergence (fades in and slides in as you scroll down)

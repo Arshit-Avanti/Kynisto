@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -66,24 +66,24 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
   return (
     <header className="fixed top-3 left-0 right-0 z-50 px-4 sm:px-6 pointer-events-none">
       <div
-        className={`max-w-6xl mx-auto rounded-full transition-all duration-300 pointer-events-auto border flex items-center justify-between px-4 sm:px-6 py-2.5 sm:py-3 shadow-md ${
+        className={`max-w-6xl mx-auto rounded-full transition-all duration-300 pointer-events-auto border flex items-center justify-between px-4 sm:px-6 py-2 sm:py-2.5 shadow-lg ${
           scrolled
             ? "bg-white/95 backdrop-blur-md border-slate-300/80 shadow-slate-200/50"
-            : "bg-white/90 backdrop-blur-md border-slate-200 shadow-slate-100/50"
+            : "bg-white/90 backdrop-blur-md border-slate-200/80 shadow-slate-100/50"
         }`}
       >
-        {/* Brand Logo */}
+        {/* Brand Logo with Orange Tagline */}
         <Link href="/" className="inline-flex items-center gap-2 shrink-0">
           <KynistoLogo showTagline variant="dark" size="sm" />
         </Link>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-700" aria-label="Main Navigation">
+        <nav className="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-700" aria-label="Main Navigation">
           <Link href="/services" className="hover:text-sky-600 transition-colors">
             Services
           </Link>
           <Link href="/healthcare" className="hover:text-sky-600 transition-colors flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
             <span>Healthcare</span>
           </Link>
           <Link href={dashboardHref} className="hover:text-sky-600 transition-colors">
@@ -94,37 +94,40 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
           </Link>
         </nav>
 
-        {/* Right CTA / User Greeting */}
+        {/* Right CTA / User Greeting Pill */}
         <div className="flex items-center gap-2">
           {user ? (
             <Link
               href={dashboardHref}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-50 border border-sky-200 text-sky-800 text-xs sm:text-sm font-bold hover:bg-sky-100 transition-all shadow-sm"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-50 border border-sky-200 text-sky-800 text-xs sm:text-sm font-bold hover:bg-sky-100 transition-all shadow-sm"
               title={`Logged in as ${user.name || "User"}`}
             >
-              <div className="w-5 h-5 rounded-full bg-sky-500 text-white flex items-center justify-center text-xs">
-                <User className="w-3 h-3" />
+              <div className="w-5 h-5 rounded-full bg-sky-500 text-white flex items-center justify-center text-xs shrink-0">
+                <User className="w-3.5 h-3.5" />
               </div>
-              <span className="truncate max-w-[120px] sm:max-w-none">Welcome, {firstName}</span>
+              <span className="truncate max-w-[130px] sm:max-w-none">Welcome, {firstName}</span>
             </Link>
           ) : (
             <Link
               href="/login"
-              className="px-4 py-1.5 rounded-full bg-slate-900 text-white text-xs sm:text-sm font-bold hover:bg-slate-800 transition-all shadow-sm"
+              className="px-5 py-1.5 rounded-full bg-slate-900 text-white text-xs sm:text-sm font-bold hover:bg-slate-800 transition-all shadow-sm"
             >
               Sign In
             </Link>
           )}
 
           {/* Mobile Menu Trigger Button */}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-full md:hidden text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none"
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="mobileNav md:hidden">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="mobileNavBtn p-2 rounded-full text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none flex items-center justify-center"
+              aria-label="Open Kynisto navigation"
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
       </div>
 

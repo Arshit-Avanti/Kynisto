@@ -105,6 +105,8 @@ export function VideoBackground({
         {/* Dedicated 9:16 Mobile Video Source */}
         <source src={mobileVideoSrc} media="(max-width: 768px)" type="video/mp4" />
         <source src={videoSrc} type="video/mp4" />
+        <source src="https://labs.google/fx/api/og-video/shared/88984ca4-9c38-4a35-a9ec-a6cf40d41099" type="video/mp4" />
+        <source src="/videos/hero-flow.mp4" type="video/mp4" />
         <source src="/videos/drive-hero.mp4" type="video/mp4" />
         <source src="/videos/kynisto-hero.mp4" type="video/mp4" />
         <source src="/videos/background-hero.mp4" type="video/mp4" />
