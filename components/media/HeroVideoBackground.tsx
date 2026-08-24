@@ -99,7 +99,7 @@ export function HeroVideoBackground({
           objectFit: "cover",
           objectPosition: "center center",
           transform: "scale(1.03) translateZ(0)",
-          filter: "brightness(1.08) contrast(1.06) saturate(1.1)",
+          filter: "brightness(1.15) saturate(1.18)",
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
           opacity: isLoaded ? 1 : 0.85,
