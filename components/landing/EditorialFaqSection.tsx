@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
-import { HelpCircle, Stethoscope, ShoppingBag, ShieldCheck, ArrowRight, BookOpen } from "lucide-react";
+import { HelpCircle, Stethoscope, ShoppingBag, ArrowRight, BookOpen } from "lucide-react";
 
 export function EditorialFaqSection() {
   const faqs = [
@@ -24,75 +24,80 @@ export function EditorialFaqSection() {
   ];
 
   return (
-    <section className="py-20 border-t border-slate-200/80 mt-16 bg-white/70 backdrop-blur-xl rounded-3xl p-8 sm:p-12 shadow-sm" aria-labelledby="editorial-heading">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-14">
-          <span className="text-[#0284c7] font-bold text-xs uppercase tracking-widest block mb-2">
-            Locality Knowledge &amp; Guidance
-          </span>
-          <h2 id="editorial-heading" className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-4">
-            Understanding the Kynisto Locality Network
-          </h2>
-          <p className="text-slate-600 text-base max-w-2xl mx-auto leading-relaxed">
-            Learn how our event-driven infrastructure empowers neighborhood commerce, eliminates clinic overcrowding, and connects communities.
-          </p>
-        </div>
-
-        {/* Editorial Articles Grid */}
-        <div className="grid md:grid-cols-2 gap-6 mb-14">
-          <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center mb-4">
-                <Stethoscope className="w-5 h-5" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">Digital Healthcare &amp; Outpatient Queuing</h3>
-              <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                Overcrowded waiting rooms increase patient anxiety and cross-infection risks. Kynisto&apos;s real-time queue engine powers transparent, dynamic doctor consultation scheduling.
-              </p>
-            </div>
-            <Link href="/guide" className="text-sky-600 hover:text-sky-700 font-bold text-xs flex items-center gap-1">
-              <span>Read Clinical Queue Guide</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-12 sm:my-16">
+      <section
+        className="py-12 sm:py-16 px-6 sm:px-12 rounded-3xl border border-white/15 bg-[#0e1628]/90 backdrop-blur-2xl text-white shadow-2xl shadow-black/80 transition-all"
+        aria-labelledby="editorial-heading"
+      >
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12 sm:mb-14">
+            <span className="text-sky-400 font-bold text-xs uppercase tracking-widest block mb-2">
+              Locality Knowledge &amp; Guidance
+            </span>
+            <h2 id="editorial-heading" className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
+              Understanding the Kynisto Locality Network
+            </h2>
+            <p className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+              Learn how our event-driven infrastructure empowers neighborhood commerce, eliminates clinic overcrowding, and connects communities.
+            </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
-                <ShoppingBag className="w-5 h-5" />
+          {/* Editorial Articles Grid */}
+          <div className="grid md:grid-cols-2 gap-5 sm:gap-6 mb-12 sm:mb-14">
+            <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center mb-4">
+                  <Stethoscope className="w-5 h-5" />
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-white mb-2">Digital Healthcare &amp; Outpatient Queuing</h3>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4">
+                  Overcrowded waiting rooms increase patient anxiety and cross-infection risks. Kynisto&apos;s real-time queue engine powers transparent, dynamic doctor consultation scheduling.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">Hyperlocal Retail &amp; Verified Merchant Commerce</h3>
-              <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                Find grocery stock, salon slots, and repair experts in your immediate neighborhood without relying on unverified phone directories or distant delivery services.
-              </p>
+              <Link href="/guide" className="text-sky-400 hover:text-sky-300 font-bold text-xs flex items-center gap-1.5 transition-colors">
+                <span>Read Clinical Queue Guide</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
-            <Link href="/about" className="text-emerald-600 hover:text-emerald-700 font-bold text-xs flex items-center gap-1">
-              <span>Learn About Our Platform</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+
+            <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mb-4">
+                  <ShoppingBag className="w-5 h-5" />
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-white mb-2">Hyperlocal Retail &amp; Verified Merchant Commerce</h3>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4">
+                  Find grocery stock, salon slots, and repair experts in your immediate neighborhood without relying on unverified phone directories or distant delivery services.
+                </p>
+              </div>
+              <Link href="/about" className="text-emerald-400 hover:text-emerald-300 font-bold text-xs flex items-center gap-1.5 transition-colors">
+                <span>Learn About Our Platform</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          {/* FAQ Accordion Items */}
+          <div className="space-y-3.5 sm:space-y-4">
+            <h3 className="text-lg sm:text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-sky-400" /> Frequently Asked Questions
+            </h3>
+            {faqs.map((faq, index) => (
+              <div key={index} className="p-4 sm:p-5 rounded-xl bg-white/[0.03] border border-white/10">
+                <h4 className="font-bold text-white text-sm sm:text-base mb-1.5">{faq.question}</h4>
+                <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 text-center">
+            <Link href="/faq" className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] border border-white/20 text-white font-bold text-xs transition-all shadow-md">
+              <BookOpen className="w-4 h-4 text-sky-400" />
+              <span>Visit Complete FAQ &amp; Help Center</span>
             </Link>
           </div>
         </div>
-
-        {/* FAQ Accordion Items */}
-        <div className="space-y-4">
-          <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <HelpCircle className="w-5 h-5 text-sky-600" /> Frequently Asked Questions
-          </h3>
-          {faqs.map((faq, index) => (
-            <div key={index} className="p-5 rounded-xl bg-slate-50/80 border border-slate-200">
-              <h4 className="font-bold text-slate-900 text-base mb-2">{faq.question}</h4>
-              <p className="text-slate-600 text-sm leading-relaxed">{faq.answer}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-10 text-center">
-          <Link href="/faq" className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-colors">
-            <BookOpen className="w-4 h-4 text-sky-600" />
-            <span>Visit Complete FAQ &amp; Help Center</span>
-          </Link>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }
