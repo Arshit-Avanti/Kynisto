@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import Link from "next/link";
@@ -34,7 +34,7 @@ export function EfferdFooter3() {
           <p className="efferdBrandDesc">
             Universal hyper-local discovery, live clinic queue tracking, and smart community commerce for your neighborhood.
           </p>
-          <div className="text-xs text-slate-400 space-y-1.5 pt-2 mb-4">
+          <div className="text-xs text-slate-200 space-y-1.5 pt-2 mb-4 drop-shadow-sm">
             <p className="flex items-center gap-2">
               <MapPin className="w-3.5 h-3.5 text-sky-400 shrink-0" />
               <span>B-5/13, DLF Ankur Vihar, Loni, Ghaziabad, UP, India - 201102</span>
@@ -108,7 +108,7 @@ export function EfferdFooter3() {
               <Link href="/terms">Terms of Service</Link>
               <Link href="/owner">Merchant Workspace</Link>
               <Link href="/admin">Admin Gateway</Link>
-              <span className="inline-flex items-center gap-1 text-emerald-400 text-xs mt-2">
+              <span className="inline-flex items-center gap-1 text-emerald-400 text-xs mt-2 drop-shadow-sm font-semibold">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" /> Systems Operational
               </span>
             </nav>
@@ -116,7 +116,7 @@ export function EfferdFooter3() {
         </div>
       </div>
 
-      <div className="border-t border-white/10 pt-6 mt-8 max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3">
+      <div className="border-t border-white/15 pt-6 mt-8 max-w-6xl mx-auto px-2 sm:px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-300 drop-shadow-sm gap-3">
         <p>© {new Date().getFullYear()} Kynisto Technologies Inc. All rights reserved.</p>
         <p>Verified Publisher Content • Google AdSense &amp; Privacy Compliant</p>
       </div>
