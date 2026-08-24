@@ -736,13 +736,13 @@ export default function LiveQueueTracker() {
       <button
         key={filter}
         onClick={() => handleFilterSelect(filter)}
-        className={`px-3.5 sm:px-5 py-1.5 sm:py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+        className={`px-4 sm:px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
           activeFilter === filter
-            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/30'
-            : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800'
+            ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25 border border-emerald-400/30 scale-[1.02]'
+            : 'bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10'
         }`}
       >
-        {filter}
+        {filter === 'All' ? '🏥 All Care' : filter === 'Hospital' ? '🏢 Hospitals' : filter === 'Clinic' ? '🩺 Clinics & OPD' : filter === 'Diagnostic' ? '🔬 Diagnostic Labs' : '🦷 Dental'}
       </button>
     ));
   }, [activeFilter, handleFilterSelect]);
@@ -761,71 +761,71 @@ export default function LiveQueueTracker() {
         <div
           key={item.id}
           style={{ contain: "content", transform: "translate3d(0,0,0)", willChange: "transform" }}
-          className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800/90 hover:border-emerald-500/40 rounded-2xl p-4 sm:p-6 transition-all duration-300 shadow-lg flex flex-col justify-between group relative overflow-hidden active:scale-[0.99] transition-transform"
+          className="bg-slate-900/60 backdrop-blur-md hover:bg-slate-900/90 border border-white/10 hover:border-emerald-500/40 rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-xl flex flex-col justify-between group relative overflow-hidden active:scale-[0.99]"
         >
           <div>
-            <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-3.5">
               <div className="flex items-center flex-wrap gap-1.5 min-w-0">
-                <span className="px-2.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[11px] font-extrabold uppercase tracking-wide">
+                <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[11px] font-extrabold uppercase tracking-wide">
                   {item.providerType || 'Clinic'}
                 </span>
                 {item.subcategory && (
-                  <span className="px-2.5 py-0.5 rounded-md bg-teal-500/10 border border-teal-500/25 text-teal-300 text-[11px] font-extrabold uppercase tracking-wide">
+                  <span className="px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/25 text-teal-300 text-[11px] font-extrabold uppercase tracking-wide">
                     {item.subcategory}
                   </span>
                 )}
               </div>
 
               {!hasLiveQueue ? (
-                <span className="inline-flex items-center text-[11px] font-bold text-slate-400 bg-slate-800/80 px-2.5 py-0.5 rounded-full border border-slate-700 whitespace-nowrap shrink-0">
+                <span className="inline-flex items-center text-[11px] font-bold text-slate-400 bg-white/5 px-3 py-1 rounded-full border border-white/10 whitespace-nowrap shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-400 mr-1.5" />
                   No Live Queue
                 </span>
               ) : isPaused ? (
-                <span className="inline-flex items-center text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 whitespace-nowrap shrink-0">
+                <span className="inline-flex items-center text-[11px] font-bold text-amber-300 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/25 whitespace-nowrap shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5" />
                   Queue Paused
                 </span>
               ) : isClosed ? (
-                <span className="inline-flex items-center text-[11px] font-bold text-rose-400 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20 whitespace-nowrap shrink-0">
+                <span className="inline-flex items-center text-[11px] font-bold text-rose-300 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/25 whitespace-nowrap shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-rose-400 mr-1.5" />
                   Queue Closed
                 </span>
               ) : (
-                <span className="inline-flex items-center text-[11px] font-bold text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30 whitespace-nowrap shrink-0">
+                <span className="inline-flex items-center text-[11px] font-bold text-emerald-300 bg-emerald-500/15 px-3 py-1 rounded-full border border-emerald-500/30 whitespace-nowrap shrink-0 shadow-sm shadow-emerald-500/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
-                  Open Queue
+                  ● Live Queue Open
                 </span>
               )}
             </div>
 
-            <h3 className="text-base sm:text-xl font-extrabold text-white group-hover:text-emerald-400 transition-colors mb-1">
+            <h3 className="text-lg sm:text-xl font-extrabold text-white group-hover:text-emerald-400 transition-colors mb-1.5">
               {item.name}
             </h3>
 
-            <p className="flex items-center text-slate-300 text-xs sm:text-sm font-medium mb-3 sm:mb-4">
+            <p className="flex items-center text-slate-300 text-xs sm:text-sm font-medium mb-4">
               <MapPin className="w-3.5 h-3.5 mr-1.5 text-teal-400 shrink-0" />
               <span className="truncate">{item.address}</span>
             </p>
 
             {/* Queue / Clinic Stats */}
-            <div className="grid grid-cols-2 gap-2 p-2.5 sm:p-3.5 bg-slate-950/80 rounded-xl border border-slate-800/80 mb-3 sm:mb-4">
+            <div className="grid grid-cols-2 gap-2.5 p-3.5 bg-black/40 rounded-2xl border border-white/5 mb-4">
               <div>
-                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
                   {hasLiveQueue ? "Waiting" : "Clinic Status"}
                 </span>
-                <span className="text-sm sm:text-lg font-black text-white tabular-nums">
+                <span className="text-base sm:text-xl font-black text-white tabular-nums">
                   {hasLiveQueue ? (isClosed ? 0 : item.waitingCount) : "OPD Listed"}{" "}
-                  {hasLiveQueue && <span className="text-[10px] sm:text-xs font-normal text-slate-400">in queue</span>}
+                  {hasLiveQueue && <span className="text-xs font-normal text-slate-400">in queue</span>}
                 </span>
               </div>
               <div>
-                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
                   {hasLiveQueue ? "Avg Speed" : "Walk-in"}
                 </span>
-                <span className="text-sm sm:text-lg font-black text-emerald-400 tabular-nums">
+                <span className="text-base sm:text-xl font-black text-emerald-400 tabular-nums">
                   {hasLiveQueue ? `${consultationMins}m` : "Available"}{" "}
-                  {hasLiveQueue && <span className="text-[10px] sm:text-xs font-normal text-slate-400">/ patient</span>}
+                  {hasLiveQueue && <span className="text-xs font-normal text-slate-400">/ patient</span>}
                 </span>
               </div>
             </div>
@@ -834,7 +834,7 @@ export default function LiveQueueTracker() {
           <div className="flex gap-2 pt-1">
             <Link
               href={`/stores/${item.slug || item.id}`}
-              className={`py-2 sm:py-2.5 px-3 font-bold text-xs sm:text-sm rounded-xl transition-all flex items-center justify-center space-x-1.5 bg-slate-800/90 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 cursor-pointer ${
+              className={`py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white border border-white/10 cursor-pointer ${
                 hasLiveQueue ? "flex-1" : "w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white border-none shadow-md"
               }`}
             >
@@ -846,7 +846,7 @@ export default function LiveQueueTracker() {
             {item.allowAppointments === 0 || item.allowAppointments === false ? (
               <button
                 type="button"
-                className="bookApptBtn opacity-60 cursor-pointer text-slate-400 border-slate-700/60 bg-slate-800/60 hover:bg-slate-800"
+                className="py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 opacity-60 cursor-pointer text-slate-400 border border-white/5 bg-white/5 hover:bg-white/10"
                 onClick={() => setBookingTarget({ id: String(item.id), name: item.name, allowAppointments: false })}
                 title="This clinic does not allow online appointments"
               >
@@ -855,10 +855,10 @@ export default function LiveQueueTracker() {
               </button>
             ) : (
               <button
-                className="bookApptBtn"
+                className="py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white border border-white/10 cursor-pointer"
                 onClick={() => setBookingTarget({ id: String(item.id), name: item.name, allowAppointments: true })}
               >
-                <Calendar className="w-3.5 h-3.5" />
+                <Calendar className="w-3.5 h-3.5 text-teal-400" />
                 <span>Book Appt</span>
               </button>
             )}
@@ -867,10 +867,10 @@ export default function LiveQueueTracker() {
               <button
                 onClick={() => handleJoinQueue(item)}
                 disabled={isClosed || isJoining}
-                className={`flex-1 py-2 sm:py-2.5 px-3 font-bold text-xs sm:text-sm rounded-xl transition-all shadow-md flex items-center justify-center space-x-1.5 group/btn ${
+                className={`flex-1 py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-2xl transition-all shadow-md flex items-center justify-center space-x-1.5 group/btn ${
                   isClosed
-                    ? 'bg-slate-800/60 text-slate-500 cursor-not-allowed border border-slate-700/50 opacity-70'
-                    : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-600/20 cursor-pointer'
+                    ? 'bg-slate-800/60 text-slate-500 cursor-not-allowed border border-white/5 opacity-70'
+                    : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white shadow-emerald-500/20 cursor-pointer'
                 }`}
               >
                 <span>{isPaused ? 'Queue Paused' : isClosed ? 'Queue Closed' : isJoining ? 'Joining...' : 'Visit Live Queue'}</span>
@@ -960,9 +960,9 @@ export default function LiveQueueTracker() {
     const ownerConsultationMins = selectedQueue.consultationMinutes || 15;
 
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex flex-col relative overflow-hidden font-sans">
+      <div className="min-h-screen bg-[#070B12] text-white flex flex-col relative overflow-hidden font-sans">
         {/* Header Banner - Premium Medical Teal & Emerald Gradient */}
-        <div className="bg-gradient-to-r from-teal-900 via-emerald-900 to-slate-950 text-white pt-8 pb-32 px-6 lg:px-16 relative shadow-2xl overflow-hidden border-b border-emerald-500/20">
+        <div className="bg-gradient-to-b from-slate-900/90 via-slate-900/60 to-transparent text-white pt-6 pb-28 px-4 sm:px-6 lg:px-16 relative overflow-hidden border-b border-white/10">
           {/* Ambient Glow Orbs */}
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute top-1/2 -right-8 -translate-y-1/2 opacity-10 pointer-events-none">
@@ -973,14 +973,14 @@ export default function LiveQueueTracker() {
             {/* BACK BUTTON */}
             <button
               onClick={() => setView('list')}
-              className="flex items-center text-emerald-200/90 hover:text-white font-bold text-sm mb-6 w-fit group transition-all bg-slate-900/60 backdrop-blur-md px-4 py-2 rounded-xl border border-emerald-500/20 shadow-md"
+              className="flex items-center text-emerald-300 hover:text-white font-bold text-xs sm:text-sm mb-6 w-fit group transition-all bg-white/5 hover:bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 shadow-md cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform text-emerald-400" />
               <span>Back to Healthcare Hub</span>
             </button>
 
             {/* LIVE STATUS PILL BADGE */}
-            <div className="mb-4 flex items-center space-x-3">
+            <div className="mb-3 flex items-center space-x-3">
               {isMyTurn ? (
                 <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-500/25 backdrop-blur-md text-xs font-black uppercase tracking-widest text-emerald-300 shadow-lg border border-emerald-400/40 animate-pulse">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 mr-2.5 shadow-[0_0_10px_#10b981]" />
@@ -1000,11 +1000,11 @@ export default function LiveQueueTracker() {
             </div>
 
             {/* CLINIC TITLE & ADDRESS */}
-            <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
               {selectedQueue.name}
             </h1>
-            <p className="flex items-center text-emerald-100/80 font-medium mt-3 text-base sm:text-lg">
-              <MapPin className="w-5 h-5 mr-2 text-teal-400 shrink-0" />
+            <p className="flex items-center text-slate-300 font-medium mt-2 text-sm sm:text-base">
+              <MapPin className="w-4 h-4 mr-2 text-teal-400 shrink-0" />
               <span>{selectedQueue.address}</span>
             </p>
           </div>
@@ -1012,7 +1012,7 @@ export default function LiveQueueTracker() {
 
         {/* Floating Ticket Container */}
         <div className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20 pb-16">
-          <div className="bg-slate-900/90 backdrop-blur-2xl rounded-3xl border border-slate-800/90 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] p-6 sm:p-10 relative overflow-hidden">
+          <div className="bg-slate-900/90 backdrop-blur-2xl rounded-3xl border border-white/10 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] p-6 sm:p-10 relative overflow-hidden">
             {/* Ambient Backlight Glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] bg-[radial-gradient(circle_at_center,_rgba(16,185,129,0.12)_0%,_rgba(6,182,212,0.06)_50%,_transparent_70%)] blur-3xl pointer-events-none" />
 
@@ -1201,24 +1201,39 @@ export default function LiveQueueTracker() {
   // 4. ALL HEALTHCARE QUEUES LIST VIEW
   return (
     <>
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col font-sans">
-      {/* Header Bar */}
-      <div className="bg-slate-900/95 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-40 px-3 sm:px-6 py-2.5 sm:py-3.5">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
+    <div className="min-h-screen bg-[#070B12] text-white flex flex-col font-sans relative overflow-x-hidden">
+      {/* Ambient Atmospheric Cyan & Emerald Glows */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[450px] pointer-events-none z-0"
+        style={{
+          background: "radial-gradient(ellipse at top, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.08) 45%, transparent 70%)",
+          filter: "blur(100px)",
+        }}
+      />
+
+      {/* Floating Topbar */}
+      <header className="sticky top-0 z-40 px-4 sm:px-6 py-3 pointer-events-none">
+        <div className="max-w-6xl mx-auto rounded-full bg-slate-900/80 backdrop-blur-xl border border-white/10 px-4 sm:px-6 py-2.5 shadow-xl shadow-black/20 flex items-center justify-between pointer-events-auto transition-all">
+          <div className="flex items-center gap-3 min-w-0">
             <Link
               href="/"
-              className="flex items-center text-slate-300 hover:text-white font-bold text-xs sm:text-sm bg-slate-800/90 hover:bg-slate-800 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl border border-slate-700/80 shrink-0"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs sm:text-sm font-semibold border border-white/10 transition-all shrink-0"
             >
-              <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 text-emerald-400" /> Home
+              <ArrowLeft className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Home</span>
             </Link>
+            <div className="h-4 w-px bg-white/10 hidden sm:block" />
             <div className="flex items-center gap-2 min-w-0">
-              <div className="p-1.5 sm:p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 shrink-0">
-                <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0">
+                <Activity className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-sm sm:text-xl font-black text-white tracking-tight truncate">Healthcare Hub</h1>
-                <span className="text-[10px] sm:text-xs text-slate-400 font-medium hidden sm:block">Verified local care &amp; live queue tracking</span>
+                <h1 className="text-sm sm:text-base font-extrabold text-white tracking-tight truncate flex items-center gap-2">
+                  <span>Healthcare Hub</span>
+                  <span className="hidden md:inline-flex px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/20">
+                    Live Queues
+                  </span>
+                </h1>
               </div>
             </div>
           </div>
@@ -1226,40 +1241,46 @@ export default function LiveQueueTracker() {
           {selectedQueue && (
             <button
               onClick={() => setView('ticket')}
-              className="flex items-center bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm transition-all shadow-md shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-3.5 py-1.5 rounded-full text-xs sm:text-sm transition-all shadow-md shadow-emerald-500/20 shrink-0 cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5 mr-1" />
-              <span className="hidden sm:inline">Active Ticket ({selectedQueue.name.split('–')[0].trim()})</span>
-              <span className="sm:hidden">Ticket</span>
+              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+              <span className="hidden sm:inline">Active Pass ({selectedQueue.name.split('–')[0].trim()})</span>
+              <span className="sm:hidden">Pass</span>
             </button>
           )}
         </div>
-      </div>
+      </header>
 
       {/* Main Hero Banner */}
-      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-teal-950/80 py-5 sm:py-10 px-4 sm:px-6 relative border-b border-slate-800/80">
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] sm:text-xs font-black uppercase tracking-wider mb-2">
-            <Activity className="w-3 h-3 mr-1.5" /> Verified Care Network
+      <div className="relative z-10 pt-4 pb-8 sm:pb-12 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto flex flex-col items-start text-left">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-md">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span>VERIFIED CARE NETWORK</span>
           </div>
-          <h2 className="text-xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-            Local care, <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">without the waiting room.</span>
+
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.15] max-w-2xl">
+            Local care,{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
+              without the waiting room.
+            </span>
           </h2>
-          <p className="text-slate-300 text-xs sm:text-base font-medium mt-1.5 sm:mt-2.5 max-w-xl leading-relaxed hidden sm:block">
+
+          <p className="text-slate-300 text-sm sm:text-base font-normal mt-3 max-w-xl leading-relaxed">
             Select a verified clinic, OPD, or diagnostic lab near you. Join live queues remotely and arrive right on time.
           </p>
 
           {/* Search Input & Push Alerts */}
-          <div className="mt-3.5 sm:mt-6 max-w-2xl flex items-center gap-2">
+          <div className="mt-6 w-full max-w-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
             <div className="flex-1 relative flex items-center">
-              <Search className="w-4 h-4 text-emerald-400 absolute left-3.5 z-10 pointer-events-none" />
+              <Search className="w-4 h-4 text-emerald-400 absolute left-4 z-10 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
                 placeholder="Search clinic, doctor, specialty..."
-                style={{ paddingLeft: "40px", paddingRight: "12px" }}
-                className="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl py-2.5 text-white placeholder-slate-400 font-medium focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 transition-all text-xs sm:text-sm"
+                style={{ paddingLeft: "42px", paddingRight: "14px" }}
+                className="w-full bg-slate-900/90 border border-white/15 rounded-2xl py-3 text-white placeholder-slate-400 font-medium focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 transition-all text-sm shadow-inner"
               />
             </div>
             <PushNotificationManager />
@@ -1269,8 +1290,8 @@ export default function LiveQueueTracker() {
 
       {/* Error Message Toast Banner */}
       {errorMsg && (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4">
-          <div className="p-3.5 bg-rose-950/60 border border-rose-500/50 rounded-xl flex items-center justify-between text-rose-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-4 relative z-10">
+          <div className="p-4 bg-rose-950/70 border border-rose-500/50 rounded-2xl flex items-center justify-between text-rose-200 shadow-xl">
             <div className="flex items-center space-x-2.5 min-w-0">
               <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
               <span className="font-bold text-xs sm:text-sm truncate">{errorMsg}</span>
@@ -1280,15 +1301,15 @@ export default function LiveQueueTracker() {
         </div>
       )}
 
-      {/* Filter Tabs & Content */}
-      <div className="max-w-6xl mx-auto w-full px-3.5 sm:px-6 py-4 sm:py-8 flex-1">
+      {/* Filter Tabs & Provider Cards Grid */}
+      <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pb-16 flex-1 relative z-10">
         {/* Category Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2.5 mb-4 sm:mb-6 no-scrollbar">
+        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar">
           {renderedCategoryFilters}
         </div>
 
         {/* Queues Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {renderedQueuesGrid}
         </div>
       </div>
