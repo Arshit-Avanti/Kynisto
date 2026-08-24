@@ -7,19 +7,19 @@ export function EditorialFaqSection() {
   const faqs = [
     {
       question: "What is Kynisto and how does it serve local communities?",
-      answer: "Kynisto is a next-generation real-time locality intelligence network. It bridges the gap between urban residents and neighborhood businesses by providing live open/closed indicators, direct inventory inquiries, and digital waiting room queue tokens for outpatient clinics, pharmacies, and specialty salons.",
+      answer: "Kynisto connects you to nearby stores, live clinic waiting queues, and local services in real time with instant directions and availability.",
     },
     {
       question: "How do virtual healthcare queue tokens eliminate physical waiting rooms?",
-      answer: "When visiting a participating hospital or outpatient clinic, patients can register their arrival digitally or join the queue remotely. Kynisto issues a secure digital token that updates with live position and ETA countdowns, allowing patients to wait safely at home and arrive only when the physician is ready.",
+      answer: "Join clinic queues directly from your phone, track live token counts and estimated wait times, and arrive right when the doctor is ready.",
     },
     {
       question: "How do local merchants and store owners benefit from listing on Kynisto?",
-      answer: "Local shop owners receive a dedicated digital storefront, real-time product/service catalog indexing, customer messaging channels, and operational analytics. Merchants experience reduced counter congestion, higher customer retention, and increased neighborhood footfall.",
+      answer: "Merchants get a digital storefront, real-time product and service indexing, customer chat, and queue tools to boost neighborhood footfall.",
     },
     {
       question: "Is personal health and contact data kept private and secure?",
-      answer: "Yes. Kynisto enforces strict data minimization principles under global privacy regulations and India's Digital Personal Data Protection Act. Queue tokens are temporary session objects scrubbed after consultation, and health records are never sold or shared with third-party advertisers.",
+      answer: "Yes. Queue tokens are automatically scrubbed after your visit, and all health data is encrypted and never shared or sold.",
     },
   ];
 
