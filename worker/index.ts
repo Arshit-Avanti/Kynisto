@@ -128,6 +128,38 @@ const worker = {
       );
     }
 
+    // Instant Edge Static Assets with 1-Year Immutable Caching & Range Support
+    const method = request.method.toUpperCase();
+    const isStaticAsset =
+      url.pathname.startsWith("/assets/") ||
+      url.pathname.startsWith("/_next/") ||
+      url.pathname.startsWith("/_vinext/") ||
+      url.pathname.startsWith("/static/") ||
+      url.pathname.startsWith("/videos/") ||
+      url.pathname.startsWith("/images/") ||
+      url.pathname === "/favicon.ico" ||
+      url.pathname === "/icon.png" ||
+      url.pathname === "/icon.svg" ||
+      url.pathname === "/sw.js" ||
+      url.pathname === "/manifest.webmanifest" ||
+      url.pathname === "/manifest.json" ||
+      /\.(png|jpg|jpeg|gif|svg|ico|css|js|mjs|woff2?|json|txt|xml|apk|webmanifest|webp|mp4|webm|mov)$/i.test(url.pathname);
+
+    if ((method === "GET" || method === "HEAD") && isStaticAsset) {
+      try {
+        const assetResponse = await env.ASSETS.fetch(request);
+        if (assetResponse.status < 400) {
+          const headers = new Headers(assetResponse.headers);
+          headers.set("Cache-Control", "public, max-age=31536000, immutable");
+          headers.set("Vary", "Accept-Encoding");
+          headers.set("Accept-Ranges", "bytes");
+          return applySecurityHeaders(new Response(assetResponse.body, { status: assetResponse.status, headers }));
+        }
+      } catch {
+        // Ignore asset fetch error and fallback to SSR router
+      }
+    }
+
     if (url.pathname.startsWith("/downloads/")) {
       const asset = await env.ASSETS.fetch(request);
       if (!asset.ok) return applySecurityHeaders(asset);
@@ -149,7 +181,6 @@ const worker = {
       url.pathname.startsWith("/api/auth/google/config") ||
       url.pathname.startsWith("/api/version")
     ) {
-      const method = request.method.toUpperCase();
       if (method === "GET" && !url.searchParams.has("manage") && !url.pathname.includes("queue/active")) {
         try {
           const appRes = await handler.fetch(request, env, ctx);
@@ -176,44 +207,6 @@ const worker = {
       }, allowedWidths);
       imgRes.headers.set("Cache-Control", "public, max-age=31536000, immutable");
       return applySecurityHeaders(imgRes);
-    }
-
-    const method = request.method.toUpperCase();
-    const isStaticAsset =
-      url.pathname.startsWith("/assets/") ||
-      url.pathname.startsWith("/_next/") ||
-      url.pathname.startsWith("/_vinext/") ||
-      url.pathname.startsWith("/static/") ||
-      url.pathname.startsWith("/videos/") ||
-      url.pathname.startsWith("/images/") ||
-      url.pathname === "/favicon.ico" ||
-      url.pathname === "/icon.png" ||
-      url.pathname === "/icon.svg" ||
-      url.pathname === "/sw.js" ||
-      url.pathname === "/manifest.webmanifest" ||
-      url.pathname === "/manifest.json" ||
-      /\.(png|jpg|jpeg|gif|svg|ico|css|js|mjs|woff2?|json|txt|xml|apk|webmanifest|webp|mp4|webm|mov)$/i.test(url.pathname);
-
-    if ((method === "GET" || method === "HEAD") && isStaticAsset) {
-      try {
-        const assetResponse = await env.ASSETS.fetch(request);
-        if (assetResponse.status !== 404) {
-          const headers = new Headers(assetResponse.headers);
-          if (
-            url.pathname.startsWith("/assets/") ||
-            url.pathname.startsWith("/_next/") ||
-            url.pathname.startsWith("/videos/") ||
-            url.pathname.startsWith("/images/") ||
-            /\.(png|jpg|jpeg|gif|svg|ico|css|js|woff2?|webp|mp4|webm|mov)$/i.test(url.pathname)
-          ) {
-            headers.set("Cache-Control", "public, max-age=31536000, immutable");
-          }
-          headers.set("Vary", "Accept-Encoding");
-          return applySecurityHeaders(new Response(assetResponse.body, { status: assetResponse.status, headers }));
-        }
-      } catch {
-        // Ignore asset fetch error and fallback to SSR router
-      }
     }
 
     try {
