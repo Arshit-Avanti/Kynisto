@@ -78,50 +78,50 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
         </Link>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-700" aria-label="Main Navigation">
-          <Link href="/services" className="hover:text-sky-600 transition-colors">
+        <nav className="hidden md:flex items-center gap-4 lg:gap-7 text-sm font-semibold text-slate-700 mx-3" aria-label="Main Navigation">
+          <Link href="/services" className="hover:text-sky-600 transition-colors whitespace-nowrap">
             Services
           </Link>
-          <Link href="/healthcare" className="hover:text-sky-600 transition-colors flex items-center gap-1.5">
+          <Link href="/healthcare" className="hover:text-sky-600 transition-colors flex items-center gap-1.5 whitespace-nowrap">
             <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
             <span>Healthcare</span>
           </Link>
-          <Link href={dashboardHref} className="hover:text-sky-600 transition-colors">
+          <Link href={dashboardHref} className="hover:text-sky-600 transition-colors whitespace-nowrap">
             Dashboard
           </Link>
-          <Link href="/wallet" className="hover:text-sky-600 transition-colors">
+          <Link href="/wallet" className="hover:text-sky-600 transition-colors whitespace-nowrap">
             Wallet
           </Link>
         </nav>
 
         {/* Right CTA / User Greeting Pill */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {user ? (
             <Link
               href={dashboardHref}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-50 border border-sky-200 text-sky-800 text-xs sm:text-sm font-bold hover:bg-sky-100 transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-sky-50 border border-sky-200 text-sky-800 text-xs sm:text-sm font-bold hover:bg-sky-100 transition-all shadow-sm shrink-0"
               title={`Logged in as ${user.name || "User"}`}
             >
               <div className="w-5 h-5 rounded-full bg-sky-500 text-white flex items-center justify-center text-xs shrink-0">
                 <User className="w-3.5 h-3.5" />
               </div>
-              <span className="truncate max-w-[130px] sm:max-w-none">Welcome, {firstName}</span>
+              <span className="whitespace-nowrap font-bold">Welcome, {firstName}</span>
             </Link>
           ) : (
             <Link
               href="/login"
-              className="px-5 py-1.5 rounded-full bg-slate-900 text-white text-xs sm:text-sm font-bold hover:bg-slate-800 transition-all shadow-sm"
+              className="px-4 sm:px-5 py-1.5 rounded-full bg-slate-900 text-white text-xs sm:text-sm font-bold hover:bg-slate-800 transition-all shadow-sm shrink-0 whitespace-nowrap"
             >
               Sign In
             </Link>
           )}
 
           {/* Mobile Menu Trigger Button */}
-          <div className="mobileNav md:hidden">
+          <div className="mobileNav md:hidden shrink-0">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="mobileNavBtn p-2 rounded-full text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none flex items-center justify-center"
+              className="mobileNavBtn p-1.5 rounded-full text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none flex items-center justify-center"
               aria-label="Open Kynisto navigation"
               aria-expanded={mobileMenuOpen}
             >
