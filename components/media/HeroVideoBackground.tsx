@@ -79,8 +79,6 @@ export function HeroVideoBackground({
         height: "100%",
         zIndex: 0,
         pointerEvents: "none",
-        maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 60%, rgba(0,0,0,0) 100%)",
-        WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 60%, rgba(0,0,0,0) 100%)",
       }}
     >
       <video
@@ -112,15 +110,6 @@ export function HeroVideoBackground({
         <source src="/videos/google-flow-88984ca4.mp4" type="video/mp4" />
         <source src={fallbackSrc} type="video/mp4" />
       </video>
-
-      {/* Subtle modern cinematic overlay for crystal-clear text readability */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse at 50% 30%, rgba(0,0,0,0.15) 0%, rgba(5,7,12,0.45) 75%, rgba(5,7,12,0.85) 100%)",
-        }}
-      />
     </div>
   );
 }
