@@ -345,7 +345,36 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
 
               {/* Exact 3-Zone Kynisto Dashboard */}
               <div className="grid grid-cols-12 min-h-0 sm:min-h-[470px]">
-                
+
+                {/* Mobile Tab Switcher (Visible on mobile screens) */}
+                <div className="col-span-12 flex sm:hidden items-center gap-1.5 p-2 bg-white/[0.04] border-b border-white/10 overflow-x-auto no-scrollbar">
+                  {[
+                    { name: "Overview", icon: "🏠" },
+                    { name: "Healthcare", icon: "🩺", badge: "Live" },
+                    { name: "Services", icon: "🛠️" },
+                    { name: "Wallet Pass", icon: "💳" },
+                    { name: "Stores", icon: "🏪" },
+                    { name: "Rewards", icon: "✨" },
+                  ].map((item) => (
+                    <button
+                      key={item.name}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveTab(item.name);
+                      }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                        activeTab === item.name
+                          ? "bg-orange-500 text-white font-bold shadow-md shadow-orange-500/30"
+                          : "bg-white/[0.05] text-slate-300 hover:bg-white/10"
+                      }`}
+                    >
+                      <span>{item.icon}</span>
+                      <span>{item.name}</span>
+                    </button>
+                  ))}
+                </div>
+
                 {/* 1. Left Sidebar (Visible on Tablet & Desktop) */}
                 <div className="col-span-12 sm:col-span-4 lg:col-span-3 border-r border-white/10 bg-white/[0.02] p-3 sm:p-4 flex flex-col justify-between hidden sm:flex">
                   <div>
@@ -365,12 +394,17 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
                         { name: "Stores", icon: "🏪" },
                         { name: "Rewards", icon: "✨" },
                       ].map((item) => (
-                        <div
+                        <button
                           key={item.name}
-                          className={`flex items-center justify-between px-2 sm:px-2.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-semibold transition-all text-left ${
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveTab(item.name);
+                          }}
+                          className={`flex items-center justify-between px-2 sm:px-2.5 py-2 rounded-xl text-[11px] sm:text-xs font-semibold transition-all text-left w-full cursor-pointer ${
                             activeTab === item.name
-                              ? "bg-white/15 text-white font-bold"
-                              : "text-slate-400 group-hover:text-slate-200"
+                              ? "bg-white/15 text-white font-bold border border-white/20 shadow-sm"
+                              : "text-slate-400 hover:text-slate-200 hover:bg-white/[0.06]"
                           }`}
                         >
                           <div className="flex items-center gap-2">
@@ -382,116 +416,385 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
                               !
                             </span>
                           )}
-                        </div>
+                        </button>
                       ))}
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1 pt-3 sm:pt-4 border-t border-white/10">
-                    <div className="flex items-center gap-2 px-2 py-0.5 text-[11px] sm:text-xs text-slate-400">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push("/account");
+                      }}
+                      className="flex items-center gap-2 px-2 py-1.5 text-[11px] sm:text-xs text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors text-left"
+                    >
                       <span>👤</span>
                       <span>Account</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-2 py-0.5 text-[11px] sm:text-xs text-slate-400">
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push("/account");
+                      }}
+                      className="flex items-center gap-2 px-2 py-1.5 text-[11px] sm:text-xs text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors text-left"
+                    >
                       <span>⚙️</span>
                       <span>Settings</span>
-                    </div>
+                    </button>
                   </div>
                 </div>
 
-                {/* 2. Center Content: Dashboard Card + Upcoming Payments + Recent Transactions */}
+                {/* 2. Center Content: Dynamic Multi-Tab Interactive Engine */}
                 <div className="col-span-12 sm:col-span-8 lg:col-span-9 p-3 sm:p-5 flex flex-col gap-3 sm:gap-4 text-left">
                   
-                  <div className="relative">
+                  {/* Search Bar with Live Execution */}
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="relative w-full"
+                  >
                     <span className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
                     <input
                       type="text"
-                      readOnly
-                      value="Search stores, clinics, services..."
-                      className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-7 sm:pl-8 pr-3 py-1 sm:py-1.5 text-[11px] sm:text-xs text-slate-300 outline-none pointer-events-none"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Search stores, clinics, plumbers, salons..."
+                      className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-7 sm:pl-8 pr-20 py-1.5 sm:py-2 text-[11px] sm:text-xs text-slate-200 placeholder:text-slate-400 outline-none focus:border-orange-500 focus:bg-white/[0.08] transition-all"
                     />
-                  </div>
+                    <button
+                      type="submit"
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-[10px] sm:text-[11px] transition-colors"
+                    >
+                      Search
+                    </button>
+                  </form>
 
-                  <div className="flex flex-col gap-2">
-                    <div className="text-[11px] sm:text-xs font-bold text-white">Live Status &amp; Passes</div>
-                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3">
-                      
-                      {/* Kynisto VIP Pass Card */}
-                      <div className="sm:col-span-7 rounded-xl sm:rounded-2xl p-3 sm:p-4 relative overflow-hidden bg-gradient-to-br from-orange-950/80 via-slate-900 to-slate-950 border border-orange-500/30 shadow-xl flex flex-col justify-between min-h-[110px] sm:min-h-[135px]">
-                        <div className="flex items-center justify-between relative z-10">
-                          <span className="text-[8px] sm:text-[9px] font-bold tracking-widest text-orange-400 uppercase">KYNISTO VIP PASS</span>
-                          <span className="text-xs text-emerald-400 font-bold">● ACTIVE</span>
+                  {/* TAB 1: OVERVIEW */}
+                  {activeTab === "Overview" && (
+                    <div className="flex flex-col gap-3.5">
+                      <div className="flex flex-col gap-2">
+                        <div className="text-[11px] sm:text-xs font-bold text-white flex items-center justify-between">
+                          <span>Live Status &amp; Passes</span>
+                          <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                            Live Sync
+                          </span>
                         </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3">
+                          
+                          {/* Kynisto VIP Pass Card */}
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push("/wallet");
+                            }}
+                            className="sm:col-span-7 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 relative overflow-hidden bg-gradient-to-br from-orange-950/90 via-slate-900 to-slate-950 border border-orange-500/40 shadow-xl flex flex-col justify-between min-h-[115px] sm:min-h-[135px] hover:border-orange-400 hover:scale-[1.02] transition-all cursor-pointer group/card"
+                          >
+                            <div className="flex items-center justify-between relative z-10">
+                              <span className="text-[8px] sm:text-[9px] font-bold tracking-widest text-orange-400 uppercase">KYNISTO VIP PASS</span>
+                              <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">● ACTIVE</span>
+                            </div>
 
-                        <div className="my-1 relative z-10">
-                          <div className="text-xs sm:text-sm font-mono tracking-widest text-white font-bold">KYN-8941 2026 5633</div>
-                          <div className="text-[8px] sm:text-[9px] text-slate-300 mt-0.5">DLF Ankur Vihar • Verified Member</div>
-                        </div>
+                            <div className="my-1 relative z-10">
+                              <div className="text-xs sm:text-sm font-mono tracking-widest text-white font-bold group-hover/card:text-orange-200 transition-colors">KYN-8941 2026 5633</div>
+                              <div className="text-[8px] sm:text-[9px] text-slate-300 mt-0.5">DLF Ankur Vihar • Verified Member</div>
+                            </div>
 
-                        <div className="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-300 relative z-10">
-                          <span>Valid 2026–2027</span>
-                          <div className="flex items-center gap-1 text-[8px] font-bold text-orange-400">
-                            <span>⚡ SMART PASS</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Live Queue Token & Loyalty Points */}
-                      <div className="sm:col-span-5 flex flex-col gap-1.5 sm:gap-2">
-                        <div className="text-[10px] sm:text-[11px] font-semibold text-slate-300">Active Queue &amp; Rewards</div>
-                        <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
-                          <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col justify-between">
-                            <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[9px] sm:text-[10px]">🩺</div>
-                            <div className="mt-1">
-                              <div className="text-[7px] sm:text-[8px] text-slate-300 font-medium">OPD Token</div>
-                              <div className="text-[10px] sm:text-[11px] font-bold text-emerald-400">#07 (Next)</div>
+                            <div className="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-300 relative z-10">
+                              <span>Valid 2026–2027</span>
+                              <div className="flex items-center gap-1 text-[8px] font-bold text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-md">
+                                <span>⚡ SMART PASS ↗</span>
+                              </div>
                             </div>
                           </div>
 
-                          <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 flex flex-col justify-between">
-                            <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-[9px] sm:text-[10px]">⭐</div>
-                            <div className="mt-1">
-                              <div className="text-[7px] sm:text-[8px] text-slate-300 font-medium">Rewards</div>
-                              <div className="text-[10px] sm:text-[11px] font-bold text-amber-300">1,250 pts</div>
+                          {/* Live Queue Token & Loyalty Points */}
+                          <div className="sm:col-span-5 flex flex-col gap-1.5 sm:gap-2">
+                            <div className="text-[10px] sm:text-[11px] font-semibold text-slate-300">Active Queue &amp; Rewards</div>
+                            <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  router.push("/healthcare");
+                                }}
+                                className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 hover:border-emerald-400 hover:bg-emerald-500/20 flex flex-col justify-between cursor-pointer transition-all hover:scale-105"
+                              >
+                                <div className="w-5 h-5 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px]">🩺</div>
+                                <div className="mt-1">
+                                  <div className="text-[7px] sm:text-[8px] text-slate-300 font-medium">OPD Token</div>
+                                  <div className="text-[10px] sm:text-[11px] font-bold text-emerald-400">#07 (Next)</div>
+                                </div>
+                              </div>
+
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  router.push("/wallet");
+                                }}
+                                className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:border-amber-400 hover:bg-amber-500/20 flex flex-col justify-between cursor-pointer transition-all hover:scale-105"
+                              >
+                                <div className="w-5 h-5 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-[10px]">⭐</div>
+                                <div className="mt-1">
+                                  <div className="text-[7px] sm:text-[8px] text-slate-300 font-medium">Rewards</div>
+                                  <div className="text-[10px] sm:text-[11px] font-bold text-amber-300">1,250 pts</div>
+                                </div>
+                              </div>
                             </div>
                           </div>
+
                         </div>
                       </div>
 
-                    </div>
-                  </div>
+                      {/* Recent Activity */}
+                      <div className="flex flex-col gap-1.5 sm:gap-2 pt-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] sm:text-xs font-bold text-white">Recent activity &amp; bookings</span>
+                          <span className="text-[9px] sm:text-[10px] text-slate-400 bg-white/5 px-2 py-0.5 rounded border border-white/10">All Visits ⌄</span>
+                        </div>
 
-                  {/* Recent Activity */}
-                  <div className="flex flex-col gap-1.5 sm:gap-2 pt-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] sm:text-xs font-bold text-white">Recent activity &amp; bookings</span>
-                      <span className="text-[9px] sm:text-[10px] text-slate-400 bg-white/5 px-2 py-0.5 rounded border border-white/10">All Visits ⌄</span>
-                    </div>
+                        <div className="flex flex-col gap-1.5">
+                          {recentTransactions.slice(0, 3).map((tx) => (
+                            <div
+                              key={tx.id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (tx.icon === "🩺") router.push("/healthcare");
+                                else if (tx.icon === "🛠️") router.push("/services");
+                                else router.push("/wallet");
+                              }}
+                              className="p-1.5 sm:p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-orange-500/30 flex items-center justify-between gap-2 sm:gap-3 text-xs transition-all cursor-pointer group/row"
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xs">
+                                  {tx.icon}
+                                </span>
+                                <div>
+                                  <div className="font-semibold text-white text-[10px] sm:text-[11px] group-hover/row:text-orange-300 transition-colors">{tx.title}</div>
+                                  <div className="text-[7px] sm:text-[8px] text-slate-400">{tx.date}</div>
+                                </div>
+                              </div>
 
-                    <div className="flex flex-col gap-1.5">
-                      {recentTransactions.slice(0, 3).map((tx) => (
-                        <div
-                          key={tx.id}
-                          className="p-1.5 sm:p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 flex items-center justify-between gap-2 sm:gap-3 text-xs transition-colors"
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[10px] sm:text-[11px]">
-                              {tx.icon}
-                            </span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] sm:text-[11px] font-bold text-emerald-400">{tx.amount}</span>
+                                <span className="text-orange-400 text-xs group-hover/row:translate-x-0.5 transition-transform">→</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB 2: HEALTHCARE & LIVE QUEUES */}
+                  {activeTab === "Healthcare" && (
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <span>🩺 Live Doctor OPD Telemetry</span>
+                        </div>
+                        <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                          ● Online
+                        </span>
+                      </div>
+
+                      <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-950/50 to-slate-900 border border-emerald-500/30 flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-xs font-bold text-white">Dr. Sharma Clinic (General OPD)</div>
+                            <div className="text-[10px] text-slate-300">DLF Ankur Vihar • 09:00 AM – 02:00 PM</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-[9px] text-slate-400 uppercase">Est. Wait</div>
+                            <div className="text-xs font-bold text-amber-400">~8 mins</div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2 bg-black/30 p-2.5 rounded-xl border border-white/5 text-center">
+                          <div>
+                            <div className="text-[8px] text-slate-400 uppercase">Now Serving</div>
+                            <div className="text-sm font-black text-amber-300">#06</div>
+                          </div>
+                          <div>
+                            <div className="text-[8px] text-slate-400 uppercase">Your Token</div>
+                            <div className="text-sm font-black text-emerald-400">#07</div>
+                          </div>
+                          <div>
+                            <div className="text-[8px] text-slate-400 uppercase">Waiting</div>
+                            <div className="text-sm font-black text-white">1 Patient</div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push("/healthcare");
+                            }}
+                            className="flex-1 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-xs shadow-md shadow-emerald-500/25 hover:brightness-110 transition-all text-center"
+                          >
+                            Open Live Queue Hub ↗
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB 3: SERVICES */}
+                  {activeTab === "Services" && (
+                    <div className="flex flex-col gap-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs font-bold text-white">🛠️ Verified On-Demand Home Services</div>
+                        <Link href="/services" className="text-[10px] text-orange-400 font-bold hover:underline">
+                          View All →
+                        </Link>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {[
+                          { title: "AC Repair & Gas", price: "₹499", time: "30m Dispatch", icon: "❄️" },
+                          { title: "Electrician Visit", price: "₹199", time: "Instant Slot", icon: "⚡" },
+                          { title: "Plumbing Service", price: "₹249", time: "45m Arrival", icon: "🔧" },
+                        ].map((srv, idx) => (
+                          <div
+                            key={idx}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push("/services");
+                            }}
+                            className="p-2.5 rounded-xl bg-white/[0.04] border border-white/10 hover:border-orange-500/50 hover:bg-white/[0.08] transition-all cursor-pointer flex flex-col justify-between gap-2 group/srv"
+                          >
                             <div>
-                              <div className="font-semibold text-white text-[10px] sm:text-[11px]">{tx.title}</div>
-                              <div className="text-[7px] sm:text-[8px] text-slate-400">{tx.date}</div>
+                              <span className="text-base">{srv.icon}</span>
+                              <div className="text-xs font-bold text-white mt-1 group-hover/srv:text-orange-400 transition-colors">{srv.title}</div>
+                              <div className="text-[9px] text-slate-400">{srv.time}</div>
+                            </div>
+                            <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                              <span className="text-xs font-extrabold text-orange-400">{srv.price}</span>
+                              <span className="text-[9px] bg-orange-500/20 text-orange-300 font-bold px-2 py-0.5 rounded-md">Book</span>
                             </div>
                           </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-                          <div className="flex items-center gap-1.5 sm:gap-2">
-                            <span className="text-[10px] sm:text-[11px] font-bold text-emerald-400">{tx.amount}</span>
-                            <span className="text-slate-500 text-[9px] sm:text-[10px]">•••</span>
+                  {/* TAB 4: WALLET PASS */}
+                  {activeTab === "Wallet Pass" && (
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs font-bold text-white">💳 Digital Membership &amp; Wallet Pass</div>
+                        <span className="text-[10px] text-emerald-400 font-bold">1-Tap Scan</span>
+                      </div>
+
+                      <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 via-orange-950/40 to-slate-950 border border-orange-500/40 shadow-xl flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-[10px] font-bold text-orange-400 uppercase tracking-wider">KYNISTO DIGITAL PASS</div>
+                            <div className="text-sm font-mono font-black text-white mt-0.5">KYN-8941 2026 5633</div>
+                          </div>
+                          <div className="w-10 h-10 rounded-lg bg-white p-1 flex items-center justify-center">
+                            <span className="text-black font-black text-[10px]">QR</span>
                           </div>
                         </div>
-                      ))}
+
+                        <div className="flex items-center justify-between text-xs pt-2 border-t border-white/10">
+                          <div>
+                            <div className="text-[8px] text-slate-400">Available Loyalty</div>
+                            <div className="text-xs font-bold text-emerald-400">₹250.00 (1,250 pts)</div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push("/wallet");
+                            }}
+                            className="px-3 py-1.5 rounded-lg bg-orange-500 text-white font-bold text-xs shadow-md hover:bg-orange-600 transition-colors"
+                          >
+                            Open Wallet Pass ↗
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {/* TAB 5: STORES */}
+                  {activeTab === "Stores" && (
+                    <div className="flex flex-col gap-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs font-bold text-white">🏪 Verified Local Stores</div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
+                          }}
+                          className="text-[10px] text-orange-400 font-bold hover:underline"
+                        >
+                          Browse All ↓
+                        </button>
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        {[
+                          { name: "Sharma General Store", cat: "Groceries & Daily Essentials", offer: "5% Cashback", dist: "0.2 km" },
+                          { name: "Apollo MedPlus Pharmacy", cat: "Medicines & Health", offer: "10% Pass Off", dist: "0.4 km" },
+                          { name: "Organic Harvest Hub", cat: "Fresh Fruits & Veggies", offer: "Free Delivery", dist: "0.6 km" },
+                        ].map((st, idx) => (
+                          <div
+                            key={idx}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
+                            }}
+                            className="p-2.5 rounded-xl bg-white/[0.04] border border-white/10 hover:border-orange-500/40 hover:bg-white/[0.08] flex items-center justify-between transition-all cursor-pointer"
+                          >
+                            <div>
+                              <div className="text-xs font-bold text-white">{st.name}</div>
+                              <div className="text-[9px] text-slate-400">{st.cat} • {st.dist}</div>
+                            </div>
+                            <span className="text-[10px] font-bold text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-md">
+                              {st.offer}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TAB 6: REWARDS */}
+                  {activeTab === "Rewards" && (
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs font-bold text-white">✨ Smart Loyalty &amp; Rewards</div>
+                        <span className="text-xs font-extrabold text-amber-400">1,250 Points</span>
+                      </div>
+
+                      <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
+                        <div>
+                          <div className="text-xs font-bold text-white">Cashback Balance: ₹250.00</div>
+                          <div className="text-[9px] text-slate-300">Usable at all 100+ verified partner stores</div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push("/wallet");
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition-colors"
+                        >
+                          Redeem ↗
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                 </div>
 
