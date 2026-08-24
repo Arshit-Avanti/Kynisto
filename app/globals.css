@@ -2664,33 +2664,60 @@ img, video, iframe, embed, object {
   gap: 18px !important;
   padding: 18px 24px !important;
   border-radius: 18px !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  box-shadow: none !important;
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
   position: relative !important;
   overflow: hidden !important;
 }
 
 .mode-light .efferdFeatureCard {
-  background: rgba(255, 255, 255, 0.75) !important;
-  border: 1px solid rgba(255, 255, 255, 0.9) !important;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08) !important;
+  background: transparent !important;
+  border: 1px solid rgba(0, 0, 0, 0.18) !important;
+  box-shadow: none !important;
 }
 
 .efferdFeatureCard:hover {
   transform: translateY(-4px) scale(1.015) !important;
-  background: rgba(255, 255, 255, 0.09) !important;
-  border-color: rgba(56, 189, 248, 0.4) !important;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), 0 0 20px rgba(56, 189, 248, 0.2) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(56, 189, 248, 0.5) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2), 0 0 15px rgba(56, 189, 248, 0.2) !important;
 }
 
 .mode-light .efferdFeatureCard:hover {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border-color: rgba(2, 132, 199, 0.35) !important;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12), 0 0 15px rgba(2, 132, 199, 0.15) !important;
+  background: rgba(0, 0, 0, 0.03) !important;
+  border-color: rgba(2, 132, 199, 0.4) !important;
+}
+
+.efferdFeatureContent p b {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+}
+
+.mode-light .efferdFeatureContent p b {
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+  text-shadow: none !important;
+}
+
+.efferdFeatureContent small {
+  color: #E2E8F0 !important;
+  -webkit-text-fill-color: #E2E8F0 !important;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+.mode-light .efferdFeatureContent small {
+  color: #475569 !important;
+  -webkit-text-fill-color: #475569 !important;
+  text-shadow: none !important;
 }
 
 .efferdIconBadge {
