@@ -184,20 +184,28 @@ const worker = {
       url.pathname.startsWith("/_next/") ||
       url.pathname.startsWith("/_vinext/") ||
       url.pathname.startsWith("/static/") ||
+      url.pathname.startsWith("/videos/") ||
+      url.pathname.startsWith("/images/") ||
       url.pathname === "/favicon.ico" ||
       url.pathname === "/icon.png" ||
       url.pathname === "/icon.svg" ||
       url.pathname === "/sw.js" ||
       url.pathname === "/manifest.webmanifest" ||
       url.pathname === "/manifest.json" ||
-      /\.(png|jpg|jpeg|gif|svg|ico|css|js|mjs|woff2?|json|txt|xml|apk|webmanifest)$/i.test(url.pathname);
+      /\.(png|jpg|jpeg|gif|svg|ico|css|js|mjs|woff2?|json|txt|xml|apk|webmanifest|webp|mp4|webm|mov)$/i.test(url.pathname);
 
     if ((method === "GET" || method === "HEAD") && isStaticAsset) {
       try {
         const assetResponse = await env.ASSETS.fetch(request);
         if (assetResponse.status !== 404) {
           const headers = new Headers(assetResponse.headers);
-          if (url.pathname.startsWith("/assets/") || url.pathname.startsWith("/_next/") || /\.(png|jpg|jpeg|gif|svg|ico|css|js|woff2?)$/i.test(url.pathname)) {
+          if (
+            url.pathname.startsWith("/assets/") ||
+            url.pathname.startsWith("/_next/") ||
+            url.pathname.startsWith("/videos/") ||
+            url.pathname.startsWith("/images/") ||
+            /\.(png|jpg|jpeg|gif|svg|ico|css|js|woff2?|webp|mp4|webm|mov)$/i.test(url.pathname)
+          ) {
             headers.set("Cache-Control", "public, max-age=31536000, immutable");
           }
           headers.set("Vary", "Accept-Encoding");

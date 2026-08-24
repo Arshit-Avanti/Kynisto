@@ -9,7 +9,7 @@ interface VideoBackgroundProps {
 
 export function VideoBackground({
   videoSrc = "/videos/hero-flow.mp4",
-  mobileVideoSrc = "/videos/hero-flow.mp4",
+  mobileVideoSrc = "/videos/hero-flow-mobile.mp4",
 }: VideoBackgroundProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -17,15 +17,13 @@ export function VideoBackground({
     const video = videoRef.current;
     if (!video) return;
 
-    // Modern Autoplay Compliance: defaultMuted and muted MUST be true for instant playback
     video.defaultMuted = true;
     video.muted = true;
     video.playsInline = true;
 
     const playVideo = () => {
       if (video.paused) {
-        video.play().catch((err) => {
-          console.warn("Video play retry:", err);
+        video.play().catch(() => {
           video.muted = true;
           video.play().catch(() => {});
         });
@@ -36,10 +34,8 @@ export function VideoBackground({
     video.addEventListener("canplay", playVideo);
     video.addEventListener("pause", playVideo);
 
-    // Initial play trigger
     playVideo();
 
-    // User first interaction trigger (fallback for strict browser policies)
     const handleFirstInteraction = () => {
       playVideo();
       window.removeEventListener("touchstart", handleFirstInteraction);
@@ -73,17 +69,20 @@ export function VideoBackground({
         minHeight: "100dvh",
         zIndex: -1,
         pointerEvents: "none",
-        background: "transparent",
-        backgroundColor: "transparent",
+        backgroundImage: "url('/images/hero-flow-poster.webp')",
+        backgroundSize: "cover",
+        backgroundPosition: "center center",
+        backgroundColor: "#0284c7",
       }}
     >
-      {/* High Performance Native Video Player (Optimized for Vertical Mobile & Full Desktop Coverage) */}
+      {/* High Performance Native Video Player (Instant 0ms Appearance with Pre-decoded Poster & Faststart MP4) */}
       <video
         ref={videoRef}
         autoPlay
         loop
         muted
         playsInline
+        poster="/images/hero-flow-poster.webp"
         // @ts-expect-error - Webkit & Android X5 WebView inline attributes
         webkit-playsinline="true"
         x5-playsinline="true"
@@ -103,14 +102,11 @@ export function VideoBackground({
           WebkitBackfaceVisibility: "hidden",
         }}
       >
-        {/* Dedicated 9:16 Mobile Video Source */}
+        {/* Dedicated Faststart 9:16 Mobile & Desktop Video Sources */}
         <source src={mobileVideoSrc} media="(max-width: 768px)" type="video/mp4" />
         <source src={videoSrc} type="video/mp4" />
-        <source src="https://labs.google/fx/api/og-video/shared/88984ca4-9c38-4a35-a9ec-a6cf40d41099" type="video/mp4" />
+        <source src="/videos/hero-flow-fast.mp4" type="video/mp4" />
         <source src="/videos/hero-flow.mp4" type="video/mp4" />
-        <source src="/videos/drive-hero.mp4" type="video/mp4" />
-        <source src="/videos/kynisto-hero.mp4" type="video/mp4" />
-        <source src="/videos/background-hero.mp4" type="video/mp4" />
         <source src="/background-hero.mp4" type="video/mp4" />
       </video>
     </div>

@@ -78,6 +78,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
         <link rel="preconnect" href="https://kynisto.in" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://kynisto.in" />
+        {/* Instant 0ms Visual Appearance Preloads */}
+        <link rel="preload" as="image" href="/images/hero-flow-poster.webp" type="image/webp" />
+        <link rel="preload" as="video" href="/videos/hero-flow.mp4" type="video/mp4" />
       </head>
       <body>
         <script

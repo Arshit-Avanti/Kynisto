@@ -79,6 +79,9 @@ export function HeroVideoBackground({
         height: "100%",
         zIndex: 0,
         pointerEvents: "none",
+        backgroundImage: "url('/images/hero-flow-poster.webp')",
+        backgroundSize: "cover",
+        backgroundPosition: "center center",
       }}
     >
       <video
@@ -87,6 +90,7 @@ export function HeroVideoBackground({
         loop
         muted
         playsInline
+        poster="/images/hero-flow-poster.webp"
         // @ts-expect-error - Webkit & Android X5 WebView inline attributes
         webkit-playsinline="true"
         x5-playsinline="true"
@@ -102,13 +106,13 @@ export function HeroVideoBackground({
           filter: "brightness(1.15) saturate(1.18)",
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
-          opacity: isLoaded ? 1 : 0.85,
-          transition: "opacity 0.6s ease",
+          opacity: 1,
         }}
       >
+        <source src="/videos/hero-flow-mobile.mp4" media="(max-width: 768px)" type="video/mp4" />
         <source src={videoSrc} type="video/mp4" />
-        <source src="/videos/google-flow-88984ca4.mp4" type="video/mp4" />
-        <source src={fallbackSrc} type="video/mp4" />
+        <source src="/videos/hero-flow-fast.mp4" type="video/mp4" />
+        <source src="/videos/hero-flow.mp4" type="video/mp4" />
       </video>
     </div>
   );
