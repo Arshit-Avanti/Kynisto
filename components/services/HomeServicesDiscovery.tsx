@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
-import { Navbar3D } from "@/components/ui/Navbar3D";
+import { Navbar3D } from "@/components/landing/Navbar3D";
 import { VideoBackground } from "@/components/media/VideoBackground";
 import { ShaderCanvas } from "@/components/ui/ShaderCanvas";
 import { apiFetch } from "@/lib/client-api";
@@ -130,11 +130,7 @@ export function HomeServicesDiscovery() {
       <VideoBackground />
       <ShaderCanvas />
 
-      <Navbar3D
-        userRole={userRole}
-        savedCount={savedCount}
-        mode="services"
-      />
+      <Navbar3D />
 
       {toastMessage && (
         <div className="services-toast-banner" role="alert">

@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
-import { Navbar3D } from "@/components/ui/Navbar3D";
+import { Navbar3D } from "@/components/landing/Navbar3D";
 import { CustomerPlanUI } from "@/components/subscription/CustomerPlanUI";
 import { BusinessMarketplaceUI } from "@/components/subscription/BusinessMarketplaceUI";
 import { Crown, Building2 } from "lucide-react";
@@ -132,7 +132,7 @@ export default function PricingPage() {
 
   return (
     <main className="site min-h-screen transition-colors duration-200">
-      <Navbar3D userRole={currentUser?.role || null} savedCount={0} mode="pricing" />
+      <Navbar3D />
 
       <div style={{ paddingTop: "100px" }}>
         <Suspense
