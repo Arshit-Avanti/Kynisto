@@ -14,31 +14,31 @@ interface TransactionItem {
 const recentTransactions: TransactionItem[] = [
   {
     id: "tx-1",
-    icon: "🚖",
-    title: "Taxi Trips",
-    date: "05 Aug 2026, 10:15",
-    amount: "₹56.50",
+    icon: "🩺",
+    title: "Dr. Sharma Clinic OPD",
+    date: "Token #07 · Calling Now",
+    amount: "Active",
   },
   {
     id: "tx-2",
-    icon: "🚆",
-    title: "Public Transport",
-    date: "01 Aug 2026, 12:01",
-    amount: "₹2.50",
+    icon: "🛠️",
+    title: "Home AC Repair Service",
+    date: "Today, 10:30 AM",
+    amount: "₹499.00",
   },
   {
     id: "tx-3",
-    icon: "✈️",
-    title: "Plane Tickets",
-    date: "28 Jul 2026, 21:40",
-    amount: "₹70.00",
+    icon: "🏪",
+    title: "Sharma General Store",
+    date: "Yesterday · Cashback",
+    amount: "+50 pts",
   },
   {
     id: "tx-4",
-    icon: "⛽",
-    title: "Gas Station",
-    date: "28 Jul 2026, 09:28",
-    amount: "₹30.75",
+    icon: "🦷",
+    title: "City Dental Care",
+    date: "18 Aug · Consultation",
+    amount: "₹200.00",
   },
 ];
 
@@ -132,11 +132,11 @@ export function HeroDashboardMockup() {
               <div className="flex flex-col gap-1">
                 {[
                   { name: "Overview", icon: "🏠" },
-                  { name: "Messages", icon: "✉️", badge: "!" },
-                  { name: "Community", icon: "👥" },
-                  { name: "Payments", icon: "💳" },
-                  { name: "Statistics", icon: "📈" },
-                  { name: "Referrals", icon: "✨" },
+                  { name: "Healthcare", icon: "🩺", badge: "Live" },
+                  { name: "Services", icon: "🛠️" },
+                  { name: "Wallet Pass", icon: "💳" },
+                  { name: "Stores", icon: "🏪" },
+                  { name: "Rewards", icon: "✨" },
                 ].map((item) => (
                   <div
                     key={item.name}
@@ -151,8 +151,8 @@ export function HeroDashboardMockup() {
                       <span>{item.name}</span>
                     </div>
                     {item.badge && (
-                      <span className="w-4 h-4 rounded-full bg-orange-500 text-white text-[9px] font-bold flex items-center justify-center">
-                        {item.badge}
+                      <span className="w-4 h-4 rounded-full bg-emerald-500 text-white text-[9px] font-bold flex items-center justify-center animate-pulse">
+                        !
                       </span>
                     )}
                   </div>
@@ -182,54 +182,53 @@ export function HeroDashboardMockup() {
               <input
                 type="text"
                 readOnly
-                value="Search..."
+                value="Search stores, clinics, services..."
                 className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-300 outline-none pointer-events-none"
               />
             </div>
 
             {/* Dashboard Title & Cards Grid */}
             <div className="flex flex-col gap-2">
-              <div className="text-xs font-bold text-white">Dashboard</div>
+              <div className="text-xs font-bold text-white">Live Status &amp; Passes</div>
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                 
-                {/* Glowing Digital Card */}
-                <div className="sm:col-span-7 rounded-2xl p-4 relative overflow-hidden bg-gradient-to-br from-indigo-900/90 via-slate-900 to-indigo-950/90 border border-white/20 shadow-xl flex flex-col justify-between min-h-[135px]">
+                {/* Glowing Kynisto Pass Card */}
+                <div className="sm:col-span-7 rounded-2xl p-4 relative overflow-hidden bg-gradient-to-br from-orange-950/80 via-slate-900 to-slate-950 border border-orange-500/30 shadow-xl flex flex-col justify-between min-h-[135px]">
                   <div className="flex items-center justify-between relative z-10">
-                    <span className="text-[9px] font-bold tracking-widest text-slate-300 uppercase">Credix Platinum</span>
-                    <span className="text-xs text-slate-300">⚡</span>
+                    <span className="text-[9px] font-bold tracking-widest text-orange-400 uppercase">KYNISTO VIP PASS</span>
+                    <span className="text-xs text-emerald-400 font-bold">● ACTIVE</span>
                   </div>
 
                   <div className="my-1.5 relative z-10">
-                    <div className="text-xs sm:text-sm font-mono tracking-widest text-white font-bold">2506 5633 7859 4841</div>
-                    <div className="text-[9px] text-slate-400 mt-0.5">Patrick Parker</div>
+                    <div className="text-xs sm:text-sm font-mono tracking-widest text-white font-bold">KYN-8941 2026 5633</div>
+                    <div className="text-[9px] text-slate-300 mt-0.5">DLF Ankur Vihar • Verified Member</div>
                   </div>
 
                   <div className="flex items-center justify-between text-[10px] text-slate-300 relative z-10">
-                    <span>Valid 08/29</span>
-                    <div className="flex -space-x-1">
-                      <span className="w-3.5 h-3.5 rounded-full bg-red-500/90 inline-block" />
-                      <span className="w-3.5 h-3.5 rounded-full bg-amber-400/90 inline-block" />
+                    <span>Valid 2026–2027</span>
+                    <div className="flex items-center gap-1 text-[8px] font-bold text-orange-400">
+                      <span>⚡ SMART PASS</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Upcoming Payments (2 Square Tiles) */}
+                {/* Queue & Loyalty Status Tiles */}
                 <div className="sm:col-span-5 flex flex-col gap-2">
-                  <div className="text-[11px] font-semibold text-slate-300">Upcoming payments</div>
+                  <div className="text-[11px] font-semibold text-slate-300">Active Queue &amp; Rewards</div>
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="p-2.5 rounded-xl bg-white/[0.04] border border-white/10 flex flex-col justify-between">
-                      <div className="w-5 h-5 rounded-lg bg-white/10 flex items-center justify-center text-[10px]">💼</div>
+                    <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col justify-between">
+                      <div className="w-5 h-5 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px]">🩺</div>
                       <div className="mt-1">
-                        <div className="text-[8px] text-slate-400 font-medium">Freelance</div>
-                        <div className="text-[11px] font-bold text-white">$1,500</div>
+                        <div className="text-[8px] text-slate-300 font-medium">OPD Token</div>
+                        <div className="text-[11px] font-bold text-emerald-400">#07 (Next)</div>
                       </div>
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-white/[0.04] border border-white/10 flex flex-col justify-between">
-                      <div className="w-5 h-5 rounded-lg bg-white/10 flex items-center justify-center text-[10px]">💰</div>
+                    <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 flex flex-col justify-between">
+                      <div className="w-5 h-5 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-[10px]">⭐</div>
                       <div className="mt-1">
-                        <div className="text-[8px] text-slate-400 font-medium">Salary</div>
-                        <div className="text-[11px] font-bold text-white">$4,000</div>
+                        <div className="text-[8px] text-slate-300 font-medium">Rewards</div>
+                        <div className="text-[11px] font-bold text-amber-300">1,250 pts</div>
                       </div>
                     </div>
                   </div>

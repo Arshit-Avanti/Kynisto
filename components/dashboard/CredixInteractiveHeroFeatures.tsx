@@ -15,31 +15,31 @@ interface TransactionItem {
 const recentTransactions: TransactionItem[] = [
   {
     id: "tx-1",
-    icon: "🚖",
-    title: "Taxi Trips",
-    date: "05 Aug, 10:15",
-    amount: "₹56.50",
+    icon: "🩺",
+    title: "Dr. Sharma Clinic OPD",
+    date: "Token #07 · Calling Now",
+    amount: "Active",
   },
   {
     id: "tx-2",
-    icon: "🚆",
-    title: "Public Transport",
-    date: "01 Aug, 12:01",
-    amount: "₹2.50",
+    icon: "🛠️",
+    title: "Home AC Repair Service",
+    date: "Today, 10:30 AM",
+    amount: "₹499.00",
   },
   {
     id: "tx-3",
-    icon: "✈️",
-    title: "Plane Tickets",
-    date: "28 Jul, 21:40",
-    amount: "₹70.00",
+    icon: "🏪",
+    title: "Sharma General Store",
+    date: "Yesterday · Cashback",
+    amount: "+50 pts",
   },
   {
     id: "tx-4",
-    icon: "⛽",
-    title: "Gas Station",
-    date: "28 Jul, 09:28",
-    amount: "₹30.75",
+    icon: "🦷",
+    title: "City Dental Care",
+    date: "18 Aug · Consultation",
+    amount: "₹200.00",
   },
 ];
 
@@ -108,7 +108,6 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
     : 1;
 
   const handleDashboardClick = () => {
-    // Navigate to /dashboard (which automatically opens account if logged in, or redirects to /login?returnTo=/dashboard if not)
     router.push("/dashboard");
   };
 
@@ -148,9 +147,9 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
           }}
         >
           {/* Badge */}
-          <div className="arise-on-scroll arise-delay-1 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.08] border border-white/20 text-[10px] sm:text-[11px] font-bold text-orange-400 mb-3 backdrop-blur-md shadow-md shadow-orange-500/10 tracking-wide uppercase max-w-full truncate">
+          <div className="arise-on-scroll arise-delay-1 inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/[0.08] border border-white/20 text-[10px] sm:text-[11px] font-bold text-orange-400 mb-3 backdrop-blur-md shadow-md shadow-orange-500/10 tracking-wide uppercase max-w-full truncate">
             <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping flex-shrink-0" />
-            <span className="truncate">THE INFRASTRUCTURE OF EFFICIENCY • 2026</span>
+            <span className="truncate">EVERYTHING AROUND YOU, SMARTER • 2026</span>
           </div>
 
           {/* Compact Responsive Title */}
@@ -162,12 +161,12 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
               letterSpacing: "-0.035em",
               lineHeight: 1.15,
               margin: "0 0 8px 0",
-              maxWidth: "750px",
+              maxWidth: "780px",
               fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif",
               wordBreak: "break-word",
             }}
           >
-            Your Money. Your Sky. Your Future is here.
+            Your City. Your Health. Your Life, Smarter.
           </h1>
 
           {/* Compact Responsive Subtitle */}
@@ -177,14 +176,14 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
               fontSize: "clamp(0.82rem, 3.2vw, 0.98rem)",
               fontWeight: 400,
               margin: "0 0 16px 0",
-              opacity: 0.85,
+              opacity: 0.9,
               letterSpacing: "-0.01em",
-              maxWidth: "540px",
+              maxWidth: "580px",
               lineHeight: 1.45,
               padding: "0 8px",
             }}
           >
-            Built on a foundation of trust and security, we ensure that your healthcare tokens, finances, and store rewards are always protected.
+            Discover verified local stores, book home services, join live doctor OPD queues, and unlock smart rewards across your neighborhood.
           </p>
 
           {/* Compact Responsive Pill Input Form */}
@@ -200,9 +199,9 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
               backdropFilter: "blur(20px)",
               border: "1px solid rgba(255, 255, 255, 0.18)",
               borderRadius: "50px",
-              padding: "4px 4px 4px 12px",
+              padding: "4px 4px 4px 14px",
               boxShadow: "0 10px 25px -4px rgba(0, 0, 0, 0.25)",
-              maxWidth: "420px",
+              maxWidth: "440px",
               width: "100%",
               boxSizing: "border-box",
               display: "flex",
@@ -215,7 +214,7 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
               className="heroSearchInput highContrastText"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Email@example.com or Search..."
+              placeholder="Search stores, clinics, plumbers, salons..."
               style={{
                 background: "transparent",
                 border: "none",
@@ -244,7 +243,7 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
                 whiteSpace: "nowrap",
               }}
             >
-              Open Account
+              Explore Now
             </button>
           </form>
         </div>
@@ -267,19 +266,19 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
             }}
           >
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.15] mb-3 sm:mb-5">
-              Banking, Anytime, Wherever You Are
+              Local Commerce &amp; Care, Wherever You Are
             </h2>
 
             <p className="text-slate-300 text-xs sm:text-base leading-relaxed mb-6 sm:mb-8 max-w-lg">
-              Manage your finances on the go with a seamless mobile experience. Whether you&apos;re transferring money, paying bills, or tracking expenses, everything is just a tap away.
+              Experience your neighborhood with unprecedented speed. From real-time clinic turn alerts to instant home service dispatches and digital passes, everything is just a tap away.
             </p>
 
             {/* Feature Points on Left Side */}
             <div className="flex flex-col gap-2.5 sm:gap-4 mb-6 sm:mb-8 w-full">
               {[
-                { title: "Universal Loyalty & Cashbacks", desc: "Instant cashback credited to your digital pass at 100+ stores." },
-                { title: "Live OPD Token Telemetry", desc: "Real-time doctor queue updates without waiting in crowded clinic lobbies." },
-                { title: "High-Speed Payments", desc: "Instant 1-tap QR checkouts backed by Cloudflare D1 real-time edge sync." },
+                { title: "Universal Loyalty & Smart Rewards", desc: "Instant reward points credited to your Kynisto digital pass at verified neighborhood stores." },
+                { title: "Live Healthcare & OPD Telemetry", desc: "Real-time doctor turn tracking so you arrive right on time without crowded clinic waiting rooms." },
+                { title: "Verified Home Services & Instant Dispatch", desc: "Book verified electricians, plumbers, and AC repair technicians with guaranteed rates." },
               ].map((feat, idx) => (
                 <div key={idx} className="flex items-start gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-white/[0.03] border border-white/10">
                   <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-orange-500/20 text-orange-400 font-bold flex items-center justify-center text-[10px] sm:text-xs flex-shrink-0 mt-0.5">
@@ -295,16 +294,16 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
 
             <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
               <Link
-                href="/wallet"
+                href="/services"
                 className="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-105 transition-all"
               >
-                Open Account
+                Explore Home Services
               </Link>
               <Link
                 href="/healthcare"
                 className="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl bg-white/[0.06] border border-white/15 text-slate-200 hover:text-white hover:bg-white/[0.1] font-semibold text-xs sm:text-sm transition-all"
               >
-                Explore Live Queues →
+                ⚡ Live Healthcare Hub →
               </Link>
             </div>
           </div>
@@ -344,7 +343,7 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
                 <span>↗</span>
               </div>
 
-              {/* Exact 3-Zone Credix Dashboard */}
+              {/* Exact 3-Zone Kynisto Dashboard */}
               <div className="grid grid-cols-12 min-h-0 sm:min-h-[470px]">
                 
                 {/* 1. Left Sidebar (Visible on Tablet & Desktop) */}
@@ -354,17 +353,17 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
                       <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-gradient-to-tr from-orange-500 to-amber-400 flex items-center justify-center font-black text-xs text-white shadow-md shadow-orange-500/30">
                         K
                       </div>
-                      <span className="font-extrabold text-xs sm:text-sm text-white tracking-wide">Credix</span>
+                      <span className="font-extrabold text-xs sm:text-sm text-white tracking-wide">Kynisto</span>
                     </div>
 
                     <div className="flex flex-col gap-1">
                       {[
                         { name: "Overview", icon: "🏠" },
-                        { name: "Messages", icon: "✉️", badge: "!" },
-                        { name: "Community", icon: "👥" },
-                        { name: "Payments", icon: "💳" },
-                        { name: "Statistics", icon: "📈" },
-                        { name: "Referrals", icon: "✨" },
+                        { name: "Healthcare", icon: "🩺", badge: "Live" },
+                        { name: "Services", icon: "🛠️" },
+                        { name: "Wallet Pass", icon: "💳" },
+                        { name: "Stores", icon: "🏪" },
+                        { name: "Rewards", icon: "✨" },
                       ].map((item) => (
                         <div
                           key={item.name}
@@ -379,8 +378,8 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
                             <span>{item.name}</span>
                           </div>
                           {item.badge && (
-                            <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-orange-500 text-white text-[8px] sm:text-[9px] font-bold flex items-center justify-center">
-                              {item.badge}
+                            <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-emerald-500 text-white text-[8px] sm:text-[9px] font-bold flex items-center justify-center animate-pulse">
+                              !
                             </span>
                           )}
                         </div>
@@ -408,53 +407,52 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
                     <input
                       type="text"
                       readOnly
-                      value="Search my cards & orders..."
+                      value="Search stores, clinics, services..."
                       className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-7 sm:pl-8 pr-3 py-1 sm:py-1.5 text-[11px] sm:text-xs text-slate-300 outline-none pointer-events-none"
                     />
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <div className="text-[11px] sm:text-xs font-bold text-white">Dashboard</div>
+                    <div className="text-[11px] sm:text-xs font-bold text-white">Live Status &amp; Passes</div>
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3">
                       
-                      {/* Card */}
-                      <div className="sm:col-span-7 rounded-xl sm:rounded-2xl p-3 sm:p-4 relative overflow-hidden bg-gradient-to-br from-indigo-900/90 via-slate-900 to-indigo-950/90 border border-white/20 shadow-xl flex flex-col justify-between min-h-[110px] sm:min-h-[135px]">
+                      {/* Kynisto VIP Pass Card */}
+                      <div className="sm:col-span-7 rounded-xl sm:rounded-2xl p-3 sm:p-4 relative overflow-hidden bg-gradient-to-br from-orange-950/80 via-slate-900 to-slate-950 border border-orange-500/30 shadow-xl flex flex-col justify-between min-h-[110px] sm:min-h-[135px]">
                         <div className="flex items-center justify-between relative z-10">
-                          <span className="text-[8px] sm:text-[9px] font-bold tracking-widest text-slate-300 uppercase">Credix Platinum</span>
-                          <span className="text-xs text-slate-300">⚡</span>
+                          <span className="text-[8px] sm:text-[9px] font-bold tracking-widest text-orange-400 uppercase">KYNISTO VIP PASS</span>
+                          <span className="text-xs text-emerald-400 font-bold">● ACTIVE</span>
                         </div>
 
                         <div className="my-1 relative z-10">
-                          <div className="text-xs sm:text-sm font-mono tracking-widest text-white font-bold">2506 5633 7859 4841</div>
-                          <div className="text-[8px] sm:text-[9px] text-slate-400 mt-0.5">Patrick Parker</div>
+                          <div className="text-xs sm:text-sm font-mono tracking-widest text-white font-bold">KYN-8941 2026 5633</div>
+                          <div className="text-[8px] sm:text-[9px] text-slate-300 mt-0.5">DLF Ankur Vihar • Verified Member</div>
                         </div>
 
                         <div className="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-300 relative z-10">
-                          <span>Valid 08/29</span>
-                          <div className="flex -space-x-1">
-                            <span className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-red-500/90 inline-block" />
-                            <span className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-amber-400/90 inline-block" />
+                          <span>Valid 2026–2027</span>
+                          <div className="flex items-center gap-1 text-[8px] font-bold text-orange-400">
+                            <span>⚡ SMART PASS</span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Upcoming Payments */}
+                      {/* Live Queue Token & Loyalty Points */}
                       <div className="sm:col-span-5 flex flex-col gap-1.5 sm:gap-2">
-                        <div className="text-[10px] sm:text-[11px] font-semibold text-slate-300">Upcoming payments</div>
+                        <div className="text-[10px] sm:text-[11px] font-semibold text-slate-300">Active Queue &amp; Rewards</div>
                         <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
-                          <div className="p-2 rounded-xl bg-white/[0.04] border border-white/10 flex flex-col justify-between">
-                            <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-lg bg-white/10 flex items-center justify-center text-[9px] sm:text-[10px]">💼</div>
+                          <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col justify-between">
+                            <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[9px] sm:text-[10px]">🩺</div>
                             <div className="mt-1">
-                              <div className="text-[7px] sm:text-[8px] text-slate-400 font-medium">Freelance</div>
-                              <div className="text-[10px] sm:text-[11px] font-bold text-white">$1,500</div>
+                              <div className="text-[7px] sm:text-[8px] text-slate-300 font-medium">OPD Token</div>
+                              <div className="text-[10px] sm:text-[11px] font-bold text-emerald-400">#07 (Next)</div>
                             </div>
                           </div>
 
-                          <div className="p-2 rounded-xl bg-white/[0.04] border border-white/10 flex flex-col justify-between">
-                            <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-lg bg-white/10 flex items-center justify-center text-[9px] sm:text-[10px]">💰</div>
+                          <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 flex flex-col justify-between">
+                            <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-[9px] sm:text-[10px]">⭐</div>
                             <div className="mt-1">
-                              <div className="text-[7px] sm:text-[8px] text-slate-400 font-medium">Salary</div>
-                              <div className="text-[10px] sm:text-[11px] font-bold text-white">$4,000</div>
+                              <div className="text-[7px] sm:text-[8px] text-slate-300 font-medium">Rewards</div>
+                              <div className="text-[10px] sm:text-[11px] font-bold text-amber-300">1,250 pts</div>
                             </div>
                           </div>
                         </div>
@@ -463,11 +461,11 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
                     </div>
                   </div>
 
-                  {/* Recent Transactions */}
+                  {/* Recent Activity */}
                   <div className="flex flex-col gap-1.5 sm:gap-2 pt-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] sm:text-xs font-bold text-white">Recent transactions</span>
-                      <span className="text-[9px] sm:text-[10px] text-slate-400 bg-white/5 px-2 py-0.5 rounded border border-white/10">Sort by ⌄</span>
+                      <span className="text-[11px] sm:text-xs font-bold text-white">Recent activity &amp; bookings</span>
+                      <span className="text-[9px] sm:text-[10px] text-slate-400 bg-white/5 px-2 py-0.5 rounded border border-white/10">All Visits ⌄</span>
                     </div>
 
                     <div className="flex flex-col gap-1.5">
@@ -487,7 +485,7 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
                           </div>
 
                           <div className="flex items-center gap-1.5 sm:gap-2">
-                            <span className="text-[10px] sm:text-[11px] font-bold text-white">{tx.amount}</span>
+                            <span className="text-[10px] sm:text-[11px] font-bold text-emerald-400">{tx.amount}</span>
                             <span className="text-slate-500 text-[9px] sm:text-[10px]">•••</span>
                           </div>
                         </div>
