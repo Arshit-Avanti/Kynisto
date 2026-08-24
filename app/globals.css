@@ -2639,23 +2639,23 @@ img, video, iframe, embed, object {
 .trustStrip.efferdFeaturesBlock {
   width: min(1344px, calc(100% - 64px)) !important;
   margin: 32px auto !important;
-  padding: 16px !important;
+  padding: 0 !important;
   display: grid !important;
   grid-template-columns: repeat(3, 1fr) !important;
   gap: 20px !important;
-  background: rgba(10, 16, 30, 0.65) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border-radius: 24px !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
   transition: all 0.3s ease !important;
 }
 
 .mode-light .trustStrip.efferdFeaturesBlock {
-  background: rgba(255, 255, 255, 0.85) !important;
-  border: 1px solid rgba(0, 0, 0, 0.12) !important;
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .efferdFeatureCard {
@@ -2664,16 +2664,20 @@ img, video, iframe, embed, object {
   gap: 18px !important;
   padding: 18px 24px !important;
   border-radius: 18px !important;
-  background: rgba(255, 255, 255, 0.04) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
   position: relative !important;
   overflow: hidden !important;
 }
 
 .mode-light .efferdFeatureCard {
-  background: rgba(248, 250, 252, 0.7) !important;
-  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08) !important;
 }
 
 .efferdFeatureCard:hover {
@@ -2825,7 +2829,7 @@ img, video, iframe, embed, object {
   .trustStrip.efferdFeaturesBlock {
     grid-template-columns: 1fr !important;
     gap: 12px !important;
-    padding: 12px !important;
+    padding: 0 !important;
   }
 }
 
