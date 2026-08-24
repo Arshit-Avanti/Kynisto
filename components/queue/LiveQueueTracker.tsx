@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/client-api';
 import { PushNotificationManager } from '@/components/ui/PushNotificationManager';
 import { AppointmentBooking } from '@/components/queue/AppointmentBooking';
+import { Navbar3D } from '@/components/landing/Navbar3D';
 
 let _cachedAudioCtx: AudioContext | null = null;
 let _lastChimeTime = 0;
@@ -732,17 +733,26 @@ export default function LiveQueueTracker() {
   }, [queues, debouncedSearchQuery, activeFilter]);
 
   const renderedCategoryFilters = useMemo(() => {
-    return ['All', 'Hospital', 'Clinic', 'Diagnostic', 'Dental'].map((filter) => (
+    const filters = [
+      { id: 'All', label: 'All Care', icon: Sparkles },
+      { id: 'Clinic', label: 'Clinics & OPD', icon: Stethoscope },
+      { id: 'Hospital', label: 'Hospitals', icon: Building2 },
+      { id: 'Diagnostic', label: 'Diagnostic Labs', icon: Activity },
+      { id: 'Dental', label: 'Dental Care', icon: Sparkles },
+    ];
+
+    return filters.map(({ id, label, icon: Icon }) => (
       <button
-        key={filter}
-        onClick={() => handleFilterSelect(filter)}
-        className={`px-4 sm:px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-          activeFilter === filter
+        key={id}
+        onClick={() => handleFilterSelect(id)}
+        className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 ${
+          activeFilter === id
             ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25 border border-emerald-400/30 scale-[1.02]'
             : 'bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10'
         }`}
       >
-        {filter === 'All' ? '🏥 All Care' : filter === 'Hospital' ? '🏢 Hospitals' : filter === 'Clinic' ? '🩺 Clinics & OPD' : filter === 'Diagnostic' ? '🔬 Diagnostic Labs' : '🦷 Dental'}
+        <Icon className={`w-3.5 h-3.5 ${activeFilter === id ? 'text-white' : 'text-emerald-400'}`} />
+        <span>{label}</span>
       </button>
     ));
   }, [activeFilter, handleFilterSelect]);
@@ -761,10 +771,11 @@ export default function LiveQueueTracker() {
         <div
           key={item.id}
           style={{ contain: "content", transform: "translate3d(0,0,0)", willChange: "transform" }}
-          className="bg-slate-900/60 backdrop-blur-md hover:bg-slate-900/90 border border-white/10 hover:border-emerald-500/40 rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-xl flex flex-col justify-between group relative overflow-hidden active:scale-[0.99]"
+          className="bg-slate-900/60 backdrop-blur-xl hover:bg-slate-900/90 border border-white/10 hover:border-emerald-500/40 rounded-3xl p-5 sm:p-7 transition-all duration-300 shadow-xl flex flex-col justify-between group relative overflow-hidden active:scale-[0.99]"
         >
           <div>
-            <div className="flex items-center justify-between flex-wrap gap-2 mb-3.5">
+            {/* Top Row: Tags & Live Queue Status */}
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
               <div className="flex items-center flex-wrap gap-1.5 min-w-0">
                 <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[11px] font-extrabold uppercase tracking-wide">
                   {item.providerType || 'Clinic'}
@@ -799,43 +810,57 @@ export default function LiveQueueTracker() {
               )}
             </div>
 
-            <h3 className="text-lg sm:text-xl font-extrabold text-white group-hover:text-emerald-400 transition-colors mb-1.5">
-              {item.name}
-            </h3>
+            {/* Clinic Info */}
+            <div className="flex items-start gap-3.5 mb-3">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
+                <Stethoscope className="w-5 h-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-lg sm:text-xl font-black text-white group-hover:text-emerald-400 transition-colors leading-tight">
+                  {item.name}
+                </h3>
+                <p className="flex items-center text-slate-300 text-xs sm:text-sm font-medium mt-1">
+                  <MapPin className="w-3.5 h-3.5 mr-1 text-teal-400 shrink-0" />
+                  <span className="truncate">{item.address}</span>
+                </p>
+              </div>
+            </div>
 
-            <p className="flex items-center text-slate-300 text-xs sm:text-sm font-medium mb-4">
-              <MapPin className="w-3.5 h-3.5 mr-1.5 text-teal-400 shrink-0" />
-              <span className="truncate">{item.address}</span>
-            </p>
-
-            {/* Queue / Clinic Stats */}
-            <div className="grid grid-cols-2 gap-2.5 p-3.5 bg-black/40 rounded-2xl border border-white/5 mb-4">
+            {/* 3-Column Metrics Gauge */}
+            <div className="grid grid-cols-3 gap-2 p-3 bg-black/40 rounded-2xl border border-white/5 mb-5 text-center">
               <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
-                  {hasLiveQueue ? "Waiting" : "Clinic Status"}
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+                  Waiting
                 </span>
-                <span className="text-base sm:text-xl font-black text-white tabular-nums">
-                  {hasLiveQueue ? (isClosed ? 0 : item.waitingCount) : "OPD Listed"}{" "}
-                  {hasLiveQueue && <span className="text-xs font-normal text-slate-400">in queue</span>}
+                <span className="text-sm sm:text-lg font-black text-white tabular-nums">
+                  {hasLiveQueue ? (isClosed ? 0 : item.waitingCount) : "OPD Listed"}
                 </span>
               </div>
               <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
-                  {hasLiveQueue ? "Avg Speed" : "Walk-in"}
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+                  Avg Speed
                 </span>
-                <span className="text-base sm:text-xl font-black text-emerald-400 tabular-nums">
-                  {hasLiveQueue ? `${consultationMins}m` : "Available"}{" "}
-                  {hasLiveQueue && <span className="text-xs font-normal text-slate-400">/ patient</span>}
+                <span className="text-sm sm:text-lg font-black text-emerald-400 tabular-nums">
+                  {hasLiveQueue ? `${consultationMins}m` : "Walk-in"}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+                  Status
+                </span>
+                <span className={`text-sm sm:text-lg font-black tabular-nums ${isClosed ? "text-slate-400" : "text-emerald-400"}`}>
+                  {isClosed ? "Closed" : "Active"}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="flex gap-2 pt-1">
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 pt-1">
             <Link
               href={`/stores/${item.slug || item.id}`}
-              className={`py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white border border-white/10 cursor-pointer ${
-                hasLiveQueue ? "flex-1" : "w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white border-none shadow-md"
+              className={`py-2.5 px-4 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white border border-white/10 cursor-pointer ${
+                hasLiveQueue ? "shrink-0" : "w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white border-none shadow-md"
               }`}
             >
               <Building2 className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
@@ -867,7 +892,7 @@ export default function LiveQueueTracker() {
               <button
                 onClick={() => handleJoinQueue(item)}
                 disabled={isClosed || isJoining}
-                className={`flex-1 py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-2xl transition-all shadow-md flex items-center justify-center space-x-1.5 group/btn ${
+                className={`flex-1 py-2.5 px-4 font-bold text-xs sm:text-sm rounded-2xl transition-all shadow-md flex items-center justify-center space-x-1.5 group/btn ${
                   isClosed
                     ? 'bg-slate-800/60 text-slate-500 cursor-not-allowed border border-white/5 opacity-70'
                     : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white shadow-emerald-500/20 cursor-pointer'
@@ -899,54 +924,29 @@ export default function LiveQueueTracker() {
             onClick={() => setView('list')}
             className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition-all"
           >
-            Browse Healthcare Queues
+            Find Another Clinic
           </button>
-          <Link href="/" className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl transition-all">
-            Return Home
-          </Link>
         </div>
       </div>
     );
   }
 
-  // 2. TURN COMPLETED STATE VIEW (Shows exact requested user thank you message)
+  // 2. COMPLETED VISIT STATE VIEW
   if (isCompleted && selectedQueue) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center font-sans">
-        <div className="w-24 h-24 rounded-full bg-emerald-500/20 border-4 border-emerald-500 flex items-center justify-center mb-6 shadow-[0_0_50px_rgba(16,185,129,0.4)] animate-bounce">
-          <PartyPopper className="w-12 h-12 text-emerald-400" />
-        </div>
-        <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-          Thank You for Visiting!
-        </h2>
-        <p className="text-lg sm:text-xl text-slate-300 font-medium mt-4 max-w-lg leading-relaxed">
-          Your consultation at <strong className="text-emerald-400">{selectedQueue.name}</strong> is now complete. Thank you for visiting!
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
+        <CheckCircle2 className="w-20 h-20 text-emerald-400 mb-6 animate-bounce" />
+        <h2 className="text-3xl sm:text-4xl font-black text-white">Consultation Complete</h2>
+        <p className="text-lg text-slate-300 font-medium mt-3 max-w-md">
+          Thank you for visiting <span className="text-white font-bold">{selectedQueue.name}</span>!
         </p>
-
-        <div className="mt-10 flex flex-col sm:flex-row gap-4">
+        <div className="flex gap-4 mt-8">
           <button
-            onClick={() => {
-              setEntryStatus('waiting');
-              entryStatusRef.current = 'waiting';
-              prevEntryStatusRef.current = null;
-              setCurrentEntryId(null);
-              currentEntryIdRef.current = null;
-              setSelectedQueue(null);
-              selectedQueueRef.current = null;
-              setMyTokenNumber(0);
-              setUserPosition(0);
-              setTotalInQueue(0);
-              setLiveCompleted(false);
-              lastStateSignatureRef.current = "";
-              setView('list');
-            }}
-            className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base rounded-2xl shadow-xl transition-all cursor-pointer"
+            onClick={() => setView('list')}
+            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition-all"
           >
-            Done · Return to Healthcare Hub
+            Back to Healthcare Hub
           </button>
-          <Link href="/" className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-base rounded-2xl transition-all">
-            Home Dashboard
-          </Link>
         </div>
       </div>
     );
@@ -1202,85 +1202,72 @@ export default function LiveQueueTracker() {
   return (
     <>
     <div className="min-h-screen bg-[#070B12] text-white flex flex-col font-sans relative overflow-x-hidden">
+      {/* Universal Floating Navbar */}
+      <Navbar3D />
+
       {/* Ambient Atmospheric Cyan & Emerald Glows */}
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[450px] pointer-events-none z-0"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[550px] pointer-events-none z-0"
         style={{
-          background: "radial-gradient(ellipse at top, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.08) 45%, transparent 70%)",
-          filter: "blur(100px)",
+          background: "radial-gradient(ellipse at top, rgba(16, 185, 129, 0.16) 0%, rgba(6, 182, 212, 0.08) 45%, transparent 70%)",
+          filter: "blur(110px)",
         }}
       />
 
-      {/* Floating Topbar */}
-      <header className="sticky top-0 z-40 px-4 sm:px-6 py-3 pointer-events-none">
-        <div className="max-w-6xl mx-auto rounded-full bg-slate-900/80 backdrop-blur-xl border border-white/10 px-4 sm:px-6 py-2.5 shadow-xl shadow-black/20 flex items-center justify-between pointer-events-auto transition-all">
-          <div className="flex items-center gap-3 min-w-0">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs sm:text-sm font-semibold border border-white/10 transition-all shrink-0"
-            >
-              <ArrowLeft className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Home</span>
-            </Link>
-            <div className="h-4 w-px bg-white/10 hidden sm:block" />
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0">
-                <Activity className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-sm sm:text-base font-extrabold text-white tracking-tight truncate flex items-center gap-2">
-                  <span>Healthcare Hub</span>
-                  <span className="hidden md:inline-flex px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/20">
-                    Live Queues
-                  </span>
-                </h1>
-              </div>
-            </div>
-          </div>
-
-          {selectedQueue && (
-            <button
-              onClick={() => setView('ticket')}
-              className="inline-flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-3.5 py-1.5 rounded-full text-xs sm:text-sm transition-all shadow-md shadow-emerald-500/20 shrink-0 cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-              <span className="hidden sm:inline">Active Pass ({selectedQueue.name.split('–')[0].trim()})</span>
-              <span className="sm:hidden">Pass</span>
-            </button>
-          )}
-        </div>
-      </header>
-
       {/* Main Hero Banner */}
-      <div className="relative z-10 pt-4 pb-8 sm:pb-12 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto flex flex-col items-start text-left">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-3 backdrop-blur-md">
+      <div className="relative z-10 pt-24 sm:pt-28 pb-6 sm:pb-10 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto flex flex-col items-center text-center">
+          {/* Active Ticket Banner if User is in a Live Queue */}
+          {selectedQueue && (
+            <div className="mb-6 w-full max-w-xl">
+              <button
+                onClick={() => setView('ticket')}
+                className="w-full flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-950/90 to-slate-900/90 border border-emerald-500/40 text-emerald-200 hover:text-white transition-all shadow-lg shadow-emerald-950/50 cursor-pointer group"
+              >
+                <div className="flex items-center gap-2.5 text-left min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                    <Sparkles className="w-4 h-4 animate-pulse" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold uppercase tracking-wider text-emerald-400">Active Live Pass</div>
+                    <div className="text-sm font-black text-white truncate">{selectedQueue.name}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs font-black uppercase px-3 py-1.5 rounded-xl bg-emerald-500 text-slate-950 shrink-0 group-hover:bg-emerald-400 transition-colors">
+                  <span>View Pass</span>
+                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </button>
+            </div>
+          )}
+
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-extrabold uppercase tracking-wider mb-4 backdrop-blur-md shadow-sm shadow-emerald-500/10">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
             <span>VERIFIED CARE NETWORK</span>
           </div>
 
-          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.15] max-w-2xl">
+          <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.12] max-w-3xl">
             Local care,{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
               without the waiting room.
             </span>
           </h2>
 
-          <p className="text-slate-300 text-sm sm:text-base font-normal mt-3 max-w-xl leading-relaxed">
+          <p className="text-slate-300 text-sm sm:text-lg font-normal mt-4 max-w-2xl leading-relaxed">
             Select a verified clinic, OPD, or diagnostic lab near you. Join live queues remotely and arrive right on time.
           </p>
 
           {/* Search Input & Push Alerts */}
-          <div className="mt-6 w-full max-w-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          <div className="mt-8 w-full max-w-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="flex-1 relative flex items-center">
               <Search className="w-4 h-4 text-emerald-400 absolute left-4 z-10 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
-                placeholder="Search clinic, doctor, specialty..."
+                placeholder="Search clinic, doctor, specialty, area..."
                 style={{ paddingLeft: "42px", paddingRight: "14px" }}
-                className="w-full bg-slate-900/90 border border-white/15 rounded-2xl py-3 text-white placeholder-slate-400 font-medium focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 transition-all text-sm shadow-inner"
+                className="w-full bg-slate-900/90 border border-white/15 rounded-2xl py-3.5 text-white placeholder-slate-400 font-medium focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 transition-all text-sm shadow-inner"
               />
             </div>
             <PushNotificationManager />
@@ -1302,14 +1289,14 @@ export default function LiveQueueTracker() {
       )}
 
       {/* Filter Tabs & Provider Cards Grid */}
-      <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pb-16 flex-1 relative z-10">
+      <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pb-20 flex-1 relative z-10">
         {/* Category Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar">
+        <div className="flex items-center justify-start sm:justify-center gap-2.5 overflow-x-auto pb-4 mb-8 no-scrollbar">
           {renderedCategoryFilters}
         </div>
 
         {/* Queues Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-7">
           {renderedQueuesGrid}
         </div>
       </div>
