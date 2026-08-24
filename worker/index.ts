@@ -40,8 +40,8 @@ function applySecurityHeaders(res: Response): Response {
     "img-src 'self' data: blob: https: https://*.google.com https://*.google.co.in https://*.googlesyndication.com https://*.google-analytics.com https://*.doubleclick.net https://pagead2.googlesyndication.com https://*.googleadservices.com https://*.gstatic.com; " +
     "font-src 'self' data: https: https://*.gstatic.com https://*.googleapis.com; " +
     "connect-src 'self' https: wss: data: blob: https://*.google.com https://*.google.co.in https://*.googlesyndication.com https://pagead2.googlesyndication.com https://*.google-analytics.com https://*.doubleclick.net https://adservice.google.com https://*.googleadservices.com https://*.googletagservices.com https://*.googletagmanager.com https://ep2.adtrafficquality.google https://*.supabase.co; " +
-    "frame-src 'self' https: data: blob: https://*.google.com https://*.googlesyndication.com https://*.googleusercontent.com https://*.doubleclick.net https://tpc.googlesyndication.com https://*.admob.com https://*.googleadservices.com; " +
-    "frame-ancestors 'self' https://*.google.com https://*.googlesyndication.com https://*.googleusercontent.com https://*.admob.com https://*.adsense.com https://adsense.google.com https://admob.google.com *; " +
+    "frame-src 'self' https: data: blob: https://*.google.com https://*.google.co.in https://*.googlesyndication.com https://*.googleusercontent.com https://*.doubleclick.net https://tpc.googlesyndication.com https://*.admob.com https://*.googleadservices.com; " +
+    "frame-ancestors 'self' https://*.google.com https://*.google.co.in https://*.googlesyndication.com https://*.googleusercontent.com https://*.admob.com https://*.adsense.com https://adsense.google.com https://admob.google.com https://search.google.com https://*.googleadservices.com; " +
     "object-src 'none';"
   );
   return new Response(res.body, {
