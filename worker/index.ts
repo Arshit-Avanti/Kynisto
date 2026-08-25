@@ -29,6 +29,7 @@ function applySecurityHeaders(res: Response): Response {
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("X-XSS-Protection", "1; mode=block");
+  headers.set("Access-Control-Allow-Origin", "*");
   headers.set(
     "Content-Security-Policy",
     "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; " +
@@ -41,7 +42,7 @@ function applySecurityHeaders(res: Response): Response {
     "font-src 'self' data: https: https://*.gstatic.com https://*.googleapis.com https://*.microsoft.com; " +
     "connect-src 'self' https: wss: data: blob: https://*.google.com https://*.google.co.in https://*.googlesyndication.com https://pagead2.googlesyndication.com https://*.google-analytics.com https://*.doubleclick.net https://adservice.google.com https://*.googleadservices.com https://*.googletagservices.com https://*.googletagmanager.com https://ep2.adtrafficquality.google https://*.supabase.co https://*.clarity.ms https://*.bing.com https://*.microsoft.com https://*.pubcenter.microsoft.com https://*.bat.bing.com; " +
     "frame-src 'self' https: data: blob: https://*.google.com https://*.google.co.in https://*.googlesyndication.com https://*.googleusercontent.com https://*.doubleclick.net https://tpc.googlesyndication.com https://*.admob.com https://*.googleadservices.com https://*.microsoft.com https://*.bing.com https://*.pubcenter.microsoft.com; " +
-    "frame-ancestors 'self' https://*.google.com https://*.google.co.in https://*.googlesyndication.com https://*.googleusercontent.com https://*.admob.com https://*.adsense.com https://adsense.google.com https://admob.google.com https://search.google.com https://*.googleadservices.com https://*.microsoft.com https://*.bing.com https://*.pubcenter.microsoft.com https://pubcenter.microsoft.com; " +
+    "frame-ancestors 'self' https: http:; " +
     "object-src 'none';"
   );
   return new Response(res.body, {
@@ -63,7 +64,7 @@ const worker = {
     if (url.pathname === "/robots.txt") {
       const origin = `https://${url.host}`;
       return new Response(
-        `User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /owner/\nDisallow: /account/\nDisallow: /api/\n\nUser-agent: bingbot\nAllow: /\n\nUser-agent: AdIdxBot\nAllow: /\n\nUser-agent: msnbot\nAllow: /\n\nUser-agent: BingPreview\nAllow: /\n\nUser-agent: Mediapartners-Google\nAllow: /\n\nUser-agent: Google-AdSense-AutoAds\nAllow: /\n\nUser-agent: Google-AdSense-AutoAds-Preflight\nAllow: /\n\nUser-agent: Googlebot\nAllow: /\n\nUser-agent: Googlebot-Image\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`,
+        `User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /owner/\nDisallow: /account/\nDisallow: /api/\n\nUser-agent: bingbot\nAllow: /\n\nUser-agent: AdIdxBot\nAllow: /\n\nUser-agent: msnbot\nAllow: /\n\nUser-agent: BingPreview\nAllow: /\n\nUser-agent: Mediapartners-Google\nAllow: /\n\nUser-agent: Google-AdSense-AutoAds\nAllow: /\n\nUser-agent: Google-AdSense-AutoAds-Preflight\nAllow: /\n\nUser-agent: Googlebot\nAllow: /\nDisallow: /admin/\nDisallow: /owner/\nDisallow: /account/\nDisallow: /api/\n\nUser-agent: Googlebot-Image\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`,
         {
           headers: {
             "Content-Type": "text/plain; charset=utf-8",

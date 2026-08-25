@@ -6,10 +6,6 @@ Disallow: /admin/
 Disallow: /owner/
 Disallow: /account/
 Disallow: /api/
-Disallow: /*?*q=*
-Disallow: /*{search_term_string}*
-Disallow: /*?*fbclid=*
-Disallow: /*?*gclid=*
 
 User-agent: bingbot
 Allow: /
@@ -38,8 +34,6 @@ Disallow: /admin/
 Disallow: /owner/
 Disallow: /account/
 Disallow: /api/
-Disallow: /*?*q=*
-Disallow: /*{search_term_string}*
 
 User-agent: Googlebot-Image
 Allow: /
