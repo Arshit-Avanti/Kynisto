@@ -149,28 +149,22 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
             padding: "0 12px",
           }}
         >
-          {/* Badge */}
-          <div className="arise-on-scroll arise-delay-1 inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-slate-950/80 border border-orange-500/30 text-[10px] sm:text-[11px] font-bold text-orange-400 mb-3 backdrop-blur-xl shadow-lg shadow-orange-500/10 tracking-wide uppercase max-w-full">
-            <span className="w-2 h-2 rounded-full bg-orange-400 animate-ping flex-shrink-0" />
-            <span>EVERYTHING AROUND YOU, SMARTER • 2026</span>
-          </div>
-
-          {/* High-Contrast Responsive Title */}
-          <h1 className="arise-on-scroll arise-delay-2 text-2.5xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.12] mb-3 text-center max-w-4xl mx-auto px-1 drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]">
+          {/* Refined Professional Heading */}
+          <h1 className="arise-on-scroll arise-delay-1 text-2xl sm:text-3xl md:text-4xl lg:text-[44px] font-bold text-white tracking-tight leading-tight sm:leading-[1.2] mb-2.5 sm:mb-3 text-center max-w-2xl mx-auto px-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.75)]">
             Your City. Your Health.{" "}
             <span className="bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 bg-clip-text text-transparent">
               Your Life, Smarter.
             </span>
           </h1>
 
-          {/* High-Contrast Responsive Subtitle */}
-          <p className="arise-on-scroll arise-delay-3 text-slate-100 text-xs sm:text-base font-medium max-w-xl mx-auto mb-4 sm:mb-5 leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] px-2 text-center">
+          {/* Refined Subtitle */}
+          <p className="arise-on-scroll arise-delay-2 text-xs sm:text-sm md:text-[15px] text-slate-100/90 font-normal max-w-lg mx-auto mb-5 sm:mb-6 leading-relaxed drop-shadow-[0_1px_6px_rgba(0,0,0,0.75)] px-3 text-center">
             Discover verified local stores, book home services, join live doctor OPD queues, and unlock smart rewards across your neighborhood.
           </p>
 
           {/* High-Contrast Responsive Pill Input Form */}
           <form
-            className="searchBox heroSearchBox arise-on-scroll arise-delay-4 w-full max-w-md mx-auto p-1 sm:p-1.5 rounded-full bg-slate-950/85 backdrop-blur-2xl border border-white/25 shadow-2xl flex items-center gap-1.5 sm:gap-2 mb-2"
+            className="searchBox heroSearchBox arise-on-scroll arise-delay-3 w-full max-w-md mx-auto p-1 sm:p-1.5 rounded-full bg-slate-950/80 backdrop-blur-2xl border border-white/20 shadow-2xl flex items-center gap-1.5 sm:gap-2 mb-2"
             role="search"
             onSubmit={(event) => {
               event.preventDefault();
