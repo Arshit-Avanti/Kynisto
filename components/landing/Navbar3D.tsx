@@ -156,16 +156,16 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
           {user ? (
             <Link
               href={dashboardHref}
-              className="hidden md:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950 text-white border border-white/15 text-xs font-bold hover:bg-slate-900 transition-all shadow-sm shrink-0"
+              className="hidden md:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100/90 hover:bg-slate-200/90 border border-slate-200 text-slate-800 text-xs font-bold transition-all shadow-sm shrink-0"
               title={`Logged in as ${user.name || "User"}`}
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span className="whitespace-nowrap font-semibold">Welcome, {firstName}</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="whitespace-nowrap font-bold text-slate-800">Welcome, {firstName}</span>
             </Link>
           ) : (
             <Link
               href="/login"
-              className="hidden md:inline-block px-5 py-1.5 rounded-full bg-slate-950 text-white text-xs font-bold hover:bg-slate-900 transition-all shadow-sm shrink-0 whitespace-nowrap"
+              className="hidden md:inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold shadow-md shadow-orange-500/20 transition-all shrink-0 whitespace-nowrap"
             >
               Sign In
             </Link>
