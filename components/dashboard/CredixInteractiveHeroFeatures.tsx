@@ -93,13 +93,14 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
   }, []);
 
   // Continuous Responsive Scroll 3D Dynamics:
-  // On Desktop: Glides from center (0%) to right (+26%) with 3D tilt
-  // On Mobile: Fits 100% within mobile viewport with subtle vertical depth (0% horizontal translate to prevent any overflow)
+  // On Desktop: Glides from center (0%) to right (+26%) with 3D tilt & rotation
+  // On Mobile: Separate dedicated 3D float physics (vertical lift, pitch dynamic, and breathing scale)
   const translateXVal = isDesktop ? scrollProgress * 26 : 0;
-  const rotY = isDesktop ? 0 - scrollProgress * 14 : 0 - scrollProgress * 3;
-  const rotX = isDesktop ? 5 + scrollProgress * 4 : 4 * (1 - scrollProgress);
+  const rotY = isDesktop ? 0 - scrollProgress * 14 : (scrollProgress - 0.5) * 4;
+  const rotX = isDesktop ? 5 + scrollProgress * 4 : 4 * Math.cos(scrollProgress * Math.PI);
   const rotZ = isDesktop ? 0 - scrollProgress * 2.5 : 0;
-  const scale = isDesktop ? 0.98 + scrollProgress * 0.02 : 1;
+  const translateYMobile = isDesktop ? 0 : -Math.sin(scrollProgress * Math.PI) * 12;
+  const scale = isDesktop ? 0.98 + scrollProgress * 0.02 : 0.97 + scrollProgress * 0.03;
 
   // Features Left Content emergence
   const featuresTranslateX = isDesktop ? Math.max(0, (1 - scrollProgress) * -40) : 0;
@@ -254,7 +255,7 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
             </div>
           </div>
 
-          {/* 3D DASHBOARD THAT MOVES FROM CENTER TO RIGHT SIDE AS YOU SCROLL (Mobile Responsive) */}
+          {/* 3D DASHBOARD THAT MOVES FROM CENTER TO RIGHT SIDE AS YOU SCROLL (Separate Mobile vs PC Animation) */}
           <div
             className="lg:col-span-7 w-full flex justify-center lg:justify-end cursor-pointer group"
             onClick={handleDashboardClick}
@@ -265,22 +266,26 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
             }}
             aria-label="Click to open full Kynisto Account Dashboard"
             style={{
-              transformStyle: isDesktop ? "preserve-3d" : "flat",
-              transform: `translateX(${translateXVal}%)`,
-              transition: "transform 0.25s cubic-bezier(0.25, 1, 0.5, 1)",
+              transformStyle: "preserve-3d",
+              transform: isDesktop ? `translateX(${translateXVal}%)` : `translateY(${translateYMobile}px)`,
+              transition: isDesktop
+                ? "transform 0.25s cubic-bezier(0.25, 1, 0.5, 1)"
+                : "transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
               maxWidth: "100%",
             }}
           >
             <div
-              className="w-full max-w-2xl rounded-2xl sm:rounded-3xl border border-white/15 bg-[#0e1628]/95 backdrop-blur-2xl text-slate-100 overflow-hidden shadow-xl sm:shadow-2xl shadow-black/90 transition-all duration-300 ease-out group-hover:border-orange-500/50 group-hover:shadow-orange-500/20 relative"
+              className={`w-full max-w-2xl rounded-2xl sm:rounded-3xl border border-white/15 bg-[#0e1628]/95 backdrop-blur-2xl text-slate-100 overflow-hidden shadow-xl sm:shadow-2xl shadow-black/90 transition-all duration-300 ease-out group-hover:border-orange-500/50 group-hover:shadow-orange-500/20 relative ${
+                isDesktop ? "desktopHeroDashboard" : "mobileHeroDashboard"
+              }`}
               style={{
                 transform: isDesktop
                   ? `perspective(1200px) rotateY(${rotY}deg) rotateX(${rotX}deg) rotateZ(${rotZ}deg) scale(${scale})`
-                  : `scale(${scale})`,
+                  : `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${scale})`,
                 transformOrigin: "center center",
                 boxShadow: isDesktop
                   ? "0 35px 80px -15px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.12), -20px 20px 40px rgba(0,0,0,0.5)"
-                  : "0 20px 40px -10px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1)",
+                  : "0 20px 45px -10px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.12), 0 0 25px rgba(56, 189, 248, 0.15)",
               }}
             >
               {/* Hover Indicator Overlay */}

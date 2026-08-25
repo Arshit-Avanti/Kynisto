@@ -2970,6 +2970,42 @@ img, video, iframe, embed, object {
 }
 
 /* ==========================================================================
+   HERO DASHBOARD MOCKUP ANIMATIONS (MOBILE VS PC)
+   ========================================================================== */
+.mobileHeroDashboard {
+  animation: mobileMockupFloat 5.5s infinite ease-in-out !important;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease !important;
+  will-change: transform, box-shadow !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.mobileHeroDashboard:active {
+  transform: scale(0.965) translateY(4px) !important;
+  border-color: rgba(249, 115, 22, 0.6) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8), 0 0 25px rgba(249, 115, 22, 0.35) !important;
+}
+
+@keyframes mobileMockupFloat {
+  0%, 100% {
+    box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.12), 0 0 22px rgba(56, 189, 248, 0.15);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+  50% {
+    box-shadow: 0 28px 55px -10px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.22), 0 0 32px rgba(249, 115, 22, 0.25);
+    border-color: rgba(249, 115, 22, 0.45);
+  }
+}
+
+.desktopHeroDashboard {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease !important;
+}
+
+.desktopHeroDashboard:hover {
+  border-color: rgba(249, 115, 22, 0.55) !important;
+  box-shadow: 0 45px 95px -20px rgba(0, 0, 0, 0.95), 0 0 35px rgba(249, 115, 22, 0.28), -25px 25px 50px rgba(0, 0, 0, 0.55) !important;
+}
+
+/* ==========================================================================
    EFFERD FEATURES 6 BENTO GRID — High-End Glassmorphic Feature Showcase
    ========================================================================== */
 .efferdFeatures6Container {
