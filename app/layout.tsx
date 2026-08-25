@@ -67,6 +67,16 @@ export default function RootLayout({
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9178031569606873"
           crossOrigin="anonymous"
         />
+        {/* Adcash Library & AutoTag */}
+        <script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js" />
+        <script
+          type="text/javascript"
+          dangerouslySetInnerHTML={{
+            __html: `if(typeof window!=="undefined"){window.aclib=window.aclib||{};aclib.runAutoTag=aclib.runAutoTag||function(){(aclib.queue=aclib.queue||[]).push(arguments)};aclib.runAutoTag({zoneId:'j06gg2rpj4'});}`,
+          }}
+        />
+        <link rel="preconnect" href="https://acscdn.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://acscdn.com" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
         <link rel="preconnect" href="https://googleads.g.doubleclick.net" crossOrigin="anonymous" />
