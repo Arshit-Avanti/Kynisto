@@ -11,6 +11,18 @@ Disallow: /*{search_term_string}*
 Disallow: /*?*fbclid=*
 Disallow: /*?*gclid=*
 
+User-agent: bingbot
+Allow: /
+
+User-agent: AdIdxBot
+Allow: /
+
+User-agent: msnbot
+Allow: /
+
+User-agent: BingPreview
+Allow: /
+
 User-agent: Mediapartners-Google
 Allow: /
 
