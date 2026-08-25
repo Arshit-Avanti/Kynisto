@@ -2672,24 +2672,176 @@ img, video, iframe, embed, object {
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
   position: relative !important;
   overflow: hidden !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Light shimmer sweep reflection effect on PC */
+.efferdFeatureCard::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 60% !important;
+  height: 100% !important;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  ) !important;
+  transform: skewX(-25deg) !important;
+  transition: left 0.75s ease !important;
+  pointer-events: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   PC / DESKTOP VIEW ANIMATIONS (min-width: 901px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 901px) {
+  .efferdFeatureCard:hover::before {
+    left: 180% !important;
+  }
+
+  .efferdFeatureCard {
+    transform-style: preserve-3d !important;
+    perspective: 1000px !important;
+  }
+
+  .efferdFeatureCard:hover {
+    transform: translateY(-8px) scale(1.025) rotateX(2deg) rotateY(-1deg) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+  }
+
+  /* Distinct PC 3D Glow & Border Color Shimmer by Card Type */
+  .featureCardLocation:hover {
+    border-color: rgba(56, 189, 248, 0.7) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35), 0 0 28px rgba(56, 189, 248, 0.4) !important;
+  }
+
+  .featureCardHours:hover {
+    border-color: rgba(52, 211, 153, 0.7) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35), 0 0 28px rgba(52, 211, 153, 0.4) !important;
+  }
+
+  .featureCardFavorites:hover {
+    border-color: rgba(244, 63, 94, 0.7) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35), 0 0 28px rgba(244, 63, 94, 0.4) !important;
+  }
+
+  .efferdFeatureCard:hover .efferdIconBadge {
+    transform: scale(1.2) rotate(-8deg) translateY(-2px) !important;
+    box-shadow: 0 0 28px currentColor !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   MOBILE VIEW ANIMATIONS (max-width: 900px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .trustStrip.efferdFeaturesBlock {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    padding: 0 !important;
+  }
+
+  /* Staggered Entrance Animation on Mobile */
+  .efferdFeatureCard {
+    animation: mobileCardEntrance 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both !important;
+  }
+
+  .featureCardLocation {
+    animation-delay: 0.08s !important;
+  }
+
+  .featureCardHours {
+    animation-delay: 0.18s !important;
+  }
+
+  .featureCardFavorites {
+    animation-delay: 0.28s !important;
+  }
+
+  /* Continuous Subtle Ambient Breathing Pulse on Mobile */
+  .featureCardLocation {
+    animation: mobileCardEntrance 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+               mobilePulseLocation 4s infinite ease-in-out 0.8s !important;
+  }
+
+  .featureCardHours {
+    animation: mobileCardEntrance 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+               mobilePulseHours 4s infinite ease-in-out 2.1s !important;
+  }
+
+  .featureCardFavorites {
+    animation: mobileCardEntrance 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+               mobilePulseFavorites 4s infinite ease-in-out 3.4s !important;
+  }
+
+  /* Tactile Touch Feedback on Mobile Tap / Press */
+  .efferdFeatureCard:active {
+    transform: scale(0.95) translateY(3px) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.45) !important;
+    transition: transform 0.1s ease, background 0.1s ease !important;
+  }
+
+  .efferdFeatureCard:active .efferdIconBadge {
+    transform: scale(0.92) !important;
+    transition: transform 0.1s ease !important;
+  }
+}
+
+/* Keyframes for Mobile Animations */
+@keyframes mobileCardEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(22px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes mobilePulseLocation {
+  0%, 100% {
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  }
+  50% {
+    border-color: rgba(56, 189, 248, 0.55);
+    box-shadow: 0 6px 22px rgba(56, 189, 248, 0.22);
+  }
+}
+
+@keyframes mobilePulseHours {
+  0%, 100% {
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  }
+  50% {
+    border-color: rgba(52, 211, 153, 0.55);
+    box-shadow: 0 6px 22px rgba(52, 211, 153, 0.22);
+  }
+}
+
+@keyframes mobilePulseFavorites {
+  0%, 100% {
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  }
+  50% {
+    border-color: rgba(244, 63, 94, 0.55);
+    box-shadow: 0 6px 22px rgba(244, 63, 94, 0.22);
+  }
 }
 
 .mode-light .efferdFeatureCard {
   background: transparent !important;
   border: 1px solid rgba(0, 0, 0, 0.18) !important;
   box-shadow: none !important;
-}
-
-.efferdFeatureCard:hover {
-  transform: translateY(-4px) scale(1.015) !important;
-  background: rgba(255, 255, 255, 0.05) !important;
-  border-color: rgba(56, 189, 248, 0.5) !important;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2), 0 0 15px rgba(56, 189, 248, 0.2) !important;
-}
-
-.mode-light .efferdFeatureCard:hover {
-  background: rgba(0, 0, 0, 0.03) !important;
-  border-color: rgba(2, 132, 199, 0.4) !important;
 }
 
 .efferdFeatureContent p b {
@@ -2731,11 +2883,7 @@ img, video, iframe, embed, object {
   position: relative !important;
   font-size: 22px !important;
   font-weight: 800 !important;
-  transition: transform 0.3s ease !important;
-}
-
-.efferdFeatureCard:hover .efferdIconBadge {
-  transform: scale(1.1) rotate(-3deg) !important;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 /* Feature 1: Exact Location badge */
@@ -2819,45 +2967,6 @@ img, video, iframe, embed, object {
 @keyframes statusPulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.4; transform: scale(0.85); }
-}
-
-.efferdFeatureContent {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 3px !important;
-}
-
-.efferdFeatureContent p b {
-  font-size: 16px !important;
-  font-weight: 850 !important;
-  color: #FFFFFF !important;
-  -webkit-text-fill-color: #FFFFFF !important;
-  letter-spacing: -0.01em !important;
-}
-
-.mode-light .efferdFeatureContent p b {
-  color: #0F172A !important;
-  -webkit-text-fill-color: #0F172A !important;
-}
-
-.efferdFeatureContent small {
-  font-size: 12px !important;
-  font-weight: 550 !important;
-  color: #94A3B8 !important;
-  -webkit-text-fill-color: #94A3B8 !important;
-}
-
-.mode-light .efferdFeatureContent small {
-  color: #475569 !important;
-  -webkit-text-fill-color: #475569 !important;
-}
-
-@media (max-width: 900px) {
-  .trustStrip.efferdFeaturesBlock {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-    padding: 0 !important;
-  }
 }
 
 /* ==========================================================================
