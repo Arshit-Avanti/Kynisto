@@ -149,7 +149,7 @@ export async function POST(request: Request) {
       ? "/admin"
       : "/";
 
-    return NextResponse.json({
+    return Response.json({
       user: {
         id: identity.id,
         name: identity.name,

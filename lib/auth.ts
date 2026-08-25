@@ -87,10 +87,10 @@ export async function createSession(
   const userRecord = await db
     .prepare(
       `SELECT u.id, u.name, u.email, u.role, u.status, u.avatar_url AS avatarUrl,
-              s.must_change_password AS mustChangePassword,
-              s.is_super_admin AS isSuperAdmin
+              COALESCE(s.must_change_password, 0) AS mustChangePassword,
+              COALESCE(s.is_super_admin, 0) AS isSuperAdmin
        FROM users u
-       JOIN user_security s ON s.user_id = u.id
+       LEFT JOIN user_security s ON s.user_id = u.id
        WHERE u.id = ?`,
     )
     .bind(userId)
@@ -149,10 +149,11 @@ export async function getSessionUser(): Promise<AuthSession | null> {
       .prepare(
         `SELECT s.id AS sessionId, s.csrf_token_hash AS csrfTokenHash, s.expires_at AS expiresAt,
                 u.id AS userId, u.name, u.email, u.role, u.status, u.avatar_url AS avatarUrl,
-                sec.must_change_password AS mustChangePassword, sec.is_super_admin AS isSuperAdmin
+                COALESCE(sec.must_change_password, 0) AS mustChangePassword,
+                COALESCE(sec.is_super_admin, 0) AS isSuperAdmin
          FROM sessions s
          JOIN users u ON u.id = s.user_id
-         JOIN user_security sec ON sec.user_id = u.id
+         LEFT JOIN user_security sec ON sec.user_id = u.id
          WHERE s.token_hash = ? AND s.expires_at > ?`,
       )
       .bind(tokenHash, now)
@@ -207,10 +208,11 @@ export async function getSessionUser(): Promise<AuthSession | null> {
       .prepare(
         `SELECT s.id AS sessionId, s.expires_at AS expiresAt,
                 u.id AS userId, u.name, u.email, u.role, u.status, u.avatar_url AS avatarUrl,
-                sec.must_change_password AS mustChangePassword, sec.is_super_admin AS isSuperAdmin
+                COALESCE(sec.must_change_password, 0) AS mustChangePassword,
+                COALESCE(sec.is_super_admin, 0) AS isSuperAdmin
          FROM sessions s
          JOIN users u ON u.id = s.user_id
-         JOIN user_security sec ON sec.user_id = u.id
+         LEFT JOIN user_security sec ON sec.user_id = u.id
          WHERE s.token_hash = ? AND s.expires_at > ?`,
       )
       .bind(tokenHash, now)

@@ -101,8 +101,19 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
     setError("");
     try {
       await loadOverview();
-    } catch (loadError) { setError(loadError instanceof Error ? loadError.message : "Unable to load dashboard."); }
-    finally { setLoading(false); }
+    } catch (loadError) {
+      const msg = loadError instanceof Error ? loadError.message : "Unable to load dashboard.";
+      if (msg.includes("Please log in") || msg.includes("UNAUTHENTICATED")) {
+        try {
+          await new Promise((r) => setTimeout(r, 350));
+          await loadOverview();
+          return;
+        } catch {}
+      }
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   }, [loadOverview, initialCache]);
 
   useEffect(() => { void load(); }, [load]);
