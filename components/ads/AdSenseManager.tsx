@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
 declare global {
@@ -26,31 +26,24 @@ const RESTRICTED_ROUTES = [
 
 export function AdSenseManager() {
   const pathname = usePathname();
-  const isFirstMountRef = useRef(true);
 
   const isRestricted = RESTRICTED_ROUTES.some(
     (prefix) => pathname === prefix || pathname?.startsWith(prefix + "/")
   );
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || isRestricted) return;
 
-    // Never execute or push ads on restricted / behavioral / auth routes
-    if (isRestricted) return;
-
-    if (isFirstMountRef.current) {
-      isFirstMountRef.current = false;
-      return;
-    }
-
-    // On subsequent SPA route transitions on valid publisher content pages, trigger safe refresh
-    try {
-      if (window.adsbygoogle) {
+    const timer = setTimeout(() => {
+      try {
+        window.adsbygoogle = window.adsbygoogle || [];
         window.adsbygoogle.push({});
+      } catch {
+        // Gracefully ignore duplicate pushes
       }
-    } catch {
-      // Gracefully ignore when no ad slots are present
-    }
+    }, 200);
+
+    return () => clearTimeout(timer);
   }, [pathname, isRestricted]);
 
   return null;
