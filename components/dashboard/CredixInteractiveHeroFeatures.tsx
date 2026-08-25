@@ -144,104 +144,51 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
             width: "100%",
             boxSizing: "border-box",
             background: "transparent",
+            width: "100%",
+            maxWidth: "1000px",
+            padding: "0 12px",
           }}
         >
           {/* Badge */}
-          <div className="arise-on-scroll arise-delay-1 inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/[0.08] border border-white/20 text-[10px] sm:text-[11px] font-bold text-orange-400 mb-3 backdrop-blur-md shadow-md shadow-orange-500/10 tracking-wide uppercase max-w-full truncate">
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping flex-shrink-0" />
-            <span className="truncate">EVERYTHING AROUND YOU, SMARTER • 2026</span>
+          <div className="arise-on-scroll arise-delay-1 inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-slate-950/80 border border-orange-500/30 text-[10px] sm:text-[11px] font-bold text-orange-400 mb-3 backdrop-blur-xl shadow-lg shadow-orange-500/10 tracking-wide uppercase max-w-full">
+            <span className="w-2 h-2 rounded-full bg-orange-400 animate-ping flex-shrink-0" />
+            <span>EVERYTHING AROUND YOU, SMARTER • 2026</span>
           </div>
 
-          {/* Compact Responsive Title */}
-          <h1
-            className="highContrastText arise-on-scroll arise-delay-2"
-            style={{
-              fontSize: "clamp(1.65rem, 6.5vw, 3.2rem)",
-              fontWeight: 800,
-              letterSpacing: "-0.035em",
-              lineHeight: 1.15,
-              margin: "0 0 8px 0",
-              maxWidth: "780px",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif",
-              wordBreak: "break-word",
-            }}
-          >
-            Your City. Your Health. Your Life, Smarter.
+          {/* High-Contrast Responsive Title */}
+          <h1 className="arise-on-scroll arise-delay-2 text-2.5xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.12] mb-3 text-center max-w-4xl mx-auto px-1 drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)]">
+            Your City. Your Health.{" "}
+            <span className="bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 bg-clip-text text-transparent">
+              Your Life, Smarter.
+            </span>
           </h1>
 
-          {/* Compact Responsive Subtitle */}
-          <p
-            className="highContrastText arise-on-scroll arise-delay-3"
-            style={{
-              fontSize: "clamp(0.82rem, 3.2vw, 0.98rem)",
-              fontWeight: 400,
-              margin: "0 0 16px 0",
-              opacity: 0.9,
-              letterSpacing: "-0.01em",
-              maxWidth: "580px",
-              lineHeight: 1.45,
-              padding: "0 8px",
-            }}
-          >
+          {/* High-Contrast Responsive Subtitle */}
+          <p className="arise-on-scroll arise-delay-3 text-slate-100 text-xs sm:text-base font-medium max-w-xl mx-auto mb-4 sm:mb-5 leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] px-2 text-center">
             Discover verified local stores, book home services, join live doctor OPD queues, and unlock smart rewards across your neighborhood.
           </p>
 
-          {/* Compact Responsive Pill Input Form */}
+          {/* High-Contrast Responsive Pill Input Form */}
           <form
-            className="searchBox heroSearchBox arise-on-scroll arise-delay-4"
+            className="searchBox heroSearchBox arise-on-scroll arise-delay-4 w-full max-w-md mx-auto p-1 sm:p-1.5 rounded-full bg-slate-950/85 backdrop-blur-2xl border border-white/25 shadow-2xl flex items-center gap-1.5 sm:gap-2 mb-2"
             role="search"
             onSubmit={(event) => {
               event.preventDefault();
               document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
             }}
-            style={{
-              background: "rgba(255, 255, 255, 0.08)",
-              backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255, 255, 255, 0.18)",
-              borderRadius: "50px",
-              padding: "4px 4px 4px 14px",
-              boxShadow: "0 10px 25px -4px rgba(0, 0, 0, 0.25)",
-              maxWidth: "440px",
-              width: "100%",
-              boxSizing: "border-box",
-              display: "flex",
-              alignItems: "center",
-            }}
           >
-            <label className="srOnly" htmlFor="store-search">Search nearby stores</label>
+            <label className="sr-only" htmlFor="store-search">Search nearby stores</label>
+            <span className="pl-3 text-slate-400 text-xs sm:text-sm">🔍</span>
             <input
               id="store-search"
-              className="heroSearchInput highContrastText"
+              className="flex-1 min-w-0 bg-transparent text-white placeholder:text-slate-400 text-xs sm:text-sm pr-1 outline-none font-medium"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search stores, clinics, plumbers, salons..."
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "#ffffff",
-                fontSize: "0.82rem",
-                outline: "none",
-                flex: 1,
-                minWidth: 0,
-              }}
             />
             <button
-              className="searchSubmit heroSearchButton"
+              className="px-3.5 sm:px-5 py-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs sm:text-sm shadow-md transition-all shrink-0 cursor-pointer"
               type="submit"
-              style={{
-                background: "#ffffff",
-                color: "#0f172a",
-                fontWeight: 700,
-                fontSize: "0.8rem",
-                borderRadius: "40px",
-                padding: "8px 16px",
-                border: "none",
-                cursor: "pointer",
-                boxShadow: "0 4px 10px rgba(0, 0, 0, 0.12)",
-                transition: "all 0.2s ease",
-                flexShrink: 0,
-                whiteSpace: "nowrap",
-              }}
             >
               Explore Now
             </button>
@@ -256,37 +203,42 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center relative z-10">
           
-          {/* FEATURES LISTED ON THE LEFT SIDE (Mobile Responsive) */}
+          {/* FEATURES LISTED ON THE LEFT SIDE (High Contrast Frosted Dark Container) */}
           <div
-            className="lg:col-span-5 flex flex-col items-start text-left transition-all duration-700 ease-out w-full"
+            className="lg:col-span-5 flex flex-col items-start text-left transition-all duration-700 ease-out w-full p-5 sm:p-7 rounded-3xl bg-slate-950/85 backdrop-blur-2xl border border-white/20 shadow-2xl"
             style={{
               transform: `translateX(${featuresTranslateX}px)`,
               opacity: featuresOpacity > 0.05 ? featuresOpacity : 0.2 + scrollProgress * 0.8,
               pointerEvents: isDesktop && scrollProgress <= 0.15 ? "none" : "auto",
             }}
           >
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.15] mb-3 sm:mb-5">
-              Local Commerce &amp; Care, Wherever You Are
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-[10px] sm:text-[11px] font-bold text-orange-400 mb-3 uppercase tracking-wider">
+              <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+              Hyperlocal Infrastructure
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-[1.15] mb-3">
+              Local Commerce &amp; Care, <span className="bg-gradient-to-r from-orange-400 to-amber-300 bg-clip-text text-transparent">Wherever You Are</span>
             </h2>
 
-            <p className="text-slate-300 text-xs sm:text-base leading-relaxed mb-6 sm:mb-8 max-w-lg">
+            <p className="text-slate-200 text-xs sm:text-sm leading-relaxed mb-5 max-w-lg font-normal">
               Experience your neighborhood with unprecedented speed. From real-time clinic turn alerts to instant home service dispatches and digital passes, everything is just a tap away.
             </p>
 
             {/* Feature Points on Left Side */}
-            <div className="flex flex-col gap-2.5 sm:gap-4 mb-6 sm:mb-8 w-full">
+            <div className="flex flex-col gap-2.5 mb-6 w-full">
               {[
                 { title: "Universal Loyalty & Smart Rewards", desc: "Instant reward points credited to your Kynisto digital pass at verified neighborhood stores." },
                 { title: "Live Healthcare & OPD Telemetry", desc: "Real-time doctor turn tracking so you arrive right on time without crowded clinic waiting rooms." },
                 { title: "Verified Home Services & Instant Dispatch", desc: "Book verified electricians, plumbers, and AC repair technicians with guaranteed rates." },
               ].map((feat, idx) => (
-                <div key={idx} className="flex items-start gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-white/[0.03] border border-white/10">
-                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-orange-500/20 text-orange-400 font-bold flex items-center justify-center text-[10px] sm:text-xs flex-shrink-0 mt-0.5">
+                <div key={idx} className="flex items-start gap-3 p-3 rounded-2xl bg-white/[0.05] border border-white/10 hover:border-orange-500/30 transition-colors">
+                  <span className="w-6 h-6 rounded-xl bg-orange-500/20 text-orange-400 font-black flex items-center justify-center text-xs flex-shrink-0 mt-0.5 shadow-sm">
                     ✓
                   </span>
                   <div>
                     <div className="font-bold text-white text-xs sm:text-sm">{feat.title}</div>
-                    <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5 leading-relaxed">{feat.desc}</div>
+                    <div className="text-[11px] sm:text-xs text-slate-300 mt-0.5 leading-relaxed font-normal">{feat.desc}</div>
                   </div>
                 </div>
               ))}
@@ -295,13 +247,13 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
             <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
               <Link
                 href="/services"
-                className="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-105 transition-all"
+                className="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs sm:text-sm shadow-lg shadow-orange-500/25 transition-all"
               >
                 Explore Home Services
               </Link>
               <Link
                 href="/healthcare"
-                className="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl bg-white/[0.06] border border-white/15 text-slate-200 hover:text-white hover:bg-white/[0.1] font-semibold text-xs sm:text-sm transition-all"
+                className="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-white/20 font-bold text-xs sm:text-sm transition-all"
               >
                 ⚡ Live Healthcare Hub →
               </Link>
