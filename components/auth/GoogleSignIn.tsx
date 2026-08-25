@@ -27,9 +27,30 @@ export function GoogleSignIn({ returnTo: _propReturnTo }: { returnTo?: string } 
       const isLocalhost =
         typeof window !== "undefined" &&
         (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-      const redirectTo = isLocalhost
+
+      // Check if user is logging in from the Android App WebView
+      const isFromApp =
+        typeof window !== "undefined" &&
+        (Boolean((window as unknown as { AndroidNotification?: unknown }).AndroidNotification) ||
+          searchParams.get("from_app") === "1" ||
+          searchParams.get("app") === "1" ||
+          searchParams.get("source") === "app" ||
+          window.sessionStorage.getItem("kynisto_from_app") === "1");
+
+      if (isFromApp && typeof window !== "undefined") {
+        try {
+          window.sessionStorage.setItem("kynisto_from_app", "1");
+        } catch {}
+      }
+
+      const confirmBase = isLocalhost
         ? `${window.location.origin}/auth/confirm`
         : "https://kynisto.in/auth/confirm";
+      
+      const redirectTo = isFromApp
+        ? `${confirmBase}?from_app=1`
+        : confirmBase;
+
       try {
         window.sessionStorage.setItem(PENDING_KEY, "1");
         window.sessionStorage.setItem(RETURNTO_KEY, "/");

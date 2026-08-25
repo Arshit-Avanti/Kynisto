@@ -197,6 +197,17 @@ export function GoogleRoleOnboarding() {
       
       // Delay to ensure Cloudflare D1 read replicas synchronize the role update
       await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      const isFromApp =
+        typeof window !== "undefined" &&
+        (window.location.search.includes("from_app=1") ||
+          window.sessionStorage.getItem("kynisto_from_app") === "1");
+
+      if (isFromApp && typeof window !== "undefined" && !(window as unknown as { AndroidNotification?: unknown }).AndroidNotification) {
+        const deepLinkUrl = `kynisto://${destination.replace(/^\/+/, "")}`;
+        window.location.href = deepLinkUrl;
+        return;
+      }
       
       window.location.replace(destination);
     } catch (selectionError) {

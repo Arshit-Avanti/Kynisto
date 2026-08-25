@@ -83,7 +83,7 @@ export function AppReturnBanner() {
     setTimeout(() => {
       const redirectPath = target || window.location.pathname;
       const transferUrl = token ? `/auth/transfer?access_token=${encodeURIComponent(token)}&redirect_to=${encodeURIComponent(redirectPath)}` : redirectPath;
-      const intentUrl = `intent://${window.location.host}${transferUrl}#Intent;scheme=https;package=dev.nxt_arshit.workers.kynisto.twa;end;`;
+      const intentUrl = `intent://${window.location.host}${transferUrl}#Intent;scheme=https;package=com.kynisto.app;end;`;
       window.location.href = intentUrl;
     }, 500);
   }
