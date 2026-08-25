@@ -87,6 +87,11 @@ export function SupabaseAuthManager() {
     let mounted = true;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
+    if (typeof window !== "undefined" && window.location.pathname.startsWith("/auth/confirm")) {
+      // Dedicated AuthConfirmChoice component manages /auth/confirm directly
+      return;
+    }
+
     const initialUrl = new URL(window.location.href);
     const hashAccessToken = extractHashToken(initialUrl.hash, initialUrl.searchParams);
     const hasOAuthResult =

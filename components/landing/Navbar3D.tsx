@@ -151,43 +151,28 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
         </nav>
 
         {/* Right CTA / User Greeting Pill & Mobile 3-Dash Menu */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Desktop User Pill / Sign In Button (Visible on md and up) */}
           {user ? (
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 hover:border-slate-300 text-xs font-semibold text-slate-800 shrink-0 whitespace-nowrap transition-all hover:shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Welcome, {firstName}</span>
-              <button
-                type="button"
-                onClick={() => void handleLogout()}
-                disabled={isLoggingOut}
-                className="text-slate-400 hover:text-rose-500 ml-1 transition-colors text-xs font-bold cursor-pointer"
-                title="Sign out"
-              >
-                {isLoggingOut ? "..." : "✕"}
-              </button>
-            </div>
+            <Link
+              href={dashboardHref}
+              className="hidden md:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950 text-white border border-white/15 text-xs font-bold hover:bg-slate-900 transition-all shadow-sm shrink-0"
+              title={`Logged in as ${user.name || "User"}`}
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span className="whitespace-nowrap font-semibold">Welcome, {firstName}</span>
+            </Link>
           ) : (
             <Link
               href="/login"
-              className="hidden sm:inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-slate-950 hover:bg-slate-900 text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all whitespace-nowrap"
+              className="hidden md:inline-block px-5 py-1.5 rounded-full bg-slate-950 text-white text-xs font-bold hover:bg-slate-900 transition-all shadow-sm shrink-0 whitespace-nowrap"
             >
               Sign In
             </Link>
           )}
 
-          {/* User Quick Icon on Mobile if Logged In */}
-          {user && (
-            <Link
-              href={dashboardHref}
-              className="sm:hidden p-1.5 rounded-full bg-orange-100 text-orange-700 border border-orange-200 flex items-center justify-center text-xs font-bold shrink-0"
-              title={`Account: ${user.name}`}
-            >
-              <User className="w-4 h-4" />
-            </Link>
-          )}
-
-          {/* Mobile 3-Dash Hamburger Menu Button (Three Dash ☰) */}
-          <div className="md:hidden shrink-0">
+          {/* Mobile Only: 3-Dash Hamburger Menu Button (☰) */}
+          <div className="flex md:hidden shrink-0">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
