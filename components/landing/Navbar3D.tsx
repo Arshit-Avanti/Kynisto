@@ -122,6 +122,12 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-1.5 lg:gap-3 text-sm font-semibold text-slate-700 mx-2" aria-label="Main Navigation">
           <Link
+            href="/"
+            className="px-3 py-1.5 rounded-full hover:bg-orange-500/10 hover:text-orange-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap"
+          >
+            Homepage
+          </Link>
+          <Link
             href="/services"
             className="px-3 py-1.5 rounded-full hover:bg-orange-500/10 hover:text-orange-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap"
           >
@@ -157,19 +163,14 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
         {/* Right CTA / User Greeting Pill & Mobile 3-Dash Menu */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {user ? (
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 hover:border-slate-300 text-xs font-semibold text-slate-800 shrink-0 whitespace-nowrap transition-all hover:shadow-sm">
+            <Link
+              href={dashboardHref}
+              className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100/90 hover:bg-slate-200/90 border border-slate-200 hover:border-slate-300 text-xs font-semibold text-slate-800 shrink-0 whitespace-nowrap transition-all hover:shadow-sm"
+              title={`Open Dashboard (${user.role || 'User'})`}
+            >
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Welcome, {firstName}</span>
-              <button
-                type="button"
-                onClick={() => void handleLogout()}
-                disabled={isLoggingOut}
-                className="text-slate-400 hover:text-rose-500 ml-1 transition-colors text-xs font-bold cursor-pointer"
-                title="Sign out"
-              >
-                {isLoggingOut ? "..." : "✕"}
-              </button>
-            </div>
+            </Link>
           ) : (
             <Link
               href="/login"
@@ -245,6 +246,24 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
           {/* Navigation Links List */}
           <div className="flex flex-col gap-1">
             
+            {/* 0. Homepage */}
+            <Link
+              href="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.08] text-white font-semibold text-xs transition-all group"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center shrink-0">
+                  <Home className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-white group-hover:text-orange-300 transition-colors">Homepage</div>
+                  <div className="text-[9px] text-slate-400">Discover everything around you</div>
+                </div>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" />
+            </Link>
+
             {/* 1. Healthcare */}
             <Link
               href="/healthcare"
