@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { apiFetch } from "@/lib/client-api";
 import { signOutSupabaseBrowser } from "@/lib/supabase-browser";
 import {
+  Home,
   User,
   Menu,
   X,
@@ -96,8 +97,11 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
     }
   };
 
+  const pathname = usePathname() || "/";
+
   return (
-    <header className="fixed top-2.5 sm:top-3 left-0 right-0 z-50 px-2 sm:px-6 pointer-events-none">
+    <>
+      <header className="fixed top-2.5 sm:top-3 left-0 right-0 z-50 px-2 sm:px-6 pointer-events-none">
       <div
         className={`max-w-6xl mx-auto rounded-full transition-all duration-300 pointer-events-auto border flex items-center justify-between px-3 sm:px-6 py-1.5 sm:py-2.5 shadow-lg ${
           scrolled
@@ -380,5 +384,109 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
         </div>
       )}
     </header>
+
+    {/* FLOATING CURVED MOBILE BOTTOM NAVIGATION DOCK (Mobile Users Only) */}
+    <nav
+      className="md:hidden fixed bottom-3.5 left-0 right-0 z-50 px-3 pointer-events-none"
+      aria-label="Mobile Bottom Navigation Bar"
+    >
+      <div className="mobileBottomDock pointer-events-auto max-w-sm mx-auto rounded-full bg-slate-950/90 backdrop-blur-2xl border border-white/20 px-2 py-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.85),0_0_25px_rgba(249,115,22,0.25)] flex items-center justify-around transition-all">
+        {/* 1. Home */}
+        <Link
+          href="/"
+          onClick={() => setMobileMenuOpen(false)}
+          className={`mobileDockItem relative flex flex-col items-center justify-center py-1.5 px-3 rounded-full transition-all duration-200 ${
+            pathname === "/"
+              ? "bg-gradient-to-tr from-orange-500/25 to-amber-500/25 border border-orange-500/40 text-orange-400 shadow-md shadow-orange-500/20 scale-105"
+              : "text-slate-300 hover:text-white hover:bg-white/[0.08]"
+          }`}
+          aria-label="Home"
+        >
+          <Home className={`w-5 h-5 transition-transform duration-200 ${pathname === "/" ? "text-orange-400 scale-110" : "text-slate-300"}`} />
+          <span className={`text-[10px] font-bold tracking-tight mt-0.5 whitespace-nowrap ${pathname === "/" ? "text-white drop-shadow-sm font-extrabold" : "text-slate-400 font-medium"}`}>
+            Home
+          </span>
+        </Link>
+
+        {/* 2. Healthcare (with live pulse) */}
+        <Link
+          href="/healthcare"
+          onClick={() => setMobileMenuOpen(false)}
+          className={`mobileDockItem relative flex flex-col items-center justify-center py-1.5 px-3 rounded-full transition-all duration-200 ${
+            pathname.startsWith("/healthcare") || pathname.startsWith("/queue")
+              ? "bg-gradient-to-tr from-emerald-500/25 to-teal-500/25 border border-emerald-500/40 text-emerald-400 shadow-md shadow-emerald-500/20 scale-105"
+              : "text-slate-300 hover:text-white hover:bg-white/[0.08]"
+          }`}
+          aria-label="Healthcare OPD"
+        >
+          <div className="relative">
+            <Stethoscope className={`w-5 h-5 transition-transform duration-200 ${pathname.startsWith("/healthcare") || pathname.startsWith("/queue") ? "text-emerald-400 scale-110" : "text-slate-300"}`} />
+            <span className="absolute -top-0.5 -right-1 flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+          </div>
+          <span className={`text-[10px] font-bold tracking-tight mt-0.5 whitespace-nowrap ${pathname.startsWith("/healthcare") || pathname.startsWith("/queue") ? "text-white drop-shadow-sm font-extrabold" : "text-slate-400 font-medium"}`}>
+            Health
+          </span>
+        </Link>
+
+        {/* 3. Services */}
+        <Link
+          href="/services"
+          onClick={() => setMobileMenuOpen(false)}
+          className={`mobileDockItem relative flex flex-col items-center justify-center py-1.5 px-3 rounded-full transition-all duration-200 ${
+            pathname.startsWith("/services")
+              ? "bg-gradient-to-tr from-sky-500/25 to-blue-500/25 border border-sky-500/40 text-sky-400 shadow-md shadow-sky-500/20 scale-105"
+              : "text-slate-300 hover:text-white hover:bg-white/[0.08]"
+          }`}
+          aria-label="Home Services"
+        >
+          <Briefcase className={`w-5 h-5 transition-transform duration-200 ${pathname.startsWith("/services") ? "text-sky-400 scale-110" : "text-slate-300"}`} />
+          <span className={`text-[10px] font-bold tracking-tight mt-0.5 whitespace-nowrap ${pathname.startsWith("/services") ? "text-white drop-shadow-sm font-extrabold" : "text-slate-400 font-medium"}`}>
+            Services
+          </span>
+        </Link>
+
+        {/* 4. Wallet */}
+        <Link
+          href="/wallet"
+          onClick={() => setMobileMenuOpen(false)}
+          className={`mobileDockItem relative flex flex-col items-center justify-center py-1.5 px-3 rounded-full transition-all duration-200 ${
+            pathname.startsWith("/wallet")
+              ? "bg-gradient-to-tr from-amber-500/25 to-yellow-500/25 border border-amber-500/40 text-amber-400 shadow-md shadow-amber-500/20 scale-105"
+              : "text-slate-300 hover:text-white hover:bg-white/[0.08]"
+          }`}
+          aria-label="My Wallet"
+        >
+          <Wallet className={`w-5 h-5 transition-transform duration-200 ${pathname.startsWith("/wallet") ? "text-amber-400 scale-110" : "text-slate-300"}`} />
+          <span className={`text-[10px] font-bold tracking-tight mt-0.5 whitespace-nowrap ${pathname.startsWith("/wallet") ? "text-white drop-shadow-sm font-extrabold" : "text-slate-400 font-medium"}`}>
+            Wallet
+          </span>
+        </Link>
+
+        {/* 5. Account / Dashboard */}
+        <Link
+          href={dashboardHref}
+          onClick={() => setMobileMenuOpen(false)}
+          className={`mobileDockItem relative flex flex-col items-center justify-center py-1.5 px-3 rounded-full transition-all duration-200 ${
+            pathname.startsWith("/dashboard") || pathname.startsWith("/account") || pathname.startsWith("/owner") || pathname.startsWith("/admin") || pathname.startsWith("/login")
+              ? "bg-gradient-to-tr from-purple-500/25 to-indigo-500/25 border border-purple-500/40 text-purple-400 shadow-md shadow-purple-500/20 scale-105"
+              : "text-slate-300 hover:text-white hover:bg-white/[0.08]"
+          }`}
+          aria-label="Account / Dashboard"
+        >
+          {user ? (
+            <LayoutDashboard className={`w-5 h-5 transition-transform duration-200 ${pathname.startsWith("/dashboard") || pathname.startsWith("/account") || pathname.startsWith("/owner") || pathname.startsWith("/admin") ? "text-purple-400 scale-110" : "text-slate-300"}`} />
+          ) : (
+            <User className={`w-5 h-5 transition-transform duration-200 ${pathname.startsWith("/login") ? "text-purple-400 scale-110" : "text-slate-300"}`} />
+          )}
+          <span className={`text-[10px] font-bold tracking-tight mt-0.5 whitespace-nowrap ${pathname.startsWith("/dashboard") || pathname.startsWith("/account") || pathname.startsWith("/owner") || pathname.startsWith("/admin") || pathname.startsWith("/login") ? "text-white drop-shadow-sm font-extrabold" : "text-slate-400 font-medium"}`}>
+            {user ? "Dashboard" : "Account"}
+          </span>
+        </Link>
+      </div>
+    </nav>
+    </>
   );
 }

@@ -4689,4 +4689,32 @@ html, body {
     padding-left: 12px !important;
     padding-right: 12px !important;
   }
+
+  body {
+    padding-bottom: 72px;
+  }
+}
+
+/* Floating Curved Mobile Bottom Navigation Bar */
+.mobileBottomDock {
+  animation: mobileDockFloat 4s ease-in-out infinite alternate;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.75), 0 0 25px rgba(249, 115, 22, 0.22), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  border-radius: 9999px !important;
+}
+
+.mobileDockItem {
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, color 0.2s ease;
+}
+
+.mobileDockItem:active {
+  transform: scale(0.90) !important;
+}
+
+@keyframes mobileDockFloat {
+  0% {
+    transform: translateY(0px);
+  }
+  100% {
+    transform: translateY(-3px);
+  }
 }

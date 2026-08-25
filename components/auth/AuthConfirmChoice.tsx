@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { apiFetch, invalidateClientCache } from "@/lib/client-api";
-import { syncSupabaseAccessCookie } from "@/lib/supabase-browser";
+import { apiFetch } from "@/lib/client-api";
 
 interface AuthConfirmChoiceProps {
   hash?: string;
@@ -53,16 +52,6 @@ export default function AuthConfirmChoice({ hash: propHash, accessToken: propTok
         }
 
         if (token) {
-          syncSupabaseAccessCookie({
-            access_token: token,
-            refresh_token: "",
-            user: { id: "" } as any,
-            token_type: "bearer",
-            expires_in: 3600,
-            expires_at: Math.floor(Date.now() / 1000) + 3600,
-          });
-          invalidateClientCache();
-
           setStatusText(isFromApp ? "Authentication successful! Returning to Kynisto App…" : "Authenticating your Google session…");
           const res = await apiFetch<{
             user: { role: string } | null;
