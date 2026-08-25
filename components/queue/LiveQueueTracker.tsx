@@ -747,11 +747,11 @@ export default function LiveQueueTracker() {
         onClick={() => handleFilterSelect(id)}
         className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 ${
           activeFilter === id
-            ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25 border border-emerald-400/30 scale-[1.02]'
-            : 'bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10'
+            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/25 border border-emerald-500/30 scale-[1.02]'
+            : 'bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 shadow-sm'
         }`}
       >
-        <Icon className={`w-3.5 h-3.5 ${activeFilter === id ? 'text-white' : 'text-emerald-400'}`} />
+        <Icon className={`w-3.5 h-3.5 ${activeFilter === id ? 'text-white' : 'text-emerald-600'}`} />
         <span>{label}</span>
       </button>
     ));
@@ -771,107 +771,102 @@ export default function LiveQueueTracker() {
         <div
           key={item.id}
           style={{ contain: "content", transform: "translate3d(0,0,0)", willChange: "transform" }}
-          className="bg-slate-900/60 backdrop-blur-xl hover:bg-slate-900/90 border border-white/10 hover:border-emerald-500/40 rounded-3xl p-5 sm:p-7 transition-all duration-300 shadow-xl flex flex-col justify-between group relative overflow-hidden active:scale-[0.99]"
+          className="bg-white border border-slate-200/90 hover:border-emerald-500/40 rounded-3xl p-5 sm:p-7 transition-all duration-300 shadow-sm hover:shadow-xl flex flex-col justify-between group relative overflow-hidden active:scale-[0.99]"
         >
           <div>
-            {/* Top Row: Tags & Live Queue Status */}
             <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
               <div className="flex items-center flex-wrap gap-1.5 min-w-0">
-                <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[11px] font-extrabold uppercase tracking-wide">
+                <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-extrabold uppercase tracking-wide">
                   {item.providerType || 'Clinic'}
                 </span>
                 {item.subcategory && (
-                  <span className="px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/25 text-teal-300 text-[11px] font-extrabold uppercase tracking-wide">
+                  <span className="px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-teal-700 text-[11px] font-extrabold uppercase tracking-wide">
                     {item.subcategory}
                   </span>
                 )}
               </div>
 
               {!hasLiveQueue ? (
-                <span className="inline-flex items-center text-[11px] font-bold text-slate-400 bg-white/5 px-3 py-1 rounded-full border border-white/10 whitespace-nowrap shrink-0">
+                <span className="inline-flex items-center text-[11px] font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200 whitespace-nowrap shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-400 mr-1.5" />
                   No Live Queue
                 </span>
               ) : isPaused ? (
-                <span className="inline-flex items-center text-[11px] font-bold text-amber-300 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/25 whitespace-nowrap shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5" />
+                <span className="inline-flex items-center text-[11px] font-bold text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200 whitespace-nowrap shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5" />
                   Queue Paused
                 </span>
               ) : isClosed ? (
-                <span className="inline-flex items-center text-[11px] font-bold text-rose-300 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/25 whitespace-nowrap shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-400 mr-1.5" />
+                <span className="inline-flex items-center text-[11px] font-bold text-rose-700 bg-rose-50 px-3 py-1 rounded-full border border-rose-200 whitespace-nowrap shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1.5" />
                   Queue Closed
                 </span>
               ) : (
-                <span className="inline-flex items-center text-[11px] font-bold text-emerald-300 bg-emerald-500/15 px-3 py-1 rounded-full border border-emerald-500/30 whitespace-nowrap shrink-0 shadow-sm shadow-emerald-500/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
+                <span className="inline-flex items-center text-[11px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 whitespace-nowrap shrink-0 shadow-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
                   ● Live Queue Open
                 </span>
               )}
             </div>
 
-            {/* Clinic Info */}
             <div className="flex items-start gap-3.5 mb-3">
-              <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shrink-0 mt-0.5 shadow-sm">
                 <Stethoscope className="w-5 h-5" />
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="text-lg sm:text-xl font-black text-white group-hover:text-emerald-400 transition-colors leading-tight">
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 group-hover:text-emerald-600 transition-colors leading-tight">
                   {item.name}
                 </h3>
-                <p className="flex items-center text-slate-300 text-xs sm:text-sm font-medium mt-1">
-                  <MapPin className="w-3.5 h-3.5 mr-1 text-teal-400 shrink-0" />
+                <p className="flex items-center text-slate-600 text-xs sm:text-sm font-medium mt-1">
+                  <MapPin className="w-3.5 h-3.5 mr-1 text-teal-600 shrink-0" />
                   <span className="truncate">{item.address}</span>
                 </p>
               </div>
             </div>
 
-            {/* 3-Column Metrics Gauge */}
-            <div className="grid grid-cols-3 gap-2 p-3 bg-black/40 rounded-2xl border border-white/5 mb-5 text-center">
+            <div className="grid grid-cols-3 gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-200/80 mb-5 text-center">
               <div>
-                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
                   Waiting
                 </span>
-                <span className="text-sm sm:text-lg font-black text-white tabular-nums">
+                <span className="text-sm sm:text-lg font-black text-slate-900 tabular-nums">
                   {hasLiveQueue ? (isClosed ? 0 : item.waitingCount) : "OPD Listed"}
                 </span>
               </div>
               <div>
-                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
                   Avg Speed
                 </span>
-                <span className="text-sm sm:text-lg font-black text-emerald-400 tabular-nums">
+                <span className="text-sm sm:text-lg font-black text-emerald-600 tabular-nums">
                   {hasLiveQueue ? `${consultationMins}m` : "Walk-in"}
                 </span>
               </div>
               <div>
-                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
                   Status
                 </span>
-                <span className={`text-sm sm:text-lg font-black tabular-nums ${isClosed ? "text-slate-400" : "text-emerald-400"}`}>
+                <span className={`text-sm sm:text-lg font-black tabular-nums ${isClosed ? "text-slate-400" : "text-emerald-600"}`}>
                   {isClosed ? "Closed" : "Active"}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex items-center gap-2 pt-1">
             <Link
               href={`/stores/${item.slug || item.id}`}
-              className={`py-2.5 px-4 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white border border-white/10 cursor-pointer ${
+              className={`py-2.5 px-4 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 cursor-pointer ${
                 hasLiveQueue ? "shrink-0" : "w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white border-none shadow-md"
               }`}
             >
-              <Building2 className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
+              <Building2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               <span>Profile</span>
             </Link>
 
-            {/* Book Appointment button */}
             {item.allowAppointments === 0 || item.allowAppointments === false ? (
               <button
                 type="button"
-                className="py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 opacity-60 cursor-pointer text-slate-400 border border-white/5 bg-white/5 hover:bg-white/10"
+                className="py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 opacity-60 cursor-pointer text-slate-400 border border-slate-200 bg-slate-50"
                 onClick={() => setBookingTarget({ id: String(item.id), name: item.name, allowAppointments: false })}
                 title="This clinic does not allow online appointments"
               >
@@ -880,10 +875,10 @@ export default function LiveQueueTracker() {
               </button>
             ) : (
               <button
-                className="py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 bg-white/5 hover:bg-white/10 text-slate-200 hover:text-white border border-white/10 cursor-pointer"
+                className="py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 cursor-pointer"
                 onClick={() => setBookingTarget({ id: String(item.id), name: item.name, allowAppointments: true })}
               >
-                <Calendar className="w-3.5 h-3.5 text-teal-400" />
+                <Calendar className="w-3.5 h-3.5 text-teal-600" />
                 <span>Book Appt</span>
               </button>
             )}
@@ -894,8 +889,8 @@ export default function LiveQueueTracker() {
                 disabled={isClosed || isJoining}
                 className={`flex-1 py-2.5 px-4 font-bold text-xs sm:text-sm rounded-2xl transition-all shadow-md flex items-center justify-center space-x-1.5 group/btn ${
                   isClosed
-                    ? 'bg-slate-800/60 text-slate-500 cursor-not-allowed border border-white/5 opacity-70'
-                    : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white shadow-emerald-500/20 cursor-pointer'
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                    : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-500/20 cursor-pointer'
                 }`}
               >
                 <span>{isPaused ? 'Queue Paused' : isClosed ? 'Queue Closed' : isJoining ? 'Joining...' : 'Visit Live Queue'}</span>
@@ -910,19 +905,18 @@ export default function LiveQueueTracker() {
 
   const isCompleted = entryStatus === 'completed';
 
-  // 1. CANCELLED STATE VIEW
   if (isCancelled && selectedQueue) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
-        <XCircle className="w-20 h-20 text-red-500 mb-6 animate-pulse" />
-        <h2 className="text-3xl sm:text-4xl font-black text-white">Visit Cancelled</h2>
-        <p className="text-lg text-slate-300 font-medium mt-3 max-w-md">
-          You have left the queue for <span className="text-white font-bold">{selectedQueue.name}</span>.
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center text-slate-900">
+        <XCircle className="w-20 h-20 text-rose-500 mb-6 animate-pulse" />
+        <h2 className="text-3xl sm:text-4xl font-black text-slate-900">Visit Cancelled</h2>
+        <p className="text-lg text-slate-600 font-medium mt-3 max-w-md">
+          You have left the queue for <span className="text-slate-900 font-bold">{selectedQueue.name}</span>.
         </p>
         <div className="flex gap-4 mt-8">
           <button
             onClick={() => setView('list')}
-            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition-all"
+            className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg transition-all cursor-pointer"
           >
             Find Another Clinic
           </button>
@@ -931,19 +925,18 @@ export default function LiveQueueTracker() {
     );
   }
 
-  // 2. COMPLETED VISIT STATE VIEW
   if (isCompleted && selectedQueue) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
-        <CheckCircle2 className="w-20 h-20 text-emerald-400 mb-6 animate-bounce" />
-        <h2 className="text-3xl sm:text-4xl font-black text-white">Consultation Complete</h2>
-        <p className="text-lg text-slate-300 font-medium mt-3 max-w-md">
-          Thank you for visiting <span className="text-white font-bold">{selectedQueue.name}</span>!
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center text-slate-900">
+        <CheckCircle2 className="w-20 h-20 text-emerald-600 mb-6 animate-bounce" />
+        <h2 className="text-3xl sm:text-4xl font-black text-slate-900">Consultation Complete</h2>
+        <p className="text-lg text-slate-600 font-medium mt-3 max-w-md">
+          Thank you for visiting <span className="text-slate-900 font-bold">{selectedQueue.name}</span>!
         </p>
         <div className="flex gap-4 mt-8">
           <button
             onClick={() => setView('list')}
-            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition-all"
+            className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg transition-all cursor-pointer"
           >
             Back to Healthcare Hub
           </button>
@@ -952,7 +945,6 @@ export default function LiveQueueTracker() {
     );
   }
 
-  // 3. ACTIVE TICKET VIEW
   if (view === 'ticket' && selectedQueue) {
     const isClosed = !isQueueOpen || selectedQueue.queueStatus === 'closed';
     const isMyTurn = entryStatus === 'called' || (currentToken === myTokenNumber && myTokenNumber > 0);
@@ -960,70 +952,62 @@ export default function LiveQueueTracker() {
     const ownerConsultationMins = selectedQueue.consultationMinutes || 15;
 
     return (
-      <div className="min-h-screen bg-[#070B12] text-white flex flex-col relative overflow-hidden font-sans">
-        {/* Header Banner - Premium Medical Teal & Emerald Gradient */}
-        <div className="bg-gradient-to-b from-slate-900/90 via-slate-900/60 to-transparent text-white pt-6 pb-28 px-4 sm:px-6 lg:px-16 relative overflow-hidden border-b border-white/10">
-          {/* Ambient Glow Orbs */}
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900 flex flex-col relative overflow-hidden font-sans">
+        <div className="bg-gradient-to-b from-emerald-50 via-teal-50/40 to-transparent text-slate-900 pt-6 pb-28 px-4 sm:px-6 lg:px-16 relative overflow-hidden border-b border-slate-200/80">
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute top-1/2 -right-8 -translate-y-1/2 opacity-10 pointer-events-none">
-            <Clock className="w-80 h-80 sm:w-[420px] sm:h-[420px] text-teal-200 stroke-[1.2]" />
+            <Clock className="w-80 h-80 sm:w-[420px] sm:h-[420px] text-teal-600 stroke-[1.2]" />
           </div>
 
           <div className="relative z-10 max-w-5xl mx-auto flex flex-col">
-            {/* BACK BUTTON */}
             <button
               onClick={() => setView('list')}
-              className="flex items-center text-emerald-300 hover:text-white font-bold text-xs sm:text-sm mb-6 w-fit group transition-all bg-white/5 hover:bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 shadow-md cursor-pointer"
+              className="flex items-center text-slate-700 hover:text-slate-900 font-bold text-xs sm:text-sm mb-6 w-fit group transition-all bg-white hover:bg-slate-50 px-4 py-2 rounded-full border border-slate-200 shadow-sm cursor-pointer"
             >
-              <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform text-emerald-400" />
+              <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform text-emerald-600" />
               <span>Back to Healthcare Hub</span>
             </button>
 
-            {/* LIVE STATUS PILL BADGE */}
             <div className="mb-3 flex items-center space-x-3">
               {isMyTurn ? (
-                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-500/25 backdrop-blur-md text-xs font-black uppercase tracking-widest text-emerald-300 shadow-lg border border-emerald-400/40 animate-pulse">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 mr-2.5 shadow-[0_0_10px_#10b981]" />
+                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-100 text-xs font-black uppercase tracking-widest text-emerald-800 shadow-sm border border-emerald-300 animate-pulse">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2.5 shadow-[0_0_10px_#10b981]" />
                   YOUR TURN NOW!
                 </span>
               ) : isClosed ? (
-                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-rose-500/20 backdrop-blur-md text-xs font-black uppercase tracking-widest text-rose-200 shadow-sm border border-rose-500/30">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-400 mr-2.5" />
+                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-rose-100 text-xs font-black uppercase tracking-widest text-rose-800 shadow-sm border border-rose-200">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 mr-2.5" />
                   QUEUE CLOSED BY CLINIC
                 </span>
               ) : (
-                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-teal-500/20 backdrop-blur-md text-xs font-black uppercase tracking-widest text-teal-200 shadow-sm border border-teal-400/30">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 mr-2.5 animate-ping" />
+                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-teal-100 text-xs font-black uppercase tracking-widest text-teal-800 shadow-sm border border-teal-200">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2.5 animate-ping" />
                   LIVE QUEUE ACTIVE
                 </span>
               )}
             </div>
 
-            {/* CLINIC TITLE & ADDRESS */}
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
               {selectedQueue.name}
             </h1>
-            <p className="flex items-center text-slate-300 font-medium mt-2 text-sm sm:text-base">
-              <MapPin className="w-4 h-4 mr-2 text-teal-400 shrink-0" />
+            <p className="flex items-center text-slate-600 font-medium mt-2 text-sm sm:text-base">
+              <MapPin className="w-4 h-4 mr-2 text-teal-600 shrink-0" />
               <span>{selectedQueue.address}</span>
             </p>
           </div>
         </div>
 
-        {/* Floating Ticket Container */}
         <div className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20 pb-16">
-          <div className="bg-slate-900/90 backdrop-blur-2xl rounded-3xl border border-white/10 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] p-6 sm:p-10 relative overflow-hidden">
-            {/* Ambient Backlight Glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] bg-[radial-gradient(circle_at_center,_rgba(16,185,129,0.12)_0%,_rgba(6,182,212,0.06)_50%,_transparent_70%)] blur-3xl pointer-events-none" />
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl p-6 sm:p-10 relative overflow-hidden">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] bg-[radial-gradient(circle_at_center,_rgba(16,185,129,0.06)_0%,_rgba(6,182,212,0.03)_50%,_transparent_70%)] blur-3xl pointer-events-none" />
 
-            {/* TURN ARRIVED BANNER */}
             {isMyTurn && !isTurnDismissed && (
-              <div className="mb-8 p-6 bg-emerald-950/90 border-2 border-emerald-500 rounded-2xl flex items-start justify-between text-emerald-100 shadow-[0_0_30px_rgba(16,185,129,0.25)] flex-wrap gap-4 transition-all duration-300">
+              <div className="mb-8 p-6 bg-emerald-50 border-2 border-emerald-500 rounded-2xl flex items-start justify-between text-emerald-950 shadow-lg flex-wrap gap-4 transition-all duration-300">
                 <div className="flex items-start">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-400 mr-4 mt-0.5 shrink-0" />
+                  <CheckCircle2 className="w-8 h-8 text-emerald-600 mr-4 mt-0.5 shrink-0" />
                   <div>
-                    <h4 className="text-2xl font-black text-white mb-1">🎉 YOUR TURN HAS ARRIVED!</h4>
-                    <p className="text-base font-bold text-emerald-200">
+                    <h4 className="text-2xl font-black text-slate-900 mb-1">🎉 YOUR TURN HAS ARRIVED!</h4>
+                    <p className="text-base font-bold text-emerald-800">
                       Token #{myTokenNumber} is currently being called by the doctor! Please enter the consultation room immediately.
                     </p>
                   </div>
@@ -1032,14 +1016,14 @@ export default function LiveQueueTracker() {
                   <button
                     type="button"
                     onClick={() => playTurnArrivalChime()}
-                    className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md cursor-pointer"
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md cursor-pointer"
                   >
                     🔔 Play Chime
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsTurnDismissed(true)}
-                    className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-300 font-bold text-xs rounded-xl border border-emerald-500/30 transition-all cursor-pointer"
+                    className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-300 transition-all cursor-pointer"
                     aria-label="Dismiss turn notification"
                   >
                     ✕ Dismiss
@@ -1048,108 +1032,101 @@ export default function LiveQueueTracker() {
               </div>
             )}
 
-            {/* Closed Queue Notice */}
             {isClosed && !isMyTurn && (
-              <div className="mb-8 p-6 bg-rose-950/60 border-l-4 border-rose-500 rounded-2xl flex items-start text-rose-200 shadow-md">
-                <Lock className="w-6 h-6 text-rose-400 mr-4 mt-0.5 shrink-0" />
+              <div className="mb-8 p-6 bg-rose-50 border-l-4 border-rose-500 rounded-2xl flex items-start text-rose-900 shadow-sm">
+                <Lock className="w-6 h-6 text-rose-500 mr-4 mt-0.5 shrink-0" />
                 <div>
-                  <h4 className="text-lg font-black text-white mb-1">Queue Closed by Store Owner / Admin</h4>
-                  <p className="text-sm font-medium text-rose-200">
+                  <h4 className="text-lg font-black text-slate-900 mb-1">Queue Closed by Store Owner / Admin</h4>
+                  <p className="text-sm font-medium text-rose-800">
                     The live queue for this provider is currently closed by the owner in their Live Queue dashboard.
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Position & Estimated Wait Section */}
-            <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 pb-8 border-b border-slate-800/80">
-              <div className="bg-slate-950/60 p-6 rounded-2xl border border-slate-800/80">
-                <p className="text-xs font-black text-emerald-400 uppercase tracking-widest mb-3 flex items-center">
-                  <User className="w-4 h-4 mr-2 text-emerald-400" /> YOUR POSITION
+            <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 pb-8 border-b border-slate-200">
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                <p className="text-xs font-black text-emerald-700 uppercase tracking-widest mb-3 flex items-center">
+                  <User className="w-4 h-4 mr-2 text-emerald-600" /> YOUR POSITION
                 </p>
                 <div className="flex items-baseline">
-                  <span className="text-6xl sm:text-7xl font-black text-white tabular-nums tracking-tighter">
+                  <span className="text-6xl sm:text-7xl font-black text-slate-900 tabular-nums tracking-tighter">
                     {userPosition}
                   </span>
-                  <span className="text-2xl sm:text-3xl text-slate-500 font-extrabold ml-3 tabular-nums">
+                  <span className="text-2xl sm:text-3xl text-slate-400 font-extrabold ml-3 tabular-nums">
                     / {Math.max(1, totalInQueue)}
                   </span>
                 </div>
-                <p className="text-xs font-semibold text-slate-400 mt-3 pt-3 border-t border-slate-800/60">
-                  Your Token #: <span className="text-white font-bold">{myTokenNumber}</span> • Serving Token #: <span className="text-emerald-400 font-bold">{currentToken}</span>
+                <p className="text-xs font-semibold text-slate-500 mt-3 pt-3 border-t border-slate-200">
+                  Your Token #: <span className="text-slate-900 font-bold">{myTokenNumber}</span> • Serving Token #: <span className="text-emerald-700 font-bold">{currentToken}</span>
                 </p>
               </div>
 
-              <div className="bg-slate-950/60 p-6 rounded-2xl border border-slate-800/80 flex flex-col justify-center">
-                <p className="text-xs font-black text-teal-400 uppercase tracking-widest mb-3 flex items-center">
-                  <Clock className="w-4 h-4 mr-2 text-teal-400" /> ESTIMATED WAIT
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col justify-center">
+                <p className="text-xs font-black text-teal-700 uppercase tracking-widest mb-3 flex items-center">
+                  <Clock className="w-4 h-4 mr-2 text-teal-600" /> ESTIMATED WAIT
                 </p>
-                <div className="text-5xl sm:text-6xl font-black text-teal-400 flex items-baseline tabular-nums tracking-tight">
-                  {isMyTurn ? 0 : estimatedWait} <span className="text-2xl font-bold ml-2.5 text-teal-300">mins</span>
+                <div className="text-5xl sm:text-6xl font-black text-teal-600 flex items-baseline tabular-nums tracking-tight">
+                  {isMyTurn ? 0 : estimatedWait} <span className="text-2xl font-bold ml-2.5 text-teal-700">mins</span>
                 </div>
-                <p className="text-xs font-semibold text-slate-400 mt-3 pt-3 border-t border-slate-800/60">
-                  Clinic Consultation Speed: <span className="text-slate-200 font-bold">{ownerConsultationMins}m</span> / patient
+                <p className="text-xs font-semibold text-slate-500 mt-3 pt-3 border-t border-slate-200">
+                  Clinic Consultation Speed: <span className="text-slate-800 font-bold">{ownerConsultationMins}m</span> / patient
                 </p>
               </div>
             </div>
 
-            {/* Glowing Slider Progress Bar */}
             <div className="relative mb-10 pt-2">
               <div className="flex justify-between text-xs font-black text-slate-400 uppercase tracking-widest mb-3">
                 <span>START</span>
                 <span>YOUR TURN</span>
               </div>
-              <div className="h-4 w-full bg-slate-950 rounded-full overflow-hidden relative p-0.5 border border-slate-800">
+              <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden relative p-0.5 border border-slate-200">
                 <div
                   className={`h-full rounded-full transition-all duration-1000 ease-out relative ${
                     isMyTurn
-                      ? 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.8)]'
-                      : 'bg-gradient-to-r from-teal-600 via-emerald-500 to-cyan-400 shadow-[0_0_15px_rgba(16,185,129,0.5)]'
+                      ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)]'
+                      : 'bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
                   }`}
                   style={{ width: `${progressPercent}%` }}
                 >
-                  <div className="absolute inset-0 bg-white/20 w-1/3 -skew-x-12 animate-[shimmer_2s_infinite]" />
+                  <div className="absolute inset-0 bg-white/30 w-1/3 -skew-x-12 animate-[shimmer_2s_infinite]" />
                 </div>
               </div>
 
-              {/* Slider Handle Knob */}
               <div
                 className="absolute top-8 -ml-4 transition-all duration-1000 ease-out flex flex-col items-center pointer-events-none"
                 style={{ left: `${progressPercent}%` }}
               >
-                <div className={`border-4 rounded-full w-8 h-8 shadow-xl flex items-center justify-center relative ${
-                  isMyTurn ? 'bg-emerald-950 border-emerald-400' : 'bg-slate-900 border-teal-400'
+                <div className={`border-4 rounded-full w-8 h-8 shadow-md flex items-center justify-center relative ${
+                  isMyTurn ? 'bg-white border-emerald-500' : 'bg-white border-teal-500'
                 }`}>
-                  <span className={`w-2.5 h-2.5 rounded-full animate-ping absolute ${isMyTurn ? 'bg-emerald-400' : 'bg-teal-400'}`} />
-                  <span className={`w-2.5 h-2.5 rounded-full relative z-10 ${isMyTurn ? 'bg-emerald-400' : 'bg-teal-400'}`} />
+                  <span className={`w-2.5 h-2.5 rounded-full animate-ping absolute ${isMyTurn ? 'bg-emerald-500' : 'bg-teal-500'}`} />
+                  <span className={`w-2.5 h-2.5 rounded-full relative z-10 ${isMyTurn ? 'bg-emerald-500' : 'bg-teal-500'}`} />
                 </div>
               </div>
             </div>
 
-            {/* Notification alert if running late */}
             {isLate && (
-              <div className="mb-8 p-4 bg-amber-500/10 border-l-4 border-amber-500 rounded-xl flex items-start text-amber-200">
-                <AlertCircle className="w-5 h-5 text-amber-400 mr-3 mt-0.5 shrink-0" />
+              <div className="mb-8 p-4 bg-amber-50 border-l-4 border-amber-500 rounded-xl flex items-start text-amber-900">
+                <AlertCircle className="w-5 h-5 text-amber-500 mr-3 mt-0.5 shrink-0" />
                 <p className="text-sm font-medium">
                   We notified the clinic that you are running <strong>{lateMinutes} minutes</strong> late. Your position is preserved.
                 </p>
               </div>
             )}
 
-            {/* In Consultation Banner */}
             {entryStatus === 'in_consultation' && (
-              <div className="mb-8 p-4 bg-blue-500/10 border-l-4 border-blue-500 rounded-xl flex items-start text-blue-200">
-                <CheckCircle2 className="w-5 h-5 text-blue-400 mr-3 mt-0.5 shrink-0" />
+              <div className="mb-8 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-xl flex items-start text-blue-900">
+                <CheckCircle2 className="w-5 h-5 text-blue-500 mr-3 mt-0.5 shrink-0" />
                 <p className="text-sm font-bold">You are currently in consultation. Please wait — the doctor will see you shortly.</p>
               </div>
             )}
 
-            {/* Action Buttons */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
               <button
                 onClick={handleRunningLate}
                 disabled={isLate || isClosed || isMyTurn || entryStatus === 'in_consultation'}
-                className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-extrabold text-base shadow-lg transition-all disabled:opacity-50 cursor-pointer"
+                className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold text-base shadow-md transition-all disabled:opacity-50 cursor-pointer"
               >
                 <Navigation className="w-5 h-5 mr-3 text-white fill-white/20" />
                 <span>Running Late</span>
@@ -1158,38 +1135,37 @@ export default function LiveQueueTracker() {
               <button
                 onClick={handleLeaveQueue}
                 disabled={isMyTurn || entryStatus === 'in_consultation'}
-                className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 text-white font-extrabold text-base shadow-lg transition-all disabled:opacity-50 cursor-pointer"
+                className="flex items-center justify-center p-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-base shadow-sm border border-slate-200 transition-all disabled:opacity-50 cursor-pointer"
               >
-                <ArrowLeft className="w-5 h-5 mr-3 text-white" />
+                <ArrowLeft className="w-5 h-5 mr-3 text-slate-700" />
                 <span>Leave Queue</span>
               </button>
 
               <button
                 onClick={handleCancelVisit}
-                className="flex items-center justify-center p-4 rounded-2xl bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-500 hover:to-red-600 text-white font-extrabold text-base shadow-lg transition-all cursor-pointer"
+                className="flex items-center justify-center p-4 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-extrabold text-base border border-rose-200 shadow-sm transition-all cursor-pointer"
               >
-                <XCircle className="w-5 h-5 mr-3 text-white fill-white/20" />
+                <XCircle className="w-5 h-5 mr-3 text-rose-600" />
                 <span>Cancel Visit</span>
               </button>
             </div>
           </div>
 
-          {/* Bottom Actions */}
           <div className="mt-8 flex flex-wrap items-center justify-between gap-4 px-2">
             <button
               onClick={() => setView('list')}
-              className="flex items-center text-teal-400 hover:text-teal-300 font-bold text-sm transition-colors cursor-pointer"
+              className="flex items-center text-teal-700 hover:text-teal-800 font-bold text-sm transition-colors cursor-pointer"
             >
               <ChevronRight className="w-4 h-4 mr-1 rotate-180" />
               View All Other Healthcare Queues
             </button>
 
-            <div className="flex items-center space-x-6 text-sm font-semibold text-slate-400">
-              <button className="flex items-center hover:text-white transition-colors cursor-pointer">
-                <Phone className="w-4 h-4 mr-2 text-teal-400" /> Call Clinic
+            <div className="flex items-center space-x-6 text-sm font-semibold text-slate-600">
+              <button className="flex items-center hover:text-slate-900 transition-colors cursor-pointer">
+                <Phone className="w-4 h-4 mr-2 text-teal-600" /> Call Clinic
               </button>
-              <button className="flex items-center hover:text-white transition-colors cursor-pointer">
-                <Bell className="w-4 h-4 mr-2 text-emerald-400" /> Notifications
+              <button className="flex items-center hover:text-slate-900 transition-colors cursor-pointer">
+                <Bell className="w-4 h-4 mr-2 text-emerald-600" /> Notifications
               </button>
             </div>
           </div>
@@ -1198,42 +1174,37 @@ export default function LiveQueueTracker() {
     );
   }
 
-  // 4. ALL HEALTHCARE QUEUES LIST VIEW
   return (
     <>
-    <div className="min-h-screen bg-[#070B12] text-white flex flex-col font-sans relative overflow-x-hidden">
-      {/* Universal Floating Navbar */}
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900 flex flex-col font-sans relative overflow-x-hidden">
       <Navbar3D />
 
-      {/* Ambient Atmospheric Cyan & Emerald Glows */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[550px] pointer-events-none z-0"
         style={{
-          background: "radial-gradient(ellipse at top, rgba(16, 185, 129, 0.16) 0%, rgba(6, 182, 212, 0.08) 45%, transparent 70%)",
+          background: "radial-gradient(ellipse at top, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.06) 45%, transparent 70%)",
           filter: "blur(110px)",
         }}
       />
 
-      {/* Main Hero Banner */}
       <div className="relative z-10 pt-24 sm:pt-28 pb-6 sm:pb-10 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto flex flex-col items-center text-center">
-          {/* Active Ticket Banner if User is in a Live Queue */}
           {selectedQueue && (
             <div className="mb-6 w-full max-w-xl">
               <button
                 onClick={() => setView('ticket')}
-                className="w-full flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-950/90 to-slate-900/90 border border-emerald-500/40 text-emerald-200 hover:text-white transition-all shadow-lg shadow-emerald-950/50 cursor-pointer group"
+                className="w-full flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-white border border-emerald-300 text-slate-900 hover:border-emerald-500 transition-all shadow-md cursor-pointer group"
               >
                 <div className="flex items-center gap-2.5 text-left min-w-0">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shrink-0">
                     <Sparkles className="w-4 h-4 animate-pulse" />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-xs font-bold uppercase tracking-wider text-emerald-400">Active Live Pass</div>
-                    <div className="text-sm font-black text-white truncate">{selectedQueue.name}</div>
+                    <div className="text-xs font-bold uppercase tracking-wider text-emerald-700">Active Live Pass</div>
+                    <div className="text-sm font-black text-slate-900 truncate">{selectedQueue.name}</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs font-black uppercase px-3 py-1.5 rounded-xl bg-emerald-500 text-slate-950 shrink-0 group-hover:bg-emerald-400 transition-colors">
+                <div className="flex items-center gap-1.5 text-xs font-black uppercase px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white shrink-0 group-hover:bg-emerald-500 transition-colors shadow-sm">
                   <span>View Pass</span>
                   <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </div>
@@ -1241,33 +1212,32 @@ export default function LiveQueueTracker() {
             </div>
           )}
 
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-extrabold uppercase tracking-wider mb-4 backdrop-blur-md shadow-sm shadow-emerald-500/10">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-extrabold uppercase tracking-wider mb-4 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
             <span>VERIFIED CARE NETWORK</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.12] max-w-3xl">
+          <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.12] max-w-3xl">
             Local care,{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600">
               without the waiting room.
             </span>
           </h2>
 
-          <p className="text-slate-300 text-sm sm:text-lg font-normal mt-4 max-w-2xl leading-relaxed">
+          <p className="text-slate-600 text-sm sm:text-lg font-normal mt-4 max-w-2xl leading-relaxed">
             Select a verified clinic, OPD, or diagnostic lab near you. Join live queues remotely and arrive right on time.
           </p>
 
-          {/* Search Input & Push Alerts */}
           <div className="mt-8 w-full max-w-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="flex-1 relative flex items-center">
-              <Search className="w-4 h-4 text-emerald-400 absolute left-4 z-10 pointer-events-none" />
+              <Search className="w-4 h-4 text-emerald-600 absolute left-4 z-10 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
                 placeholder="Search clinic, doctor, specialty, area..."
                 style={{ paddingLeft: "42px", paddingRight: "14px" }}
-                className="w-full bg-slate-900/90 border border-white/15 rounded-2xl py-3.5 text-white placeholder-slate-400 font-medium focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 transition-all text-sm shadow-inner"
+                className="w-full bg-white border border-slate-200 rounded-2xl py-3.5 text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm shadow-sm"
               />
             </div>
             <PushNotificationManager />
@@ -1275,34 +1245,29 @@ export default function LiveQueueTracker() {
         </div>
       </div>
 
-      {/* Error Message Toast Banner */}
       {errorMsg && (
         <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-4 relative z-10">
-          <div className="p-4 bg-rose-950/70 border border-rose-500/50 rounded-2xl flex items-center justify-between text-rose-200 shadow-xl">
+          <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-between text-rose-800 shadow-sm">
             <div className="flex items-center space-x-2.5 min-w-0">
-              <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+              <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
               <span className="font-bold text-xs sm:text-sm truncate">{errorMsg}</span>
             </div>
-            <button onClick={() => setErrorMsg(null)} className="text-rose-400 hover:text-white font-bold text-base cursor-pointer ml-2">×</button>
+            <button onClick={() => setErrorMsg(null)} className="text-rose-600 hover:text-rose-800 font-bold text-base cursor-pointer ml-2">×</button>
           </div>
         </div>
       )}
 
-      {/* Filter Tabs & Provider Cards Grid */}
       <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pb-20 flex-1 relative z-10">
-        {/* Category Filters */}
         <div className="flex items-center justify-start sm:justify-center gap-2.5 overflow-x-auto pb-4 mb-8 no-scrollbar">
           {renderedCategoryFilters}
         </div>
 
-        {/* Queues Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-7">
           {renderedQueuesGrid}
         </div>
       </div>
     </div>
 
-    {/* Appointment Booking Modal Overlay */}
     {bookingTarget && (
       <div
         className="apptOverlay"

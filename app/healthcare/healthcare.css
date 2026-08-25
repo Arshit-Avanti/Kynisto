@@ -1,29 +1,26 @@
-/* Kynisto Healthcare - Modern Medical Design System */
+/* Kynisto Healthcare - Modern Medical Light Design System */
 
-:root,
-.dark-theme,
-.mode-dark,
-.dark {
-  --h-bg: #090d16;
-  --h-card-bg: rgba(15, 23, 42, 0.75);
-  --h-card-border: rgba(51, 65, 85, 0.6);
-  --h-card-hover-border: rgba(16, 185, 129, 0.4);
-  --h-primary: #10b981;
-  --h-primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  --h-accent: #06b6d4;
-  --h-accent-gradient: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
-  --h-text: #f8fafc;
-  --h-text-muted: #94a3b8;
+:root {
+  --h-bg: #f8fafc;
+  --h-card-bg: #ffffff;
+  --h-card-border: #e2e8f0;
+  --h-card-hover-border: #059669;
+  --h-primary: #059669;
+  --h-primary-gradient: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+  --h-accent: #0284c7;
+  --h-accent-gradient: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  --h-text: #0f172a;
+  --h-text-muted: #475569;
   --h-text-subtle: #64748b;
-  --h-surface: rgba(30, 41, 59, 0.5);
-  --h-glow: 0 0 25px rgba(16, 185, 129, 0.15);
+  --h-surface: #f1f5f9;
+  --h-glow: 0 4px 20px rgba(5, 150, 105, 0.12);
 }
 
 .light-theme,
 .mode-light {
   --h-bg: #f8fafc;
   --h-card-bg: #ffffff;
-  --h-card-border: #cbd5e1;
+  --h-card-border: #e2e8f0;
   --h-card-hover-border: #059669;
   --h-primary: #059669;
   --h-primary-gradient: linear-gradient(135deg, #059669 0%, #047857 100%);

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./healthcare.css";
 import "./healthcare-queue-badge.css";
-import "./healthcare-dark.css";
 
 export const metadata: Metadata = {
   title: "Healthcare Near You | Kynisto",

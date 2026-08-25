@@ -204,17 +204,17 @@ export function AppointmentBooking({ storeId, storeName, allowAppointments, onCl
       {step !== 'doctor' && step !== 'success' && (
         <button
           onClick={() => setStep(step === 'date' ? 'doctor' : step === 'slot' ? 'date' : step === 'confirm' ? 'slot' : 'doctor')}
-          className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all shrink-0"
+          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all shrink-0 cursor-pointer"
           aria-label="Back"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
       )}
       <div className="flex-1 min-w-0">
-        <h3 className="text-lg font-black text-white truncate">{title}</h3>
-        {subtitle && <p className="text-xs text-slate-400 font-medium mt-0.5">{subtitle}</p>}
+        <h3 className="text-lg font-black text-slate-900 truncate">{title}</h3>
+        {subtitle && <p className="text-xs text-slate-500 font-medium mt-0.5">{subtitle}</p>}
       </div>
-      <button onClick={onClose} className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 transition-all shrink-0">
+      <button onClick={onClose} className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-all shrink-0 cursor-pointer">
         <XCircle className="w-4 h-4" />
       </button>
     </div>
@@ -226,16 +226,16 @@ export function AppointmentBooking({ storeId, storeName, allowAppointments, onCl
       <div className="apptBooking">
         {renderHeader('Book Appointment', storeName)}
         <div className="flex flex-col items-center justify-center text-center py-6 sm:py-8 px-2 sm:px-4">
-          <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 mb-4 shadow-lg shadow-amber-500/10">
+          <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 mb-4 shadow-sm">
             <Calendar className="w-7 h-7" />
           </div>
-          <h3 className="text-lg sm:text-xl font-extrabold text-white mb-2">Appointments Not Allowed</h3>
-          <p className="text-slate-300 text-xs sm:text-sm font-medium max-w-sm mb-6 leading-relaxed">
+          <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 mb-2">Appointments Not Allowed</h3>
+          <p className="text-slate-600 text-xs sm:text-sm font-medium max-w-sm mb-6 leading-relaxed">
             {disabledMessage || "This clinic is not accepting online appointments at this time."}
           </p>
           <button
             onClick={onClose}
-            className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition-all cursor-pointer border border-slate-700"
+            className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition-all cursor-pointer shadow-sm"
           >
             Close
           </button>
@@ -433,14 +433,14 @@ export function AppointmentBooking({ storeId, storeName, allowAppointments, onCl
   // Step 5: Success
   if (step === 'success') return (
     <div className="apptBooking apptSuccess">
-      <CheckCircle2 className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
-      <h3 className="text-2xl font-black text-white mb-2">Appointment Booked!</h3>
-      <p className="text-slate-300 text-sm font-medium mb-1">{storeName}</p>
-      <p className="text-emerald-400 font-bold text-lg mb-1">{formatDate(selectedDate)} · {selectedSlot}</p>
+      <CheckCircle2 className="w-16 h-16 text-emerald-600 mx-auto mb-4" />
+      <h3 className="text-2xl font-black text-slate-900 mb-2">Appointment Booked!</h3>
+      <p className="text-slate-600 text-sm font-medium mb-1">{storeName}</p>
+      <p className="text-emerald-600 font-bold text-lg mb-1">{formatDate(selectedDate)} · {selectedSlot}</p>
       {selectedDoctor && (
-        <p className="text-slate-400 text-sm mb-6">Dr. {selectedDoctor.name}</p>
+        <p className="text-slate-500 text-sm mb-6">Dr. {selectedDoctor.name}</p>
       )}
-      <p className="text-slate-400 text-xs mb-8 max-w-xs text-center">
+      <p className="text-slate-500 text-xs mb-8 max-w-xs text-center">
         Arrive at least 10 minutes early. Use the check-in button on the day of your appointment to join the live queue.
       </p>
       {error && <p className="apptError mb-4">{error}</p>}
