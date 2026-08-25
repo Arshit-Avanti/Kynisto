@@ -4,12 +4,26 @@ Disallow: /admin/
 Disallow: /owner/
 Disallow: /account/
 Disallow: /api/
-Disallow: /*?*q=*
-Disallow: /*{search_term_string}*
-Disallow: /*?*fbclid=*
-Disallow: /*?*gclid=*
+
+User-agent: bingbot
+Allow: /
+
+User-agent: AdIdxBot
+Allow: /
+
+User-agent: msnbot
+Allow: /
+
+User-agent: BingPreview
+Allow: /
 
 User-agent: Mediapartners-Google
+Allow: /
+
+User-agent: Google-AdSense-AutoAds
+Allow: /
+
+User-agent: Google-AdSense-AutoAds-Preflight
 Allow: /
 
 User-agent: Google-AdSense-AdsBot
@@ -21,10 +35,9 @@ Disallow: /admin/
 Disallow: /owner/
 Disallow: /account/
 Disallow: /api/
-Disallow: /*?*q=*
-Disallow: /*{search_term_string}*
 
 User-agent: Googlebot-Image
 Allow: /
 
 Sitemap: https://kynisto.in/sitemap.xml
+
