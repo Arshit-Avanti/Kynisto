@@ -116,21 +116,36 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
         </Link>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-4 lg:gap-7 text-sm font-semibold text-slate-700 mx-3" aria-label="Main Navigation">
-          <Link href="/services" className="hover:text-orange-500 transition-colors whitespace-nowrap">
+        <nav className="hidden md:flex items-center gap-1.5 lg:gap-3 text-sm font-semibold text-slate-700 mx-2" aria-label="Main Navigation">
+          <Link
+            href="/services"
+            className="px-3 py-1.5 rounded-full hover:bg-orange-500/10 hover:text-orange-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap"
+          >
             Services
           </Link>
-          <Link href="/healthcare" className="hover:text-orange-500 transition-colors flex items-center gap-1.5 whitespace-nowrap">
+          <Link
+            href="/healthcare"
+            className="px-3 py-1.5 rounded-full hover:bg-emerald-500/10 hover:text-emerald-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5 whitespace-nowrap"
+          >
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span>Healthcare</span>
           </Link>
-          <Link href={dashboardHref} className="hover:text-orange-500 transition-colors whitespace-nowrap">
+          <Link
+            href={dashboardHref}
+            className="px-3 py-1.5 rounded-full hover:bg-orange-500/10 hover:text-orange-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap"
+          >
             Dashboard
           </Link>
-          <Link href="/wallet" className="hover:text-orange-500 transition-colors whitespace-nowrap">
+          <Link
+            href="/wallet"
+            className="px-3 py-1.5 rounded-full hover:bg-orange-500/10 hover:text-orange-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap"
+          >
             Wallet
           </Link>
-          <Link href="/pricing" className="hover:text-orange-500 transition-colors whitespace-nowrap">
+          <Link
+            href="/pricing"
+            className="px-3 py-1.5 rounded-full hover:bg-orange-500/10 hover:text-orange-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap"
+          >
             Pricing
           </Link>
         </nav>
@@ -138,20 +153,23 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
         {/* Right CTA / User Greeting Pill & Mobile 3-Dash Menu */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {user ? (
-            <Link
-              href={dashboardHref}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-orange-800 text-xs sm:text-sm font-bold hover:bg-orange-100 transition-all shadow-sm shrink-0"
-              title={`Logged in as ${user.name || "User"}`}
-            >
-              <div className="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs shrink-0">
-                <User className="w-3.5 h-3.5" />
-              </div>
-              <span className="whitespace-nowrap font-bold">Welcome, {firstName}</span>
-            </Link>
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 hover:border-slate-300 text-xs font-semibold text-slate-800 shrink-0 whitespace-nowrap transition-all hover:shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Welcome, {firstName}</span>
+              <button
+                type="button"
+                onClick={() => void handleLogout()}
+                disabled={isLoggingOut}
+                className="text-slate-400 hover:text-rose-500 ml-1 transition-colors text-xs font-bold cursor-pointer"
+                title="Sign out"
+              >
+                {isLoggingOut ? "..." : "✕"}
+              </button>
+            </div>
           ) : (
             <Link
               href="/login"
-              className="hidden sm:inline-block px-4 sm:px-5 py-1.5 rounded-full bg-slate-900 text-white text-xs sm:text-sm font-bold hover:bg-slate-800 transition-all shadow-sm shrink-0 whitespace-nowrap"
+              className="hidden sm:inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-slate-950 hover:bg-slate-900 text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all whitespace-nowrap"
             >
               Sign In
             </Link>
