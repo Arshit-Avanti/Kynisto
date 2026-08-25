@@ -89,11 +89,11 @@ const modernCleanTechStyles = `
     font-size: 14px !important;
     transition: all 0.2s ease !important;
   }
-  .mode-dark .sectionHeading h2, .mode-dark .sectionHeading h3, .mode-dark .hero h1, .mode-dark .hero p, .mode-dark h2, .mode-dark h3 {
+  .mode-dark .sectionHeading h2, .mode-dark .sectionHeading h3, .mode-dark .hero h1:not(.hulyTextLightFlow), .mode-dark .hero p, .mode-dark h2, .mode-dark h3 {
     color: var(--text-primary) !important;
     text-shadow: var(--text-shadow-heavy, 0 2px 10px rgba(0,0,0,0.9)) !important;
   }
-  .mode-dark .hero h1 {
+  .mode-dark .hero h1:not(.hulyTextLightFlow) {
     color: var(--text-primary) !important;
     -webkit-text-fill-color: var(--text-primary) !important;
     text-shadow: none !important;

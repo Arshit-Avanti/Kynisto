@@ -115,9 +115,9 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
   return (
     <div ref={containerRef} className="w-full relative overflow-hidden max-w-[100vw]">
       
-      {/* 1. HERO SECTION */}
+      {/* 1. HERO SECTION WITH HULY-STYLE VERTICAL FLOW OF LIGHT */}
       <section
-        className="hero"
+        className="hero relative"
         id="top"
         style={{
           textAlign: "center",
@@ -133,6 +133,18 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
           background: "transparent",
         }}
       >
+        {/* Vertical Huly-Style Light Beam Stream (Passes from sky, down through the text, to the dashboard) */}
+        <div className="hulyLightBeamContainer absolute -top-12 left-1/2 -translate-x-1/2 w-full max-w-5xl h-[850px] pointer-events-none z-[1] overflow-visible">
+          {/* Ambient Wide Glowing Cone */}
+          <div className="hulyLightCone" />
+          {/* Intense Vertical Laser Core */}
+          <div className="hulyLaserCore" />
+          {/* Downward Traveling Photon Energy Pulse */}
+          <div className="hulyTravelingPhoton" />
+          {/* Expanding Bottom Flare */}
+          <div className="hulyBottomLightFlare" />
+        </div>
+
         <div
           className="heroCopy"
           style={{
@@ -145,21 +157,18 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
             width: "100%",
             boxSizing: "border-box",
             background: "transparent",
-            width: "100%",
-            maxWidth: "1000px",
             padding: "0 12px",
           }}
         >
-          {/* Refined Professional Heading */}
-          <h1 className="arise-on-scroll arise-delay-1 text-2xl sm:text-3xl md:text-4xl lg:text-[44px] font-bold text-white tracking-tight leading-tight sm:leading-[1.2] mb-2.5 sm:mb-3 text-center max-w-2xl mx-auto px-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.75)]">
-            Your City. Your Health.{" "}
-            <span className="bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 bg-clip-text text-transparent">
-              Your Life, Smarter.
-            </span>
+          {/* Huly-Style Text with Flowing Light Passing Downwards */}
+          <h1 className="hulyTextLightFlow arise-on-scroll arise-delay-1 text-3xl sm:text-4xl md:text-5xl lg:text-[56px] font-black tracking-tight leading-tight sm:leading-[1.15] mb-3 sm:mb-4 text-center max-w-3xl mx-auto px-2">
+            <span className="hulyTextSegment block">Your City.</span>
+            <span className="hulyTextSegment block">Your Health.</span>
+            <span className="hulyTextSegmentSunset block">Your Life, Smarter.</span>
           </h1>
 
           {/* Refined Subtitle */}
-          <p className="arise-on-scroll arise-delay-2 text-xs sm:text-sm md:text-[15px] text-slate-100/90 font-normal max-w-lg mx-auto mb-5 sm:mb-6 leading-relaxed drop-shadow-[0_1px_6px_rgba(0,0,0,0.75)] px-3 text-center">
+          <p className="arise-on-scroll arise-delay-2 text-xs sm:text-sm md:text-[15px] text-slate-100 font-medium max-w-lg mx-auto mb-5 sm:mb-6 leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] px-3 text-center">
             Discover verified local stores, book home services, join live doctor OPD queues, and unlock smart rewards across your neighborhood.
           </p>
 
