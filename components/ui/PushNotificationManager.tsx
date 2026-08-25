@@ -54,21 +54,22 @@ export function PushNotificationManager() {
           display: "flex",
           alignItems: "center",
           gap: "6px",
-          padding: "6px 14px",
-          borderRadius: "10px",
-          border: subscribed ? "1px solid rgba(16, 185, 129, 0.4)" : "1px solid rgba(255, 255, 255, 0.2)",
-          background: subscribed ? "rgba(16, 185, 129, 0.15)" : "rgba(255, 255, 255, 0.08)",
-          color: subscribed ? "#34D399" : "#FFFFFF",
+          padding: "8px 14px",
+          borderRadius: "12px",
+          border: subscribed ? "1px solid rgba(16, 185, 129, 0.4)" : "1px solid #cbd5e1",
+          background: subscribed ? "rgba(16, 185, 129, 0.12)" : "#ffffff",
+          color: subscribed ? "#047857" : "#334155",
           fontSize: "12px",
           fontWeight: 700,
           cursor: "pointer",
           transition: "all 0.15s ease",
+          boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
         }}
       >
         <span aria-hidden="true" style={{ fontSize: "14px" }}>{subscribed ? "🔔" : "🔕"}</span>
         <span>{loading ? "Updating..." : subscribed ? "Push Alerts Active" : "Enable Push Alerts"}</span>
       </button>
-      {message && <small style={{ color: "#FF8A00", fontSize: "11px", fontWeight: 600 }}>{message}</small>}
+      {message && <small style={{ color: "#d97706", fontSize: "11px", fontWeight: 700 }}>{message}</small>}
     </div>
   );
 }

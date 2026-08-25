@@ -322,20 +322,21 @@
 }
 
 /* ==========================================================================
-   APPOINTMENT BOOKING COMPONENT STYLES
+   APPOINTMENT BOOKING COMPONENT STYLES (Luminous Light Theme Default)
    ========================================================================== */
 
 /* Main booking sheet/modal container */
 .apptBooking {
   width: 100%;
-  max-width: 480px;
+  max-width: 500px;
   margin: 0 auto;
-  background: rgba(9, 13, 22, 0.98);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
   border-radius: 24px;
   padding: 24px 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(16, 185, 129, 0.12);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 25px rgba(16, 185, 129, 0.08) !important;
   position: relative;
+  color: #0f172a !important;
 }
 
 .apptSuccess {
@@ -348,7 +349,7 @@
 
 .apptStepHint {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: #64748b;
   margin-bottom: 14px;
   text-transform: uppercase;
@@ -358,12 +359,12 @@
 .apptError {
   margin-bottom: 14px;
   padding: 10px 14px;
-  border-radius: 10px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  color: #f87171;
+  border-radius: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .apptSkeleton {
@@ -374,7 +375,7 @@
 .apptSkeleton span {
   height: 56px;
   border-radius: 14px;
-  background: linear-gradient(90deg, rgba(30,41,59,0.5) 25%, rgba(51,65,85,0.4) 50%, rgba(30,41,59,0.5) 75%);
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
   background-size: 200% 100%;
   animation: apptShimmer 1.4s ease-in-out infinite;
 }
@@ -390,28 +391,28 @@
   align-items: center;
   gap: 14px;
   padding: 14px 16px;
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 14px;
-  background: rgba(30, 41, 59, 0.5);
-  color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #f8fafc;
+  color: #0f172a;
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
   width: 100%;
 }
-.apptDoctorCard:hover { background: rgba(30, 41, 59, 0.9); border-color: rgba(16,185,129,0.3); }
-.apptDoctorCard.selected { background: rgba(16, 185, 129, 0.1); border-color: rgba(16,185,129,0.5); }
-.apptDoctorCard strong { display: block; font-size: 14px; font-weight: 700; color: #ffffff; }
-.apptDoctorCard small { display: block; font-size: 12px; color: #94a3b8; font-weight: 500; margin-top: 1px; }
+.apptDoctorCard:hover { background: #f0fdf4; border-color: #10b981; }
+.apptDoctorCard.selected { background: #ecfdf5; border-color: #10b981; box-shadow: 0 0 0 2px rgba(16,185,129,0.2); }
+.apptDoctorCard strong { display: block; font-size: 14px; font-weight: 800; color: #0f172a; }
+.apptDoctorCard small { display: block; font-size: 12px; color: #64748b; font-weight: 600; margin-top: 1px; }
 .apptDoctorIcon {
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16,185,129,0.2);
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
   display: grid;
   place-items: center;
-  color: #34d399;
+  color: #059669;
   flex-shrink: 0;
 }
 
@@ -429,27 +430,27 @@
   align-items: center;
   justify-content: center;
   padding: 12px 6px;
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid #e2e8f0;
   border-radius: 14px;
-  background: rgba(30, 41, 59, 0.5);
-  color: #ffffff;
+  background: #f8fafc;
+  color: #0f172a;
   cursor: pointer;
   transition: all 0.18s ease;
   position: relative;
   min-height: 76px;
 }
-.apptDateCard:hover { border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.08); }
-.apptDateCard.selected { border-color: #10b981; background: rgba(16,185,129,0.15); }
-.apptDateCard.today { border-color: rgba(6,182,212,0.4); }
+.apptDateCard:hover { border-color: #10b981; background: #f0fdf4; }
+.apptDateCard.selected { border-color: #059669; background: #ecfdf5; box-shadow: 0 0 0 2px rgba(16,185,129,0.25); }
+.apptDateCard.today { border-color: #0284c7; }
 .apptDateDay { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
-.apptDateNum { font-size: 22px; font-weight: 900; color: #ffffff; line-height: 1.1; margin: 2px 0; }
-.apptDateMonth { font-size: 10px; font-weight: 600; color: #94a3b8; }
+.apptDateNum { font-size: 22px; font-weight: 900; color: #0f172a; line-height: 1.1; margin: 2px 0; }
+.apptDateMonth { font-size: 10px; font-weight: 700; color: #64748b; }
 .apptTodayBadge {
   position: absolute;
   top: -6px;
   left: 50%;
   transform: translateX(-50%);
-  background: #06b6d4;
+  background: #0284c7;
   color: #ffffff;
   font-size: 9px;
   font-weight: 800;
@@ -472,24 +473,24 @@
   justify-content: center;
   gap: 6px;
   padding: 12px 8px;
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
-  background: rgba(30, 41, 59, 0.5);
-  color: #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.18s ease;
 }
-.apptSlotCard:hover { border-color: rgba(16,185,129,0.4); color: #ffffff; background: rgba(16,185,129,0.08); }
-.apptSlotCard.selected { border-color: #10b981; background: rgba(16,185,129,0.18); color: #34d399; }
+.apptSlotCard:hover { border-color: #10b981; color: #059669; background: #f0fdf4; }
+.apptSlotCard.selected { border-color: #059669; background: #ecfdf5; color: #047857; box-shadow: 0 0 0 2px rgba(16,185,129,0.25); }
 
 /* Confirm step summary */
 .apptSummary {
   padding: 16px;
-  border-radius: 14px;
-  background: rgba(30, 41, 59, 0.5);
-  border: 1px solid rgba(16,185,129,0.2);
+  border-radius: 16px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -500,26 +501,26 @@
   align-items: center;
   gap: 10px;
   font-size: 14px;
-  font-weight: 600;
-  color: #e2e8f0;
+  font-weight: 700;
+  color: #0f172a;
 }
 
 /* Form */
 .apptForm { display: flex; flex-direction: column; margin-bottom: 20px; }
-.apptLabel { font-size: 12px; font-weight: 700; color: #94a3b8; margin-bottom: 6px; }
+.apptLabel { font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px; }
 .apptInput {
   padding: 11px 14px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid #cbd5e1;
   border-radius: 12px;
-  background: rgba(30, 41, 59, 0.7);
-  color: #ffffff;
+  background: #ffffff;
+  color: #0f172a;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   outline: none;
   transition: border-color 0.2s;
   width: 100%;
 }
-.apptInput:focus { border-color: rgba(16,185,129,0.5); }
+.apptInput:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.15); }
 .apptTextarea { resize: vertical; min-height: 72px; }
 
 /* Primary book/checkin button */
@@ -547,16 +548,16 @@
 .apptSecondaryBtn {
   width: 100%;
   padding: 12px;
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid #cbd5e1;
   border-radius: 14px;
-  background: rgba(30, 41, 59, 0.6);
-  color: #94a3b8;
+  background: #f1f5f9;
+  color: #334155;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.apptSecondaryBtn:hover { color: #ffffff; border-color: rgba(255,255,255,0.2); }
+.apptSecondaryBtn:hover { color: #0f172a; background: #e2e8f0; border-color: #94a3b8; }
 
 /* Empty state */
 .apptEmpty {
@@ -569,7 +570,7 @@
 .apptLink {
   margin-top: 10px;
   display: inline-block;
-  color: #34d399;
+  color: #059669;
   font-size: 13px;
   font-weight: 700;
   text-decoration: underline;
@@ -578,21 +579,19 @@
   border: none;
 }
 
-/* ==========================================================================
-   APPOINTMENT CARD (upcoming appointment display)
-   ========================================================================== */
-
+/* Appointment card */
 .apptCard {
   padding: 16px 18px;
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid #e2e8f0;
   border-radius: 18px;
-  background: rgba(15, 23, 42, 0.8);
+  background: #ffffff;
   margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   transition: all 0.2s ease;
 }
 .apptCardToday {
-  border-color: rgba(16, 185, 129, 0.35);
-  background: rgba(16, 185, 129, 0.05);
+  border-color: rgba(16, 185, 129, 0.4);
+  background: #f0fdf4;
   box-shadow: 0 4px 20px rgba(16,185,129,0.1);
 }
 .apptCardCancelled { opacity: 0.55; }
@@ -604,9 +603,9 @@
   gap: 12px;
   margin-bottom: 10px;
 }
-.apptCardStore { font-size: 15px; font-weight: 800; color: #ffffff; }
-.apptCardDate { font-size: 13px; font-weight: 700; color: #34d399; margin-top: 3px; }
-.apptCardDoctor { font-size: 12px; color: #94a3b8; font-weight: 500; margin-top: 2px; }
+.apptCardStore { font-size: 15px; font-weight: 800; color: #0f172a; }
+.apptCardDate { font-size: 13px; font-weight: 700; color: #059669; margin-top: 3px; }
+.apptCardDoctor { font-size: 12px; color: #64748b; font-weight: 600; margin-top: 2px; }
 
 .apptStatusBadge {
   display: inline-block;
@@ -616,22 +615,22 @@
   font-weight: 700;
   text-transform: capitalize;
   white-space: nowrap;
-  background: rgba(100,116,139,0.2);
-  color: #94a3b8;
-  border: 1px solid rgba(100,116,139,0.2);
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
   flex-shrink: 0;
 }
-.apptStatusBadge.booked { background: rgba(59,130,246,0.12); color: #93c5fd; border-color: rgba(59,130,246,0.25); }
-.apptStatusBadge.confirmed { background: rgba(16,185,129,0.12); color: #6ee7b7; border-color: rgba(16,185,129,0.25); }
-.apptStatusBadge.checked_in { background: rgba(20,184,166,0.15); color: #2dd4bf; border-color: rgba(20,184,166,0.3); }
-.apptStatusBadge.completed { background: rgba(16,185,129,0.1); color: #a7f3d0; border-color: rgba(16,185,129,0.15); }
-.apptStatusBadge.cancelled { background: rgba(239,68,68,0.1); color: #fca5a5; border-color: rgba(239,68,68,0.15); }
-.apptStatusBadge.no_show, .apptStatusBadge.rescheduled { background: rgba(245,158,11,0.1); color: #fcd34d; border-color: rgba(245,158,11,0.2); }
+.apptStatusBadge.booked { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.apptStatusBadge.confirmed { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+.apptStatusBadge.checked_in { background: #f0fdfa; color: #0f766e; border-color: #99f6e4; }
+.apptStatusBadge.completed { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+.apptStatusBadge.cancelled { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+.apptStatusBadge.no_show, .apptStatusBadge.rescheduled { background: #fffbeb; color: #b45309; border-color: #fde68a; }
 
 .apptCheckedIn {
   font-size: 12px;
   font-weight: 700;
-  color: #34d399;
+  color: #059669;
   margin-bottom: 10px;
 }
 
@@ -647,45 +646,25 @@
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  border: 1px solid rgba(239,68,68,0.25);
+  border: 1px solid #fecaca;
   border-radius: 10px;
-  background: rgba(239,68,68,0.08);
-  color: #f87171;
+  background: #fef2f2;
+  color: #dc2626;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.apptCancelBtn:hover { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.4); }
-
-/* Book appointment trigger button (in clinic list card) */
-.bookApptBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  flex: 1;
-  padding: 8px 12px;
-  border: 1px solid rgba(6,182,212,0.3);
-  border-radius: 12px;
-  background: rgba(6,182,212,0.08);
-  color: #67e8f9;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-.bookApptBtn:hover { background: rgba(6,182,212,0.15); border-color: rgba(6,182,212,0.5); color: #22d3ee; }
+.apptCancelBtn:hover { background: #fee2e2; border-color: #fca5a5; }
 
 /* Appointment booking modal overlay */
 .apptOverlay {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -711,23 +690,6 @@
 @keyframes apptSlideUp {
   from { transform: translateY(100%); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
-}
-
-/* Light mode */
-@media (prefers-color-scheme: light) {
-  .apptBooking { background: #ffffff; border-color: #d1fae5; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
-  .apptDoctorCard { background: #f8fafc; border-color: #e2e8f0; }
-  .apptDoctorCard:hover { background: #f0fdf4; border-color: #10b981; }
-  .apptDoctorCard strong { color: #0f172a; }
-  .apptDoctorCard small { color: #475569; }
-  .apptDateCard { background: #f8fafc; border-color: #e2e8f0; }
-  .apptDateNum { color: #0f172a; }
-  .apptSlotCard { background: #f8fafc; border-color: #e2e8f0; color: #475569; }
-  .apptSummary { background: #f0fdf4; border-color: #d1fae5; }
-  .apptSummaryRow { color: #0f172a; }
-  .apptInput { background: #f8fafc; border-color: #cbd5e1; color: #0f172a; }
-  .apptCard { background: #ffffff; border-color: #e2e8f0; }
-  .apptCardStore { color: #0f172a; }
 }
 
 /* ─── Book Appointment button on clinic cards ─────────────────────────── */

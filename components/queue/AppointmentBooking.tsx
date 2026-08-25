@@ -352,7 +352,7 @@ export function AppointmentBooking({ storeId, storeName, allowAppointments, onCl
               <button
                 key={slot.time}
                 disabled={!slot.available}
-                className={`apptSlotCard ${selectedSlot === slot.time ? 'selected' : ''} ${!slot.available ? 'opacity-40 cursor-not-allowed bg-slate-950 border-slate-800' : ''}`}
+                className={`apptSlotCard ${selectedSlot === slot.time ? 'selected' : ''} ${!slot.available ? 'opacity-40 cursor-not-allowed bg-slate-100 border-slate-200 text-slate-400' : ''}`}
                 onClick={() => {
                   if (slot.available) {
                     setSelectedSlot(slot.time);
@@ -377,19 +377,19 @@ export function AppointmentBooking({ storeId, storeName, allowAppointments, onCl
       {error && <p className="apptError">{error}</p>}
       <div className="apptSummary">
         <div className="apptSummaryRow">
-          <Calendar className="w-4 h-4 text-emerald-400" />
+          <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>{formatDate(selectedDate)} at {selectedSlot}</span>
         </div>
         <div className="apptSummaryRow">
-          <Stethoscope className="w-4 h-4 text-teal-400" />
+          <Stethoscope className="w-4 h-4 text-teal-600 shrink-0" />
           <span>{selectedDoctor ? `Dr. ${selectedDoctor.name}${selectedDoctor.specialization ? ` · ${selectedDoctor.specialization}` : ''}` : 'Any available doctor'}</span>
         </div>
         <div className="apptSummaryRow">
-          <span style={{ color: "#10B981", fontSize: "15px", fontWeight: 900, display: "inline-block", width: "16px", textAlign: "center" }}>₹</span>
-          <span>Consultation Fee: <b style={{ color: "#10B981" }}>₹{selectedDoctor?.consultationFee ?? 500}</b> (Pay at clinic)</span>
+          <span style={{ color: "#059669", fontSize: "15px", fontWeight: 900, display: "inline-block", width: "16px", textAlign: "center" }}>₹</span>
+          <span>Consultation Fee: <b style={{ color: "#059669" }}>₹{selectedDoctor?.consultationFee ?? 500}</b> (Pay at clinic)</span>
         </div>
         <div className="apptSummaryRow">
-          <User className="w-4 h-4 text-blue-400" />
+          <User className="w-4 h-4 text-blue-600 shrink-0" />
           <span>{storeName}</span>
         </div>
       </div>

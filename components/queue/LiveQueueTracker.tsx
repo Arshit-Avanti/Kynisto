@@ -1236,8 +1236,8 @@ export default function LiveQueueTracker() {
                 value={searchQuery}
                 onChange={handleSearchChange}
                 placeholder="Search clinic, doctor, specialty, area..."
-                style={{ paddingLeft: "42px", paddingRight: "14px" }}
-                className="w-full bg-white border border-slate-200 rounded-2xl py-3.5 text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm shadow-sm"
+                style={{ paddingLeft: "42px", paddingRight: "14px", color: "#0f172a", backgroundColor: "#ffffff" }}
+                className="w-full bg-white border border-slate-300 rounded-2xl py-3.5 text-slate-900 placeholder:text-slate-500 font-medium focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm shadow-sm"
               />
             </div>
             <PushNotificationManager />
