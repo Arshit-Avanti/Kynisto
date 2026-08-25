@@ -231,6 +231,7 @@ const modernCleanTechStyles = `
   }
   .categoryTile {
     transition: all 0.3s ease, transform 0.2s ease !important;
+    contain: content !important;
   }
   .categoryTile[aria-pressed="true"], .careTypes button.active {
     background: rgba(255, 87, 34, 0.3) !important;
@@ -247,6 +248,7 @@ const modernCleanTechStyles = `
     transform-style: preserve-3d !important;
     transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.15s ease, border-color 0.15s ease !important;
     will-change: transform, box-shadow, border-color !important;
+    contain: layout style paint !important;
     position: relative !important;
   }
   .storeCard::before {
