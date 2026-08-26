@@ -100,7 +100,7 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
   const pathname = usePathname() || "/";
 
   return (
-    <header className="fixed top-2.5 sm:top-3 left-0 right-0 z-50 px-2 sm:px-6 pointer-events-none">
+    <header className="fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top,0.5rem)] sm:pt-3 px-2 sm:px-6 pointer-events-none">
       <div
         className={`max-w-6xl mx-auto rounded-full transition-all duration-300 pointer-events-auto border flex items-center justify-between px-3 sm:px-6 py-1.5 sm:py-2.5 shadow-lg ${
           scrolled
@@ -189,12 +189,12 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
             </Link>
           )}
 
-          {/* Mobile 3-Dash Hamburger Menu Button (Three Dash ☰) */}
+          {/* Mobile 3-Dash Hamburger Menu Button */}
           <div className="md:hidden shrink-0">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`p-2 rounded-full transition-all flex items-center justify-center shadow-md ${
+              className={`w-9 h-9 rounded-full transition-all duration-200 flex items-center justify-center shadow-md active:scale-90 focus:outline-none focus:ring-2 focus:ring-orange-500/40 ${
                 mobileMenuOpen
                   ? "bg-orange-500 text-white shadow-orange-500/30"
                   : "bg-slate-900 text-white hover:bg-slate-800"
@@ -210,10 +210,10 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
 
       {/* Mobile 3-Dash Floating Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden pointer-events-auto max-w-lg mx-auto mt-2 p-3 sm:p-4 rounded-3xl bg-slate-950/95 backdrop-blur-2xl border border-white/20 shadow-2xl text-white space-y-2.5 animate-in fade-in slide-in-from-top-3 duration-200">
+        <div className="md:hidden pointer-events-auto max-w-lg mx-auto mt-2 p-3 sm:p-4 rounded-3xl bg-slate-950/95 backdrop-blur-2xl border border-white/15 shadow-2xl text-white space-y-2.5 max-h-[85vh] overflow-y-auto overscroll-contain animate-in fade-in slide-in-from-top-3 duration-200">
           
           {/* User Greeting & Status Header */}
-          <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.06] border border-white/10">
+          <div className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.06] border border-white/10 shadow-inner">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-amber-400 flex items-center justify-center text-white font-black text-xs shrink-0 shadow-md">
                 {user?.name ? user.name.charAt(0).toUpperCase() : "K"}
@@ -248,18 +248,18 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
             <Link
               href="/healthcare"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.08] text-white font-semibold text-xs transition-all group"
+              className="flex items-center justify-between p-2.5 px-3 rounded-2xl hover:bg-white/[0.08] active:bg-white/[0.12] text-white font-semibold text-xs transition-all duration-150 group"
             >
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0 shadow-sm">
                   <Stethoscope className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">Healthcare &amp; OPD</div>
-                  <div className="text-[9px] text-slate-400">Live doctor queues &amp; tokens</div>
+                  <div className="text-[10px] text-slate-400">Live doctor queues &amp; tokens</div>
                 </div>
               </div>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[9px] font-bold flex items-center gap-1">
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] font-bold flex items-center gap-1.5 shrink-0">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
                 Live
               </span>
@@ -269,90 +269,90 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
             <Link
               href="/services"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.08] text-white font-semibold text-xs transition-all group"
+              className="flex items-center justify-between p-2.5 px-3 rounded-2xl hover:bg-white/[0.08] active:bg-white/[0.12] text-white font-semibold text-xs transition-all duration-150 group"
             >
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-sky-500/20 border border-sky-500/30 text-sky-400 flex items-center justify-center shrink-0 shadow-sm">
                   <Briefcase className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="text-xs font-bold text-white group-hover:text-sky-300 transition-colors">Home Services</div>
-                  <div className="text-[9px] text-slate-400">AC, electrician &amp; plumbing</div>
+                  <div className="text-[10px] text-slate-400">AC, electrician &amp; plumbing</div>
                 </div>
               </div>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" />
+              <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" />
             </Link>
 
             {/* 3. Wallet & Passes */}
             <Link
               href="/wallet"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.08] text-white font-semibold text-xs transition-all group"
+              className="flex items-center justify-between p-2.5 px-3 rounded-2xl hover:bg-white/[0.08] active:bg-white/[0.12] text-white font-semibold text-xs transition-all duration-150 group"
             >
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center shrink-0 shadow-sm">
                   <Wallet className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">Wallet &amp; Digital Passes</div>
-                  <div className="text-[9px] text-slate-400">Loyalty points &amp; cashback</div>
+                  <div className="text-[10px] text-slate-400">Loyalty points &amp; cashback</div>
                 </div>
               </div>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" />
+              <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" />
             </Link>
 
             {/* 4. Dashboard */}
             <Link
               href={dashboardHref}
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.08] text-white font-semibold text-xs transition-all group"
+              className="flex items-center justify-between p-2.5 px-3 rounded-2xl hover:bg-white/[0.08] active:bg-white/[0.12] text-white font-semibold text-xs transition-all duration-150 group"
             >
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-orange-500/20 border border-orange-500/30 text-orange-400 flex items-center justify-center shrink-0 shadow-sm">
                   <LayoutDashboard className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="text-xs font-bold text-white group-hover:text-orange-300 transition-colors">Dashboard</div>
-                  <div className="text-[9px] text-slate-400">Manage bookings &amp; activity</div>
+                  <div className="text-[10px] text-slate-400">Manage bookings &amp; activity</div>
                 </div>
               </div>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" />
+              <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" />
             </Link>
 
             {/* 5. Stores & Places */}
             <Link
               href="/#places"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.08] text-white font-semibold text-xs transition-all group"
+              className="flex items-center justify-between p-2.5 px-3 rounded-2xl hover:bg-white/[0.08] active:bg-white/[0.12] text-white font-semibold text-xs transition-all duration-150 group"
             >
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/30 text-purple-400 flex items-center justify-center shrink-0 shadow-sm">
                   <Store className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">Local Stores &amp; Places</div>
-                  <div className="text-[9px] text-slate-400">Groceries, pharmacies &amp; cafes</div>
+                  <div className="text-[10px] text-slate-400">Groceries, pharmacies &amp; cafes</div>
                 </div>
               </div>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" />
+              <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" />
             </Link>
 
             {/* 6. Pricing & Plans */}
             <Link
               href="/pricing"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.08] text-white font-semibold text-xs transition-all group"
+              className="flex items-center justify-between p-2.5 px-3 rounded-2xl hover:bg-white/[0.08] active:bg-white/[0.12] text-white font-semibold text-xs transition-all duration-150 group"
             >
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0 shadow-sm">
                   <Crown className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">Memberships &amp; Plans</div>
-                  <div className="text-[9px] text-slate-400">Unlock VIP pass privileges</div>
+                  <div className="text-[10px] text-slate-400">Unlock VIP pass privileges</div>
                 </div>
               </div>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" />
+              <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" />
             </Link>
           </div>
 
@@ -375,7 +375,7 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
                 className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs shadow-lg transition-all text-center"
               >
                 <LogIn className="w-4 h-4" />
-                <span>Sign In with Google</span>
+                <span>Sign In</span>
               </Link>
             )}
           </div>

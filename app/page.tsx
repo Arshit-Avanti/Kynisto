@@ -887,24 +887,29 @@ const modernCleanTechStyles = `
 
     /* Hero section responsiveness */
     .hero {
-      padding: 80px 16px 40px 16px !important;
+      padding: 70px 14px 28px 14px !important;
       text-align: center !important;
+      max-width: 100vw !important;
+      overflow-x: hidden !important;
     }
 
     .heroTitleClassical,
     .hero h1 {
-      font-size: clamp(2.1rem, 10.5vw, 3.6rem) !important;
-      line-height: 1.1 !important;
-      letter-spacing: -0.04em !important;
-      white-space: nowrap !important;
-      word-break: keep-all !important;
-      overflow-wrap: normal !important;
+      font-size: clamp(1.85rem, 7.5vw, 3.5rem) !important;
+      line-height: 1.15 !important;
+      letter-spacing: -0.03em !important;
+      white-space: normal !important;
+      word-break: normal !important;
+      overflow-wrap: break-word !important;
+      text-wrap: balance !important;
       max-width: 100% !important;
     }
 
     .hero p {
-      font-size: 1.1rem !important;
-      margin-bottom: 24px !important;
+      font-size: 0.95rem !important;
+      line-height: 1.5 !important;
+      margin-bottom: 20px !important;
+      padding: 0 8px !important;
     }
 
     /* Hero Floating Action Cards ("Loyalty Card", "Queue Ticket", "Dashboard") */
@@ -961,14 +966,15 @@ const modernCleanTechStyles = `
       width: 100% !important;
       max-width: 100% !important;
       margin: 10px auto 14px auto !important;
-      padding: 4px 6px 4px 12px !important;
-      border-radius: 16px !important;
+      padding: 6px 8px 6px 14px !important;
+      border-radius: 9999px !important;
       display: flex !important;
       align-items: center !important;
-      gap: 6px !important;
+      gap: 8px !important;
       box-sizing: border-box !important;
-      background: rgba(15, 23, 42, 0.85) !important;
+      background: rgba(15, 23, 42, 0.88) !important;
       border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      min-height: 48px !important;
     }
 
     .searchBox input,
@@ -980,17 +986,22 @@ const modernCleanTechStyles = `
       overflow: hidden !important;
       text-overflow: ellipsis !important;
       white-space: nowrap !important;
+      color: #ffffff !important;
     }
 
     .searchSubmit,
     .heroSearchButton {
       flex-shrink: 0 !important;
-      padding: 8px 14px !important;
-      font-size: 0.84rem !important;
+      padding: 8px 16px !important;
+      font-size: 0.82rem !important;
       font-weight: 700 !important;
-      border-radius: 12px !important;
+      border-radius: 9999px !important;
       white-space: nowrap !important;
-      min-width: 64px !important;
+      min-width: auto !important;
+      min-height: 36px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
     }
 
     /* Smart search horizontal scrolling carousel on mobile */
@@ -1021,9 +1032,11 @@ const modernCleanTechStyles = `
     /* Feature Cards ("Universal Discovery", "Real-time Queues", "Unified Loyalty") */
     .featureGrid {
       grid-template-columns: 1fr !important;
-      gap: 10px !important;
+      gap: 12px !important;
       margin: 20px auto !important;
-      padding: 0 !important;
+      padding: 0 14px !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
     }
 
     .featureCard,
@@ -1031,25 +1044,27 @@ const modernCleanTechStyles = `
     .mode-dark .featureCard {
       background: rgba(15, 23, 42, 0.82) !important;
       border: 1px solid rgba(255, 255, 255, 0.12) !important;
-      padding: 14px 16px !important;
+      padding: 16px 18px !important;
       border-radius: 16px !important;
       transform: translateZ(0) !important;
       will-change: transform, opacity !important;
       contain: layout style paint !important;
+      box-sizing: border-box !important;
+      max-width: 100% !important;
     }
 
     .featureIconBadge {
-      width: 32px !important;
-      height: 32px !important;
-      border-radius: 8px !important;
-      font-size: 14px !important;
+      width: 36px !important;
+      height: 36px !important;
+      border-radius: 10px !important;
+      font-size: 16px !important;
     }
 
     .featureCard h3,
     .mode-light .featureCard h3,
     .mode-dark .featureCard h3 {
-      font-size: 1.05rem !important;
-      margin: 6px 0 4px 0 !important;
+      font-size: 1.1rem !important;
+      margin: 8px 0 4px 0 !important;
       font-weight: 800 !important;
       color: #FFFFFF !important;
       -webkit-text-fill-color: #FFFFFF !important;
@@ -1058,24 +1073,27 @@ const modernCleanTechStyles = `
     .featureCard p,
     .mode-light .featureCard p,
     .mode-dark .featureCard p {
-      font-size: 0.82rem !important;
-      line-height: 1.4 !important;
-      color: #94a3b8 !important;
-      -webkit-text-fill-color: #94a3b8 !important;
+      font-size: 0.84rem !important;
+      line-height: 1.45 !important;
+      color: #cbd5e1 !important;
+      -webkit-text-fill-color: #cbd5e1 !important;
       opacity: 1 !important;
     }
 
     /* Category Section on Mobile */
     .categorySection {
       margin-top: 24px !important;
-      padding: 0 !important;
+      padding: 0 14px !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
     }
 
     .sectionHeading.compactHeading {
       display: flex !important;
       justify-content: space-between !important;
       align-items: flex-end !important;
-      margin-bottom: 10px !important;
+      margin-bottom: 12px !important;
+      gap: 8px !important;
     }
 
     .sectionHeading h2,
@@ -1083,135 +1101,268 @@ const modernCleanTechStyles = `
       font-size: 1.25rem !important;
       font-weight: 800 !important;
       margin: 2px 0 0 0 !important;
+      line-height: 1.25 !important;
     }
 
     .resetLink {
-      font-size: 0.72rem !important;
-      padding: 4px 8px !important;
-      border-radius: 6px !important;
+      font-size: 0.75rem !important;
+      padding: 5px 10px !important;
+      border-radius: 8px !important;
       background: rgba(255, 255, 255, 0.08) !important;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
     }
 
     .categoryGrid {
-      grid-template-columns: repeat(3, 1fr) !important;
-      gap: 6px !important;
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 10px !important;
       width: 100% !important;
+      box-sizing: border-box !important;
     }
 
     .categoryTile {
-      padding: 8px 4px !important;
-      border-radius: 12px !important;
-      min-height: 76px !important;
+      padding: 12px 8px !important;
+      border-radius: 14px !important;
+      min-height: 80px !important;
       display: flex !important;
       flex-direction: column !important;
       align-items: center !important;
       justify-content: center !important;
-      gap: 3px !important;
+      gap: 4px !important;
       text-align: center !important;
-      background: rgba(15, 23, 42, 0.75) !important;
+      background: rgba(15, 23, 42, 0.78) !important;
       border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      box-sizing: border-box !important;
+      transition: transform 0.2s ease, border-color 0.2s ease !important;
     }
 
     .categoryArt {
-      width: 28px !important;
-      height: 28px !important;
-      border-radius: 8px !important;
-      font-size: 13px !important;
+      width: 32px !important;
+      height: 32px !important;
+      border-radius: 10px !important;
+      font-size: 15px !important;
       margin-bottom: 2px !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
+      flex-shrink: 0 !important;
     }
 
     .categoryTile span {
-      font-size: 0.72rem !important;
+      font-size: 0.8rem !important;
       font-weight: 700 !important;
-      line-height: 1.15 !important;
+      line-height: 1.2 !important;
       color: #FFFFFF !important;
       -webkit-text-fill-color: #FFFFFF !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      max-width: 100% !important;
     }
 
     .categoryTile small {
-      font-size: 0.62rem !important;
+      font-size: 0.68rem !important;
       color: #94a3b8 !important;
-      opacity: 0.8 !important;
+      opacity: 0.9 !important;
+      font-weight: 600 !important;
+      white-space: nowrap !important;
     }
 
     /* Trust Strip / Bottom Feature Cards */
     .efferdFeaturesBlock {
       display: grid !important;
       grid-template-columns: 1fr !important;
-      gap: 8px !important;
-      margin: 20px 0 !important;
+      gap: 10px !important;
+      margin: 24px 0 !important;
+      padding: 0 14px !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
     }
 
     .efferdFeatureCard {
-      padding: 10px 12px !important;
-      border-radius: 12px !important;
+      padding: 12px 14px !important;
+      border-radius: 14px !important;
       display: flex !important;
       align-items: center !important;
-      gap: 10px !important;
+      gap: 12px !important;
       background: rgba(15, 23, 42, 0.75) !important;
       border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
     }
 
     .efferdIconBadge {
-      width: 32px !important;
-      height: 32px !important;
-      border-radius: 8px !important;
+      width: 36px !important;
+      height: 36px !important;
+      border-radius: 10px !important;
       flex-shrink: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    .efferdFeatureContent {
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
     }
 
     .efferdFeatureContent p {
-      font-size: 0.84rem !important;
+      font-size: 0.88rem !important;
       font-weight: 700 !important;
       margin: 0 !important;
       color: #FFFFFF !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
     }
 
     .efferdFeatureContent small {
-      font-size: 0.72rem !important;
+      font-size: 0.74rem !important;
       color: #94a3b8 !important;
       margin: 0 !important;
+      display: block !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
     }
 
-    .storesGrid {
+    .placesSection {
+      margin-top: 28px !important;
+      padding: 0 14px !important;
+      max-width: 100% !important;
+      overflow-x: hidden !important;
+      box-sizing: border-box !important;
+    }
+
+    .filterGroup {
+      display: flex !important;
+      overflow-x: auto !important;
+      flex-wrap: nowrap !important;
+      gap: 6px !important;
+      padding: 4px 2px 8px 2px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+    }
+    .filterGroup::-webkit-scrollbar {
+      display: none !important;
+    }
+    .filterGroup button {
+      flex-shrink: 0 !important;
+      padding: 6px 12px !important;
+      font-size: 0.78rem !important;
+      border-radius: 10px !important;
+      white-space: nowrap !important;
+    }
+
+    .advancedFilters {
+      display: grid !important;
       grid-template-columns: 1fr !important;
-      gap: 12px !important;
+      gap: 8px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    .storeGrid,
+    .storesGrid {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: 14px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
     }
 
     .storeCard {
-      padding: 14px !important;
+      padding: 0 !important;
       border-radius: 16px !important;
+      overflow: hidden !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      background: rgba(15, 23, 42, 0.82) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+
+    .storeCard .storeVisual {
+      height: 140px !important;
+      width: 100% !important;
+    }
+
+    .storeCard .storeBody {
+      padding: 12px 14px 14px 14px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 6px !important;
     }
 
     .storeCard h3 {
-      font-size: 1.1rem !important;
+      font-size: 1.05rem !important;
+      font-weight: 700 !important;
+      margin: 0 !important;
+      line-height: 1.3 !important;
+      word-break: break-word !important;
     }
 
-    .storeCard p {
-      font-size: 0.85rem !important;
-      line-height: 1.4 !important;
-      color: #F1F5F9 !important;
-      -webkit-text-fill-color: #F1F5F9 !important;
+    .storeCard p.address {
+      font-size: 0.8rem !important;
+      line-height: 1.35 !important;
+      color: #94a3b8 !important;
+      margin: 0 !important;
+      word-break: break-word !important;
+    }
+
+    .cardActions {
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      margin-top: 6px !important;
+    }
+
+    .cardActions a.detailsButton,
+    .cardActions button.detailsButton {
+      flex: 1 1 auto !important;
+      padding: 8px 14px !important;
+      font-size: 0.82rem !important;
+      font-weight: 700 !important;
+      border-radius: 10px !important;
+      text-align: center !important;
+      min-height: 38px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    .saveIcon {
+      width: 38px !important;
+      height: 38px !important;
+      border-radius: 10px !important;
+      flex-shrink: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
     }
   }
 
   @media (max-width: 380px) {
     .heroTitleClassical,
     .hero h1 {
-      font-size: 2.1rem !important;
+      font-size: 1.75rem !important;
     }
     .glassCard3D b {
       font-size: 0.7rem !important;
     }
     .categoryGrid {
-      grid-template-columns: repeat(3, 1fr) !important;
-      gap: 4px !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 6px !important;
     }
     .categoryTile {
-      padding: 6px 2px !important;
-      min-height: 70px !important;
+      padding: 10px 4px !important;
+      min-height: 74px !important;
     }
   }
 `;
@@ -1736,7 +1887,7 @@ export default function Home() {
   };
 
   return (
-    <main className={`site theme-${accent} density-${density} mode-${themeMode}`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
+    <main className={`site theme-${accent} density-${density} mode-${themeMode} pb-32 min-h-screen overflow-x-hidden`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
       <VideoBackground videoSrc="/videos/hero-flow.mp4" mobileVideoSrc="/videos/hero-flow.mp4" />
       <SubscriptionExpiryBanner />
       <WelcomeRewardModal userRole={userRole} userId={userId} />
@@ -2067,7 +2218,7 @@ export default function Home() {
           </div>
           <button className="resetLink" type="button" onClick={resetFilters}>Reset filters <span aria-hidden="true">↗</span></button>
         </div>
-        <div className="categoryGrid">
+        <div className="categoryGrid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-4 w-full">
           {catalogCategories.map((item, index) => {
             const active = category === item.name;
             return (

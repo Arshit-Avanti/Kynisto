@@ -125,7 +125,7 @@ export function HomeServicesDiscovery() {
   };
 
   return (
-    <main className="services-page-shell">
+    <main className="services-page-shell pb-32">
       <style dangerouslySetInnerHTML={{ __html: servicesCustomCss }} />
       <VideoBackground />
       <ShaderCanvas />
@@ -252,20 +252,20 @@ export function HomeServicesDiscovery() {
                     </div>
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "16px" }}>
+                  <div className="service-card-actions" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "8px", marginTop: "16px" }}>
                     <button
                       type="button"
-                      className="book-now-btn"
+                      className="book-now-btn prominent-book-btn"
                       style={{ margin: 0 }}
                       onClick={() => setSelectedService(service)}
                     >
-                      Book Now ➔
+                      Book Service ➔
                     </button>
                     <a
                       href={waUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="book-now-btn"
+                      className="book-now-btn whatsapp-action-btn"
                       style={{
                         margin: 0,
                         background: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)",
@@ -695,6 +695,7 @@ p.services-hero-subtitle,
   font-weight: 700;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .category-pill:hover {
@@ -817,6 +818,9 @@ p.services-hero-subtitle,
   border: 1px solid rgba(16, 185, 129, 0.3);
   padding: 4px 10px;
   border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .category-meta {
@@ -849,19 +853,24 @@ p.services-hero-subtitle,
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
   padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 8px;
 }
 
 .rating-box {
   display: flex;
   align-items: center;
   gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 4px 10px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .rating-box .star {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 800;
   color: #F59E0B;
 }
@@ -869,13 +878,19 @@ p.services-hero-subtitle,
 .rating-box .reviews {
   font-size: 11px;
   color: #94A3B8;
+  font-weight: 600;
+}
+
+.price-box {
+  text-align: right;
 }
 
 .price-box small {
   display: block;
-  font-size: 9px;
+  font-size: 9.5px;
   color: #94A3B8;
   text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .price-box strong {
@@ -886,21 +901,38 @@ p.services-hero-subtitle,
 
 .book-now-btn {
   width: 100%;
-  padding: 12px;
+  min-height: 44px;
+  padding: 12px 14px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.18);
   color: #FFFFFF;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.book-now-btn:hover {
+.prominent-book-btn {
   background: linear-gradient(135deg, #FF5722 0%, #E53935 100%);
-  border-color: transparent;
-  box-shadow: 0 4px 18px rgba(255, 87, 34, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+  box-shadow: 0 4px 16px rgba(255, 87, 34, 0.35);
+  font-weight: 800;
+}
+
+.prominent-book-btn:hover {
+  background: linear-gradient(135deg, #FF7043 0%, #F44336 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 87, 34, 0.5);
+}
+
+.prominent-book-btn:active {
+  transform: scale(0.98);
 }
 
 .services-empty-state {
@@ -1146,18 +1178,80 @@ p.services-hero-subtitle,
 }
 
 @media (max-width: 768px) {
+  .services-page-shell {
+    padding-bottom: 7rem;
+  }
+  .services-hero {
+    padding: 110px 16px 32px 16px;
+  }
   .services-hero-title {
-    font-size: 2.1rem !important;
+    font-size: 2rem !important;
+  }
+  .services-category-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    justify-content: flex-start;
+    padding: 6px 16px 14px 16px;
+    margin: 0 -16px;
+    gap: 8px;
+    scroll-snap-type: x mandatory;
+  }
+  .services-category-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .category-pill {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 9px 16px;
+    font-size: 12.5px;
+    scroll-snap-align: start;
+  }
+  .services-grid-container {
+    padding: 0 16px;
+    margin-bottom: 40px;
   }
   .services-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .service-card {
+    padding: 18px 16px;
+    border-radius: 20px;
+  }
+  .service-name {
+    font-size: 1.15rem;
+  }
+  .service-desc {
+    font-size: 0.85rem;
+    min-height: auto;
+    margin-bottom: 14px;
+  }
+  .service-card-meta {
+    padding-top: 10px;
+    margin-bottom: 14px;
+  }
+  .book-now-btn {
+    min-height: 44px;
+    font-size: 12.5px;
+    padding: 10px 12px;
   }
   .services-modal-content {
-    padding: 20px;
+    padding: 20px 16px;
+    border-radius: 24px;
+    max-height: 88vh;
   }
   .booking-summary-strip {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
+  }
+  .confirm-booking-btn {
+    width: 100%;
+    min-height: 48px;
   }
 }
 `;

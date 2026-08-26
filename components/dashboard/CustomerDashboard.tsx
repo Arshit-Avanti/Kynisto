@@ -180,15 +180,15 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
 
   return <>
     <SubscriptionExpiryBanner />
-    <div className="portalTitleRow">
+    <div className="portalTitleRow flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
-        <span className="portalEyebrow">MY ACCOUNT</span>
-        <h1 style={{ fontSize: "2.2rem", fontWeight: 800 }}>Welcome back, <span style={{ color: "#0ea5e9" }}>{(user?.name || user?.email || "User").split(" ")[0]}</span>!</h1>
-        <p style={{ color: "#64748b", marginTop: "0.5rem" }}>Manage your profile, orders, wishlist and preferences. All your account information is secure and private.</p>
+        <span className="portalEyebrow text-xs font-black uppercase tracking-wider text-sky-500">MY ACCOUNT</span>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">Welcome back, <span className="text-sky-500">{(user?.name || user?.email || "User").split(" ")[0]}</span>!</h1>
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Manage your profile, orders, wishlist and preferences. All your account information is secure and private.</p>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+      <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
         <RoleSwitcherButton currentRole={user.role} />
-        <Link className="portalButton" href="/products" style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "#0ea5e9", color: "#fff", padding: "0.75rem 1.25rem", borderRadius: "12px", textDecoration: "none", fontWeight: 700 }}>
+        <Link className="portalButton" href="/products" style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "#0ea5e9", color: "#fff", padding: "0.6rem 1rem", borderRadius: "12px", textDecoration: "none", fontWeight: 700, fontSize: "0.85rem" }}>
           Explore Local Products →
         </Link>
       </div>
@@ -196,46 +196,66 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
     {error && <p className="authError" role="alert">{error}</p>}
     
     {activeQueue && (
-      <div style={{
-        background: "rgba(30, 27, 75, 0.4)",
-        backdropFilter: "blur(20px)",
-        border: "1px solid rgba(99, 102, 241, 0.3)",
-        color: "#ffffff",
-        padding: "1.5rem 2rem",
-        borderRadius: "20px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexWrap: "wrap",
-        gap: "1.5rem",
-        marginBottom: "2rem",
-        boxShadow: "0 0 30px rgba(99, 102, 241, 0.15), inset 0 0 20px rgba(99, 102, 241, 0.05)"
-      }}>
+      <div className="overflow-hidden rounded-2xl sm:rounded-3xl p-4 sm:p-6 mb-6 sm:mb-8 border border-indigo-500/30 bg-gradient-to-br from-indigo-950/60 via-slate-900/80 to-purple-950/60 backdrop-blur-xl shadow-[0_0_30px_rgba(99,102,241,0.15)] text-white">
         <style>{`
           @keyframes pulseTicket {
             0%, 100% { filter: drop-shadow(0 0 5px rgba(129, 140, 248, 0.5)); transform: scale(1); }
             50% { filter: drop-shadow(0 0 15px rgba(129, 140, 248, 0.9)); transform: scale(1.05); }
           }
         `}</style>
-        <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
-          <div style={{ background: "rgba(99, 102, 241, 0.1)", padding: "1rem", borderRadius: "16px", border: "1px solid rgba(129, 140, 248, 0.3)" }}>
-            <Ticket size={32} color="#a5b4fc" style={{ animation: "pulseTicket 2s infinite" }} />
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+            <div className="bg-indigo-500/20 p-3 sm:p-3.5 rounded-2xl border border-indigo-400/30 shrink-0 text-indigo-300">
+              <Ticket className="h-6 w-6 sm:h-8 sm:w-8 animate-pulse" style={{ animation: "pulseTicket 2s infinite" }} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-[10px] sm:text-xs font-black px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                  LIVE QUEUE
+                </span>
+                <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] sm:text-xs font-black px-2.5 py-0.5 rounded-full">
+                  TOKEN #{activeQueue.tokenNumber}
+                </span>
+              </div>
+              <strong className="text-base sm:text-lg font-black text-white block">
+                {activeQueue.storeName}
+              </strong>
+              <span className="text-indigo-200/80 text-xs sm:text-sm font-bold flex items-center gap-2 mt-0.5 flex-wrap">
+                {activeQueue.queueState ? (
+                  <>
+                    <span>👤 {Math.max(0, (activeQueue.queueState.position ?? 1) - 1)} ahead</span>
+                    <span>•</span>
+                    <span>⏳ ~{activeQueue.queueState.estimatedWaitMinutes ?? 0} min wait</span>
+                    {activeQueue.queueState.waitingCount !== undefined && (
+                      <>
+                        <span>•</span>
+                        <span>👥 {activeQueue.queueState.waitingCount} waiting</span>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <span>Status: {activeQueue.status}</span>
+                )}
+              </span>
+            </div>
           </div>
-          <div>
-            <strong style={{ fontSize: "1.2rem", display: "block", marginBottom: "0.25rem", textShadow: "0 0 10px rgba(255,255,255,0.3)" }}>You&apos;re in a queue at {activeQueue.storeName}</strong>
-            <span style={{ color: "#c7d2fe", fontSize: "0.95rem", textShadow: "0 0 5px rgba(199, 210, 254, 0.5)" }}>
-              Token #{activeQueue.tokenNumber}
-              {activeQueue.queueState ? ` · ${Math.max(0, (activeQueue.queueState.position ?? 1) - 1)} ahead · ~${activeQueue.queueState.estimatedWaitMinutes ?? 0} min wait` : ""}
-            </span>
+
+          <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
+            <Link
+              href={activeQueue.queueCode ? `/q/${activeQueue.queueCode}` : '/healthcare'}
+              className="flex-1 md:flex-initial inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/40 text-white px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl text-xs sm:text-sm font-black shadow-lg shadow-indigo-600/30 transition-all text-center"
+            >
+              View Queue →
+            </Link>
+            <button
+              type="button"
+              onClick={() => void handleLeaveQueue()}
+              className="inline-flex items-center justify-center bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 hover:text-rose-200 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer"
+            >
+              Leave
+            </button>
           </div>
-        </div>
-        <div style={{ display: "flex", gap: "1rem" }}>
-          {activeQueue.queueCode ? (
-            <Link href={`/q/${activeQueue.queueCode}`} style={{ background: "rgba(79, 70, 229, 0.8)", backdropFilter: "blur(4px)", border: "1px solid rgba(129, 140, 248, 0.5)", color: "#fff", padding: "0.75rem 1.5rem", borderRadius: "12px", fontWeight: 700, textDecoration: "none", boxShadow: "0 0 15px rgba(79, 70, 229, 0.4)" }}>View Queue</Link>
-          ) : (
-            <Link href="/healthcare" style={{ background: "rgba(79, 70, 229, 0.8)", backdropFilter: "blur(4px)", border: "1px solid rgba(129, 140, 248, 0.5)", color: "#fff", padding: "0.75rem 1.5rem", borderRadius: "12px", fontWeight: 700, textDecoration: "none", boxShadow: "0 0 15px rgba(79, 70, 229, 0.4)" }}>View Queue</Link>
-          )}
-          <button type="button" onClick={() => void handleLeaveQueue()} style={{ background: "rgba(248, 113, 113, 0.1)", backdropFilter: "blur(4px)", color: "#fca5a5", border: "1px solid rgba(248, 113, 113, 0.3)", padding: "0.75rem 1.5rem", borderRadius: "12px", fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}>Leave</button>
         </div>
       </div>
     )}
@@ -261,39 +281,39 @@ function CustomerOverview({ user, favorites, reviews, cart }: { user: SessionUse
   const userName = user?.name || user?.email || "User";
   return (
     <>
-      <div className="statsGrid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
-        <article className="statCard" style={{ background: "linear-gradient(135deg, rgba(131, 24, 67, 0.85), rgba(190, 24, 93, 0.9))", backdropFilter: "blur(12px)", border: "1px solid rgba(244, 114, 182, 0.4)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", boxShadow: "0 10px 30px -10px rgba(219, 39, 119, 0.4), inset 0 0 20px rgba(219, 39, 119, 0.1)", transform: "translateZ(0)" }}>
-          <Heart size={28} color="#f472b6" style={{ marginBottom: "0.75rem", filter: "drop-shadow(0 0 8px rgba(244, 114, 182, 0.8))" }} />
-          <small style={{ color: "#fbcfe8", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>FAVOURITE SHOPS</small>
-          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "#fff", lineHeight: 1, marginTop: "0.5rem", textShadow: "0 0 15px rgba(255,255,255,0.5)" }}>{favorites.length}</strong>
-          <span className="subText" style={{ color: "#f9a8d4", fontSize: "0.85rem", marginTop: "0.25rem" }}>Saved shops</span>
+      <div className="statsGrid grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-6 sm:mb-8">
+        <article className="statCard p-3.5 sm:p-5" style={{ background: "linear-gradient(135deg, rgba(131, 24, 67, 0.85), rgba(190, 24, 93, 0.9))", backdropFilter: "blur(12px)", border: "1px solid rgba(244, 114, 182, 0.4)", borderRadius: "20px", display: "flex", flexDirection: "column", boxShadow: "0 10px 30px -10px rgba(219, 39, 119, 0.4), inset 0 0 20px rgba(219, 39, 119, 0.1)", transform: "translateZ(0)" }}>
+          <Heart className="w-5 h-5 sm:w-7 sm:h-7 text-pink-400 mb-2" style={{ filter: "drop-shadow(0 0 8px rgba(244, 114, 182, 0.8))" }} />
+          <small style={{ color: "#fbcfe8", fontWeight: 700, fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>FAVOURITE SHOPS</small>
+          <strong style={{ fontSize: "1.75rem", fontWeight: 900, color: "#fff", lineHeight: 1, marginTop: "0.25rem", textShadow: "0 0 15px rgba(255,255,255,0.5)" }}>{favorites.length}</strong>
+          <span className="subText" style={{ color: "#f9a8d4", fontSize: "0.75rem", marginTop: "0.25rem" }}>Saved shops</span>
         </article>
-        <article className="statCard" style={{ background: "linear-gradient(135deg, rgba(120, 53, 15, 0.85), rgba(180, 83, 9, 0.9))", backdropFilter: "blur(12px)", border: "1px solid rgba(251, 191, 36, 0.4)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", boxShadow: "0 10px 30px -10px rgba(217, 119, 6, 0.4), inset 0 0 20px rgba(217, 119, 6, 0.1)", transform: "translateZ(0)" }}>
-          <Star size={28} color="#fbbf24" style={{ marginBottom: "0.75rem", filter: "drop-shadow(0 0 8px rgba(251, 191, 36, 0.8))" }} />
-          <small style={{ color: "#fde68a", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>REVIEWS WRITTEN</small>
-          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "#fff", lineHeight: 1, marginTop: "0.5rem", textShadow: "0 0 15px rgba(255,255,255,0.5)" }}>{reviews.length}</strong>
-          <span className="subText" style={{ color: "#fcd34d", fontSize: "0.85rem", marginTop: "0.25rem" }}>Reviews written</span>
+        <article className="statCard p-3.5 sm:p-5" style={{ background: "linear-gradient(135deg, rgba(120, 53, 15, 0.85), rgba(180, 83, 9, 0.9))", backdropFilter: "blur(12px)", border: "1px solid rgba(251, 191, 36, 0.4)", borderRadius: "20px", display: "flex", flexDirection: "column", boxShadow: "0 10px 30px -10px rgba(217, 119, 6, 0.4), inset 0 0 20px rgba(217, 119, 6, 0.1)", transform: "translateZ(0)" }}>
+          <Star className="w-5 h-5 sm:w-7 sm:h-7 text-amber-400 mb-2" style={{ filter: "drop-shadow(0 0 8px rgba(251, 191, 36, 0.8))" }} />
+          <small style={{ color: "#fde68a", fontWeight: 700, fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>REVIEWS WRITTEN</small>
+          <strong style={{ fontSize: "1.75rem", fontWeight: 900, color: "#fff", lineHeight: 1, marginTop: "0.25rem", textShadow: "0 0 15px rgba(255,255,255,0.5)" }}>{reviews.length}</strong>
+          <span className="subText" style={{ color: "#fcd34d", fontSize: "0.75rem", marginTop: "0.25rem" }}>Reviews written</span>
         </article>
-        <article className="statCard" style={{ background: "linear-gradient(135deg, rgba(30, 58, 138, 0.85), rgba(29, 78, 216, 0.9))", backdropFilter: "blur(12px)", border: "1px solid rgba(96, 165, 250, 0.4)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", boxShadow: "0 10px 30px -10px rgba(37, 99, 235, 0.4), inset 0 0 20px rgba(37, 99, 235, 0.1)", transform: "translateZ(0)" }}>
-          <ShoppingCart size={28} color="#60a5fa" style={{ marginBottom: "0.75rem", filter: "drop-shadow(0 0 8px rgba(96, 165, 250, 0.8))" }} />
-          <small style={{ color: "#bfdbfe", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>CART PRODUCTS</small>
-          <strong style={{ fontSize: "2.5rem", fontWeight: 900, color: "#fff", lineHeight: 1, marginTop: "0.5rem", textShadow: "0 0 15px rgba(255,255,255,0.5)" }}>{cart.length}</strong>
-          <span className="subText" style={{ color: "#93c5fd", fontSize: "0.85rem", marginTop: "0.25rem" }}>Items in your cart</span>
+        <article className="statCard p-3.5 sm:p-5" style={{ background: "linear-gradient(135deg, rgba(30, 58, 138, 0.85), rgba(29, 78, 216, 0.9))", backdropFilter: "blur(12px)", border: "1px solid rgba(96, 165, 250, 0.4)", borderRadius: "20px", display: "flex", flexDirection: "column", boxShadow: "0 10px 30px -10px rgba(37, 99, 235, 0.4), inset 0 0 20px rgba(37, 99, 235, 0.1)", transform: "translateZ(0)" }}>
+          <ShoppingCart className="w-5 h-5 sm:w-7 sm:h-7 text-blue-400 mb-2" style={{ filter: "drop-shadow(0 0 8px rgba(96, 165, 250, 0.8))" }} />
+          <small style={{ color: "#bfdbfe", fontWeight: 700, fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>CART PRODUCTS</small>
+          <strong style={{ fontSize: "1.75rem", fontWeight: 900, color: "#fff", lineHeight: 1, marginTop: "0.25rem", textShadow: "0 0 15px rgba(255,255,255,0.5)" }}>{cart.length}</strong>
+          <span className="subText" style={{ color: "#93c5fd", fontSize: "0.75rem", marginTop: "0.25rem" }}>Items in cart</span>
         </article>
-        <article className="statCard" style={{ background: "linear-gradient(135deg, rgba(17, 94, 89, 0.85), rgba(15, 118, 110, 0.9))", backdropFilter: "blur(12px)", border: "1px solid rgba(45, 212, 191, 0.4)", padding: "1.5rem", borderRadius: "20px", display: "flex", flexDirection: "column", boxShadow: "0 10px 30px -10px rgba(13, 148, 136, 0.4), inset 0 0 20px rgba(13, 148, 136, 0.1)", transform: "translateZ(0)" }}>
-          <MapPin size={28} color="#2dd4bf" style={{ marginBottom: "0.75rem", filter: "drop-shadow(0 0 8px rgba(45, 212, 191, 0.8))" }} />
-          <small style={{ color: "#99f6e4", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>LOCATION</small>
-          <strong style={{ fontSize: "1.5rem", fontWeight: 800, color: "#fff", lineHeight: 1.2, marginTop: "0.5rem", textShadow: "0 0 10px rgba(255,255,255,0.3)" }}>Your Locality</strong>
-          <span className="subText" style={{ color: "#5eead4", fontSize: "0.85rem", marginTop: "0.25rem" }}>Your current locality</span>
+        <article className="statCard p-3.5 sm:p-5" style={{ background: "linear-gradient(135deg, rgba(17, 94, 89, 0.85), rgba(15, 118, 110, 0.9))", backdropFilter: "blur(12px)", border: "1px solid rgba(45, 212, 191, 0.4)", borderRadius: "20px", display: "flex", flexDirection: "column", boxShadow: "0 10px 30px -10px rgba(13, 148, 136, 0.4), inset 0 0 20px rgba(13, 148, 136, 0.1)", transform: "translateZ(0)" }}>
+          <MapPin className="w-5 h-5 sm:w-7 sm:h-7 text-teal-400 mb-2" style={{ filter: "drop-shadow(0 0 8px rgba(45, 212, 191, 0.8))" }} />
+          <small style={{ color: "#99f6e4", fontWeight: 700, fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>LOCATION</small>
+          <strong style={{ fontSize: "1.25rem", fontWeight: 800, color: "#fff", lineHeight: 1.2, marginTop: "0.25rem", textShadow: "0 0 10px rgba(255,255,255,0.3)" }}>Your Locality</strong>
+          <span className="subText" style={{ color: "#5eead4", fontSize: "0.75rem", marginTop: "0.25rem" }}>Current locality</span>
         </article>
       </div>
 
-      <div className="portalGrid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-        <section className="portalCard" style={{ padding: "2rem", borderRadius: "20px", background: "var(--portal-card-bg, #ffffff)", border: "1px solid var(--portal-border, #e2e8f0)", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.05)" }}>
-          <div className="portalCardHeader" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-            <h2 style={{ fontSize: "1.35rem", fontWeight: 800 }}>Recently Saved</h2>
-            <Link href="/account?tab=favorites" style={{ color: "#0ea5e9", textDecoration: "none", fontSize: "0.9rem", fontWeight: 700 }}>
-              View all
+      <div className="portalGrid grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <section className="portalCard p-4 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="portalCardHeader flex justify-between items-center mb-4">
+            <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">Recently Saved</h2>
+            <Link href="/account?tab=favorites" className="text-sky-500 hover:text-sky-600 text-xs sm:text-sm font-bold">
+              View all →
             </Link>
           </div>
           {favorites.length > 0 ? (
@@ -303,27 +323,27 @@ function CustomerOverview({ user, favorites, reviews, cart }: { user: SessionUse
           )}
         </section>
 
-        <section className="portalCard" style={{ padding: "2rem", borderRadius: "20px", background: "var(--portal-card-bg, #ffffff)", border: "1px solid var(--portal-border, #e2e8f0)", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.05)" }}>
-          <div className="portalCardHeader" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-            <h2 style={{ fontSize: "1.35rem", fontWeight: 800 }}>Account Identity</h2>
+        <section className="portalCard p-4 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="portalCardHeader flex justify-between items-center mb-4">
+            <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">Account Identity</h2>
             <span className="statusPill active">Active</span>
           </div>
-          <div className="accountDetail" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div style={{ width: "64px", height: "64px", borderRadius: "16px", background: "#0ea5e9", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.75rem", fontWeight: 800 }}>
+          <div className="accountDetail flex flex-col gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-sky-500 text-white flex items-center justify-center text-xl sm:text-2xl font-black shrink-0">
                 {userName.slice(0, 1).toUpperCase()}
               </div>
-              <div>
-                <b style={{ fontSize: "1.25rem", color: "var(--text-primary, #0f172a)" }}>{userName}</b>
-                <small style={{ display: "block", color: "var(--text-secondary, #64748b)", marginTop: "0.25rem", fontSize: "0.95rem" }}>{user?.email || ""}</small>
+              <div className="min-w-0">
+                <b className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white block truncate">{userName}</b>
+                <small className="text-xs text-slate-500 dark:text-slate-400 block truncate">{user?.email || ""}</small>
               </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", padding: "1.25rem", background: "var(--cream, #f8fafc)", borderRadius: "16px", border: "1px solid var(--line, #f1f5f9)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", color: "#0ea5e9", fontSize: "0.95rem", fontWeight: 500 }}>
-                <MapPin size={18} /> Customer • 28.7381° N, 77.2689° E
+            <div className="flex flex-col gap-2 p-3 sm:p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/50 text-xs font-bold">
+              <div className="flex items-center gap-2 text-sky-600 dark:text-sky-400">
+                <MapPin size={16} className="shrink-0" /> <span>Customer • 28.7381° N, 77.2689° E</span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", color: "var(--text-secondary, #64748b)", fontSize: "0.95rem", fontWeight: 500 }}>
-                <Calendar size={18} /> Member since May 22, 2024
+              <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                <Calendar size={16} className="shrink-0" /> <span>Member since May 22, 2024</span>
               </div>
             </div>
           </div>
