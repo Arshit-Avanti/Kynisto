@@ -65,7 +65,7 @@ const modernCleanTechStyles = `
   }
   
   /* Mode Dark Styles */
-  .mode-dark .searchBox, .mode-dark .healthSearch, .mode-dark .productIntro form, .mode-dark .locationPill, .mode-dark .categoryTile, .mode-dark .storeCard, .mode-dark .advancedFilters input, .mode-dark .providerGrid article {
+  .mode-dark .searchBox, .mode-dark .healthSearch, .mode-dark .productIntro form, .mode-dark .locationPill, .mode-dark .storeCard, .mode-dark .advancedFilters input, .mode-dark .providerGrid article {
     border-radius: 16px !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     background: rgba(255, 255, 255, 0.05) !important;
@@ -77,7 +77,7 @@ const modernCleanTechStyles = `
     will-change: transform, opacity !important;
     contain: layout style paint !important;
   }
-  .mode-dark .categoryTile strong, .mode-dark .categoryTile b, .mode-dark .categoryTile span, .mode-dark .storeCard h3, .mode-dark .storeCard b, .mode-dark .storeCard p, .mode-dark .providerGrid h3 {
+  .mode-dark .storeCard h3, .mode-dark .storeCard b, .mode-dark .storeCard p, .mode-dark .providerGrid h3 {
     color: var(--text-primary) !important;
     text-shadow: var(--text-shadow-strong, 0 1px 4px rgba(0,0,0,0.8)) !important;
   }
@@ -225,21 +225,18 @@ const modernCleanTechStyles = `
     box-shadow: 0 0 18px rgba(255, 87, 34, 0.45) !important;
     outline: none !important;
   }
-  .locationPill:hover, .categoryTile:hover {
+  .locationPill:hover {
     border-color: rgba(255, 87, 34, 0.5) !important;
     background: rgba(255, 255, 255, 0.12) !important;
   }
-  .categoryTile {
-    transition: all 0.3s ease, transform 0.2s ease !important;
-  }
-  .categoryTile[aria-pressed="true"], .careTypes button.active {
+  .careTypes button.active {
     background: rgba(255, 87, 34, 0.3) !important;
     color: #fff !important;
     border-color: #FF5722 !important;
     box-shadow: 0 0 20px rgba(255, 87, 34, 0.45) !important;
     transform: translateY(-2px) !important;
   }
-  .categoryTile[aria-pressed="true"] svg, .careTypes button.active svg {
+  .careTypes button.active svg {
     stroke: #FF7A00 !important;
   }
   .storeCard {
@@ -1358,11 +1355,11 @@ const modernCleanTechStyles = `
     }
     .categoryGrid {
       grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-      gap: 6px !important;
+      gap: 8px !important;
     }
     .categoryTile {
-      padding: 10px 4px !important;
-      min-height: 74px !important;
+      padding: 10px 10px !important;
+      min-height: 68px !important;
     }
   }
 `;
@@ -2210,17 +2207,33 @@ export default function Home() {
       {/* Interactive Credix Hero + Features Section with Continuous Scroll-Driven 3D Dashboard Motion */}
       <CredixInteractiveHeroFeatures query={query} setQuery={setQuery} />
 
-      <section className="categorySection" aria-labelledby="category-heading">
-        <div className="sectionHeading compactHeading arise-on-scroll">
+      <section className="categorySection w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 relative z-20" aria-labelledby="category-heading">
+        <div className="sectionHeading compactHeading arise-on-scroll flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <span className="kicker">Browse by need</span>
-            <h2 id="category-heading">What are you looking for?</h2>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-[11px] font-bold text-orange-400 mb-2 uppercase tracking-wider">
+              <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+              Browse by Need
+            </div>
+            <h2 id="category-heading" className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+              What are you looking for?
+            </h2>
+            <p className="text-slate-300 text-xs sm:text-sm mt-1">
+              Explore trusted stores, clinics, technicians, and local essentials near you.
+            </p>
           </div>
-          <button className="resetLink" type="button" onClick={resetFilters}>Reset filters <span aria-hidden="true">↗</span></button>
+          <button
+            className="resetLink inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] border border-white/20 text-slate-100 hover:text-white font-bold text-xs sm:text-sm shadow-sm hover:border-orange-500/50 transition-all cursor-pointer w-fit"
+            type="button"
+            onClick={resetFilters}
+          >
+            <span>Reset filters</span>
+            <span aria-hidden="true" className="text-orange-400 font-bold">↗</span>
+          </button>
         </div>
-        <div className="categoryGrid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-4 w-full">
+        <div className="categoryGrid">
           {catalogCategories.map((item, index) => {
             const active = category === item.name;
+            const count = item.storeCount ?? catalogStores.filter((store) => store.category === item.name).length;
             return (
               <button
                 key={item.name}
@@ -2232,9 +2245,14 @@ export default function Home() {
                   document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
                 }}
               >
-                <span className="categoryArt" aria-hidden="true"><i /><b>{item.icon}</b></span>
-                <span>{item.name}</span>
-                <small>{item.storeCount ?? catalogStores.filter((store) => store.category === item.name).length} nearby</small>
+                <span className="categoryArt" aria-hidden="true">
+                  <i />
+                  <b>{item.icon}</b>
+                </span>
+                <div className="flex flex-col min-w-0 pr-1 overflow-hidden text-left">
+                  <span className="truncate">{item.name}</span>
+                  <small className="truncate">{count} nearby</small>
+                </div>
               </button>
             );
           })}
