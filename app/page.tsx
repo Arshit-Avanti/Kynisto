@@ -1365,16 +1365,21 @@ const modernCleanTechStyles = `
 `;
 
 const categories: Category[] = [
-  { name: "Salon", icon: "✂", tone: "coral" },
-  { name: "Grocery", icon: "◒", tone: "green" },
-  { name: "Clinic", icon: "+", tone: "blue" },
-  { name: "Stationery", icon: "✎", tone: "yellow" },
-  { name: "Pharmacy", icon: "✚", tone: "mint" },
-  { name: "Bakery", icon: "♨", tone: "peach" },
-  { name: "Repair", icon: "⚙", tone: "lilac" },
-  { name: "Pet care", icon: "●", tone: "sky" },
-  { name: "Fitness", icon: "↔", tone: "lime" },
-  { name: "Café", icon: "☕", tone: "sand" },
+  { name: "Salons & Beauty", icon: "✂", tone: "coral" },
+  { name: "Grocery & Essentials", icon: "◒", tone: "green" },
+  { name: "Stationery & Print", icon: "✎", tone: "blue" },
+  { name: "Bakeries", icon: "♨", tone: "yellow" },
+  { name: "Mobile & Electronics Repair", icon: "⚙", tone: "mint" },
+  { name: "Fitness & Yoga", icon: "↔", tone: "peach" },
+  { name: "Cafés", icon: "☕", tone: "lilac" },
+  { name: "Restaurants", icon: "🍽️", tone: "sky" },
+  { name: "Home Services", icon: "🔧", tone: "lime" },
+  { name: "Hardware & Tools", icon: "🔨", tone: "sand" },
+  { name: "Education & Coaching", icon: "🎓", tone: "coral" },
+  { name: "Fashion & Apparel", icon: "✦", tone: "green" },
+  { name: "Automobile Services", icon: "🚗", tone: "blue" },
+  { name: "Banks & ATMs", icon: "⊞", tone: "yellow" },
+  { name: "Florists & Gifts", icon: "✿", tone: "mint" },
 ];
 
 const stores: Store[] = [
@@ -1551,7 +1556,7 @@ export default function Home() {
   const [sortMode, setSortMode] = useState<SortMode>("all");
   const [saved, setSaved] = useState<Array<string | number>>([]);
   const [catalogStores, setCatalogStores] = useState<Store[]>([]);
-  const [catalogCategories, setCatalogCategories] = useState<Category[]>(categories.filter((item) => !["Clinic", "Pharmacy", "Pet care"].includes(item.name)));
+  const [catalogCategories, setCatalogCategories] = useState<Category[]>(categories);
   const [catalogTotal, setCatalogTotal] = useState(0);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -1672,13 +1677,15 @@ export default function Home() {
           apiFetch<{ user: { id: string; name?: string; role: "admin" | "store_owner" | "customer" } | null }>("/api/auth/me"),
         ]);
         if (!active) return;
-        const palette = ["coral", "green", "blue", "yellow", "mint", "peach", "lilac", "sky", "lime", "sand"];
-        setCatalogCategories(categoryData.items.map((item, index) => ({
-          name: item.name,
-          icon: item.icon ?? "⌖",
-          tone: palette[index % palette.length],
-          storeCount: Number(item.storeCount ?? 0),
-        })));
+        if (categoryData?.items && categoryData.items.length > 0) {
+          const palette = ["coral", "green", "blue", "yellow", "mint", "peach", "lilac", "sky", "lime", "sand"];
+          setCatalogCategories(categoryData.items.map((item, index) => ({
+            name: item.name,
+            icon: item.icon ?? "⌖",
+            tone: palette[index % palette.length],
+            storeCount: Number(item.storeCount ?? 0),
+          })));
+        }
         setUserRole(sessionData.user?.role ?? null);
         setUserId(sessionData.user?.id ?? null);
         setUserName(sessionData.user?.name ?? null);
