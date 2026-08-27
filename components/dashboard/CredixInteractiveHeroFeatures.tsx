@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Search, ArrowRight } from "lucide-react";
 
 interface TransactionItem {
   id: string;
@@ -163,29 +164,44 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
             Discover verified local stores, book home services, join live doctor OPD queues, and unlock smart rewards across your neighborhood.
           </p>
 
-          {/* High-Contrast Responsive Pill Input Form */}
+          {/* Minimalist Neumorphic / Glassmorphic Capsule Search Bar (Reference: media_1787853301950.png) */}
           <form
-            className="searchBox heroSearchBox arise-on-scroll arise-delay-3 w-full max-w-xl mx-auto p-1.5 sm:p-2 rounded-full bg-slate-950/80 backdrop-blur-2xl border border-white/20 shadow-2xl flex items-center gap-1.5 sm:gap-2 mb-2"
+            className="searchBox heroSearchBox arise-on-scroll arise-delay-3 relative w-full max-w-xl mx-auto p-1.5 sm:p-2 rounded-full bg-white/[0.88] dark:bg-slate-900/80 backdrop-blur-2xl border border-white/60 dark:border-white/20 shadow-[0_12px_36px_rgba(0,0,0,0.18),0_0_24px_rgba(59,130,246,0.12),inset_0_1px_2px_rgba(255,255,255,0.8)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.2)] flex items-center transition-all duration-300 hover:border-blue-400/50 focus-within:border-blue-500 focus-within:shadow-[0_16px_45px_rgba(59,130,246,0.25),inset_0_1px_2px_rgba(255,255,255,0.9)] group mb-2 overflow-hidden"
             role="search"
             onSubmit={(event) => {
               event.preventDefault();
               document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
             }}
           >
-            <label className="sr-only" htmlFor="store-search">Search nearby stores</label>
-            <span className="pl-3 sm:pl-4 text-slate-400 text-sm sm:text-base shrink-0">🔍</span>
+            {/* Subtle Diagonal Specular Sheen */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-60" />
+
+            <label className="sr-only" htmlFor="store-search">Search anything</label>
+
+            {/* Left Embossed Circular Search Disc */}
+            <div className="relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/90 dark:bg-white/10 shadow-[0_2px_6px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,0.9)] dark:shadow-[0_2px_6px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center text-slate-600 dark:text-slate-200 shrink-0 transition-transform group-focus-within:scale-105">
+              <Search className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+            </div>
+
+            {/* Subtle Vertical Divider */}
+            <div className="relative z-10 w-[1.5px] h-5 sm:h-6 bg-slate-300/80 dark:bg-white/20 mx-2 sm:mx-2.5 shrink-0" />
+
+            {/* Clean Input Field */}
             <input
               id="store-search"
-              className="flex-1 min-w-0 bg-transparent text-white placeholder:text-slate-400 text-xs sm:text-sm md:text-base px-2 py-1.5 outline-none font-medium"
+              className="relative z-10 flex-1 min-w-0 bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 text-xs sm:text-sm md:text-base px-1 py-1.5 outline-none font-medium"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search stores, clinics, plumbers, salons..."
+              placeholder="Search anything..."
             />
+
+            {/* Right Vibrant Blue / Azure Circular Action Button */}
             <button
-              className="px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 active:scale-95 text-white font-bold text-xs sm:text-sm md:text-base shadow-md transition-all shrink-0 cursor-pointer whitespace-nowrap"
+              className="relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-blue-600 via-blue-500 to-sky-400 text-white shadow-md shadow-blue-500/35 hover:shadow-lg hover:shadow-blue-500/55 active:scale-90 hover:scale-105 transition-all flex items-center justify-center shrink-0 cursor-pointer ml-1"
               type="submit"
+              aria-label="Search"
             >
-              Explore Now
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-white stroke-[2.5]" />
             </button>
           </form>
         </div>

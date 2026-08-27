@@ -4,24 +4,6 @@ import Link from "next/link";
 import { HelpCircle, Stethoscope, ShoppingBag, ArrowRight, BookOpen } from "lucide-react";
 
 export function EditorialFaqSection() {
-  const faqs = [
-    {
-      question: "What is Kynisto and how does it serve local communities?",
-      answer: "Kynisto connects you to nearby stores, live clinic waiting queues, and local services in real time with instant directions and availability.",
-    },
-    {
-      question: "How do virtual healthcare queue tokens eliminate physical waiting rooms?",
-      answer: "Join clinic queues directly from your phone, track live token counts and estimated wait times, and arrive right when the doctor is ready.",
-    },
-    {
-      question: "How do local merchants and store owners benefit from listing on Kynisto?",
-      answer: "Merchants get a digital storefront, real-time product and service indexing, customer chat, and queue tools to boost neighborhood footfall.",
-    },
-    {
-      question: "Is personal health and contact data kept private and secure?",
-      answer: "Yes. Queue tokens are automatically scrubbed after your visit, and all health data is encrypted and never shared or sold.",
-    },
-  ];
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-12 sm:my-16 space-y-16 sm:space-y-20">
@@ -87,49 +69,34 @@ export function EditorialFaqSection() {
         </div>
       </section>
 
-      {/* 2. SECTION: FREQUENTLY ASKED QUESTIONS (TRANSPARENT BACKGROUND) */}
+      {/* 2. SECTION: 1-CLICK FAQ & HELP CENTER ACCESS */}
       <section
-        className="w-full bg-transparent text-white transition-all"
-        aria-labelledby="faq-heading"
+        className="w-full max-w-4xl mx-auto"
+        aria-labelledby="faq-help-heading"
       >
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-10 sm:mb-12">
-            <span className="text-orange-400 font-bold text-xs uppercase tracking-widest block mb-2">
-              Common Inquiries &amp; Support
-            </span>
-            <h2 id="faq-heading" className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight mb-4 flex items-center justify-center gap-2.5 drop-shadow-md">
-              <HelpCircle className="w-7 h-7 sm:w-8 sm:h-8 text-orange-400" />
-              <span>Frequently Asked Questions</span>
-            </h2>
-            <p className="text-slate-200 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed drop-shadow-sm">
-              Clear answers about our real-time clinic queuing, local merchant catalog indexing, and private data protection.
-            </p>
+        <div className="p-6 sm:p-8 rounded-3xl bg-slate-950/80 backdrop-blur-2xl border border-white/15 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-6 text-left relative overflow-hidden group hover:border-orange-500/40 transition-all duration-300">
+          <div className="relative z-10 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/10">
+              <HelpCircle className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 id="faq-help-heading" className="text-base sm:text-lg font-bold text-white mb-1">
+                Have questions about Kynisto?
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-300">
+                Explore guides, clinic queuing answers, merchant benefits, privacy, and support.
+              </p>
+            </div>
           </div>
 
-          {/* FAQ Accordion Items */}
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <div
-                key={index}
-                className="faqCard group p-5 sm:p-6 rounded-2xl bg-white/[0.06] border border-white/15 backdrop-blur-xl transition-all duration-300 shadow-md cursor-default hover:-translate-y-1.5 hover:bg-white/[0.09] hover:border-orange-500/40 hover:shadow-xl hover:shadow-orange-500/10"
-              >
-                <h3 className="font-bold text-white text-base sm:text-lg mb-2 group-hover:text-orange-300 transition-colors drop-shadow-sm">
-                  {faq.question}
-                </h3>
-                <p className="text-slate-200 text-xs sm:text-sm leading-relaxed font-normal">{faq.answer}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-10 text-center">
-            <Link
-              href="/faq"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/[0.1] hover:bg-white/[0.18] border border-white/20 backdrop-blur-md text-white font-bold text-xs sm:text-sm transition-all shadow-lg hover:shadow-orange-500/10"
-            >
-              <BookOpen className="w-4 h-4 text-orange-400" />
-              <span>Visit Complete FAQ &amp; Help Center</span>
-            </Link>
-          </div>
+          <Link
+            href="/faq"
+            className="relative z-10 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs sm:text-sm transition-all shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 shrink-0 hover:scale-105 active:scale-95 whitespace-nowrap"
+          >
+            <BookOpen className="w-4 h-4" />
+            <span>Visit Complete FAQ &amp; Help Center</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       </section>
 
