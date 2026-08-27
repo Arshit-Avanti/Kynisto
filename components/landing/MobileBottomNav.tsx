@@ -1,13 +1,13 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/client-api";
 import {
   Home,
-  Stethoscope,
-  Briefcase,
+  Search,
+  Sparkles,
   Wallet,
   User,
   LayoutDashboard,
@@ -52,36 +52,40 @@ export function MobileBottomNav() {
 
   const navItems = [
     {
+      id: "home",
       label: "Home",
       href: "/",
       icon: Home,
       isActive: pathname === "/",
-      ariaLabel: "Kynisto Home",
+      ariaLabel: "Home Tab",
     },
     {
-      label: "Health",
+      id: "search",
+      label: "Search",
       href: "/healthcare",
-      icon: Stethoscope,
+      icon: Search,
       isActive: pathname.startsWith("/healthcare") || pathname.startsWith("/queue"),
-      hasLiveBadge: true,
-      ariaLabel: "Healthcare OPD Queues",
+      ariaLabel: "Search & Healthcare",
     },
     {
-      label: "Services",
+      id: "services",
+      label: "Imagine",
       href: "/services",
-      icon: Briefcase,
+      icon: Sparkles,
       isActive: pathname.startsWith("/services"),
-      ariaLabel: "Home Services",
+      ariaLabel: "Imagine & Services",
     },
     {
-      label: "Wallet",
+      id: "wallet",
+      label: "Message",
       href: "/wallet",
       icon: Wallet,
       isActive: pathname.startsWith("/wallet"),
-      ariaLabel: "My Wallet",
+      ariaLabel: "Message & Wallet",
     },
     {
-      label: user ? "Dashboard" : "Account",
+      id: "profile",
+      label: user ? "Dashboard" : "Profile",
       href: dashboardHref,
       icon: user ? LayoutDashboard : User,
       isActive:
@@ -90,57 +94,113 @@ export function MobileBottomNav() {
         pathname.startsWith("/owner") ||
         pathname.startsWith("/admin") ||
         pathname.startsWith("/login"),
-      ariaLabel: "Account Dashboard",
+      ariaLabel: "Profile Tab",
     },
   ];
 
+  // Determine active item index (0 to 4)
+  const currentActiveIndex = navItems.findIndex((item) => item.isActive);
+  const [activeIndex, setActiveIndex] = useState(
+    currentActiveIndex !== -1 ? currentActiveIndex : 0
+  );
+
+  useEffect(() => {
+    const idx = navItems.findIndex((item) => item.isActive);
+    if (idx !== -1) {
+      setActiveIndex(idx);
+    }
+  }, [pathname]);
+
+  const ActiveIcon = navItems[activeIndex]?.icon || Home;
+
   return (
     <nav
-      className="md:hidden fixed bottom-4 sm:bottom-6 left-0 right-0 z-[999999] px-3 pointer-events-none transition-all duration-300 pb-[env(safe-area-inset-bottom,0.25rem)]"
-      aria-label="Floating Mobile Bottom Navigation"
+      className="md:hidden fixed bottom-3 sm:bottom-5 left-0 right-0 z-[999999] px-3 pointer-events-none transition-all duration-300 pb-[env(safe-area-inset-bottom,0.25rem)]"
+      aria-label="Floating Curved Mobile Bottom Navigation"
     >
-      <div className="mobileBottomDock pointer-events-auto max-w-[360px] sm:max-w-[380px] mx-auto rounded-full bg-slate-950/95 backdrop-blur-2xl border border-white/15 px-2 py-1.5 shadow-[0_16px_45px_rgba(0,0,0,0.9),0_0_25px_rgba(249,115,22,0.25)] flex items-center justify-around transition-all">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const active = item.isActive;
+      <div className="relative max-w-[360px] sm:max-w-[380px] mx-auto pointer-events-auto select-none">
+        
+        {/* 1. ELEVATED FLOATING CIRCULAR BUBBLE INDICATOR */}
+        <div
+          className="absolute -top-5 z-30 pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+          style={{
+            left: `${activeIndex * 20}%`,
+            width: "20%",
+          }}
+        >
+          <div className="mx-auto w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/15 shadow-[0_8px_22px_rgba(0,0,0,0.16),0_2px_6px_rgba(0,0,0,0.08)] flex items-center justify-center transform transition-transform duration-300">
+            <ActiveIcon className="w-5 h-5 sm:w-6 sm:h-6 text-slate-900 dark:text-white stroke-[2.2]" />
+          </div>
+        </div>
 
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              className={`mobileDockItem relative flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-full transition-all duration-200 ${
-                active
-                  ? "bg-gradient-to-tr from-orange-500/25 to-amber-500/25 border border-orange-500/60 text-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.35)] scale-105"
-                  : "text-slate-400 hover:text-white hover:bg-white/[0.08] active:scale-95"
-              }`}
-              aria-label={item.ariaLabel}
-            >
-              <div className="relative flex items-center justify-center">
-                <Icon
-                  className={`w-5 h-5 transition-transform duration-200 ${
-                    active ? "text-orange-400 scale-110" : "text-slate-300"
-                  }`}
-                />
-
-                {/* Live Pulse Dot for Healthcare */}
-                {item.hasLiveBadge && (
-                  <span className="absolute -top-0.5 -right-1 flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                  </span>
-                )}
-              </div>
-
-              <span
-                className={`text-[10px] font-bold tracking-tight mt-0.5 whitespace-nowrap leading-none transition-colors select-none ${
-                  active ? "text-white drop-shadow font-extrabold" : "text-slate-400 font-medium"
-                }`}
+        {/* 2. MAIN NAVBAR BODY WITH SCOOPED CURVED NOTCH */}
+        <div className="relative bg-white dark:bg-slate-900 backdrop-blur-xl border border-slate-100 dark:border-white/10 rounded-[28px] shadow-[0_12px_36px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)] px-1 pt-2 pb-2">
+          
+          {/* Smooth Scooped Wave Notch Overlay */}
+          <div
+            className="absolute -top-[14px] pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] z-20"
+            style={{
+              left: `${activeIndex * 20}%`,
+              width: "20%",
+            }}
+          >
+            <div className="w-[68px] h-[22px] mx-auto relative flex items-center justify-center">
+              <svg
+                viewBox="0 0 68 22"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-full h-full text-white dark:text-slate-900 drop-shadow-[0_-1px_1px_rgba(0,0,0,0.03)]"
               >
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
+                <path
+                  d="M0 0 C12 0 16 18 34 18 C52 18 56 0 68 0 V22 H0 Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </div>
+          </div>
+
+          {/* 3. FIVE NAVIGATION ITEMS */}
+          <div className="relative z-20 flex items-center justify-between">
+            {navItems.map((item, index) => {
+              const Icon = item.icon;
+              const isActive = activeIndex === index;
+
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  onClick={() => setActiveIndex(index)}
+                  className="flex-1 flex flex-col items-center justify-center py-1 relative group focus:outline-none"
+                  aria-label={item.ariaLabel}
+                >
+                  {/* Icon Slot (Hidden or lowered when active because elevated bubble takes over) */}
+                  <div
+                    className={`w-6 h-6 flex items-center justify-center transition-all duration-300 ${
+                      isActive
+                        ? "opacity-0 -translate-y-2 pointer-events-none scale-75"
+                        : "opacity-100 translate-y-0 text-slate-400 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-white"
+                    }`}
+                  >
+                    <Icon className="w-5 h-5 stroke-[1.8]" />
+                  </div>
+
+                  {/* Label */}
+                  <span
+                    className={`text-[11px] tracking-tight mt-1 select-none transition-all duration-300 ${
+                      isActive
+                        ? "text-slate-900 dark:text-white font-bold translate-y-0.5 scale-105"
+                        : "text-slate-400 dark:text-slate-500 font-medium"
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+
+        </div>
+
       </div>
     </nav>
   );
