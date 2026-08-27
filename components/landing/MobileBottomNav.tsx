@@ -128,17 +128,17 @@ export function MobileBottomNav() {
             width: "20%",
           }}
         >
-          <div className="mx-auto w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/20 shadow-[0_8px_20px_rgba(0,0,0,0.16),0_2px_6px_rgba(0,0,0,0.06)] flex items-center justify-center transform transition-transform duration-300">
-            <ActiveIcon className="w-5 h-5 sm:w-6 sm:h-6 text-slate-900 dark:text-white stroke-[2.2]" />
+          <div className="mx-auto w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-white border border-slate-200/90 shadow-[0_8px_20px_rgba(0,0,0,0.15),0_2px_6px_rgba(0,0,0,0.06)] flex items-center justify-center transform transition-transform duration-300">
+            <ActiveIcon className="w-5 h-5 sm:w-6 sm:h-6 text-slate-900 stroke-[2.2]" />
           </div>
         </div>
 
         {/* 2. MAIN NAVBAR BODY WITH SCOOPED CURVED NOTCH */}
-        <div className="relative bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 rounded-[28px] shadow-[0_12px_36px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)] px-1 pt-2 pb-2">
+        <div className="relative bg-white border border-slate-200/90 rounded-[28px] shadow-[0_14px_40px_rgba(0,0,0,0.18),0_2px_8px_rgba(0,0,0,0.04)] px-1 pt-2.5 pb-2">
           
           {/* Smooth Scooped Wave Notch Overlay */}
           <div
-            className="absolute -top-[14px] pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] z-20"
+            className="absolute -top-[13px] pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] z-20"
             style={{
               left: `${activeIndex * 20}%`,
               width: "20%",
@@ -149,11 +149,11 @@ export function MobileBottomNav() {
                 viewBox="0 0 68 22"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-full h-full text-white dark:text-slate-900 drop-shadow-[0_-1px_1px_rgba(0,0,0,0.03)]"
+                className="w-full h-full text-white"
               >
                 <path
                   d="M0 0 C12 0 16 18 34 18 C52 18 56 0 68 0 V22 H0 Z"
-                  fill="currentColor"
+                  fill="#FFFFFF"
                 />
               </svg>
             </div>
@@ -178,7 +178,7 @@ export function MobileBottomNav() {
                     className={`w-6 h-6 flex items-center justify-center transition-all duration-300 ${
                       isActive
                         ? "opacity-0 -translate-y-2 pointer-events-none scale-75"
-                        : "opacity-100 translate-y-0 text-slate-400 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-white"
+                        : "opacity-100 translate-y-0 text-slate-400 group-hover:text-slate-700"
                     }`}
                   >
                     <Icon className="w-5 h-5 stroke-[1.8]" />
@@ -188,8 +188,8 @@ export function MobileBottomNav() {
                   <span
                     className={`text-[11px] tracking-tight mt-1 select-none transition-all duration-300 ${
                       isActive
-                        ? "text-slate-900 dark:text-white font-bold translate-y-0.5 scale-105"
-                        : "text-slate-400 dark:text-slate-500 font-medium"
+                        ? "text-slate-900 font-bold translate-y-0.5 scale-105"
+                        : "text-slate-400 font-medium"
                     }`}
                   >
                     {item.label}
