@@ -118,7 +118,7 @@ export function MobileBottomNav() {
       className="md:hidden fixed bottom-3 sm:bottom-5 left-0 right-0 z-[999999] px-3 pointer-events-none transition-all duration-300 pb-[env(safe-area-inset-bottom,0.25rem)]"
       aria-label="Floating Curved Mobile Bottom Navigation"
     >
-      <div className="relative max-w-[360px] sm:max-w-[380px] mx-auto pointer-events-auto select-none">
+      <div className="mobileCurvedNavWrapper relative max-w-[360px] sm:max-w-[380px] mx-auto pointer-events-auto select-none">
         
         {/* 1. ELEVATED FLOATING CIRCULAR BUBBLE INDICATOR */}
         <div
@@ -128,13 +128,13 @@ export function MobileBottomNav() {
             width: "20%",
           }}
         >
-          <div className="mx-auto w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/15 shadow-[0_8px_22px_rgba(0,0,0,0.16),0_2px_6px_rgba(0,0,0,0.08)] flex items-center justify-center transform transition-transform duration-300">
+          <div className="mx-auto w-12 h-12 sm:w-13 sm:h-13 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/20 shadow-[0_8px_20px_rgba(0,0,0,0.16),0_2px_6px_rgba(0,0,0,0.06)] flex items-center justify-center transform transition-transform duration-300">
             <ActiveIcon className="w-5 h-5 sm:w-6 sm:h-6 text-slate-900 dark:text-white stroke-[2.2]" />
           </div>
         </div>
 
         {/* 2. MAIN NAVBAR BODY WITH SCOOPED CURVED NOTCH */}
-        <div className="relative bg-white dark:bg-slate-900 backdrop-blur-xl border border-slate-100 dark:border-white/10 rounded-[28px] shadow-[0_12px_36px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)] px-1 pt-2 pb-2">
+        <div className="relative bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-white/10 rounded-[28px] shadow-[0_12px_36px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)] px-1 pt-2 pb-2">
           
           {/* Smooth Scooped Wave Notch Overlay */}
           <div
