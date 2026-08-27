@@ -133,33 +133,10 @@ export function MobileBottomNav() {
           </div>
         </div>
 
-        {/* 2. MAIN NAVBAR BODY WITH SCOOPED CURVED NOTCH */}
-        <div className="relative bg-[#0A101D] border border-white/15 rounded-[28px] shadow-[0_16px_40px_rgba(0,0,0,0.85),0_0_24px_rgba(249,115,22,0.12)] px-1 pt-2.5 pb-2">
+        {/* 2. MAIN NAVBAR BODY */}
+        <div className="relative bg-[#0A101D]/95 backdrop-blur-xl border border-white/15 rounded-full shadow-[0_16px_40px_rgba(0,0,0,0.85),0_0_24px_rgba(249,115,22,0.12)] px-2 py-2">
           
-          {/* Smooth Scooped Wave Notch Overlay */}
-          <div
-            className="absolute -top-[13px] pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] z-20"
-            style={{
-              left: `${activeIndex * 20}%`,
-              width: "20%",
-            }}
-          >
-            <div className="w-[68px] h-[22px] mx-auto relative flex items-center justify-center">
-              <svg
-                viewBox="0 0 68 22"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-full h-full text-[#0A101D]"
-              >
-                <path
-                  d="M0 0 C12 0 16 18 34 18 C52 18 56 0 68 0 V22 H0 Z"
-                  fill="#0A101D"
-                />
-              </svg>
-            </div>
-          </div>
-
-          {/* 3. FIVE NAVIGATION ITEMS */}
+          {/* FIVE NAVIGATION ITEMS */}
           <div className="relative z-20 flex items-center justify-between">
             {navItems.map((item, index) => {
               const Icon = item.icon;
