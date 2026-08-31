@@ -101,12 +101,13 @@ export function SupabaseAuthManager() {
       initialUrl.searchParams.has("error_description") ||
       initialUrl.hash.includes("error");
 
-    if (hasOAuthResult) {
-      setActive(true);
-      setLoading(true);
-    } else {
+    if (!hasOAuthResult) {
       storageRemove(PENDING_KEY);
+      return;
     }
+
+    setActive(true);
+    setLoading(true);
 
     async function initAuth() {
       try {

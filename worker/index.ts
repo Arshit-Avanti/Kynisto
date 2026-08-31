@@ -56,15 +56,20 @@ const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
-    // Enforce canonical HTTPS redirection
-    if (url.protocol === "http:" || request.headers.get("x-forwarded-proto") === "http") {
-      return Response.redirect(`https://${url.host}${url.pathname}${url.search}`, 301);
+    // Enforce canonical apex domain (https://kynisto.in) and HTTPS 301 redirection
+    const host = url.hostname.toLowerCase();
+    const isHttp = url.protocol === "http:" || request.headers.get("x-forwarded-proto") === "http";
+    const isWww = host === "www.kynisto.in";
+
+    if (isHttp || isWww) {
+      const canonicalHost = isWww ? "kynisto.in" : url.host;
+      return Response.redirect(`https://${canonicalHost}${url.pathname}${url.search}`, 301);
     }
 
     if (url.pathname === "/robots.txt") {
-      const origin = `https://${url.host}`;
+      const origin = "https://kynisto.in";
       return new Response(
-        `User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /owner/\nDisallow: /account/\nDisallow: /api/\n\nUser-agent: bingbot\nAllow: /\n\nUser-agent: AdIdxBot\nAllow: /\n\nUser-agent: msnbot\nAllow: /\n\nUser-agent: BingPreview\nAllow: /\n\nUser-agent: Mediapartners-Google\nAllow: /\n\nUser-agent: Google-AdSense-AutoAds\nAllow: /\n\nUser-agent: Google-AdSense-AutoAds-Preflight\nAllow: /\n\nUser-agent: Google-AdSense-AdsBot\nAllow: /\n\nUser-agent: Googlebot\nAllow: /\nDisallow: /admin/\nDisallow: /owner/\nDisallow: /account/\nDisallow: /api/\n\nUser-agent: Googlebot-Image\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`,
+        `User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /owner/\nDisallow: /account/\nDisallow: /api/\n\nUser-agent: Mediapartners-Google\nDisallow:\nAllow: /\n\nUser-agent: Google-AdSense-Infeed\nDisallow:\nAllow: /\n\nUser-agent: Google-AdSense-AutoAds\nDisallow:\nAllow: /\n\nUser-agent: Google-AdSense-AutoAds-Preflight\nDisallow:\nAllow: /\n\nUser-agent: Google-AdSense-AdsBot\nDisallow:\nAllow: /\n\nUser-agent: Googlebot\nAllow: /\nDisallow: /admin/\nDisallow: /owner/\nDisallow: /account/\nDisallow: /api/\n\nUser-agent: Googlebot-Image\nAllow: /\n\nUser-agent: bingbot\nAllow: /\n\nUser-agent: AdIdxBot\nAllow: /\n\nUser-agent: msnbot\nAllow: /\n\nUser-agent: BingPreview\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`,
         {
           headers: {
             "Content-Type": "text/plain; charset=utf-8",
@@ -177,6 +182,7 @@ const worker = {
     if (
       url.pathname.startsWith("/api/categories") ||
       url.pathname.startsWith("/api/stores") ||
+      url.pathname.startsWith("/api/search") ||
       url.pathname.startsWith("/api/products") ||
       url.pathname.startsWith("/api/services") ||
       url.pathname.startsWith("/api/healthcare") ||

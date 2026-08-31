@@ -618,6 +618,14 @@ export function OwnerStoreEditor({
           {/* ── Step 1: Basic Info ─────────────────────────────────────────────── */}
           <div style={{ display: step === 1 ? "contents" : "none" }}>
             <label>Store / Business name<input name="name" defaultValue={text("name")} required placeholder="e.g. Ankur Vihar Supermarket" /></label>
+            <label>Custom Store Handle / URL Code
+              <input
+                name="slug"
+                defaultValue={text("slug")}
+                placeholder="e.g. aarogya-clinic or city-care"
+                style={{ fontFamily: "monospace" }}
+              />
+            </label>
             <label>Category
               <select name="categoryId" value={categoryId} onChange={(event) => setCategoryId(event.target.value)} required>
                 <option value="">Choose category</option>
@@ -636,6 +644,7 @@ export function OwnerStoreEditor({
               <button type="button" className="portalButton" onClick={() => setStep(2)}>Next Step: Location</button>
             </div>
           </div>
+
 
           {/* ── Step 2: Location & Contact ─────────────────────────────────────── */}
           <div style={{ display: step === 2 ? "contents" : "none" }}>

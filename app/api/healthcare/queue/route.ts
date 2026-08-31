@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     const action = cleanText(body.action, "Action", { max: 20 });
     const storeId = cleanText(body.storeId, "Provider", { max: 80 });
     const provider = await requireHealthcareStore(storeId);
-    if ((provider.storeStatus !== "approved" && provider.storeStatus !== "active") || !provider.providerType) {
+    if ((provider.storeStatus === "suspended" || provider.storeStatus === "deleted" || provider.storeStatus === "rejected") || !provider.providerType) {
       throw new HttpError(409, "Provider is not available.", "PROVIDER_UNAVAILABLE");
     }
     const db = getD1();

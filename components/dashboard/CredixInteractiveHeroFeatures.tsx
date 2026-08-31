@@ -103,11 +103,24 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
   const translateYMobile = isDesktop ? 0 : -Math.sin(scrollProgress * Math.PI) * 12;
   const scale = isDesktop ? 0.98 + scrollProgress * 0.02 : 0.97 + scrollProgress * 0.03;
 
-  // Features Left Content emergence
-  const featuresTranslateX = isDesktop ? Math.max(0, (1 - scrollProgress) * -40) : 0;
-  const featuresOpacity = isDesktop
-    ? Math.min(1, Math.max(0, (scrollProgress - 0.1) * 1.3))
-    : 1;
+  // Features Left Content emergence (100% hidden before scroll, smoothly glides in when scrolling)
+  const featuresTranslateX = isDesktop ? Math.max(0, (0.35 - scrollProgress) * -80) : 0;
+  const featuresTranslateY = isDesktop ? 0 : Math.max(0, (0.25 - scrollProgress) * 40);
+  const featuresOpacity = Math.max(0, Math.min(1, (scrollProgress - 0.08) * 3));
+  const isFeaturesVisible = scrollProgress > 0.06;
+
+  const handleSearchSubmit = (event?: React.FormEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    const trimmed = query.trim();
+    if (trimmed) {
+      router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+    } else {
+      router.push("/search");
+    }
+  };
 
   const handleDashboardClick = () => {
     router.push("/dashboard");
@@ -116,18 +129,19 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
   return (
     <div ref={containerRef} className="w-full relative overflow-hidden max-w-[100vw]">
       
-      {/* 1. HERO SECTION */}
+      {/* 1. HERO SECTION (Perfect Horizontal & Vertical Viewport Centering) */}
       <section
         className="hero"
         id="top"
         style={{
           textAlign: "center",
-          padding: "85px 16px 12px 16px",
+          padding: "24px 16px 24px 16px",
+          minHeight: "calc(100vh - 100px)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           position: "relative",
-          justifyContent: "flex-start",
+          justifyContent: "center",
           overflow: "visible",
           width: "100%",
           maxWidth: "100vw",
@@ -140,18 +154,16 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            maxWidth: "1000px",
+            maxWidth: "820px",
             position: "relative",
             zIndex: 2,
             width: "100%",
             boxSizing: "border-box",
             background: "transparent",
-            width: "100%",
-            maxWidth: "1000px",
-            padding: "0 12px",
+            padding: "0 16px",
           }}
         >
-          {/* Elegant 2-Line Hero Heading (Exact 2-Line Mobile & Desktop Parity) */}
+          {/* Elegant 2-Line Hero Heading */}
           <h1 className="arise-on-scroll arise-delay-1 text-center mb-5 sm:mb-7 select-none px-2">
             <span className="block text-[1.85rem] xs:text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-tight leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] whitespace-nowrap">
               Life is <span className="italic font-light">Smarter</span>
@@ -161,14 +173,11 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
             </span>
           </h1>
 
-          {/* Minimalist Neumorphic / Glassmorphic Capsule Search Bar (Reference: media_1787853301950.png) */}
+          {/* Minimalist Neumorphic / Glassmorphic Capsule Search Bar */}
           <form
             className="searchBox heroSearchBox arise-on-scroll arise-delay-3 relative w-full max-w-xl mx-auto p-1.5 sm:p-2 rounded-full bg-white/[0.88] dark:bg-slate-900/80 backdrop-blur-2xl border border-white/60 dark:border-white/20 shadow-[0_12px_36px_rgba(0,0,0,0.18),0_0_24px_rgba(59,130,246,0.12),inset_0_1px_2px_rgba(255,255,255,0.8)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.2)] flex items-center transition-all duration-300 hover:border-blue-400/50 focus-within:border-blue-500 focus-within:shadow-[0_16px_45px_rgba(59,130,246,0.25),inset_0_1px_2px_rgba(255,255,255,0.9)] group mb-2 overflow-hidden"
             role="search"
-            onSubmit={(event) => {
-              event.preventDefault();
-              document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
-            }}
+            onSubmit={handleSearchSubmit}
           >
             {/* Subtle Diagonal Specular Sheen */}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-60" />
@@ -189,7 +198,7 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
               className="relative z-10 flex-1 min-w-0 bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 text-xs sm:text-sm md:text-base px-1 py-1.5 outline-none font-medium"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search anything..."
+              placeholder="Search stores, clinics, doctors, salons, services..."
             />
 
             {/* Right Vibrant Blue / Azure Circular Action Button */}
@@ -211,59 +220,128 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center relative z-10">
           
-          {/* FEATURES LISTED ON THE LEFT SIDE (High Contrast Frosted Dark Container) */}
+          {/* FEATURES LISTED ON THE LEFT SIDE (100% Hidden before scroll, glides in smoothly when scrolling) */}
           <div
-            className="lg:col-span-5 flex flex-col items-start text-left transition-all duration-700 ease-out w-full p-5 sm:p-7 rounded-3xl bg-slate-950/85 backdrop-blur-2xl border border-white/20 shadow-2xl"
+            className="lg:col-span-5 flex flex-col items-start text-left transition-all duration-500 ease-out w-full p-5 sm:p-7 rounded-3xl bg-slate-950/90 backdrop-blur-2xl border border-white/20 shadow-2xl relative overflow-hidden group/card"
             style={{
-              transform: `translateX(${featuresTranslateX}px)`,
-              opacity: featuresOpacity > 0.05 ? featuresOpacity : 0.2 + scrollProgress * 0.8,
-              pointerEvents: isDesktop && scrollProgress <= 0.15 ? "none" : "auto",
+              transform: isDesktop
+                ? `translateX(${featuresTranslateX}px)`
+                : `translateY(${featuresTranslateY}px)`,
+              opacity: featuresOpacity,
+              visibility: isFeaturesVisible ? "visible" : "hidden",
+              pointerEvents: scrollProgress > 0.15 ? "auto" : "none",
             }}
           >
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-[10px] sm:text-[11px] font-bold text-orange-400 mb-3 uppercase tracking-wider">
-              <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
-              Hyperlocal Infrastructure
+            {/* Ambient Radiant Glow Sweep in the background */}
+            <div className="absolute -top-24 -left-24 w-64 h-64 bg-orange-500/15 rounded-full blur-3xl pointer-events-none group-hover/card:bg-orange-500/25 transition-all duration-700" />
+            <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none group-hover/card:bg-cyan-500/20 transition-all duration-700" />
+
+            {/* Header Badge with Live Radar Pulse */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/40 text-[10px] sm:text-[11px] font-extrabold text-orange-400 mb-3 uppercase tracking-wider shadow-inner">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
+              </span>
+              <span>Hyperlocal Infrastructure</span>
             </div>
 
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-[1.15] mb-3">
-              Local Commerce &amp; Care, <span className="bg-gradient-to-r from-orange-400 to-amber-300 bg-clip-text text-transparent">Wherever You Are</span>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-[1.15] mb-3">
+              Local Commerce &amp; Care,{" "}
+              <span className="bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 bg-clip-text text-transparent drop-shadow-sm">
+                Wherever You Are
+              </span>
             </h2>
 
-            <p className="text-slate-200 text-xs sm:text-sm leading-relaxed mb-5 max-w-lg font-normal">
+            <p className="text-slate-200 text-xs sm:text-sm leading-relaxed mb-4 max-w-lg font-normal">
               Experience your neighborhood with unprecedented speed. From real-time clinic turn alerts to instant home service dispatches and digital passes, everything is just a tap away.
             </p>
 
-            {/* Feature Points on Left Side */}
+            {/* Live Telemetry Ticker Pills */}
+            <div className="grid grid-cols-3 gap-2 w-full mb-4">
+              <div className="p-2 rounded-xl bg-white/[0.04] border border-white/10 flex flex-col items-center justify-center text-center">
+                <div className="flex items-center gap-1 text-[11px] font-black text-emerald-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>140+ Live</span>
+                </div>
+                <div className="text-[10px] text-slate-400 font-medium">Clinic OPDs</div>
+              </div>
+              <div className="p-2 rounded-xl bg-white/[0.04] border border-white/10 flex flex-col items-center justify-center text-center">
+                <div className="flex items-center gap-1 text-[11px] font-black text-amber-400">
+                  <span>⚡ ~12m</span>
+                </div>
+                <div className="text-[10px] text-slate-400 font-medium">Avg Dispatch</div>
+              </div>
+              <div className="p-2 rounded-xl bg-white/[0.04] border border-white/10 flex flex-col items-center justify-center text-center">
+                <div className="flex items-center gap-1 text-[11px] font-black text-cyan-400">
+                  <span>🎁 100%</span>
+                </div>
+                <div className="text-[10px] text-slate-400 font-medium">Cashback Pass</div>
+              </div>
+            </div>
+
+            {/* Feature Points with Interactive Animation on Hover */}
             <div className="flex flex-col gap-2.5 mb-6 w-full">
               {[
-                { title: "Universal Loyalty & Smart Rewards", desc: "Instant reward points credited to your Kynisto digital pass at verified neighborhood stores." },
-                { title: "Live Healthcare & OPD Telemetry", desc: "Real-time doctor turn tracking so you arrive right on time without crowded clinic waiting rooms." },
-                { title: "Verified Home Services & Instant Dispatch", desc: "Book verified electricians, plumbers, and AC repair technicians with guaranteed rates." },
+                {
+                  icon: "💳",
+                  badge: "Smart Pass",
+                  badgeColor: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+                  title: "Universal Loyalty & Smart Rewards",
+                  desc: "Instant reward points credited to your Kynisto digital pass at verified neighborhood stores.",
+                },
+                {
+                  icon: "🩺",
+                  badge: "Live Telemetry",
+                  badgeColor: "text-cyan-400 bg-cyan-500/10 border-cyan-500/30",
+                  title: "Live Healthcare & OPD Telemetry",
+                  desc: "Real-time doctor turn tracking so you arrive right on time without crowded clinic waiting rooms.",
+                },
+                {
+                  icon: "🛠️",
+                  badge: "Instant Dispatch",
+                  badgeColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+                  title: "Verified Home Services & Instant Dispatch",
+                  desc: "Book verified electricians, plumbers, and AC repair technicians with guaranteed rates.",
+                },
               ].map((feat, idx) => (
-                <div key={idx} className="flex items-start gap-3 p-3 rounded-2xl bg-white/[0.05] border border-white/10 hover:border-orange-500/30 transition-colors">
-                  <span className="w-6 h-6 rounded-xl bg-orange-500/20 text-orange-400 font-black flex items-center justify-center text-xs flex-shrink-0 mt-0.5 shadow-sm">
+                <div
+                  key={idx}
+                  className="group/feat flex items-start gap-3 p-3.5 rounded-2xl bg-white/[0.05] border border-white/10 hover:border-orange-500/50 hover:bg-white/[0.08] hover:translate-x-1 transition-all duration-300 cursor-default"
+                >
+                  <span className="w-7 h-7 rounded-xl bg-orange-500/20 border border-orange-500/40 text-orange-400 font-black flex items-center justify-center text-xs flex-shrink-0 mt-0.5 shadow-sm group-hover/feat:bg-orange-500 group-hover/feat:text-white transition-colors">
                     ✓
                   </span>
-                  <div>
-                    <div className="font-bold text-white text-xs sm:text-sm">{feat.title}</div>
-                    <div className="text-[11px] sm:text-xs text-slate-300 mt-0.5 leading-relaxed font-normal">{feat.desc}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-white text-xs sm:text-sm group-hover/feat:text-orange-200 transition-colors">
+                        {feat.title}
+                      </span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${feat.badgeColor} shrink-0 hidden sm:inline-block`}>
+                        {feat.badge}
+                      </span>
+                    </div>
+                    <div className="text-[11px] sm:text-xs text-slate-300 mt-0.5 leading-relaxed font-normal">
+                      {feat.desc}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
 
+            {/* Action CTAs with Glow and Hover Shimmer */}
             <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
               <Link
                 href="/services"
-                className="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs sm:text-sm shadow-lg shadow-orange-500/25 transition-all"
+                className="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs sm:text-sm shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 active:scale-95 transition-all"
               >
                 Explore Home Services
               </Link>
               <Link
                 href="/healthcare"
-                className="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-white/20 font-bold text-xs sm:text-sm transition-all"
+                className="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/25 text-white font-bold text-xs sm:text-sm shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5"
               >
-                ⚡ Live Healthcare Hub →
+                <span>⚡ Live Healthcare Hub</span>
+                <span className="text-orange-400">→</span>
               </Link>
             </div>
           </div>
@@ -416,11 +494,7 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
                   
                   {/* Search Bar with Live Execution */}
                   <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
-                    }}
+                    onSubmit={handleSearchSubmit}
                     onClick={(e) => e.stopPropagation()}
                     className="relative w-full"
                   >

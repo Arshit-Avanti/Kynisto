@@ -126,7 +126,7 @@ export function StoreActions({ store }: { store: StoreActionData }) {
       <button className="glass-button shimmer" style={{ ...actionStyle(), opacity: store.hasOwner ? 1 : 0.6 }} type="button" disabled={!store.hasOwner} onClick={() => void startChat()}>
         <ChatIcon /> {store.hasOwner ? "Message" : "Chat unavailable"}
       </button>
-      {store.categoryModule === "healthcare" && store.queueEnabled && <Link className="glass-button shimmer" style={actionStyle()} href={`/healthcare?provider=${encodeURIComponent(store.id)}`}><QueueIcon /> Join Queue</Link>}
+      {store.categoryModule === "healthcare" && store.queueEnabled && <Link className="glass-button shimmer" style={actionStyle()} href={`/healthcare?storeId=${encodeURIComponent(store.id)}&action=join`}><QueueIcon /> Join Live Queue</Link>}
       <button className="glass-button shimmer" style={actionStyle()} type="button" onClick={() => setReviewing((value) => !value)}>
         <EditIcon /> Review
       </button>

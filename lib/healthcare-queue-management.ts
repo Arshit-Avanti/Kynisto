@@ -2,8 +2,9 @@ import { getD1 } from "@/db/runtime";
 import { indiaServiceDate, invalidateHealthcareCache, isQueueEligibleHealthcareType, QUEUE_ENTRY_TTL_SECONDS, requireHealthcareStore, resetQueueForNewDay } from "@/lib/healthcare";
 import { HttpError } from "@/lib/security";
 
-export const QUEUE_OPERATIONS = ["open", "pause", "resume", "close", "reset", "call_next", "recall", "skip", "complete", "remove", "add_walk_in", "add_emergency", "mark_arrived", "mark_no_show", "start_consultation"] as const;
+export const QUEUE_OPERATIONS = ["open", "pause", "resume", "close", "reset", "call_next", "call_patient", "recall", "skip", "complete", "remove", "add_walk_in", "add_emergency", "mark_arrived", "mark_no_show", "start_consultation"] as const;
 export type QueueOperation = (typeof QUEUE_OPERATIONS)[number];
+
 
 export function isQueueOperation(value: unknown): value is QueueOperation {
   return typeof value === "string" && QUEUE_OPERATIONS.includes(value as QueueOperation);
@@ -218,6 +219,35 @@ export async function operateHealthcareQueue(options: {
     await db.batch(statements);
     return { ok: true, called: next };
   }
+
+  if (action === "call_patient") {
+    const entryId = options.entryId;
+    if (!entryId) throw new HttpError(400, "Patient entry is required.", "MISSING_ENTRY_ID");
+    const settings = await db.prepare("SELECT status FROM healthcare_queue_settings WHERE store_id = ?").bind(storeId).first<{ status: string }>();
+    if (settings?.status !== "open") throw new HttpError(409, "Open or resume the queue before calling a patient.", "QUEUE_NOT_OPEN");
+
+    const target = await db.prepare(`SELECT id, user_id AS userId, token_number AS tokenNumber, status, is_emergency AS isEmergency, is_walk_in AS isWalkIn
+      FROM healthcare_queue_entries WHERE id = ? AND store_id = ? AND service_date = ? AND status = 'waiting' LIMIT 1`)
+      .bind(entryId, storeId, today).first<{ id: string; userId: string; tokenNumber: number; status: string; isEmergency: number; isWalkIn: number }>();
+    if (!target) throw new HttpError(404, "Patient not found or not in waiting status.", "QUEUE_ENTRY_NOT_FOUND");
+
+    // If another patient was previously called (but not in consultation), reset them back to waiting
+    await db.prepare("UPDATE healthcare_queue_entries SET status = 'waiting', updated_at = ? WHERE store_id = ? AND service_date = ? AND status = 'called' AND id <> ?")
+      .bind(now, storeId, today, target.id).run().catch(() => {});
+
+    const statements: D1PreparedStatement[] = [
+      db.prepare("UPDATE healthcare_queue_entries SET status = 'called', called_at = ?, updated_at = ? WHERE id = ?").bind(now, now, target.id),
+      db.prepare("UPDATE healthcare_queue_settings SET current_token_number = ?, updated_by = ?, updated_at = ? WHERE store_id = ?").bind(target.tokenNumber, actorId, now, storeId),
+      db.prepare("INSERT INTO healthcare_queue_events (id, store_id, entry_id, actor_id, event_type, metadata, created_at) VALUES (?, ?, ?, ?, 'called', ?, ?)").bind(crypto.randomUUID(), storeId, target.id, actorId, JSON.stringify({ tokenNumber: target.tokenNumber }), now),
+    ];
+    if (!target.isEmergency && !target.isWalkIn) {
+      statements.push(db.prepare("INSERT INTO notifications (id, user_id, audience, type, title, message, link, created_at) VALUES (?, ?, 'user', 'queue', '🚨 Your Turn Has Arrived!', ?, '/healthcare', ?)")
+        .bind(crypto.randomUUID(), target.userId, `Token #${target.tokenNumber} is now being called at ${provider.name}! Please enter the consultation room / counter immediately.`, now));
+    }
+    await db.batch(statements);
+    return { ok: true, called: target };
+  }
+
 
   if (action === "mark_arrived") {
     const entryId = options.entryId;

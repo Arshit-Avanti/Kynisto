@@ -30,11 +30,16 @@ export function OwnerHealthcareQRCard() {
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
+  const [isEditingCode, setIsEditingCode] = useState(false);
+  const [customCodeInput, setCustomCodeInput] = useState("");
+  const [savingCode, setSavingCode] = useState(false);
+  const [codeMsg, setCodeMsg] = useState<{ text: string; error?: boolean } | null>(null);
 
   useEffect(() => {
     apiFetch<QrOwnerData>("/api/healthcare/qr/owner")
       .then((res) => {
         setData(res);
+        setCustomCodeInput(res?.qr?.queueCode || "");
         setLoading(false);
       })
       .catch(() => {
@@ -59,6 +64,28 @@ export function OwnerHealthcareQRCard() {
     }
   };
 
+  const handleSaveCustomCode = async () => {
+    if (!data || savingCode) return;
+    const clean = customCodeInput.trim();
+    if (!clean) return;
+    setSavingCode(true);
+    setCodeMsg(null);
+    try {
+      const res = await apiFetch<{ ok: boolean; qr: QrOwnerData["qr"] }>("/api/healthcare/qr/owner", {
+        method: "POST",
+        json: { queueCode: clean },
+      });
+      setData((current) => current ? { ...current, qr: res.qr } : current);
+      setIsEditingCode(false);
+      setCodeMsg({ text: "✓ Custom queue code saved successfully!" });
+    } catch (err: any) {
+      setCodeMsg({ text: err instanceof Error ? err.message : "Failed to update code.", error: true });
+    } finally {
+      setSavingCode(false);
+    }
+  };
+
+
   if (loading) {
     return (
       <div className="dashCard" style={{ padding: "1.5rem", textAlign: "center" }}>
@@ -81,10 +108,55 @@ export function OwnerHealthcareQRCard() {
           <span style={{ color: "#2563eb", fontSize: "0.85rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
             Permanent Healthcare QR Identity
           </span>
-          <h3 style={{ fontSize: "1.35rem", fontWeight: 800, color: "#0f172a", marginTop: "0.2rem" }}>
-            Clinic Queue Code: <code style={{ background: "#eff6ff", color: "#1d4ed8", padding: "0.2rem 0.6rem", borderRadius: "8px", fontFamily: "monospace" }}>{qr.queueCode}</code>
-          </h3>
-          <p style={{ color: "#64748b", fontSize: "0.9rem", marginTop: "0.25rem" }}>
+          
+          {isEditingCode ? (
+            <div style={{ marginTop: "0.5rem", display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+              <span style={{ fontSize: "0.9rem", color: "#64748b", fontWeight: 600 }}>kynisto.in/q/</span>
+              <input
+                type="text"
+                value={customCodeInput}
+                onChange={(e) => setCustomCodeInput(e.target.value)}
+                placeholder="e.g. aarogya-clinic"
+                style={{ padding: "0.4rem 0.75rem", borderRadius: "8px", border: "1.5px solid #2563eb", fontSize: "0.95rem", fontFamily: "monospace", outline: "none" }}
+              />
+              <button
+                type="button"
+                disabled={savingCode || !customCodeInput.trim()}
+                onClick={handleSaveCustomCode}
+                style={{ padding: "0.45rem 0.9rem", borderRadius: "8px", background: "#2563eb", color: "#fff", border: "none", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}
+              >
+                {savingCode ? "Saving…" : "Save Custom Code"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setIsEditingCode(false); setCustomCodeInput(qr.queueCode); }}
+                style={{ padding: "0.45rem 0.75rem", borderRadius: "8px", background: "#f1f5f9", color: "#475569", border: "none", fontWeight: 600, fontSize: "0.85rem", cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginTop: "0.2rem", flexWrap: "wrap" }}>
+              <h3 style={{ fontSize: "1.35rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>
+                Clinic Code: <code style={{ background: "#eff6ff", color: "#1d4ed8", padding: "0.2rem 0.6rem", borderRadius: "8px", fontFamily: "monospace" }}>{qr.queueCode}</code>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsEditingCode(true)}
+                style={{ padding: "0.25rem 0.6rem", borderRadius: "6px", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8rem", fontWeight: 700, color: "#2563eb", cursor: "pointer" }}
+              >
+                ✏️ Customize Code
+              </button>
+            </div>
+          )}
+
+          {codeMsg && (
+            <p style={{ fontSize: "0.85rem", marginTop: "0.4rem", color: codeMsg.error ? "#dc2626" : "#16a34a", fontWeight: 600 }}>
+              {codeMsg.text}
+            </p>
+          )}
+
+          <p style={{ color: "#64748b", fontSize: "0.9rem", marginTop: "0.35rem" }}>
             Permanent QR link: <a href={qrUrl} target="_blank" rel="noreferrer" style={{ color: "#2563eb", textDecoration: "underline", fontWeight: 600 }}>{qrUrl}</a>
           </p>
         </div>
@@ -109,6 +181,7 @@ export function OwnerHealthcareQRCard() {
       </div>
 
       <hr style={{ border: "none", borderTop: "1px dashed #cbd5e1", margin: "1.25rem 0" }} />
+
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem", alignItems: "center" }}>
         {/* QR Code Graphic Display */}

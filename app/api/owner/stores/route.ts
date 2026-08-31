@@ -30,10 +30,38 @@ export async function POST(request: Request) {
     const db = getD1();
     const now = Math.floor(Date.now() / 1000);
     const autoApprove = await systemBoolean("owner_auto_approval", false);
-    const status = autoApprove ? "approved" : "pending";
     const storeId = crypto.randomUUID();
-    const slug = `${slugify(input.name)}-${crypto.randomUUID().slice(0, 6)}`;
+    let customSlug = body.slug ? slugify(String(body.slug)) : "";
+    let slug = customSlug;
+    if (customSlug) {
+      if (customSlug.length < 2 || customSlug.length > 80) {
+        throw new HttpError(400, "Store handle must be between 2 and 80 alphanumeric characters.", "INVALID_SLUG");
+      }
+      const existingCustom = await db.prepare("SELECT 1 FROM stores WHERE slug = ?").bind(customSlug).first();
+      if (existingCustom) {
+        throw new HttpError(409, "This store handle / URL code is already taken. Please choose another unique handle.", "SLUG_TAKEN");
+      }
+    } else {
+
+      let baseSlug = slugify(input.name) || "store";
+      const existing = await db.prepare("SELECT 1 FROM stores WHERE slug = ?").bind(baseSlug).first();
+      slug = baseSlug;
+      if (existing) {
+        const areaTag = slugify(input.area || input.city || "");
+        if (areaTag && !baseSlug.includes(areaTag)) {
+          slug = `${baseSlug}-${areaTag}`;
+        } else {
+          slug = `${baseSlug}-${Math.floor(100 + Math.random() * 900)}`;
+        }
+        const existingArea = await db.prepare("SELECT 1 FROM stores WHERE slug = ?").bind(slug).first();
+        if (existingArea) {
+          slug = `${slug}-${Math.floor(10 + Math.random() * 90)}`;
+        }
+      }
+    }
+
     const logoUrl = cleanText(body.logoUrl, "Logo URL", { max: 500, required: false }) || null;
+
     const bannerUrl = cleanText(body.bannerUrl, "Banner URL", { max: 500, required: false }) || null;
 
     await db.batch([
@@ -172,7 +200,23 @@ export async function PATCH(request: Request) {
         storeId,
         session.user.id,
       )
+
       .run();
+
+    const customSlug = body.slug ? slugify(String(body.slug)) : "";
+    if (customSlug) {
+      if (customSlug.length < 2 || customSlug.length > 80) {
+        throw new HttpError(400, "Store handle must be between 2 and 80 alphanumeric characters.", "INVALID_SLUG");
+      }
+      const existingSlug = await db.prepare("SELECT id FROM stores WHERE slug = ? AND id <> ?").bind(customSlug, storeId).first();
+      if (existingSlug) {
+        throw new HttpError(409, "This store handle / URL code is already taken. Please choose another unique handle.", "SLUG_TAKEN");
+      }
+      await db.prepare("UPDATE stores SET slug = ? WHERE id = ? AND owner_id = ?").bind(customSlug, storeId, session.user.id).run();
+      // Sync permanent healthcare QR queue code if present
+      await db.prepare("UPDATE permanent_healthcare_qr_ids SET queue_code = ? WHERE store_id = ?").bind(customSlug, storeId).run().catch(() => {});
+    }
+
 
     if (input.businessType === "Home Service Business") {
       const priceFrom = Number(body.startingPrice ?? body.priceFrom ?? 299);

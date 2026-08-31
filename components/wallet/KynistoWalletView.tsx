@@ -8,6 +8,8 @@ import {
   Coins, CreditCard, ChevronRight, Zap, Info 
 } from 'lucide-react';
 import { apiFetch } from '@/lib/client-api';
+import { saveQueueSession } from '@/lib/queue-persistence';
+
 
 interface KynistoPointsHistory {
   id: string;
@@ -277,7 +279,20 @@ export default function KynistoWalletView() {
           kynistoPointsEarned: res.kynistoPointsEarned,
           storePointsEarned: res.storePointsEarned,
           storeName: res.storeName,
+          isHealthcare: res.isHealthcare,
+          tokenNumber: res.tokenNumber,
+          queueCode: res.queueCode,
+          redirectUrl: res.redirectUrl,
         });
+        if (res.isHealthcare && res.storeId && res.tokenNumber) {
+          saveQueueSession({
+            storeId: res.storeId,
+            storeName: res.storeName,
+            tokenNumber: res.tokenNumber,
+            joinedAt: Date.now(),
+            queueCode: res.queueCode,
+          });
+        }
         setQrInputToken("");
         stopCamera();
         await fetchWalletData();
@@ -290,6 +305,7 @@ export default function KynistoWalletView() {
       setScanning(false);
     }
   };
+
 
   const handleRedeemKynistoPoints = async () => {
     if (!walletData || walletData.kynistoPoints.total < 1000) return;
@@ -951,12 +967,32 @@ export default function KynistoWalletView() {
                 <div className="flex items-center gap-2 text-base font-black text-emerald-400">
                   <CheckCircle2 className="h-6 w-6" /> {scanResult.storeName} Scan Verified!
                 </div>
+                {scanResult.isHealthcare && (
+                  <div className="bg-emerald-950/80 p-3.5 rounded-xl border border-emerald-500/50 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs uppercase tracking-wider text-emerald-400 font-extrabold">Live Healthcare Pass</span>
+                      <span className="bg-emerald-500 text-white text-xs font-black px-2.5 py-0.5 rounded-full">Active</span>
+                    </div>
+                    <div className="text-2xl font-black text-white">Token #{scanResult.tokenNumber}</div>
+                    <p className="text-xs text-emerald-200 font-medium">{scanResult.message}</p>
+                    {scanResult.redirectUrl && (
+                      <a
+                        href={scanResult.redirectUrl}
+                        className="inline-flex items-center justify-center gap-2 w-full py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-xs shadow-md transition-all cursor-pointer"
+                      >
+                        <span>View Live Ticket Online</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+                  </div>
+                )}
                 <div className="bg-slate-950/60 p-3 rounded-xl space-y-1 text-xs font-extrabold">
                   <div className="text-indigo-400">✨ +{scanResult.kynistoPointsEarned} Kynisto Points</div>
                   <div className="text-emerald-400">🏪 +{scanResult.storePointsEarned} Store Loyalty Points</div>
                 </div>
               </div>
             )}
+
 
             {scanResult?.error && (
               <div className="mb-4 p-4 rounded-2xl bg-rose-500/20 border border-rose-500 text-rose-300 font-bold text-xs">

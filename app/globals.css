@@ -4819,3 +4819,57 @@ html, body {
     opacity: 1;
   }
 }
+
+/* Hyperlocal Animated Card & Glow Keyframes */
+@keyframes pulse-radar {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(249, 115, 22, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
+  }
+}
+
+@keyframes float-subtle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-pulse-radar {
+  animation: pulse-radar 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.animate-float-subtle {
+  animation: float-subtle 4s ease-in-out infinite;
+}
+
+.animate-shimmer-sweep {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer-sweep 3s infinite;
+}
+
+.font-cormorant {
+  font-family: 'Cormorant Garamond', Georgia, Cambria, 'Times New Roman', Times, serif;
+}
+
+

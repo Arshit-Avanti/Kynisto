@@ -328,8 +328,18 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
             {isWaiting && (
               <button onClick={() => void action("skip", { entryId: entry.id })} disabled={Boolean(busy)}>Skip</button>
             )}
-            {/* No-show */}
-            {(isWaiting || isCalling) && (
+            {/* Call button for waiting patients */}
+            {isWaiting && (
+              <button
+                onClick={() => void action("call_patient", { entryId: entry.id })}
+                disabled={Boolean(busy)}
+                className="portalButtonSm primary"
+                style={{ background: "#2563eb", color: "#ffffff", fontWeight: 700 }}
+                title="Call this patient to the counter"
+              >Call</button>
+            )}
+            {/* No-show for called patients */}
+            {isCalling && (
               <button
                 onClick={() => void action("mark_no_show", { entryId: entry.id })}
                 disabled={Boolean(busy)}
@@ -341,6 +351,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
             {(isWaiting || isCalling || isInConsultation) && (
               <button className="dangerButton" onClick={() => void action("remove", { entryId: entry.id })} disabled={Boolean(busy)}>Remove</button>
             )}
+
           </div>
         </article>
       );

@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { requireApiSession } from "@/lib/auth";
 import { getD1 } from "@/db/runtime";
+import { syncOrJoinHealthcareQueueByQr } from "@/lib/healthcare-qr";
+import { HttpError } from "@/lib/security";
+
 
 async function ensureLoyaltyTables() {
   try {
@@ -115,6 +118,79 @@ export async function POST(request: Request) {
     const d1 = getD1();
     const now = Math.floor(Date.now() / 1000);
 
+    // 0. Detect and process Healthcare QR Codes (e.g. HC_XXXXXXXX, /q/HC_..., or healthcare store identifiers)
+    let possibleQueueCode = "";
+    if (/^HC_[A-Za-z0-9]+/i.test(rawToken)) {
+      possibleQueueCode = rawToken.toUpperCase();
+    } else {
+      const qrMatch = rawToken.match(/(?:q|queue\/clinic)\/([A-Za-z0-9_]+)/i);
+      if (qrMatch && qrMatch[1]) {
+        possibleQueueCode = qrMatch[1].toUpperCase();
+      }
+    }
+
+    if (!possibleQueueCode && cleanedSlugOrId) {
+      // Check if cleanedSlugOrId belongs to a healthcare store or queue record
+      const isHc = await d1.prepare(`SELECT q.queue_code AS qc FROM permanent_healthcare_qr_ids q
+        JOIN stores s ON s.id = q.store_id
+        JOIN categories c ON c.id = s.category_id
+        WHERE (s.id = ? OR s.slug = ? OR UPPER(q.queue_code) = UPPER(?)) AND c.module = 'healthcare' LIMIT 1`)
+        .bind(cleanedSlugOrId, cleanedSlugOrId, cleanedSlugOrId)
+        .first<{ qc: string }>();
+      if (isHc?.qc) {
+        possibleQueueCode = isHc.qc;
+      }
+    }
+
+    if (possibleQueueCode) {
+      try {
+        const hcResult = await syncOrJoinHealthcareQueueByQr(
+          possibleQueueCode,
+          session.user.id,
+          session.user.name,
+          (session.user as any).phone,
+          {
+            platform: "app",
+            arrivalStatus: "arrived",
+            markArrived: true,
+          }
+        );
+
+        // Award standard visit loyalty reward
+        const storeLoyalty = await d1.prepare("SELECT reward_points_per_scan FROM store_loyalty_settings WHERE store_id = ?").bind(hcResult.record.storeId).first<{ reward_points_per_scan: number }>();
+        const pointsEarned = storeLoyalty?.reward_points_per_scan || 50;
+
+        try {
+          await d1.prepare(`INSERT INTO kynisto_wallets (user_id, kynisto_points, updated_at)
+            VALUES (?, 10, ?) ON CONFLICT(user_id) DO UPDATE SET kynisto_points = kynisto_points + 10, updated_at = ?`)
+            .bind(session.user.id, now, now).run();
+
+          await d1.prepare(`INSERT INTO store_loyalty_points (id, user_id, store_id, points, last_visited_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(user_id, store_id) DO UPDATE SET points = points + ?, last_visited_at = ?, updated_at = ?`)
+            .bind(`sl_${session.user.id}_${hcResult.record.storeId}`, session.user.id, hcResult.record.storeId, pointsEarned, now, now, pointsEarned, now, now).run();
+        } catch { /* ignore loyalty points background err */ }
+
+        return NextResponse.json({
+          success: true,
+          isHealthcare: true,
+          queueCode: hcResult.record.queueCode,
+          storeId: hcResult.record.storeId,
+          storeName: hcResult.record.storeName,
+          tokenNumber: hcResult.tokenNumber,
+          alreadyJoined: hcResult.alreadyJoined,
+          message: hcResult.message,
+          queueState: hcResult.queueState,
+          kynistoPointsEarned: 10,
+          storePointsEarned: pointsEarned,
+          redirectUrl: `/q/${hcResult.record.queueCode}`,
+        });
+      } catch (hcErr: any) {
+        if (hcErr instanceof HttpError && hcErr.code !== "INVALID_QUEUE_CODE") {
+          return NextResponse.json({ error: hcErr.message }, { status: hcErr.status });
+        }
+      }
+    }
+
     // 1. Find store loyalty settings by qr_code_token, store ID, or store slug
     let storeSettings = await d1.prepare(`
       SELECT sls.*, s.name as store_name
@@ -128,6 +204,7 @@ export async function POST(request: Request) {
          OR ? = ('KYNISTO_LOYALTY_' || sls.store_id)
          OR ? = ('KYNISTO_LOYALTY_' || sls.store_id)
     `).bind(rawToken, rawToken, cleanedSlugOrId, rawToken, cleanedSlugOrId, rawToken, cleanedSlugOrId).first<any>();
+
 
     // Fallback: If no custom loyalty settings row exists yet for this store ID/slug, initialize default settings for a valid store
     if (!storeSettings) {

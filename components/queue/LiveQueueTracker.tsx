@@ -1,57 +1,153 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef, useMemo, startTransition } from 'react';
-import { Clock, MapPin, AlertCircle, XCircle, CheckCircle2, Navigation, User, Phone, Bell, ArrowLeft, Search, Building2, Stethoscope, Activity, Sparkles, Filter, ChevronRight, Lock, RefreshCw, AlertTriangle, PartyPopper, Calendar } from 'lucide-react';
+import { Clock, MapPin, AlertCircle, XCircle, CheckCircle2, Navigation, User, Phone, Bell, ArrowLeft, Search, Building2, Stethoscope, Activity, Sparkles, Filter, ChevronRight, Lock, RefreshCw, AlertTriangle, PartyPopper, Calendar, QrCode } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/client-api';
 import { PushNotificationManager } from '@/components/ui/PushNotificationManager';
 import { AppointmentBooking } from '@/components/queue/AppointmentBooking';
+import { ClinicQrModal } from '@/components/queue/ClinicQrModal';
+import { UniversalHealthcareQrScanner } from '@/components/queue/UniversalHealthcareQrScanner';
 import { Navbar3D } from '@/components/landing/Navbar3D';
+import { saveQueueSession, clearQueueSession } from '@/lib/queue-persistence';
+
+
+
 
 let _cachedAudioCtx: AudioContext | null = null;
 let _lastChimeTime = 0;
 
-function playTurnArrivalChime() {
-  if (typeof window === "undefined") return;
-  const now = Date.now();
-  if (now - _lastChimeTime < 2500) return; // Prevent spamming within 2.5s
-  _lastChimeTime = now;
-
+function getAudioContext(): AudioContext | null {
+  if (typeof window === "undefined") return null;
   try {
-    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
-    if (!AudioContextClass) return;
+    const AudioContextClass =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return null;
     if (!_cachedAudioCtx || _cachedAudioCtx.state === "closed") {
       _cachedAudioCtx = new AudioContextClass();
     }
-    const ctx = _cachedAudioCtx;
-    if (ctx.state === "suspended") {
+    if (_cachedAudioCtx.state === "suspended") {
+      _cachedAudioCtx.resume().catch(() => {});
+    }
+    return _cachedAudioCtx;
+  } catch {
+    return null;
+  }
+}
+
+// Auto-unlock Web Audio on first user interaction for background step chimes
+if (typeof window !== "undefined") {
+  const unlockAudio = () => {
+    const ctx = getAudioContext();
+    if (ctx && ctx.state === "suspended") {
       ctx.resume().catch(() => {});
     }
-    
+    window.removeEventListener("pointerdown", unlockAudio);
+    window.removeEventListener("touchstart", unlockAudio);
+    window.removeEventListener("click", unlockAudio);
+    window.removeEventListener("keydown", unlockAudio);
+  };
+  window.addEventListener("pointerdown", unlockAudio, { passive: true });
+  window.addEventListener("touchstart", unlockAudio, { passive: true });
+  window.addEventListener("click", unlockAudio, { passive: true });
+  window.addEventListener("keydown", unlockAudio, { passive: true });
+}
+
+function playQueueJoinedChime() {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(523.25, now);
+    gain1.gain.setValueAtTime(0.3, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.35);
+
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(783.99, now + 0.15);
+    gain2.gain.setValueAtTime(0.35, now + 0.15);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.15);
+    osc2.stop(now + 0.65);
+  } catch { /* ignore */ }
+}
+
+function playQueueStepChime() {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  const nowMs = Date.now();
+  if (nowMs - _lastChimeTime < 1500) return;
+  _lastChimeTime = nowMs;
+  try {
+    const now = ctx.currentTime;
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = "triangle";
+    osc1.frequency.setValueAtTime(587.33, now);
+    gain1.gain.setValueAtTime(0.28, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.25);
+
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(739.99, now + 0.12);
+    gain2.gain.setValueAtTime(0.32, now + 0.12);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.12);
+    osc2.stop(now + 0.55);
+  } catch { /* ignore */ }
+}
+
+function playTurnArrivalChime() {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  const nowMs = Date.now();
+  if (nowMs - _lastChimeTime < 2500) return; // Prevent spamming within 2.5s
+  _lastChimeTime = nowMs;
+
+  try {
+    const now = ctx.currentTime;
     // Tone 1: High Bell (E5 - 659.25Hz)
     const osc1 = ctx.createOscillator();
     const gain1 = ctx.createGain();
     osc1.type = "sine";
-    osc1.frequency.setValueAtTime(659.25, ctx.currentTime);
-    gain1.gain.setValueAtTime(0.4, ctx.currentTime);
-    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    osc1.frequency.setValueAtTime(659.25, now);
+    gain1.gain.setValueAtTime(0.4, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
     osc1.connect(gain1);
     gain1.connect(ctx.destination);
-    osc1.start(ctx.currentTime);
-    osc1.stop(ctx.currentTime + 0.5);
+    osc1.start(now);
+    osc1.stop(now + 0.5);
 
     // Tone 2: Warm Low Chime (C5 - 523.25Hz)
     const osc2 = ctx.createOscillator();
     const gain2 = ctx.createGain();
     osc2.type = "sine";
-    osc2.frequency.setValueAtTime(523.25, ctx.currentTime + 0.2);
-    gain2.gain.setValueAtTime(0.45, ctx.currentTime + 0.2);
-    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+    osc2.frequency.setValueAtTime(523.25, now + 0.2);
+    gain2.gain.setValueAtTime(0.45, now + 0.2);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
     osc2.connect(gain2);
     gain2.connect(ctx.destination);
-    osc2.start(ctx.currentTime + 0.2);
-    osc2.stop(ctx.currentTime + 0.9);
+    osc2.start(now + 0.2);
+    osc2.stop(now + 0.9);
   } catch (e) {
     console.warn("Audio chime notice:", e);
   }
@@ -233,8 +329,9 @@ export default function LiveQueueTracker() {
   const [entryStatus, setEntryStatus] = useState<'waiting' | 'called' | 'in_consultation' | 'completed' | 'cancelled' | 'left' | 'no_show' | 'expired'>('waiting');
   const [currentEntryId, setCurrentEntryId] = useState<string | null>(null);
   const [liveCompleted, setLiveCompleted] = useState<boolean>(false);
-  const [isTurnDismissed, setIsTurnDismissed] = useState<boolean>(false);
   const prevEntryStatusRef = useRef<string | null>(null);
+  const notifiedTurnEntriesRef = useRef<Set<string>>(new Set());
+  const notifiedPositionsRef = useRef<Map<string, number>>(new Map());
   
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -244,9 +341,16 @@ export default function LiveQueueTracker() {
   const [isCancelled, setIsCancelled] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isJoining, setIsJoining] = useState(false);
+  const [isTurnDismissed, setIsTurnDismissed] = useState(false);
 
   // Appointment booking modal state
   const [bookingTarget, setBookingTarget] = useState<{ id: string; name: string; allowAppointments?: boolean } | null>(null);
+
+  // Clinic QR modal state
+  const [qrTarget, setQrTarget] = useState<{ id: string; name: string; slug?: string } | null>(null);
+  const [showUniversalScanner, setShowUniversalScanner] = useState(false);
+
+
 
   // Throttled / Debounced search input handler to keep responsiveness < 15ms
   useEffect(() => {
@@ -334,17 +438,39 @@ export default function LiveQueueTracker() {
         setCurrentToken(curr);
         
         if (state.entry) {
-          if (state.entry.status === 'waiting' || state.entry.status === 'called') {
+          const entryId = String(state.entry.id);
+          const newStatus = state.entry.status;
+          const newPos = state.entry.position || 1;
+
+          if (newStatus === 'waiting' || newStatus === 'called' || newStatus === 'in_consultation') {
+            if (newStatus === 'called') {
+              if (!notifiedTurnEntriesRef.current.has(entryId)) {
+                notifiedTurnEntriesRef.current.add(entryId);
+                playTurnArrivalChime();
+                if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+                  try { navigator.vibrate([300, 150, 300, 150, 600]); } catch {}
+                }
+              }
+            } else if (newStatus === 'waiting' && newPos > 0) {
+              const lastPos = notifiedPositionsRef.current.get(entryId);
+              if (lastPos !== undefined && newPos < lastPos) {
+                playQueueStepChime();
+                if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+                  try { navigator.vibrate([60, 40, 60]); } catch {}
+                }
+              }
+              notifiedPositionsRef.current.set(entryId, newPos);
+            }
+
             setEntryStatus(state.entry.status);
             setCurrentEntryId(state.entry.id);
             currentEntryIdRef.current = state.entry.id;
             prevEntryStatusRef.current = state.entry.status;
-            const pos = state.entry.position || 1;
-            setUserPosition(pos);
+            setUserPosition(newPos);
             setMyTokenNumber(state.entry.tokenNumber);
-            setTotalInQueue(Math.max(1, state.waitingCount || pos));
+            setTotalInQueue(Math.max(1, state.waitingCount || newPos));
             const ownerConsultationMins = state.consultationMinutes || 15;
-            setEstimatedWait(pos > 1 ? (pos - 1) * ownerConsultationMins : 0);
+            setEstimatedWait(newPos > 1 ? (newPos - 1) * ownerConsultationMins : 0);
           } else if (state.entry.status === 'completed') {
             setEntryStatus('completed');
             setLiveCompleted(true);
@@ -354,6 +480,8 @@ export default function LiveQueueTracker() {
                 icon: "/icons/icon-192x192.png",
               });
             }
+          } else if (state.entry.status === 'no_show') {
+            setEntryStatus('no_show');
           } else {
             setEntryStatus(state.entry.status);
           }
@@ -376,36 +504,215 @@ export default function LiveQueueTracker() {
     }
   }, [myTokenNumber]);
 
-  // 3. Auto-detect user's active joined queue in database on load
+  // Handle Joining Live Queue (Sub-10ms Optimistic Transition + Background Sync)
+  const handleJoinQueue = useCallback(async (item: HealthcareQueueItem) => {
+    setErrorMsg(null);
+    notifiedTokenRef.current = null;
+
+    const ownerEnabled = item.ownerQueueEnabled === 1 || item.ownerQueueEnabled === true;
+    const adminEnabled = item.adminQueueEnabled === 1 || item.adminQueueEnabled === true;
+    const accepting = item.acceptingPatients === 1 || item.acceptingPatients === true || item.acceptingPatients === undefined;
+    const hasLiveQueue = ownerEnabled && adminEnabled && item.queueStatus !== 'no_queue';
+    const isClosedNow = !hasLiveQueue || !accepting || item.queueStatus === 'closed' || item.queueStatus === 'paused';
+
+    if (isClosedNow) {
+      setErrorMsg(`The live queue for ${item.name} is currently closed by the clinic.`);
+      return;
+    }
+
+    // 1. Instant Optimistic State Commit (< 2ms) - Zero Delay Transition
+    const optPos = (item.waitingCount || 0) + 1;
+    const optToken = item.currentTokenNumber ? (item.currentTokenNumber + optPos) : optPos;
+    const ownerConsultationMins = item.consultationMinutes || 15;
+    const optWait = optPos > 1 ? (optPos - 1) * ownerConsultationMins : 0;
+
+    setSelectedQueue(item);
+    selectedQueueRef.current = item;
+    setCurrentEntryId(null);
+    currentEntryIdRef.current = null;
+    prevEntryStatusRef.current = 'waiting';
+    entryStatusRef.current = 'waiting';
+    setEntryStatus('waiting');
+    setLiveCompleted(false);
+    setIsCancelled(false);
+    setIsLate(false);
+    setIsTurnDismissed(false);
+    lastStateSignatureRef.current = "";
+
+    setMyTokenNumber(optToken);
+    setUserPosition(optPos);
+    setTotalInQueue(Math.max(1, optPos));
+    setEstimatedWait(optWait);
+    setIsQueueOpen(true);
+    setView('ticket');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+
+    setIsJoining(true);
+    playQueueJoinedChime();
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      try { navigator.vibrate([100, 50, 100]); } catch {}
+    }
+
+    // 2. Concurrent Background Worker Sync with D1 Database
+    try {
+      const response = await apiFetch<{ state: PatientQueueStateResponse['state']; tokenNumber?: number; position?: number; entry?: { id: string } }>('/api/healthcare/queue', {
+        method: 'POST',
+        json: { action: 'join', storeId: String(item.id) },
+      });
+
+      if (response && response.state && response.state.entry) {
+        const { entry, consultationMinutes, queueStatus } = response.state;
+        const open = queueStatus !== 'closed';
+        setIsQueueOpen(open);
+        if (!open) {
+          setView('list');
+          setErrorMsg(`The live queue for ${item.name} is closed.`);
+          return;
+        }
+        setCurrentEntryId(entry.id);
+        
+        const initialStatus = entry.status === 'completed' ? 'waiting' : entry.status;
+        setEntryStatus(initialStatus);
+        prevEntryStatusRef.current = initialStatus;
+        setLiveCompleted(false);
+        const pos = entry.position || response.position || optPos;
+        setUserPosition(pos);
+        setMyTokenNumber(entry.tokenNumber || response.tokenNumber || optToken);
+        setTotalInQueue(Math.max(1, response.state.waitingCount || pos));
+        const mins = consultationMinutes || item.consultationMinutes || 15;
+        setEstimatedWait(pos > 1 ? (pos - 1) * mins : 0);
+      } else if (response && (response.tokenNumber || response.position)) {
+        setCurrentEntryId(response.entry?.id || null);
+        const pos = response.position || optPos;
+        setUserPosition(pos);
+        setMyTokenNumber(response.tokenNumber || optToken);
+        setTotalInQueue(pos);
+        setEntryStatus('waiting');
+        prevEntryStatusRef.current = 'waiting';
+      } else {
+        await syncPatientStateWithStore(item.id);
+      }
+    } catch (err: any) {
+      const msg = err?.message || 'Failed to join queue.';
+      if (msg.includes('Unauthorized') || msg.includes('login') || msg.includes('auth')) {
+        router.push(`/login?returnTo=${encodeURIComponent(window.location.pathname)}`);
+        return;
+      }
+      if (msg.includes('closed') || msg.includes('not open') || msg.includes('disabled') || msg.includes('CLOSED')) {
+        setView('list');
+        setSelectedQueue(null);
+        setErrorMsg(`The live queue for ${item.name} is currently closed by the clinic.`);
+      } else {
+        setErrorMsg(msg);
+      }
+    } finally {
+      setIsJoining(false);
+    }
+  }, [router, syncPatientStateWithStore]);
+
+  const handleRunningLate = useCallback(async () => {
+    if (!selectedQueue) return;
+    const input = typeof window !== 'undefined' ? window.prompt('How many minutes late are you? (5–60)', '10') : '10';
+    const mins = parseInt(input ?? '10', 10);
+    const validMins = Math.min(60, Math.max(5, isNaN(mins) ? 10 : mins));
+    setLateMinutes(validMins);
+    setIsLate(true);
+    try {
+      await apiFetch('/api/healthcare/queue', {
+        method: 'POST',
+        json: { action: 'update_arrival', storeId: String(selectedQueue.id), arrivalStatus: 'running_late', lateMinutes: validMins },
+      });
+    } catch {
+      // UI fallback
+    }
+  }, [selectedQueue]);
+
+  const handleLeaveQueue = useCallback(async () => {
+    if (selectedQueue) {
+      try {
+        await apiFetch('/api/healthcare/queue', {
+          method: 'POST',
+          json: { action: 'leave', storeId: String(selectedQueue.id) },
+        });
+      } catch { /* Fallback */ }
+    }
+    setIsCancelled(true);
+    setView('list');
+  }, [selectedQueue]);
+
+  const handleCancelVisit = useCallback(async () => {
+    if (typeof window !== 'undefined' && !window.confirm('Cancel your visit? You will lose your place in the queue.')) return;
+    if (selectedQueue) {
+      try {
+        await apiFetch('/api/healthcare/queue', {
+          method: 'POST',
+          json: { action: 'cancel', storeId: String(selectedQueue.id) },
+        });
+      } catch { /* Fallback */ }
+    }
+    setIsCancelled(true);
+    setView('list');
+  }, [selectedQueue]);
+
+  // 3. Auto-detect user's active joined queue in database on load — runs ONCE on mount only
+  const queuesRef = useRef(queues);
+  queuesRef.current = queues;
+  const hasCheckedActiveQueueRef = useRef(false);
   useEffect(() => {
+    // Only run once: prevent re-triggering on every queue polling update
+    if (hasCheckedActiveQueueRef.current) return;
+    hasCheckedActiveQueueRef.current = true;
+
     let cancelled = false;
     async function checkUserActiveQueue() {
       try {
         const auth = await apiFetch<{ user?: { id: string } }>('/api/auth/me').catch(() => null);
         if (!auth || !auth.user || cancelled) return;
 
-        const res = await apiFetch<{ activeQueue: { storeId: string; storeName: string; storeSlug: string; tokenNumber: number; status: string } | null }>('/api/healthcare/queue/active');
+        const res = await apiFetch<{ activeQueue: { storeId: string; storeName: string; storeSlug: string; tokenNumber: number; status: string; queueState?: any } | null }>('/api/healthcare/queue/active');
         if (res && res.activeQueue && !cancelled) {
-          const storeId = res.activeQueue.storeId;
-          const match = queues.find((q) => String(q.id) === String(storeId) || q.slug === storeId);
+          const storeId = String(res.activeQueue.storeId);
+          // Use queuesRef to avoid dependency on queues state (prevents re-runs)
+          const currentQueues = queuesRef.current;
+          const match = currentQueues.find((q) => String(q.id) === storeId || q.slug === storeId || q.slug === res.activeQueue?.storeSlug);
           if (match) {
             setSelectedQueue(match);
+            selectedQueueRef.current = match;
           } else {
-            setSelectedQueue({
+            const fallbackItem: HealthcareQueueItem = {
               id: storeId,
+              slug: res.activeQueue.storeSlug,
               name: res.activeQueue.storeName || 'Healthcare Clinic',
               category: 'Healthcare',
               providerType: 'Clinic',
-              address: '',
+              address: 'Local Care Network',
               queueStatus: 'open',
               waitingCount: 1,
-            });
+              consultationMinutes: 15,
+            };
+            setSelectedQueue(fallbackItem);
+            selectedQueueRef.current = fallbackItem;
           }
+          
           setMyTokenNumber(res.activeQueue.tokenNumber);
           const activeStatus = res.activeQueue.status as any;
-          const initialStatus = (activeStatus === 'waiting' || activeStatus === 'called') ? activeStatus : 'waiting';
+          const initialStatus = (activeStatus === 'waiting' || activeStatus === 'called' || activeStatus === 'in_consultation') ? activeStatus : 'waiting';
           setEntryStatus(initialStatus);
           prevEntryStatusRef.current = initialStatus;
+
+          if (res.activeQueue.queueState) {
+            const qs = res.activeQueue.queueState;
+            setCurrentToken(qs.currentTokenNumber || 0);
+            if (qs.entry) {
+              setUserPosition(qs.entry.position || 1);
+              setTotalInQueue(Math.max(1, qs.waitingCount || qs.entry.position || 1));
+              const mins = qs.consultationMinutes || 15;
+              const pos = qs.entry.position || 1;
+              setEstimatedWait(pos > 1 ? (pos - 1) * mins : 0);
+            }
+          }
+
+          // Show Ticket Screen (Image 2) immediately for active queue entry
           setView('ticket');
           void syncPatientStateWithStore(storeId);
         }
@@ -415,20 +722,30 @@ export default function LiveQueueTracker() {
     }
     checkUserActiveQueue();
     return () => { cancelled = true; };
-  }, [queues, syncPatientStateWithStore]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // ← Empty deps: run exactly once on mount
 
-  // Check URL params for pre-selected store or queue code
+  // Check URL params for pre-selected store or queue join action — runs once when queues load
+  const hasHandledUrlParamsRef = useRef(false);
   useEffect(() => {
+    // Only handle URL params once after queues are first loaded
+    if (queues.length === 0 || hasHandledUrlParamsRef.current) return;
+    hasHandledUrlParamsRef.current = true;
+
     if (typeof window === 'undefined') return;
     const searchParams = new URLSearchParams(window.location.search);
     const storeIdParam = searchParams.get('storeId') || searchParams.get('store') || searchParams.get('id');
-    if (storeIdParam && queues.length > 0) {
+    const actionParam = searchParams.get('action');
+    if (storeIdParam) {
       const match = queues.find((q) => String(q.id) === String(storeIdParam) || q.slug === storeIdParam);
-      if (match && !selectedQueue) {
+      if (match) {
         setSelectedQueue(match);
+        if (actionParam === 'join') {
+          handleJoinQueue(match);
+        }
       }
     }
-  }, [queues, selectedQueue]);
+  }, [queues, handleJoinQueue]);
 
   const notifiedTokenRef = useRef<number | null>(null);
 
@@ -558,152 +875,6 @@ export default function LiveQueueTracker() {
       }
     }
   }, [view, selectedQueue, myTokenNumber, currentToken, userPosition, entryStatus]);
-
-  // Handle Joining Live Queue (Sub-10ms Optimistic Transition + Background Sync)
-  const handleJoinQueue = useCallback(async (item: HealthcareQueueItem) => {
-    setErrorMsg(null);
-    notifiedTokenRef.current = null;
-
-    const ownerEnabled = item.ownerQueueEnabled === 1 || item.ownerQueueEnabled === true;
-    const adminEnabled = item.adminQueueEnabled === 1 || item.adminQueueEnabled === true;
-    const accepting = item.acceptingPatients === 1 || item.acceptingPatients === true || item.acceptingPatients === undefined;
-    const hasLiveQueue = ownerEnabled && adminEnabled && item.queueStatus !== 'no_queue';
-    const isClosedNow = !hasLiveQueue || !accepting || item.queueStatus === 'closed' || item.queueStatus === 'paused';
-
-    if (isClosedNow) {
-      setErrorMsg(`The live queue for ${item.name} is currently closed by the clinic.`);
-      return;
-    }
-
-    // 1. Instant Optimistic State Commit (< 2ms) - Zero Delay Transition
-    const optPos = (item.waitingCount || 0) + 1;
-    const optToken = item.currentTokenNumber ? (item.currentTokenNumber + optPos) : optPos;
-    const ownerConsultationMins = item.consultationMinutes || 15;
-    const optWait = optPos > 1 ? (optPos - 1) * ownerConsultationMins : 0;
-
-    setSelectedQueue(item);
-    selectedQueueRef.current = item;
-    setCurrentEntryId(null);
-    currentEntryIdRef.current = null;
-    prevEntryStatusRef.current = 'waiting';
-    entryStatusRef.current = 'waiting';
-    setEntryStatus('waiting');
-    setLiveCompleted(false);
-    setIsCancelled(false);
-    setIsLate(false);
-    setIsTurnDismissed(false);
-    lastStateSignatureRef.current = "";
-
-    setMyTokenNumber(optToken);
-    setUserPosition(optPos);
-    setTotalInQueue(Math.max(1, optPos));
-    setEstimatedWait(optWait);
-    setIsQueueOpen(true);
-    setView('ticket');
-    window.scrollTo({ top: 0, behavior: 'instant' });
-
-    setIsJoining(true);
-
-    // 2. Concurrent Background Worker Sync with D1 Database
-    try {
-      const response = await apiFetch<{ state: PatientQueueStateResponse['state']; tokenNumber?: number; position?: number; entry?: { id: string } }>('/api/healthcare/queue', {
-        method: 'POST',
-        json: { action: 'join', storeId: String(item.id) },
-      });
-
-      if (response && response.state && response.state.entry) {
-        const { entry, consultationMinutes, queueStatus } = response.state;
-        const open = queueStatus !== 'closed';
-        setIsQueueOpen(open);
-        if (!open) {
-          setView('list');
-          setErrorMsg(`The live queue for ${item.name} is closed.`);
-          return;
-        }
-        setCurrentEntryId(entry.id);
-        
-        const initialStatus = entry.status === 'completed' ? 'waiting' : entry.status;
-        setEntryStatus(initialStatus);
-        prevEntryStatusRef.current = initialStatus;
-        setLiveCompleted(false);
-        const pos = entry.position || response.position || optPos;
-        setUserPosition(pos);
-        setMyTokenNumber(entry.tokenNumber || response.tokenNumber || optToken);
-        setTotalInQueue(Math.max(1, response.state.waitingCount || pos));
-        const mins = consultationMinutes || item.consultationMinutes || 15;
-        setEstimatedWait(pos > 1 ? (pos - 1) * mins : 0);
-      } else if (response && (response.tokenNumber || response.position)) {
-        setCurrentEntryId(response.entry?.id || null);
-        const pos = response.position || optPos;
-        setUserPosition(pos);
-        setMyTokenNumber(response.tokenNumber || optToken);
-        setTotalInQueue(pos);
-        setEntryStatus('waiting');
-        prevEntryStatusRef.current = 'waiting';
-      } else {
-        await syncPatientStateWithStore(item.id);
-      }
-    } catch (err: any) {
-      const msg = err?.message || 'Failed to join queue.';
-      if (msg.includes('Unauthorized') || msg.includes('login') || msg.includes('auth')) {
-        router.push(`/login?returnTo=${encodeURIComponent(window.location.pathname)}`);
-        return;
-      }
-      if (msg.includes('closed') || msg.includes('not open') || msg.includes('disabled') || msg.includes('CLOSED')) {
-        setView('list');
-        setSelectedQueue(null);
-        setErrorMsg(`The live queue for ${item.name} is currently closed by the clinic.`);
-      } else {
-        setErrorMsg(msg);
-      }
-    } finally {
-      setIsJoining(false);
-    }
-  }, [router, syncPatientStateWithStore]);
-
-  const handleRunningLate = useCallback(async () => {
-    if (!selectedQueue) return;
-    const input = typeof window !== 'undefined' ? window.prompt('How many minutes late are you? (5–60)', '10') : '10';
-    const mins = parseInt(input ?? '10', 10);
-    const validMins = Math.min(60, Math.max(5, isNaN(mins) ? 10 : mins));
-    setLateMinutes(validMins);
-    setIsLate(true);
-    try {
-      await apiFetch('/api/healthcare/queue', {
-        method: 'POST',
-        json: { action: 'update_arrival', storeId: String(selectedQueue.id), arrivalStatus: 'running_late', lateMinutes: validMins },
-      });
-    } catch {
-      // UI fallback
-    }
-  }, [selectedQueue]);
-
-  const handleLeaveQueue = useCallback(async () => {
-    if (selectedQueue) {
-      try {
-        await apiFetch('/api/healthcare/queue', {
-          method: 'POST',
-          json: { action: 'leave', storeId: String(selectedQueue.id) },
-        });
-      } catch { /* Fallback */ }
-    }
-    setIsCancelled(true);
-    setView('list');
-  }, [selectedQueue]);
-
-  const handleCancelVisit = useCallback(async () => {
-    if (typeof window !== 'undefined' && !window.confirm('Cancel your visit? You will lose your place in the queue.')) return;
-    if (selectedQueue) {
-      try {
-        await apiFetch('/api/healthcare/queue', {
-          method: 'POST',
-          json: { action: 'cancel', storeId: String(selectedQueue.id) },
-        });
-      } catch { /* Fallback */ }
-    }
-    setIsCancelled(true);
-    setView('list');
-  }, [selectedQueue]);
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -866,7 +1037,7 @@ export default function LiveQueueTracker() {
             {item.allowAppointments === 0 || item.allowAppointments === false ? (
               <button
                 type="button"
-                className="py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 opacity-60 cursor-pointer text-slate-400 border border-slate-200 bg-slate-50"
+                className="py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 opacity-60 cursor-pointer text-slate-400 border border-slate-200 bg-slate-50 shrink-0"
                 onClick={() => setBookingTarget({ id: String(item.id), name: item.name, allowAppointments: false })}
                 title="This clinic does not allow online appointments"
               >
@@ -875,7 +1046,7 @@ export default function LiveQueueTracker() {
               </button>
             ) : (
               <button
-                className="py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 cursor-pointer"
+                className="py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 cursor-pointer shrink-0"
                 onClick={() => setBookingTarget({ id: String(item.id), name: item.name, allowAppointments: true })}
               >
                 <Calendar className="w-3.5 h-3.5 text-teal-600" />
@@ -902,6 +1073,8 @@ export default function LiveQueueTracker() {
       );
     });
   }, [filteredQueues, isJoining, handleJoinQueue, setBookingTarget]);
+
+
 
   const isCompleted = entryStatus === 'completed';
 
@@ -948,7 +1121,8 @@ export default function LiveQueueTracker() {
   if (view === 'ticket' && selectedQueue) {
     const isClosed = !isQueueOpen || selectedQueue.queueStatus === 'closed';
     const isMyTurn = entryStatus === 'called' || (currentToken === myTokenNumber && myTokenNumber > 0);
-    const progressPercent = isMyTurn ? 100 : Math.min(100, Math.max(10, ((totalInQueue - userPosition + 1) / Math.max(1, totalInQueue)) * 100));
+    const isInConsultation = entryStatus === 'in_consultation';
+    const progressPercent = isMyTurn || isInConsultation ? 100 : Math.min(100, Math.max(10, ((totalInQueue - userPosition + 1) / Math.max(1, totalInQueue)) * 100));
     const ownerConsultationMins = selectedQueue.consultationMinutes || 15;
 
     return (
@@ -960,16 +1134,33 @@ export default function LiveQueueTracker() {
           </div>
 
           <div className="relative z-10 max-w-5xl mx-auto flex flex-col">
-            <button
-              onClick={() => setView('list')}
-              className="flex items-center text-slate-700 hover:text-slate-900 font-bold text-xs sm:text-sm mb-6 w-fit group transition-all bg-white hover:bg-slate-50 px-4 py-2 rounded-full border border-slate-200 shadow-sm cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform text-emerald-600" />
-              <span>Back to Healthcare Hub</span>
-            </button>
+            <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
+              <button
+                onClick={() => setView('list')}
+                className="flex items-center text-slate-700 hover:text-slate-900 font-bold text-xs sm:text-sm w-fit group transition-all bg-white hover:bg-slate-50 px-4 py-2 rounded-full border border-slate-200 shadow-sm cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform text-emerald-600" />
+                <span>Back to Healthcare Hub</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setQrTarget({ id: String(selectedQueue.id), name: selectedQueue.name, slug: selectedQueue.slug })}
+                className="flex items-center gap-1.5 text-emerald-700 hover:text-emerald-800 bg-white hover:bg-emerald-50 px-4 py-2 rounded-full border border-emerald-200 shadow-sm font-bold text-xs sm:text-sm cursor-pointer transition-all"
+                title="View Clinic QR Code or Scan Counter QR"
+              >
+                <QrCode className="w-4 h-4 text-emerald-600" />
+                <span>Clinic QR Pass</span>
+              </button>
+            </div>
 
             <div className="mb-3 flex items-center space-x-3">
-              {isMyTurn ? (
+              {isInConsultation ? (
+                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-teal-100 text-xs font-black uppercase tracking-widest text-teal-900 shadow-sm border border-teal-300">
+                  <span className="w-2.5 h-2.5 rounded-full bg-teal-500 mr-2.5" />
+                  👨‍⚕️ IN CONSULTATION
+                </span>
+              ) : isMyTurn ? (
                 <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-100 text-xs font-black uppercase tracking-widest text-emerald-800 shadow-sm border border-emerald-300 animate-pulse">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2.5 shadow-[0_0_10px_#10b981]" />
                   YOUR TURN NOW!
@@ -1001,6 +1192,20 @@ export default function LiveQueueTracker() {
           <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl p-6 sm:p-10 relative overflow-hidden">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] bg-[radial-gradient(circle_at_center,_rgba(16,185,129,0.06)_0%,_rgba(6,182,212,0.03)_50%,_transparent_70%)] blur-3xl pointer-events-none" />
 
+            {isInConsultation && (
+              <div className="mb-8 p-6 bg-teal-50 border-2 border-teal-500 rounded-2xl flex items-start justify-between text-teal-950 shadow-lg flex-wrap gap-4 transition-all duration-300">
+                <div className="flex items-start">
+                  <Stethoscope className="w-8 h-8 text-teal-600 mr-4 mt-0.5 shrink-0" />
+                  <div>
+                    <h4 className="text-2xl font-black text-slate-900 mb-1">👨‍⚕️ CONSULTATION IN PROGRESS</h4>
+                    <p className="text-base font-bold text-teal-800">
+                      Token #{myTokenNumber} is currently with the doctor in the consultation room.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {isMyTurn && !isTurnDismissed && (
               <div className="mb-8 p-6 bg-emerald-50 border-2 border-emerald-500 rounded-2xl flex items-start justify-between text-emerald-950 shadow-lg flex-wrap gap-4 transition-all duration-300">
                 <div className="flex items-start">
@@ -1031,6 +1236,7 @@ export default function LiveQueueTracker() {
                 </div>
               </div>
             )}
+
 
             {isClosed && !isMyTurn && (
               <div className="mb-8 p-6 bg-rose-50 border-l-4 border-rose-500 rounded-2xl flex items-start text-rose-900 shadow-sm">
@@ -1189,24 +1395,70 @@ export default function LiveQueueTracker() {
 
       <div className="relative z-10 pt-24 sm:pt-28 pb-6 sm:pb-10 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto flex flex-col items-center text-center">
-          {selectedQueue && (
-            <div className="mb-6 w-full max-w-xl">
+          {selectedQueue && !isCancelled && !liveCompleted && entryStatus !== 'completed' && myTokenNumber > 0 && (
+            <div className="mb-6 w-full max-w-2xl">
               <button
+                type="button"
                 onClick={() => setView('ticket')}
-                className="w-full flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-white border border-emerald-300 text-slate-900 hover:border-emerald-500 transition-all shadow-md cursor-pointer group"
+                className="w-full flex flex-col gap-3 p-4 sm:p-4.5 rounded-3xl bg-white/95 backdrop-blur-sm border-2 border-emerald-300 hover:border-emerald-500 text-slate-900 transition-all shadow-md hover:shadow-lg shadow-emerald-600/5 cursor-pointer group text-left"
               >
-                <div className="flex items-center gap-2.5 text-left min-w-0">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shrink-0">
-                    <Sparkles className="w-4 h-4 animate-pulse" />
+                {/* Header Row: Pass Label, Clinic Name & CTA */}
+                <div className="w-full flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shrink-0">
+                      <Sparkles className="w-4 h-4 animate-pulse" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-700">
+                          Active Live Pass
+                        </span>
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300/80">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping mr-1" />
+                          LIVE
+                        </span>
+                      </div>
+                      <div className="text-sm sm:text-base font-black text-slate-900 truncate">
+                        {selectedQueue.name}
+                      </div>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-bold uppercase tracking-wider text-emerald-700">Active Live Pass</div>
-                    <div className="text-sm font-black text-slate-900 truncate">{selectedQueue.name}</div>
+
+                  <div className="flex items-center gap-1.5 text-xs font-black uppercase px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white shrink-0 group-hover:bg-emerald-500 transition-colors shadow-sm">
+                    <span>View Pass</span>
+                    <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs font-black uppercase px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white shrink-0 group-hover:bg-emerald-500 transition-colors shadow-sm">
-                  <span>View Pass</span>
-                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+
+                {/* Rich Live Telemetry Badges Strip */}
+                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+                  {/* Token Number Badge */}
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200/90 text-emerald-900 text-xs font-extrabold">
+                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-wide">Token</span>
+                    <span className="font-black text-emerald-950">#{String(myTokenNumber || 1).padStart(2, '0')}</span>
+                  </div>
+
+                  {/* Position Badge */}
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-50 border border-teal-200/90 text-teal-900 text-xs font-extrabold">
+                    <span className="text-[10px] font-black text-teal-600 uppercase tracking-wide">Pos</span>
+                    <span className="font-black text-teal-950">#{userPosition || 1}</span>
+                  </div>
+
+                  {/* Estimated Wait Badge */}
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-50 border border-cyan-200/90 text-cyan-900 text-xs font-extrabold">
+                    <Clock className="w-3 h-3 text-cyan-600 shrink-0" />
+                    <span className="font-black text-cyan-950">
+                      ~{entryStatus === 'called' || (currentToken === myTokenNumber && myTokenNumber > 0) ? 0 : estimatedWait} min wait
+                    </span>
+                  </div>
+
+                  {/* Current Serving Token Badge */}
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 text-xs font-extrabold sm:ml-auto">
+                    <Activity className="w-3 h-3 text-slate-500 shrink-0" />
+                    <span className="font-black text-slate-800">
+                      Serving #{String(currentToken || 0).padStart(2, '0')}
+                    </span>
+                  </div>
                 </div>
               </button>
             </div>
@@ -1240,6 +1492,17 @@ export default function LiveQueueTracker() {
                 className="w-full bg-white border border-slate-300 rounded-2xl py-3.5 text-slate-900 placeholder:text-slate-500 font-medium focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm shadow-sm"
               />
             </div>
+
+            <button
+              type="button"
+              onClick={() => setShowUniversalScanner(true)}
+              className="py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition-all cursor-pointer shrink-0"
+              title="Scan any clinic QR code or enter queue code"
+            >
+              <QrCode className="w-4 h-4 text-white shrink-0" />
+              <span>Universal QR Scanner</span>
+            </button>
+
             <PushNotificationManager />
           </div>
         </div>
@@ -1290,6 +1553,45 @@ export default function LiveQueueTracker() {
         </div>
       </div>
     )}
+
+    {qrTarget && (
+      <ClinicQrModal
+        storeId={qrTarget.id}
+        storeName={qrTarget.name}
+        storeSlug={qrTarget.slug}
+        onClose={() => setQrTarget(null)}
+        onSuccess={(tokenNumber) => {
+          setQrTarget(null);
+          setMyTokenNumber(tokenNumber);
+          const match = queues.find((q) => String(q.id) === qrTarget.id || q.slug === qrTarget.slug);
+          if (match) setSelectedQueue(match);
+          setEntryStatus('waiting');
+          setView('ticket');
+          void syncPatientStateWithStore(qrTarget.id);
+        }}
+      />
+    )}
+
+    {showUniversalScanner && (
+      <UniversalHealthcareQrScanner
+        onClose={() => setShowUniversalScanner(false)}
+        onSuccess={(tokenNumber, queueState, storeId) => {
+          setShowUniversalScanner(false);
+          setMyTokenNumber(tokenNumber);
+          if (storeId) {
+            const match = queues.find((q) => String(q.id) === String(storeId));
+            if (match) setSelectedQueue(match);
+            void syncPatientStateWithStore(storeId);
+          }
+          const validStatus = (queueState?.entry?.status as any) || 'waiting';
+          setEntryStatus(validStatus === 'arrived' ? 'waiting' : validStatus);
+          setView('ticket');
+        }}
+      />
+    )}
+
     </>
   );
 }
+
+

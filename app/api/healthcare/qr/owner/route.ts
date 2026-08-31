@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await requireApiPermission(request, "queue.manage_own");
     const db = getD1();
-    const body = await request.json() as { status?: "active" | "disabled" };
+    const body = await request.json() as { status?: "active" | "disabled"; queueCode?: string };
 
     const store = await db.prepare("SELECT id, name, slug FROM stores WHERE owner_id = ? LIMIT 1")
       .bind(session.user.id)
@@ -46,11 +46,34 @@ export async function POST(request: NextRequest) {
       return noStoreJson({ ok: false, message: "No store found for this owner." }, { status: 404 });
     }
     
-    const newStatus = body.status === "disabled" ? "disabled" : "active";
+    const now = Math.floor(Date.now() / 1000);
 
-    await db.prepare("UPDATE permanent_healthcare_qr_ids SET status = ?, updated_at = ? WHERE store_id = ?")
-      .bind(newStatus, Math.floor(Date.now() / 1000), store.id)
-      .run();
+    if (body.status) {
+      const newStatus = body.status === "disabled" ? "disabled" : "active";
+      await db.prepare("UPDATE permanent_healthcare_qr_ids SET status = ?, updated_at = ? WHERE store_id = ?")
+        .bind(newStatus, now, store.id)
+        .run();
+    }
+
+    if (body.queueCode) {
+      const cleanCode = body.queueCode.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "-").replace(/-+/g, "-");
+      if (cleanCode.length < 2 || cleanCode.length > 50) {
+        throw new HttpError(400, "Queue code must be between 2 and 50 alphanumeric characters.", "INVALID_CODE");
+      }
+      const existingConflict = await db.prepare("SELECT store_id FROM permanent_healthcare_qr_ids WHERE (queue_code = ? OR UPPER(queue_code) = UPPER(?)) AND store_id <> ? LIMIT 1")
+        .bind(cleanCode, cleanCode, store.id)
+        .first();
+      if (existingConflict) {
+        throw new HttpError(409, "This queue code is already taken. Please choose another unique attractive code.", "CODE_TAKEN");
+      }
+      await db.prepare("UPDATE permanent_healthcare_qr_ids SET queue_code = ?, updated_at = ? WHERE store_id = ?")
+        .bind(cleanCode, now, store.id)
+        .run();
+      // Also update store slug to keep in sync
+      await db.prepare("UPDATE stores SET slug = ?, updated_at = ? WHERE id = ? AND owner_id = ?")
+        .bind(cleanCode, now, store.id, session.user.id)
+        .run().catch(() => {});
+    }
 
     const qrRecord = await getOrCreatePermanentQueueId(store.id, session.user.id);
 
@@ -62,3 +85,4 @@ export async function POST(request: NextRequest) {
     return apiError(error);
   }
 }
+

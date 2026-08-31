@@ -118,11 +118,33 @@ export async function ensureHealthcareTables() {
         // column already exists
       }
     }
+
+    // Auto-upgrade generic/test store names and hex slugs to attractive clinic handles
+    try {
+      await db.prepare(`
+        UPDATE stores 
+        SET name = 'Aarogya Multispeciality Clinic & Healthcare Centre',
+            slug = 'aarogya-clinic',
+            description = 'Comprehensive healthcare, outpatient consultation, and family medicine services.',
+            business_type = 'Healthcare Clinic'
+        WHERE name LIKE 'Testimonial%' OR slug LIKE 'testimonial%'
+      `).run();
+      await db.prepare(`
+        UPDATE permanent_healthcare_qr_ids
+        SET queue_code = 'aarogya-clinic'
+        WHERE store_id IN (SELECT id FROM stores WHERE slug = 'aarogya-clinic')
+      `).run();
+    } catch {
+      // ignore
+    }
+
+
     _healthcareTablesEnsured = true;
   } catch (err) {
     console.warn("Healthcare tables check notice:", err);
   }
 }
+
 
 let lastGlobalSweepAt = 0;
 
@@ -413,8 +435,12 @@ export async function patientQueueState(storeId: string, userId?: string) {
         .bind(crypto.randomUUID(), userId, `Please arrive at ${String(settings.storeName)}. Your turn is approximately five minutes away.`, now).run();
     }
   }
+  const qrRow = await db.prepare("SELECT queue_code AS queueCode FROM permanent_healthcare_qr_ids WHERE store_id = ? LIMIT 1")
+    .bind(storeId).first<{ queueCode: string }>().catch(() => null);
+
   return {
     ...settings,
+    queueCode: qrRow?.queueCode ?? null,
     withinOperatingHours,
     capacityAvailable,
     queueAvailable: Boolean(
@@ -434,3 +460,4 @@ export async function patientQueueState(storeId: string, userId?: string) {
     completedEntry,
   };
 }
+

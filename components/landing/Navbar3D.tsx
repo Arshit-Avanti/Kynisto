@@ -21,7 +21,8 @@ import {
   LogIn,
   ChevronRight,
   Shield,
-  Activity
+  Activity,
+  Search
 } from "lucide-react";
 
 interface NavbarUser {
@@ -120,6 +121,13 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
 
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-1.5 lg:gap-3 text-sm font-semibold text-slate-700 mx-2" aria-label="Main Navigation">
+          <Link
+            href="/search"
+            className="px-3 py-1.5 rounded-full hover:bg-orange-500/10 hover:text-orange-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5 whitespace-nowrap"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span>Search</span>
+          </Link>
           <Link
             href="/services"
             className="px-3 py-1.5 rounded-full hover:bg-orange-500/10 hover:text-orange-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap"
@@ -244,6 +252,24 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
           {/* Navigation Links List */}
           <div className="flex flex-col gap-1">
             
+            {/* 0. Search & Explore */}
+            <Link
+              href="/search"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between p-2.5 px-3 rounded-2xl hover:bg-white/[0.08] active:bg-white/[0.12] text-white font-semibold text-xs transition-all duration-150 group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-orange-500/20 border border-orange-500/30 text-orange-400 flex items-center justify-center shrink-0 shadow-sm">
+                  <Search className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-white group-hover:text-orange-300 transition-colors">Search &amp; Discover</div>
+                  <div className="text-[10px] text-slate-400">Stores, clinics, doctors &amp; services</div>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" />
+            </Link>
+
             {/* 1. Healthcare */}
             <Link
               href="/healthcare"

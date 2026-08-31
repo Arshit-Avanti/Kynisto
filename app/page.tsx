@@ -207,9 +207,8 @@ const modernCleanTechStyles = `
     font-weight: 700 !important;
   }
   .hero h1 {
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif !important;
-    font-weight: 850 !important;
-    letter-spacing: -0.06em !important;
+    font-family: 'Cormorant Garamond', Georgia, serif !important;
+    letter-spacing: -0.02em !important;
   }
   .searchBox input, .healthSearch input, .productIntro form input, .advancedFilters input {
     background: transparent !important;
@@ -1722,18 +1721,6 @@ export default function Home() {
     let active = true;
 
     async function loadSessionAndCategories() {
-      try {
-        const supabase = await getSupabaseBrowserClient();
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          syncSupabaseAccessCookie(session);
-        }
-      } catch {
-        // Continue if Supabase browser client fails to load or initialize
-      }
-
-      if (!active) return;
-
       try {
         const [categoryData, sessionData] = await Promise.all([
           apiFetch<{ items: Array<{ name: string; icon?: string; storeCount?: number }> }>("/api/categories"),

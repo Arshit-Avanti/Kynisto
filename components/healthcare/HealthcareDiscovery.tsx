@@ -7,6 +7,10 @@ import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { apiFetch } from "@/lib/client-api";
 import { PushNotificationManager } from "@/components/ui/PushNotificationManager";
 import { AppointmentBooking } from "@/components/queue/AppointmentBooking";
+import { ClinicQrModal } from "@/components/queue/ClinicQrModal";
+import { UniversalHealthcareQrScanner } from "@/components/queue/UniversalHealthcareQrScanner";
+import { saveQueueSession, clearQueueSession } from "@/lib/queue-persistence";
+
 import {
   Activity,
   Stethoscope,
@@ -25,8 +29,10 @@ import {
   Ticket,
   AlertCircle,
   Calendar,
-  X
+  X,
+  QrCode
 } from "lucide-react";
+
 
 type Provider = {
   id: string; name: string; slug: string; description: string; address: string; area: string;
@@ -77,7 +83,13 @@ export function HealthcareDiscovery() {
   const [queueLoading, setQueueLoading] = useState(Boolean(requestedProvider));
   const [queueBusy, setQueueBusy] = useState("");
   const [bookingTarget, setBookingTarget] = useState<{ id: string; name: string; allowAppointments?: boolean } | null>(null);
+  const [qrTarget, setQrTarget] = useState<{ id: string; name: string; slug?: string } | null>(null);
+  const [showUniversalScanner, setShowUniversalScanner] = useState(false);
   const canJoinQueue = role === "customer" || role === "admin";
+
+
+
+
 
   // Throttled / Debounced search input handler for <15ms input response time
   useEffect(() => {
@@ -154,10 +166,21 @@ export function HealthcareDiscovery() {
     try {
       const result = await apiFetch<{ state: QueueState }>("/api/healthcare/queue", { method: "POST", json: { action, storeId: activeStore } });
       updateQueueState(result.state);
+      if (action === "join" && result.state?.entry) {
+        saveQueueSession({
+          storeId: activeStore,
+          storeName: activeProvider?.name || "Healthcare Clinic",
+          tokenNumber: result.state.entry.tokenNumber,
+          joinedAt: Date.now(),
+        });
+      } else if (action === "leave" || action === "cancel") {
+        clearQueueSession();
+      }
       void load(true);
     } catch (actionError) { setError(actionError instanceof Error ? actionError.message : "Queue action failed."); }
     finally { setQueueBusy(""); }
-  }, [canJoinQueue, role, activeStore, queueBusy, updateQueueState, load]);
+  }, [canJoinQueue, role, activeStore, queueBusy, updateQueueState, load, activeProvider]);
+
 
   const updateArrival = useCallback(async (arrivalStatus: "leaving_now" | "running_late") => {
     if (!activeStore || queueBusy) return;
@@ -401,6 +424,8 @@ export function HealthcareDiscovery() {
     });
   }, [items, activeStore, types, selectQueue, setBookingTarget]);
 
+
+
   return (
     <main className="healthPage min-h-screen bg-[#140A0C] text-slate-100 p-4 md:p-8 pb-32">
       {arrivalNotice}
@@ -444,10 +469,20 @@ export function HealthcareDiscovery() {
                 Find Care
               </button>
             </form>
-            <div className="flex items-center shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowUniversalScanner(true)}
+                className="py-3.5 px-4 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-orange-500/20 cursor-pointer transition-all shrink-0"
+                title="Scan any clinic QR code or enter queue code"
+              >
+                <QrCode size={14} />
+                <span>Universal QR Scanner</span>
+              </button>
               <PushNotificationManager />
             </div>
           </div>
+
 
           <div className="healthTrust flex flex-wrap gap-6 text-xs text-slate-300 font-semibold">
             <span className="flex items-center gap-1.5"><CheckCircle2 size={16} className="text-emerald-400" /> <b className="text-white">{items.length}</b> Verified Providers</span>
@@ -595,7 +630,38 @@ export function HealthcareDiscovery() {
           )}
         </div>
       )}
+
+
+      {qrTarget && (
+        <ClinicQrModal
+          storeId={qrTarget.id}
+          storeName={qrTarget.name}
+          storeSlug={qrTarget.slug}
+          onClose={() => setQrTarget(null)}
+          onSuccess={(tokenNumber) => {
+            setQrTarget(null);
+            setActiveStore(qrTarget.id);
+            void load(true);
+          }}
+        />
+      )}
+
+      {showUniversalScanner && (
+        <UniversalHealthcareQrScanner
+          onClose={() => setShowUniversalScanner(false)}
+          onSuccess={(tokenNumber, queueState, storeId) => {
+            setShowUniversalScanner(false);
+            if (storeId) {
+              setActiveStore(storeId);
+            }
+            void load(true);
+          }}
+        />
+      )}
     </main>
   );
 }
+
+
+
 

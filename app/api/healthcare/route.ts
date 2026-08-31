@@ -18,63 +18,9 @@ export async function GET(request: Request) {
     await expireHealthcareQueueEntries();
 
     const db = getD1();
-
-    // Auto-sync: Ensure all healthcare categories have module='healthcare'
-    await db.prepare(`
-      UPDATE categories SET module = 'healthcare' 
-      WHERE module <> 'healthcare' 
-      AND (
-        slug IN ('clinics-doctors', 'pharmacies', 'dental-care', 'opticians', 'pet-care')
-        OR name LIKE '%Clinic%' OR name LIKE '%Doctor%' OR name LIKE '%Hospital%' 
-        OR name LIKE '%Pharm%' OR name LIKE '%Dental%' OR name LIKE '%Health%' 
-        OR name LIKE '%Optic%'
-      )
-    `).run().catch(() => {});
-
-    // Auto-sync: Ensure all healthcare stores have a verified healthcare_provider_profile
-    await db.prepare(`
-      INSERT INTO healthcare_provider_profiles 
-        (store_id, provider_type, accepting_patients, emergency_available, admin_queue_enabled, owner_queue_enabled, queue_activation_status, verification_status, created_at, updated_at)
-      SELECT 
-        s.id,
-        CASE 
-          WHEN c.name LIKE '%Hospital%' OR s.name LIKE '%Hospital%' THEN 'hospital'
-          WHEN c.name LIKE '%Dental%' OR s.name LIKE '%Dental%' THEN 'dental_clinic'
-          WHEN c.name LIKE '%Pharm%' OR s.name LIKE '%Pharm%' OR s.name LIKE '%Medical%' THEN 'pharmacy'
-          WHEN c.name LIKE '%Diagnostic%' OR c.name LIKE '%Lab%' OR s.name LIKE '%Diagnostic%' OR s.name LIKE '%Scan%' THEN 'diagnostic_lab'
-          WHEN c.name LIKE '%Optic%' OR c.name LIKE '%Eye%' THEN 'eye_clinic'
-          WHEN c.name LIKE '%Pet%' OR c.name LIKE '%Vet%' THEN 'veterinary_clinic'
-          ELSE 'clinic'
-        END,
-        1,
-        CASE WHEN c.name LIKE '%Hospital%' OR s.name LIKE '%Hospital%' THEN 1 ELSE 0 END,
-        1, 1, 'approved', 'verified', unixepoch(), unixepoch()
-      FROM stores s 
-      JOIN categories c ON c.id = s.category_id
-      WHERE (
-        c.module = 'healthcare' 
-        OR c.slug IN ('clinics-doctors', 'pharmacies', 'dental-care', 'opticians', 'pet-care') 
-        OR c.name LIKE '%Clinic%' OR c.name LIKE '%Doctor%' OR c.name LIKE '%Hospital%' 
-        OR c.name LIKE '%Pharm%' OR c.name LIKE '%Dental%' OR c.name LIKE '%Health%' 
-        OR c.name LIKE '%Optic%'
-      )
-      AND NOT EXISTS (SELECT 1 FROM healthcare_provider_profiles hp WHERE hp.store_id = s.id)
-    `).run().catch(() => {});
-
-    // Auto-sync: Ensure all healthcare stores have queue settings (default to closed until owner starts queue)
-    const today = new Date().toISOString().slice(0, 10);
-    await db.prepare(`
-      INSERT INTO healthcare_queue_settings 
-        (store_id, status, consultation_minutes, current_token_number, next_token_number, service_date, opening_time, closing_time, maximum_daily_patients, updated_at)
-      SELECT s.id, 'closed', 15, 0, 1, ?, '09:00', '21:00', 100, unixepoch()
-      FROM stores s 
-      JOIN healthcare_provider_profiles hp ON hp.store_id = s.id
-      WHERE NOT EXISTS (SELECT 1 FROM healthcare_queue_settings qs WHERE qs.store_id = s.id)
-    `).bind(today).run().catch(() => {});
-
     const params = url.searchParams;
     const conditions = [
-      "(s.status = 'approved' OR s.status = 'active')",
+      "s.status NOT IN ('suspended','deleted','rejected')",
       "(c.module = 'healthcare' OR c.slug IN ('clinics-doctors', 'pharmacies', 'dental-care', 'opticians', 'pet-care') OR c.name LIKE '%Clinic%' OR c.name LIKE '%Doctor%' OR c.name LIKE '%Hospital%' OR c.name LIKE '%Pharm%' OR c.name LIKE '%Dental%' OR c.name LIKE '%Health%' OR c.name LIKE '%Optic%' OR hp.store_id IS NOT NULL)",
       "(hp.verification_status = 'verified' OR hp.verification_status IS NULL)"
     ];

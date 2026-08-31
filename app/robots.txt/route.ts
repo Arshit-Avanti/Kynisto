@@ -7,25 +7,24 @@ Disallow: /owner/
 Disallow: /account/
 Disallow: /api/
 
-User-agent: bingbot
-Allow: /
-
-User-agent: AdIdxBot
-Allow: /
-
-User-agent: msnbot
-Allow: /
-
-User-agent: BingPreview
-Allow: /
-
 User-agent: Mediapartners-Google
+Disallow:
+Allow: /
+
+User-agent: Google-AdSense-Infeed
+Disallow:
 Allow: /
 
 User-agent: Google-AdSense-AutoAds
+Disallow:
 Allow: /
 
 User-agent: Google-AdSense-AutoAds-Preflight
+Disallow:
+Allow: /
+
+User-agent: Google-AdSense-AdsBot
+Disallow:
 Allow: /
 
 User-agent: Googlebot
@@ -36,6 +35,18 @@ Disallow: /account/
 Disallow: /api/
 
 User-agent: Googlebot-Image
+Allow: /
+
+User-agent: bingbot
+Allow: /
+
+User-agent: AdIdxBot
+Allow: /
+
+User-agent: msnbot
+Allow: /
+
+User-agent: BingPreview
 Allow: /
 
 Sitemap: ${origin}/sitemap.xml

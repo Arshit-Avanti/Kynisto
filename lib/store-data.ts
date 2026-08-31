@@ -284,7 +284,7 @@ export async function listStores(options: {
 
   await ensureSeeded();
   const db = getD1();
-  const conditions = ["(s.status = 'approved' OR s.status = 'active')", "c.module = 'local'", "c.status = 'active'"];
+  const conditions = ["s.status NOT IN ('suspended','deleted','rejected')", "c.module = 'local'", "c.status = 'active'"];
   const bindings: unknown[] = [];
   const query = options.query?.trim();
 
@@ -471,7 +471,7 @@ export async function getStoreBySlug(slug: string) {
   await ensureSeeded();
   const db = getD1();
   const row = await db
-    .prepare(`${storeSelect} WHERE s.slug = ? AND (s.status = 'approved' OR s.status = 'active') LIMIT 1`)
+    .prepare(`${storeSelect} WHERE s.slug = ? AND s.status NOT IN ('suspended','deleted','rejected') LIMIT 1`)
     .bind(slug)
     .first<StoreRow>();
   if (!row) return null;
