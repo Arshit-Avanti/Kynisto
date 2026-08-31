@@ -1420,8 +1420,17 @@ const CATEGORY_PHOTOS: Record<string, string> = {
 export function getStorePhoto(store: { bannerUrl?: string | null; logoUrl?: string | null; category?: string; businessType?: string; name?: string }) {
   if (store.bannerUrl && store.bannerUrl.trim()) return store.bannerUrl;
   if (store.logoUrl && store.logoUrl.trim()) return store.logoUrl;
-  if (store.category && CATEGORY_PHOTOS[store.category]) return CATEGORY_PHOTOS[store.category];
-  if (store.businessType && CATEGORY_PHOTOS[store.businessType]) return CATEGORY_PHOTOS[store.businessType];
+  
+  const rawCat = (store.category || "").trim().toLowerCase();
+  const rawType = (store.businessType || "").trim().toLowerCase();
+  const rawName = (store.name || "").trim().toLowerCase();
+
+  for (const [key, url] of Object.entries(CATEGORY_PHOTOS)) {
+    const k = key.toLowerCase();
+    if (rawCat && (rawCat.includes(k) || k.includes(rawCat))) return url;
+    if (rawType && (rawType.includes(k) || k.includes(rawType))) return url;
+    if (rawName && rawName.includes(k)) return url;
+  }
   return CATEGORY_PHOTOS["Default"];
 }
 
