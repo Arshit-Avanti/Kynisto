@@ -1382,12 +1382,56 @@ const categories: Category[] = [
   { name: "Florists & Gifts", icon: "✿", tone: "mint" },
 ];
 
+const CATEGORY_PHOTOS: Record<string, string> = {
+  "Salon": "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80",
+  "Salons & Beauty": "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80",
+  "Grocery": "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=800&q=80",
+  "Grocery & Essentials": "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=800&q=80",
+  "Supermarket": "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=800&q=80",
+  "Clinic": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80",
+  "Clinics & Doctors": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80",
+  "Hospital": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=800&q=80",
+  "Stationery": "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=800&q=80",
+  "Stationery & Printing": "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=800&q=80",
+  "Pharmacy": "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=800&q=80",
+  "Pharmacies": "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=800&q=80",
+  "Bakery": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80",
+  "Bakeries": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80",
+  "Repair": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
+  "Mobile & Electronics Repair": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
+  "Pet care": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=800&q=80",
+  "Pet Care": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=800&q=80",
+  "Fitness": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80",
+  "Fitness & Yoga": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80",
+  "Café": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80",
+  "Cafés": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80",
+  "Restaurants": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
+  "Home Services": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=800&q=80",
+  "Hardware": "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?auto=format&fit=crop&w=800&q=80",
+  "Education & Coaching": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
+  "Fashion": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80",
+  "Automobile Services": "https://images.unsplash.com/photo-1486006920555-c77dce18193b?auto=format&fit=crop&w=800&q=80",
+  "Dental Care": "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=800&q=80",
+  "Opticians": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80",
+  "Florists": "https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80",
+  "Default": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80",
+};
+
+export function getStorePhoto(store: { bannerUrl?: string | null; logoUrl?: string | null; category?: string; businessType?: string; name?: string }) {
+  if (store.bannerUrl && store.bannerUrl.trim()) return store.bannerUrl;
+  if (store.logoUrl && store.logoUrl.trim()) return store.logoUrl;
+  if (store.category && CATEGORY_PHOTOS[store.category]) return CATEGORY_PHOTOS[store.category];
+  if (store.businessType && CATEGORY_PHOTOS[store.businessType]) return CATEGORY_PHOTOS[store.businessType];
+  return CATEGORY_PHOTOS["Default"];
+}
+
 const stores: Store[] = [
   {
     id: 1,
     name: "Glow & Go Salon",
     category: "Salon",
     icon: "✂",
+    bannerUrl: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80",
     address: "B-42, Main Market Road, Your Locality, Loni, Ghaziabad",
     shortAddress: "Main Market Road",
     rating: 4.8,
@@ -1404,6 +1448,7 @@ const stores: Store[] = [
     name: "FreshBasket Grocers",
     category: "Grocery",
     icon: "◒",
+    bannerUrl: "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=800&q=80",
     address: "MM-18, Your Locality, Loni, Ghaziabad",
     shortAddress: "Main Market",
     rating: 4.6,
@@ -1420,6 +1465,7 @@ const stores: Store[] = [
     name: "Aarogya Family Clinic",
     category: "Clinic",
     icon: "+",
+    bannerUrl: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80",
     address: "C-215, Shiv Chowk Road, Your Locality, Loni, Ghaziabad",
     shortAddress: "Shiv Chowk Road",
     rating: 4.9,
@@ -1436,6 +1482,7 @@ const stores: Store[] = [
     name: "Paper Trail Stationery",
     category: "Stationery",
     icon: "✎",
+    bannerUrl: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=800&q=80",
     address: "A-9, Mangal Bazaar Road, Your Locality, Loni, Ghaziabad",
     shortAddress: "Mangal Bazaar Road",
     rating: 4.7,
@@ -1452,6 +1499,7 @@ const stores: Store[] = [
     name: "WellSpring Pharmacy",
     category: "Pharmacy",
     icon: "✚",
+    bannerUrl: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=800&q=80",
     address: "D-33, Main Market, Your Locality, Loni, Ghaziabad",
     shortAddress: "Main Market",
     rating: 4.7,
@@ -1468,6 +1516,7 @@ const stores: Store[] = [
     name: "Oven & Crumb Bakery",
     category: "Bakery",
     icon: "♨",
+    bannerUrl: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80",
     address: "B-66, 25 Foota Road, Your Locality, Loni, Ghaziabad",
     shortAddress: "25 Foota Road",
     rating: 4.8,
@@ -1484,6 +1533,7 @@ const stores: Store[] = [
     name: "QuickFix Mobile Repair",
     category: "Repair",
     icon: "⚙",
+    bannerUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
     address: "A-401, Mangal Bazaar Road, Your Locality, Loni, Ghaziabad",
     shortAddress: "Mangal Bazaar Road",
     rating: 4.5,
@@ -1500,6 +1550,7 @@ const stores: Store[] = [
     name: "Paw & Whisker Pet Care",
     category: "Pet care",
     icon: "●",
+    bannerUrl: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=800&q=80",
     address: "C-25, Shani Bazaar Road, Your Locality, Loni, Ghaziabad",
     shortAddress: "Shani Bazaar Road",
     rating: 4.9,
@@ -1516,6 +1567,7 @@ const stores: Store[] = [
     name: "MoveWell Fitness Studio",
     category: "Fitness",
     icon: "↔",
+    bannerUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80",
     address: "D-77, Shiv Chowk Road, Your Locality, Loni, Ghaziabad",
     shortAddress: "Shiv Chowk Road",
     rating: 4.8,
@@ -1532,6 +1584,7 @@ const stores: Store[] = [
     name: "Third Place Café",
     category: "Café",
     icon: "☕",
+    bannerUrl: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80",
     address: "MM-4, Main Market, Your Locality, Loni, Ghaziabad",
     shortAddress: "Main Market",
     rating: 4.6,
@@ -1560,8 +1613,9 @@ export default function Home() {
   const [catalogTotal, setCatalogTotal] = useState(0);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [nextPage, setNextPage] = useState(2);
   const [hasMore, setHasMore] = useState(false);
+  const [displayLimit, setDisplayLimit] = useState(6);
+  const [nextPage, setNextPage] = useState(2);
   const [userRole, setUserRole] = useState<"admin" | "store_owner" | "customer" | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
@@ -1704,11 +1758,12 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    setDisplayLimit(6);
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
       setCatalogLoading(true);
       const parameters = new URLSearchParams({
-        limit: "24",
+        limit: "12",
         page: "1",
         lat: String(currentCoords.latitude),
         lng: String(currentCoords.longitude),
@@ -1828,38 +1883,41 @@ export default function Home() {
   };
 
   const loadMore = async () => {
-    setLoadingMore(true);
-    const parameters = new URLSearchParams({
-      limit: "24",
-      page: String(nextPage),
-      lat: String(currentCoords.latitude),
-      lng: String(currentCoords.longitude),
-    });
-    if (query.trim()) parameters.set("q", query.trim());
-    if (category !== "All") parameters.set("category", category);
-    if (areaFilter.trim()) parameters.set("area", areaFilter.trim());
-    if (pinFilter.trim()) parameters.set("pin", pinFilter.trim());
-    if (businessTypeFilter.trim()) parameters.set("type", businessTypeFilter.trim());
-    if (sortMode === "open") parameters.set("openNow", "true");
-    if (["nearest", "rated", "newest"].includes(sortMode)) parameters.set("sort", sortMode);
-    try {
-      const data = await apiFetch<{
-        items: Array<Store & { services?: string[] }>;
-        pagination: { hasMore: boolean };
-      }>(`/api/stores?${parameters}`);
-      setCatalogStores((current) => {
-        const existingKeys = new Set(current.map((s) => String(s.id ?? s.slug)));
-        const newItems = data.items
-          .filter((s) => !existingKeys.has(String(s.id ?? s.slug)))
-          .map((store) => ({ ...store, services: store.services ?? [] }));
-        return [...current, ...newItems];
+    setDisplayLimit((prev) => prev + 6);
+    if (hasMore) {
+      setLoadingMore(true);
+      const parameters = new URLSearchParams({
+        limit: "6",
+        page: String(nextPage),
+        lat: String(currentCoords.latitude),
+        lng: String(currentCoords.longitude),
       });
-      setHasMore(data.pagination.hasMore);
-      setNextPage((page) => page + 1);
-    } catch (error) {
-      setToast(error instanceof Error ? error.message : "Could not load more places.");
-    } finally {
-      setLoadingMore(false);
+      if (query.trim()) parameters.set("q", query.trim());
+      if (category !== "All") parameters.set("category", category);
+      if (areaFilter.trim()) parameters.set("area", areaFilter.trim());
+      if (pinFilter.trim()) parameters.set("pin", pinFilter.trim());
+      if (businessTypeFilter.trim()) parameters.set("type", businessTypeFilter.trim());
+      if (sortMode === "open") parameters.set("openNow", "true");
+      if (["nearest", "rated", "newest"].includes(sortMode)) parameters.set("sort", sortMode);
+      try {
+        const data = await apiFetch<{
+          items: Array<Store & { services?: string[] }>;
+          pagination: { hasMore: boolean };
+        }>(`/api/stores?${parameters}`);
+        setCatalogStores((current) => {
+          const existingKeys = new Set(current.map((s) => String(s.id ?? s.slug)));
+          const newItems = data.items
+            .filter((s) => !existingKeys.has(String(s.id ?? s.slug)))
+            .map((store) => ({ ...store, services: store.services ?? [] }));
+          return [...current, ...newItems];
+        });
+        setHasMore(data.pagination.hasMore);
+        setNextPage((page) => page + 1);
+      } catch (error) {
+        setToast(error instanceof Error ? error.message : "Could not load more places.");
+      } finally {
+        setLoadingMore(false);
+      }
     }
   };
 
@@ -2327,7 +2385,7 @@ export default function Home() {
         ) : results.length > 0 ? (
           <>
           <div className="storeGrid">
-            {results.map((store, index) => (
+            {results.slice(0, displayLimit).map((store, index) => (
               <article className={`storeCard arise-on-scroll arise-delay-${(index % 6) + 1}`} key={store.id}>
                 <button
                   type="button"
@@ -2336,26 +2394,19 @@ export default function Home() {
                   onClick={() => setSelectedStore(store)}
                   style={{ position: "relative", overflow: "hidden" }}
                 >
-                  {store.bannerUrl || store.logoUrl ? (
-                    <img
-                      src={store.bannerUrl || store.logoUrl}
-                      alt={store.name}
-                      loading="lazy"
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  ) : (
-                    <>
-                      <span className="visualPattern" aria-hidden="true" />
-                      <span className="storeGlyph" aria-hidden="true">{store.icon}</span>
-                    </>
-                  )}
-                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(11,15,23,0.7) 0%, transparent 70%)", pointerEvents: "none" }} />
+                  <img
+                    src={getStorePhoto(store)}
+                    alt={store.name}
+                    loading="lazy"
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(11,15,23,0.7) 0%, transparent 60%)", pointerEvents: "none" }} />
                   <span className={`statusBadge ${store.open ? "isOpen" : "isClosed"}`}>{store.open ? "Open now" : "Closed"}</span>
                   <span className="distanceBadge">{store.distance.toFixed(1)} km</span>
                 </button>
@@ -2387,10 +2438,10 @@ export default function Home() {
               </article>
             ))}
           </div>
-          {hasMore && (
+          {(hasMore || results.length > displayLimit) && (
             <div className="loadMoreRow">
               <button type="button" onClick={() => void loadMore()} disabled={loadingMore}>
-                {loadingMore ? "Loading more places..." : "Show more nearby places"}
+                {loadingMore ? "Loading more places..." : `Show more nearby places (${Math.max(0, catalogTotal - Math.min(catalogTotal, displayLimit))} remaining)`}
               </button>
             </div>
           )}
@@ -2514,9 +2565,19 @@ export default function Home() {
       {selectedStore && (
         <div className="modalLayer detailsLayer" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && setSelectedStore(null)}>
           <section className="detailModal" role="dialog" aria-modal="true" aria-labelledby="store-detail-title">
-            <div className={`detailHero tone-${selectedStore.tone}`}>
-              <span className="visualPattern" aria-hidden="true" />
-              <span className="detailGlyph" aria-hidden="true">{selectedStore.icon}</span>
+            <div className={`detailHero tone-${selectedStore.tone}`} style={{ position: "relative", overflow: "hidden" }}>
+              <img
+                src={getStorePhoto(selectedStore)}
+                alt={selectedStore.name}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(11,15,23,0.75) 0%, transparent 60%)", pointerEvents: "none" }} />
               <button type="button" className="closeButton lightClose" aria-label="Close store details" onClick={() => setSelectedStore(null)}>×</button>
               <span className={`statusBadge ${selectedStore.open ? "isOpen" : "isClosed"}`}>{selectedStore.open ? "Open now" : "Closed"}</span>
             </div>
