@@ -1391,8 +1391,8 @@ const CATEGORY_PHOTOS: Record<string, string> = {
   "Clinic": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80",
   "Clinics & Doctors": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80",
   "Hospital": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=800&q=80",
-  "Stationery": "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=800&q=80",
-  "Stationery & Printing": "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=800&q=80",
+  "Stationery": "https://images.unsplash.com/photo-1456735190829-bb75b0004266?auto=format&fit=crop&w=800&q=80",
+  "Stationery & Printing": "https://images.unsplash.com/photo-1456735190829-bb75b0004266?auto=format&fit=crop&w=800&q=80",
   "Pharmacy": "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=800&q=80",
   "Pharmacies": "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=800&q=80",
   "Bakery": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80",
@@ -2413,11 +2413,12 @@ export default function Home() {
                       width: "100%",
                       height: "100%",
                       objectFit: "cover",
+                      zIndex: 1,
                     }}
                   />
-                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(11,15,23,0.7) 0%, transparent 60%)", pointerEvents: "none" }} />
-                  <span className={`statusBadge ${store.open ? "isOpen" : "isClosed"}`}>{store.open ? "Open now" : "Closed"}</span>
-                  <span className="distanceBadge">{store.distance.toFixed(1)} km</span>
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(11,15,23,0.7) 0%, transparent 60%)", pointerEvents: "none", zIndex: 2 }} />
+                  <span className={`statusBadge ${store.open ? "isOpen" : "isClosed"}`} style={{ zIndex: 3 }}>{store.open ? "Open now" : "Closed"}</span>
+                  <span className="distanceBadge" style={{ zIndex: 3 }}>{store.distance.toFixed(1)} km</span>
                 </button>
                 <div className="storeBody">
                   <div className="storeTopline">
