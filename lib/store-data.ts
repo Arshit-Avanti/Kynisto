@@ -237,25 +237,9 @@ export async function listCategories(module: "local" | "healthcare" | "all" = "l
      FROM categories WHERE parent_id IS NOT NULL AND status = 'active' ${childModuleCondition}
      ORDER BY sort_order ASC, name ASC`,
   );
-  const [result, children] = await Promise.all([
-    (module === "all" ? parentStatement : parentStatement.bind(module)).all<{
-      id: string;
-      name: string;
-      slug: string;
-      description: string;
-      icon: string;
-      color: string;
-      storeCount: number;
-    }>(),
-    (module === "all" ? childStatement : childStatement.bind(module)).all<{
-      id: string;
-      parentId: string;
-      name: string;
-      slug: string;
-      description: string;
-      icon: string;
-      color: string;
-    }>(),
+  const [result, children] = await db.batch<any>([
+    module === "all" ? parentStatement : parentStatement.bind(module),
+    module === "all" ? childStatement : childStatement.bind(module),
   ]);
   const categories = (result.results ?? []).map((category) => ({
     ...category,
@@ -476,18 +460,18 @@ export async function getStoreBySlug(slug: string) {
     .first<StoreRow>();
   if (!row) return null;
 
-  const [images, products, services, offers, reviews, catalogMedia] = await Promise.all([
-    db.prepare("SELECT id, url, alt_text AS altText, kind, width, height FROM store_images WHERE store_id = ? ORDER BY sort_order ASC, created_at ASC").bind(row.id).all(),
-    db.prepare("SELECT p.id, p.name, p.slug, p.description, p.price, p.currency, p.image_url AS imageUrl, COALESCE(i.quantity - i.reserved_quantity, 0) AS available FROM products p LEFT JOIN inventory i ON i.product_id = p.id WHERE p.store_id = ? AND p.status = 'active' ORDER BY p.created_at DESC LIMIT 24").bind(row.id).all(),
-    db.prepare("SELECT id, name, slug, description, price_from AS priceFrom, duration_minutes AS durationMinutes, image_url AS imageUrl FROM services WHERE store_id = ? AND status = 'active' ORDER BY created_at DESC LIMIT 24").bind(row.id).all(),
-    db.prepare("SELECT id, title, description, code, starts_at AS startsAt, ends_at AS endsAt FROM offers WHERE store_id = ? AND status = 'active' AND (ends_at IS NULL OR ends_at > unixepoch()) ORDER BY created_at DESC LIMIT 12").bind(row.id).all(),
-    db.prepare("SELECT id, reviewer_name AS reviewerName, rating, title, comment, owner_reply AS ownerReply, owner_replied_at AS ownerRepliedAt, created_at AS createdAt FROM reviews WHERE store_id = ? AND status = 'published' ORDER BY created_at DESC LIMIT 50").bind(row.id).all(),
+  const [images, products, services, offers, reviews, catalogMedia] = await db.batch<any>([
+    db.prepare("SELECT id, url, alt_text AS altText, kind, width, height FROM store_images WHERE store_id = ? ORDER BY sort_order ASC, created_at ASC").bind(row.id),
+    db.prepare("SELECT p.id, p.name, p.slug, p.description, p.price, p.currency, p.image_url AS imageUrl, COALESCE(i.quantity - i.reserved_quantity, 0) AS available FROM products p LEFT JOIN inventory i ON i.product_id = p.id WHERE p.store_id = ? AND p.status = 'active' ORDER BY p.created_at DESC LIMIT 24").bind(row.id),
+    db.prepare("SELECT id, name, slug, description, price_from AS priceFrom, duration_minutes AS durationMinutes, image_url AS imageUrl FROM services WHERE store_id = ? AND status = 'active' ORDER BY created_at DESC LIMIT 24").bind(row.id),
+    db.prepare("SELECT id, title, description, code, starts_at AS startsAt, ends_at AS endsAt FROM offers WHERE store_id = ? AND status = 'active' AND (ends_at IS NULL OR ends_at > unixepoch()) ORDER BY created_at DESC LIMIT 12").bind(row.id),
+    db.prepare("SELECT id, reviewer_name AS reviewerName, rating, title, comment, owner_reply AS ownerReply, owner_replied_at AS ownerRepliedAt, created_at AS createdAt FROM reviews WHERE store_id = ? AND status = 'published' ORDER BY created_at DESC LIMIT 50").bind(row.id),
     db.prepare(`SELECT id, owner_type AS ownerType, product_id AS productId, service_id AS serviceId,
       public_url AS publicUrl, thumbnail_url AS thumbnailUrl, media_type AS mediaType,
       caption, alt_text AS altText, duration_seconds AS durationSeconds, featured,
       crop_x AS cropX, crop_y AS cropY
       FROM media_assets WHERE store_id = ? AND owner_type IN ('product', 'service')
-      ORDER BY featured DESC, sort_order ASC, created_at ASC`).bind(row.id).all<Record<string, unknown>>(),
+      ORDER BY featured DESC, sort_order ASC, created_at ASC`).bind(row.id),
   ]);
 
   const mediaRows = catalogMedia.results ?? [];
