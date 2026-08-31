@@ -151,21 +151,9 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
             padding: "0 12px",
           }}
         >
-          {/* Eye-Catching 2-Line Hero Heading */}
-          <h1 className="arise-on-scroll arise-delay-1 text-4xl sm:text-6xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.15] mb-5 sm:mb-7 text-center max-w-4xl mx-auto px-2 drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]">
-            <span className="block whitespace-nowrap">
-              Life is{" "}
-              <span className="font-serif italic font-normal bg-gradient-to-r from-amber-300 via-orange-400 to-amber-200 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(251,191,36,0.35)]">
-                Smarter
-              </span>
-            </span>
-            <span className="block whitespace-nowrap text-slate-100 font-bold tracking-tight mt-1 sm:mt-2">
-              with{" "}
-              <span className="relative inline-block text-white">
-                Kynisto
-                <span className="absolute -bottom-1 sm:-bottom-1.5 left-0 right-0 h-[2.5px] sm:h-[3.5px] rounded-full bg-gradient-to-r from-orange-500 via-amber-400 to-orange-400/40" />
-              </span>
-            </span>
+          {/* Elegant Luxury Editorial Heading (Exact Reference: media_1788175043181.png) */}
+          <h1 className="arise-on-scroll arise-delay-1 text-2xl xs:text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-normal leading-[1.2] mb-5 sm:mb-7 text-center max-w-3xl mx-auto px-4 drop-shadow-[0_2px_14px_rgba(0,0,0,0.7)] select-none">
+            Life is <span className="italic font-normal">Smarter</span> with Kynisto
           </h1>
 
           {/* Minimalist Neumorphic / Glassmorphic Capsule Search Bar (Reference: media_1787853301950.png) */}
