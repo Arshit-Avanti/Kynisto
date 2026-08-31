@@ -151,9 +151,14 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
             padding: "0 12px",
           }}
         >
-          {/* Elegant Luxury Editorial Heading (Exact Reference: media_1788175043181.png) */}
-          <h1 className="arise-on-scroll arise-delay-1 text-2xl xs:text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-normal leading-[1.2] mb-5 sm:mb-7 text-center max-w-3xl mx-auto px-4 drop-shadow-[0_2px_14px_rgba(0,0,0,0.7)] select-none">
-            Life is <span className="italic font-normal">Smarter</span> with Kynisto
+          {/* Elegant 2-Line Hero Heading (Exact 2-Line Mobile & Desktop Parity) */}
+          <h1 className="arise-on-scroll arise-delay-1 text-center mb-5 sm:mb-7 select-none px-2">
+            <span className="block text-[1.85rem] xs:text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-tight leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] whitespace-nowrap">
+              Life is <span className="italic font-light">Smarter</span>
+            </span>
+            <span className="block text-[1.85rem] xs:text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-tight leading-tight mt-0.5 sm:mt-1.5 drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] whitespace-nowrap">
+              with Kynisto
+            </span>
           </h1>
 
           {/* Minimalist Neumorphic / Glassmorphic Capsule Search Bar (Reference: media_1787853301950.png) */}
