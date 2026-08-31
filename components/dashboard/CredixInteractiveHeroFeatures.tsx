@@ -151,18 +151,10 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
             padding: "0 12px",
           }}
         >
-          {/* Refined Professional Heading */}
-          <h1 className="arise-on-scroll arise-delay-1 text-3xl sm:text-5xl md:text-6xl font-bold text-white tracking-tight leading-tight sm:leading-[1.15] mb-3 sm:mb-4 text-center max-w-3xl mx-auto px-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.75)]">
-            Your City. Your Health.{" "}
-            <span className="bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 bg-clip-text text-transparent">
-              Your Life, Smarter.
-            </span>
+          {/* Elegant Hero Heading (Reference: media_1788175043181.png) */}
+          <h1 className="arise-on-scroll arise-delay-1 text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-normal leading-tight mb-5 sm:mb-7 text-center max-w-3xl mx-auto px-2 drop-shadow-[0_2px_12px_rgba(0,0,0,0.75)] font-medium">
+            Life is <span className="italic font-normal">Smarter</span> with Kynisto
           </h1>
-
-          {/* Refined Subtitle */}
-          <p className="arise-on-scroll arise-delay-2 text-xs sm:text-sm md:text-base text-slate-100/90 font-normal max-w-lg mx-auto mb-5 sm:mb-6 leading-relaxed drop-shadow-[0_1px_6px_rgba(0,0,0,0.75)] px-3 text-center">
-            Discover verified local stores, book home services, join live doctor OPD queues, and unlock smart rewards across your neighborhood.
-          </p>
 
           {/* Minimalist Neumorphic / Glassmorphic Capsule Search Bar (Reference: media_1787853301950.png) */}
           <form
