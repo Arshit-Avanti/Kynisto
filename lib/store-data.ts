@@ -447,7 +447,7 @@ export async function listStores(options: {
       hasMore: start + limit < total,
     },
   };
-  microCache.set(cacheKey, storeResult, 15_000);
+  microCache.set(cacheKey, storeResult, 30_000);
   return storeResult;
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { VideoBackground } from "@/components/media/VideoBackground";
 import { CredixInteractiveHeroFeatures } from "@/components/dashboard/CredixInteractiveHeroFeatures";
@@ -63,7 +63,7 @@ const modernCleanTechStyles = `
     background: transparent !important;
     color: #f8fafc !important;
   }
-  
+
   /* Mode Dark Styles */
   .mode-dark .searchBox, .mode-dark .healthSearch, .mode-dark .productIntro form, .mode-dark .locationPill, .mode-dark .storeCard, .mode-dark .advancedFilters input, .mode-dark .providerGrid article {
     border-radius: 16px !important;
@@ -414,23 +414,23 @@ const modernCleanTechStyles = `
   .searchSubmit:hover {
     box-shadow: 0 4px 15px rgba(255, 87, 34, 0.5) !important;
   }
-  
+
   /* Ambient Mesh */
   .ambientMesh {
     position: absolute; inset: 0; z-index: 0; pointer-events: none;
-    background-image: 
-      radial-gradient(at 0% 0%, hsla(253,16%,7%,0.3) 0, transparent 50%), 
-      radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%), 
+    background-image:
+      radial-gradient(at 0% 0%, hsla(253,16%,7%,0.3) 0, transparent 50%),
+      radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%),
       radial-gradient(at 100% 0%, hsla(339,49%,30%,0.2) 0, transparent 50%);
     filter: blur(80px) saturate(150%); opacity: 0.25;
   }
   .mode-light .ambientMesh {
-    background-image: 
-      radial-gradient(at 0% 0%, hsla(253,16%,97%,1) 0, transparent 50%), 
-      radial-gradient(at 50% 0%, hsla(225,39%,80%,1) 0, transparent 50%), 
+    background-image:
+      radial-gradient(at 0% 0%, hsla(253,16%,97%,1) 0, transparent 50%),
+      radial-gradient(at 50% 0%, hsla(225,39%,80%,1) 0, transparent 50%),
       radial-gradient(at 100% 0%, hsla(339,49%,80%,1) 0, transparent 50%);
   }
-  
+
   /* High Contrast Text Custom Properties */
   .mode-dark {
     --text-primary: #FFFFFF;
@@ -449,7 +449,7 @@ const modernCleanTechStyles = `
     background-image: none !important;
     color: #000000 !important;
   }
-  
+
   /* Floating 3D Cards */
   .floatingCardsContainer {
     position: relative; height: 180px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; z-index: 2; margin: 30px 0 40px 0;
@@ -492,11 +492,11 @@ const modernCleanTechStyles = `
   }
   .glassCard3D svg { margin-bottom: 12px; opacity: 0.9; transform: translateZ(20px); transition: transform 0.15s ease; }
   .glassCard3D b { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; transform: translateZ(30px); transition: transform 0.15s ease; }
-  
+
   .glassCard3D:hover::before { opacity: 1; }
-  .glassCard3D:hover { 
-    cursor: pointer; 
-    border-color: rgba(255, 87, 34, 0.8) !important; 
+  .glassCard3D:hover {
+    cursor: pointer;
+    border-color: rgba(255, 87, 34, 0.8) !important;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 87, 34, 0.3) !important;
     transform: perspective(1000px) rotateX(10deg) rotateY(-8deg) translateZ(30px) translateY(-12px);
     z-index: 10;
@@ -574,7 +574,7 @@ const modernCleanTechStyles = `
     letter-spacing: -0.02em;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
   }
-  
+
   .featureGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -680,7 +680,7 @@ const modernCleanTechStyles = `
     font-weight: 450 !important;
     letter-spacing: 0.01em !important;
   }
-  
+
 
 
   /* FLOATING GLASS NAVBAR LIGHT MODE & DARK MODE UNIFIED STYLES */
@@ -1416,21 +1416,35 @@ const CATEGORY_PHOTOS: Record<string, string> = {
   "Default": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80",
 };
 
+function optimizeUnsplashUrl(url: string) {
+  if (!url || !url.includes("images.unsplash.com")) return url;
+  try {
+    const parsed = new URL(url);
+    parsed.searchParams.set("w", "600");
+    parsed.searchParams.set("q", "75");
+    parsed.searchParams.set("auto", "format");
+    parsed.searchParams.set("fit", "crop");
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
 export function getStorePhoto(store: { bannerUrl?: string | null; logoUrl?: string | null; category?: string; businessType?: string; name?: string }) {
-  if (store.bannerUrl && store.bannerUrl.trim()) return store.bannerUrl;
-  if (store.logoUrl && store.logoUrl.trim()) return store.logoUrl;
-  
+  if (store.bannerUrl && store.bannerUrl.trim()) return optimizeUnsplashUrl(store.bannerUrl);
+  if (store.logoUrl && store.logoUrl.trim()) return optimizeUnsplashUrl(store.logoUrl);
+
   const rawCat = (store.category || "").trim().toLowerCase();
   const rawType = (store.businessType || "").trim().toLowerCase();
   const rawName = (store.name || "").trim().toLowerCase();
 
   for (const [key, url] of Object.entries(CATEGORY_PHOTOS)) {
     const k = key.toLowerCase();
-    if (rawCat && (rawCat.includes(k) || k.includes(rawCat))) return url;
-    if (rawType && (rawType.includes(k) || k.includes(rawType))) return url;
-    if (rawName && rawName.includes(k)) return url;
+    if (rawCat && (rawCat.includes(k) || k.includes(rawCat))) return optimizeUnsplashUrl(url);
+    if (rawType && (rawType.includes(k) || k.includes(rawType))) return optimizeUnsplashUrl(url);
+    if (rawName && rawName.includes(k)) return optimizeUnsplashUrl(url);
   }
-  return CATEGORY_PHOTOS["Default"];
+  return optimizeUnsplashUrl(CATEGORY_PHOTOS["Default"]);
 }
 
 const stores: Store[] = [
@@ -1857,7 +1871,7 @@ export default function Home() {
     return filtered;
   }, [catalogStores, category, query, sortMode]);
 
-  const toggleSaved = async (store: Store) => {
+  const toggleSaved = useCallback(async (store: Store) => {
     if (userRole !== "customer" && userRole !== "admin") {
       window.location.assign(`/login?returnTo=${encodeURIComponent(store.slug ? `/stores/${store.slug}` : "/")}`);
       return;
@@ -1876,9 +1890,9 @@ export default function Home() {
       setSaved((current) => isSaved ? [...current, store.id] : current.filter((id) => id !== store.id));
       setToast(error instanceof Error ? error.message : "Could not update saved places.");
     }
-  };
+  }, [saved, userRole]);
 
-  const loadMore = async () => {
+  const loadMore = useCallback(async () => {
     setDisplayLimit((prev) => prev + 6);
     if (hasMore) {
       setLoadingMore(true);
@@ -1915,9 +1929,9 @@ export default function Home() {
         setLoadingMore(false);
       }
     }
-  };
+  }, [areaFilter, businessTypeFilter, category, currentCoords, hasMore, nextPage, pinFilter, query, sortMode]);
 
-  const useCurrentLocation = () => {
+  const useCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setToast("Location services are not supported on this device.");
       return;
@@ -1933,7 +1947,7 @@ export default function Home() {
       () => setToast("Location access was not enabled. Using Your Locality."),
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
     );
-  };
+  }, []);
 
   const resetFilters = () => {
     setQuery("");
@@ -2485,6 +2499,8 @@ export default function Home() {
               <img
                 src={getStorePhoto(selectedStore)}
                 alt={selectedStore.name}
+                loading="lazy"
+                decoding="async"
                 style={{
                   position: "absolute",
                   inset: 0,
