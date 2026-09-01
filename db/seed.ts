@@ -138,8 +138,9 @@ async function seedDatabase(): Promise<void> {
 
   // Seed categories only — no demo stores
   const categoryRows: SeedValue[][] = [];
-  categorySeeds.forEach(([name, icon, color, children], categoryIndex) => {
-    const parentId = `category-${String(categoryIndex + 1).padStart(2, "0")}`;
+  categorySeeds.forEach(([name, icon, color, children], index) => {
+    if (index < 100) {
+    const parentId = `category-${String(index + 1).padStart(2, "0")}`;
     categoryRows.push([
       parentId,
       null,
@@ -148,8 +149,8 @@ async function seedDatabase(): Promise<void> {
       `Trusted ${name.toLowerCase()} in and around Your Locality.`,
       icon,
       color,
-      HEALTHCARE_CATEGORY_INDEXES.has(categoryIndex) ? "healthcare" : "local",
-      categoryIndex,
+      HEALTHCARE_CATEGORY_INDEXES.has(index) ? "healthcare" : "local",
+      index,
       "active",
       now,
       now,
@@ -163,13 +164,14 @@ async function seedDatabase(): Promise<void> {
         `${child} businesses serving Your Locality and Loni.`,
         icon,
         color,
-        HEALTHCARE_CATEGORY_INDEXES.has(categoryIndex) ? "healthcare" : "local",
+        HEALTHCARE_CATEGORY_INDEXES.has(index) ? "healthcare" : "local",
         childIndex,
         "active",
         now,
         now,
       ]);
     });
+    }
   });
 
   await db.batch([
