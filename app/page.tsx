@@ -11,9 +11,10 @@ import { getSupabaseBrowserClient, syncSupabaseAccessCookie } from "@/lib/supaba
 import { WelcomeRewardModal } from "@/components/subscription/WelcomeRewardModal";
 import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
 import { EfferdFeatures6 } from "@/components/blocks/features-6";
-import { EfferdFooter3 } from "@/components/blocks/footer-3";
+import { Footer3D } from "@/components/landing/Footer3D";
 import { Navbar3D } from "@/components/landing/Navbar3D";
 import { EditorialFaqSection } from "@/components/landing/EditorialFaqSection";
+import { EditorialGuidesSection } from "@/components/landing/EditorialGuidesSection";
 
 type Category = {
   name: string;
@@ -2412,9 +2413,11 @@ export default function Home() {
         </div>
       </section>
 
+      <EditorialGuidesSection />
+
       <EditorialFaqSection />
 
-      <EfferdFooter3 />
+      <Footer3D />
 
       {customizing && (
         <div className="modalLayer" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && setCustomizing(false)}>
