@@ -103,11 +103,11 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
   const translateYMobile = isDesktop ? 0 : -Math.sin(scrollProgress * Math.PI) * 12;
   const scale = isDesktop ? 0.98 + scrollProgress * 0.02 : 0.97 + scrollProgress * 0.03;
 
-  // Features Left Content emergence (100% hidden before scroll, smoothly glides in when scrolling)
+  // Features Left Content emergence (smooth transition on Desktop, naturally visible on Mobile)
   const featuresTranslateX = isDesktop ? Math.max(0, (0.35 - scrollProgress) * -80) : 0;
-  const featuresTranslateY = isDesktop ? 0 : Math.max(0, (0.25 - scrollProgress) * 40);
-  const featuresOpacity = Math.max(0, Math.min(1, (scrollProgress - 0.08) * 3));
-  const isFeaturesVisible = scrollProgress > 0.06;
+  const featuresTranslateY = 0;
+  const featuresOpacity = isDesktop ? Math.max(0, Math.min(1, (scrollProgress - 0.08) * 3)) : 1;
+  const isFeaturesVisible = isDesktop ? scrollProgress > 0.06 : true;
 
   const handleSearchSubmit = (event?: React.FormEvent) => {
     if (event) {
@@ -135,8 +135,8 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
         id="top"
         style={{
           textAlign: "center",
-          padding: "24px 16px 24px 16px",
-          minHeight: "calc(100vh - 100px)",
+          padding: isDesktop ? "24px 16px 24px 16px" : "48px 16px 20px 16px",
+          minHeight: isDesktop ? "calc(100vh - 120px)" : "auto",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -160,22 +160,22 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
             width: "100%",
             boxSizing: "border-box",
             background: "transparent",
-            padding: "0 16px",
+            padding: "0 12px",
           }}
         >
           {/* Elegant 2-Line Hero Heading */}
-          <h1 className="arise-on-scroll arise-delay-1 text-center mb-5 sm:mb-7 select-none px-2 max-w-full">
-            <span className="block text-2xl xs:text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-tight leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] break-words sm:whitespace-nowrap">
+          <h1 className="arise-on-scroll arise-delay-1 text-center mb-4 sm:mb-7 select-none px-2 max-w-full">
+            <span className="block text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-tight leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] break-words sm:whitespace-nowrap">
               Life is <span className="italic font-light">Smarter</span>
             </span>
-            <span className="block text-2xl xs:text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-tight leading-tight mt-0.5 sm:mt-1.5 drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] break-words sm:whitespace-nowrap">
+            <span className="block text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-tight leading-tight mt-0.5 sm:mt-1.5 drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] break-words sm:whitespace-nowrap">
               with Kynisto
             </span>
           </h1>
 
           {/* Minimalist Neumorphic / Glassmorphic Capsule Search Bar */}
           <form
-            className="searchBox heroSearchBox arise-on-scroll arise-delay-3 relative w-full max-w-xl mx-auto p-1.5 sm:p-2 rounded-full bg-white/[0.88] dark:bg-slate-900/80 backdrop-blur-2xl border border-white/60 dark:border-white/20 shadow-[0_12px_36px_rgba(0,0,0,0.18),0_0_24px_rgba(59,130,246,0.12),inset_0_1px_2px_rgba(255,255,255,0.8)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.2)] flex items-center transition-all duration-300 hover:border-blue-400/50 focus-within:border-blue-500 focus-within:shadow-[0_16px_45px_rgba(59,130,246,0.25),inset_0_1px_2px_rgba(255,255,255,0.9)] group mb-2 overflow-hidden"
+            className="searchBox heroSearchBox arise-on-scroll arise-delay-3 relative w-full max-w-xl mx-auto p-1.5 sm:p-2 rounded-full bg-slate-900/80 backdrop-blur-2xl border border-white/30 shadow-[0_16px_40px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.2)] flex items-center transition-all duration-300 hover:border-orange-400/50 focus-within:border-orange-500 focus-within:shadow-[0_16px_45px_rgba(255,122,0,0.25),inset_0_1px_2px_rgba(255,255,255,0.9)] group mb-2 overflow-hidden"
             role="search"
             onSubmit={handleSearchSubmit}
           >
@@ -185,31 +185,60 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
             <label className="sr-only" htmlFor="store-search">Search anything</label>
 
             {/* Left Embossed Circular Search Disc */}
-            <div className="relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/90 dark:bg-white/10 shadow-[0_2px_6px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,0.9)] dark:shadow-[0_2px_6px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center text-slate-600 dark:text-slate-200 shrink-0 transition-transform group-focus-within:scale-105">
-              <Search className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+            <div className="relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 shadow-[0_2px_6px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center text-slate-200 shrink-0 transition-transform group-focus-within:scale-105">
+              <Search className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-orange-400" />
             </div>
 
             {/* Subtle Vertical Divider */}
-            <div className="relative z-10 w-[1.5px] h-5 sm:h-6 bg-slate-300/80 dark:bg-white/20 mx-2 sm:mx-2.5 shrink-0" />
+            <div className="relative z-10 w-[1.5px] h-5 sm:h-6 bg-white/20 mx-2 sm:mx-2.5 shrink-0" />
 
             {/* Clean Input Field */}
             <input
               id="store-search"
-              className="relative z-10 flex-1 min-w-0 bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-400 text-xs sm:text-sm md:text-base px-1 py-1.5 outline-none font-medium"
+              className="relative z-10 flex-1 min-w-0 bg-transparent text-white placeholder:text-slate-300 text-xs sm:text-sm md:text-base px-1 py-1.5 outline-none font-medium"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search stores, clinics, doctors, salons, services..."
             />
 
-            {/* Right Vibrant Blue / Azure Circular Action Button */}
+            {/* Right Vibrant Orange Circular Action Button */}
             <button
-              className="relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-blue-600 via-blue-500 to-sky-400 text-white shadow-md shadow-blue-500/35 hover:shadow-lg hover:shadow-blue-500/55 active:scale-90 hover:scale-105 transition-all flex items-center justify-center shrink-0 cursor-pointer ml-1"
+              className="relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/35 hover:shadow-lg hover:shadow-orange-500/55 active:scale-90 hover:scale-105 transition-all flex items-center justify-center shrink-0 cursor-pointer ml-1"
               type="submit"
               aria-label="Search"
             >
               <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-white stroke-[2.5]" />
             </button>
           </form>
+
+          {/* Quick Interactive Category Pills */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-3 sm:mt-4 max-w-xl mx-auto px-1">
+            <Link
+              href="/healthcare"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-950/70 hover:bg-slate-900/90 border border-white/20 hover:border-emerald-400/60 backdrop-blur-xl text-white text-[11px] sm:text-xs font-bold shadow-lg active:scale-95 transition-all hover:scale-105"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Live OPD Queues</span>
+            </Link>
+            <Link
+              href="/services"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-950/70 hover:bg-slate-900/90 border border-white/20 hover:border-orange-400/60 backdrop-blur-xl text-white text-[11px] sm:text-xs font-bold shadow-lg active:scale-95 transition-all hover:scale-105"
+            >
+              <span>⚡ Home Services</span>
+            </Link>
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-950/70 hover:bg-slate-900/90 border border-white/20 hover:border-sky-400/60 backdrop-blur-xl text-white text-[11px] sm:text-xs font-bold shadow-lg active:scale-95 transition-all hover:scale-105"
+            >
+              <span>🛍️ Local Stores</span>
+            </Link>
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-950/70 hover:bg-slate-900/90 border border-white/20 hover:border-amber-400/60 backdrop-blur-xl text-white text-[11px] sm:text-xs font-bold shadow-lg active:scale-95 transition-all hover:scale-105"
+            >
+              <span>📖 Guides &amp; Blog</span>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -220,16 +249,14 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center relative z-10">
           
-          {/* FEATURES LISTED ON THE LEFT SIDE (100% Hidden before scroll, glides in smoothly when scrolling) */}
+          {/* FEATURES LISTED ON THE LEFT SIDE */}
           <div
             className="lg:col-span-5 flex flex-col items-start text-left transition-all duration-500 ease-out w-full p-5 sm:p-7 rounded-3xl bg-slate-950/90 backdrop-blur-2xl border border-white/20 shadow-2xl relative overflow-hidden group/card"
             style={{
-              transform: isDesktop
-                ? `translateX(${featuresTranslateX}px)`
-                : `translateY(${featuresTranslateY}px)`,
-              opacity: featuresOpacity,
-              visibility: isFeaturesVisible ? "visible" : "hidden",
-              pointerEvents: scrollProgress > 0.15 ? "auto" : "none",
+              transform: isDesktop ? `translateX(${featuresTranslateX}px)` : "none",
+              opacity: isDesktop ? featuresOpacity : 1,
+              visibility: isDesktop ? (isFeaturesVisible ? "visible" : "hidden") : "visible",
+              pointerEvents: isDesktop ? (scrollProgress > 0.15 ? "auto" : "none") : "auto",
             }}
           >
             {/* Ambient Radiant Glow Sweep in the background */}
