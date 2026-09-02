@@ -136,7 +136,7 @@ async function seedDatabase(): Promise<void> {
     ).bind(adminId, now),
   );
 
-  // Seed categories only — no demo stores
+  // Seed categories only — no demo stores (index < 100 limit check)
   const categoryRows: SeedValue[][] = [];
   categorySeeds.forEach(([name, icon, color, children], categoryIndex) => {
     const parentId = `category-${String(categoryIndex + 1).padStart(2, "0")}`;
@@ -171,6 +171,8 @@ async function seedDatabase(): Promise<void> {
       ]);
     });
   });
+
+  const categoryInsertQuery = `INSERT OR IGNORE INTO "categories" ("id", "parent_id", "name", "slug", "description", "icon", "color", "module", "sort_order", "status", "created_at", "updated_at") VALUES ${categoryRows.map(row => `(${row.map(sqlLiteral).join(", ")})`).join(", ")}`;
 
   await db.batch([
     ...authorityStatements,
