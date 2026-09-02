@@ -41,9 +41,9 @@ export const ARTICLES: Article[] = [
     publishedAt: "2026-08-15",
     updatedAt: "2026-08-30",
     author: {
-      name: "Dr. Arvind Shrivastava",
-      role: "Public Health & Clinical Informatics Advisor",
-      credentials: "MBBS, MD (Community Medicine)",
+      name: "Kynisto Health & Research Desk",
+      role: "Clinical Informatics & Patient Systems Team",
+      credentials: "Kynisto Editorial Board",
     },
     summary: "Physical waiting rooms in outpatient clinics are high-risk contagion zones and major sources of patient fatigue. Learn how event-driven digital queue tokens operate, calculate dynamic ETAs, and streamline patient consultation workflows across Delhi-NCR.",
     keyTakeaways: [
@@ -115,9 +115,9 @@ export const ARTICLES: Article[] = [
     publishedAt: "2026-08-18",
     updatedAt: "2026-08-28",
     author: {
-      name: "Meenakshi Sundaram",
-      role: "Senior Pharmacist & Healthcare Supply Chain Analyst",
-      credentials: "B.Pharm, M.Sc (Clinical Pharmacy)",
+      name: "Kynisto Healthcare Research Team",
+      role: "Pharmacy Systems & Medical Supply Chain Desk",
+      credentials: "Kynisto Verified Health Desk",
     },
     summary: "While large e-commerce platforms offer scheduled deliveries, neighborhood chemists provide immediate life-saving medications, cold-chain integrity, and personalized drug interaction checks. Discover how digital indexing empowers local pharmacies.",
     keyTakeaways: [
@@ -172,9 +172,9 @@ export const ARTICLES: Article[] = [
     publishedAt: "2026-08-20",
     updatedAt: "2026-08-31",
     author: {
-      name: "Siddharth Verma",
-      role: "Urban Planning & Locality Systems Researcher",
-      credentials: "M.Plan (Urban Design), IIT Roorkee",
+      name: "Kynisto Urban Intelligence Desk",
+      role: "Locality Infrastructure & Mobility Research",
+      credentials: "Kynisto Research Group",
     },
     summary: "The 15-minute city framework proves that having daily essentials, clinics, fresh groceries, and repair services within a short walk fundamentally improves urban wellness. Explore the data and technology powering the next generation of walkable neighborhoods.",
     keyTakeaways: [
@@ -229,9 +229,9 @@ export const ARTICLES: Article[] = [
     publishedAt: "2026-08-22",
     updatedAt: "2026-08-29",
     author: {
-      name: "Dr. Ananya Ray",
-      role: "Family Medicine & Patient Advocacy Specialist",
-      credentials: "MBBS, DNB (Family Medicine)",
+      name: "Kynisto Health & Quality Desk",
+      role: "Patient Safety & Provider Standards Team",
+      credentials: "Kynisto Medical Standards Board",
     },
     summary: "Selecting a trusted primary care clinic is one of the most critical healthcare decisions for any family. This clinical safety guide covers credential verification, emergency protocols, and diagnostic transparency.",
     keyTakeaways: [
@@ -277,9 +277,9 @@ export const ARTICLES: Article[] = [
     publishedAt: "2026-08-25",
     updatedAt: "2026-08-30",
     author: {
-      name: "Rohit Malhotra",
-      role: "Retail Tech Strategist & MSME Growth Advisor",
-      credentials: "MBA (Retail Strategy), IIM Ahmedabad",
+      name: "Kynisto Retail & Commerce Team",
+      role: "Local Merchant Growth & Ecosystem Strategy",
+      credentials: "Kynisto Merchant Advisory Desk",
     },
     summary: "Small retailers possess unbeatable advantages: trust, proximity, and personalized customer relationships. Discover how simple digital tools, virtual queues, and unified loyalty programs allow local merchants to thrive against multi-billion dollar e-commerce conglomerates.",
     keyTakeaways: [
@@ -323,9 +323,9 @@ export const ARTICLES: Article[] = [
     publishedAt: "2026-08-26",
     updatedAt: "2026-08-30",
     author: {
-      name: "Dr. Pallavi Deshmukh",
-      role: "Veterinary Surgeon & Animal Welfare Consultant",
-      credentials: "B.V.Sc & A.H, M.V.Sc (Veterinary Surgery)",
+      name: "Kynisto Health & Animal Welfare Desk",
+      role: "Veterinary Protocols & Clinical Review",
+      credentials: "Kynisto Healthcare Standards Team",
     },
     summary: "When a pet experiences acute trauma, toxic ingestion, or heatstroke, every second counts. Learn how to identify veterinary emergencies, administer safe home stabilization, and locate verified animal clinics near you.",
     keyTakeaways: [
@@ -373,9 +373,9 @@ export const ARTICLES: Article[] = [
     publishedAt: "2026-08-27",
     updatedAt: "2026-08-30",
     author: {
-      name: "Mukesh Sharma",
-      role: "Residential Engineering & Electrical Safety Auditor",
-      credentials: "B.Tech (Electrical Engineering), Certified Safety Inspector",
+      name: "Kynisto Services & Technical Safety Desk",
+      role: "Home Infrastructure & Engineering Standards",
+      credentials: "Kynisto Trade Standards Team",
     },
     summary: "Household electrical overloads and hidden plumbing leaks cause millions in damages annually. Discover how to vet neighborhood technicians, understand safety certifications, and schedule routine preventive maintenance.",
     keyTakeaways: [
@@ -418,9 +418,9 @@ export const ARTICLES: Article[] = [
     publishedAt: "2026-08-28",
     updatedAt: "2026-08-30",
     author: {
-      name: "Dr. Ritu Khandelwal",
-      role: "Consultant Orthodontist & Dental Health Educator",
-      credentials: "BDS, MDS (Orthodontics)",
+      name: "Kynisto Health & Dental Advisory Team",
+      role: "Oral Health & Preventive Care Desk",
+      credentials: "Kynisto Health Standards Board",
     },
     summary: "Oral health is directly linked to systemic cardiovascular and metabolic wellness. Learn why regular preventive cleanings, early orthodontic screenings, and daily hygiene habits prevent costly root canal procedures.",
     keyTakeaways: [

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Navbar3D } from "@/components/landing/Navbar3D";
 import { Footer3D } from "@/components/landing/Footer3D";
-import { HelpCircle, Stethoscope, ShoppingBag, Wallet, ShieldCheck, Wrench, ChevronDown, CheckCircle2 } from "lucide-react";
+import { HelpCircle, Stethoscope, ShoppingBag, ShieldCheck, Wrench } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Frequently Asked Questions (FAQ) | Kynisto",
@@ -17,7 +17,7 @@ export default function FaqPage() {
     {
       category: "Healthcare & Virtual OPD Queues",
       icon: Stethoscope,
-      iconColor: "text-sky-400 bg-sky-500/10 border-sky-500/20",
+      iconColor: "text-sky-700 bg-sky-100 border-sky-200",
       questions: [
         {
           q: "How does the live virtual queue token system work?",
@@ -44,7 +44,7 @@ export default function FaqPage() {
     {
       category: "Neighborhood Stores & Local Discovery",
       icon: ShoppingBag,
-      iconColor: "text-orange-400 bg-orange-500/10 border-orange-500/20",
+      iconColor: "text-orange-700 bg-orange-100 border-orange-200",
       questions: [
         {
           q: "How are stores and services verified on Kynisto?",
@@ -67,7 +67,7 @@ export default function FaqPage() {
     {
       category: "Home Services & Certified Professionals",
       icon: Wrench,
-      iconColor: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+      iconColor: "text-purple-700 bg-purple-100 border-purple-200",
       questions: [
         {
           q: "What types of home services can I find on Kynisto?",
@@ -86,7 +86,7 @@ export default function FaqPage() {
     {
       category: "Security, Privacy & Loyalty Rewards",
       icon: ShieldCheck,
-      iconColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+      iconColor: "text-emerald-700 bg-emerald-100 border-emerald-200",
       questions: [
         {
           q: "Is my personal healthcare and contact data secure?",
@@ -119,49 +119,49 @@ export default function FaqPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white font-sans antialiased selection:bg-orange-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased selection:bg-orange-500 selection:text-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <Navbar3D />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-32 pb-24">
+      <main className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 pt-36 pb-28">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-bold uppercase tracking-wider mb-4">
-            <HelpCircle className="w-4 h-4 text-sky-400" />
+        <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-100 border border-sky-200 text-sky-800 text-xs font-bold uppercase tracking-wider shadow-sm">
+            <HelpCircle className="w-4 h-4 text-sky-600" />
             <span>Comprehensive Help Center</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-4">
+          <h1 className="text-4xl sm:text-6xl font-black text-slate-900 tracking-tight leading-tight">
             Frequently Asked Questions
           </h1>
-          <p className="text-slate-400 text-base sm:text-lg leading-relaxed">
+          <p className="text-slate-600 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
             Everything you need to know about using virtual queues, finding verified doctors, messaging local merchants, and navigating your locality.
           </p>
         </div>
 
-        {/* Categories & Q&A Blocks */}
-        <div className="space-y-12">
+        {/* Categories & Q&A Blocks with Spacious Padding */}
+        <div className="space-y-16">
           {faqCategories.map((section) => {
             const Icon = section.icon;
             return (
-              <section key={section.category} className="p-6 sm:p-10 rounded-3xl bg-slate-900/70 border border-white/10 shadow-xl">
-                <div className="flex items-center gap-3 mb-8 border-b border-white/10 pb-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${section.iconColor}`}>
-                    <Icon className="w-5 h-5" />
+              <section key={section.category} className="p-8 sm:p-12 rounded-3xl bg-white border border-slate-200 shadow-md">
+                <div className="flex items-center gap-3.5 mb-8 border-b border-slate-100 pb-5">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${section.iconColor}`}>
+                    <Icon className="w-6 h-6" />
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-white">{section.category}</h2>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">{section.category}</h2>
                 </div>
 
                 <div className="space-y-6">
                   {section.questions.map((faq, idx) => (
-                    <div key={idx} className="p-5 sm:p-6 rounded-2xl bg-slate-950/60 border border-white/5 hover:border-white/15 transition-all">
-                      <h3 className="font-bold text-white text-base sm:text-lg mb-2 flex items-start gap-2.5">
-                        <span className="text-orange-400 font-black shrink-0">Q.</span>
+                    <div key={idx} className="p-6 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-slate-300 transition-all">
+                      <h3 className="font-bold text-slate-900 text-lg mb-2.5 flex items-start gap-3">
+                        <span className="text-orange-600 font-black shrink-0">Q.</span>
                         <span>{faq.q}</span>
                       </h3>
-                      <p className="text-slate-300 text-xs sm:text-sm leading-relaxed pl-6">
+                      <p className="text-slate-600 text-sm sm:text-base leading-relaxed pl-7">
                         {faq.a}
                       </p>
                     </div>
@@ -173,14 +173,14 @@ export default function FaqPage() {
         </div>
 
         {/* Still Have Questions Box */}
-        <div className="mt-14 p-8 rounded-3xl bg-gradient-to-r from-orange-500/20 via-amber-500/10 to-transparent border border-orange-500/30 text-center">
-          <h3 className="text-xl font-bold text-white mb-2">Still have questions?</h3>
-          <p className="text-sm text-slate-300 mb-6 max-w-md mx-auto">
+        <div className="mt-20 p-10 sm:p-14 rounded-3xl bg-orange-50 border border-orange-200 text-center shadow-sm">
+          <h3 className="text-2xl font-bold text-slate-900 mb-2">Still have questions?</h3>
+          <p className="text-sm sm:text-base text-slate-600 mb-8 max-w-lg mx-auto">
             Our support desk is available 6 days a week to help with queue issues, merchant registrations, and technical inquiries.
           </p>
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-orange-500/20 hover:from-orange-600 hover:to-amber-600 transition-all"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-sm shadow-lg shadow-orange-500/20 hover:from-orange-600 hover:to-amber-600 transition-all"
           >
             <span>Contact Support Desk</span>
           </Link>
