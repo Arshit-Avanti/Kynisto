@@ -1,83 +1,200 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Navbar3D } from "@/components/landing/Navbar3D";
 import { Footer3D } from "@/components/landing/Footer3D";
-import { BookOpen, Stethoscope, Compass, ShoppingBag, ShieldCheck, ArrowRight } from "lucide-react";
+import { BookOpen, Stethoscope, Compass, ShoppingBag, ShieldCheck, ArrowRight, CheckCircle2, QrCode, Smartphone, BellRing, Sparkles, Store } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Guide to Smarter Locality Living & Virtual Queues | Kynisto",
-  description: "Comprehensive guide to avoiding clinic waiting rooms, finding verified local shops, booking instant appointments, and maximizing neighborhood loyalty rewards.",
+  title: "User & Merchant Guide | Kynisto - Locality Intelligence Manual",
+  description: "Comprehensive illustrated guide to using Kynisto: joining live clinic queues, finding verified local shops, messaging store owners, and activating digital storefronts.",
   alternates: {
     canonical: "https://kynisto.in/guide",
   },
 };
 
 export default function GuidePage() {
+  const guideJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "How to Use Kynisto Virtual Queues & Locality Discovery",
+    description: "Step-by-step guide to joining clinic virtual queues, avoiding physical waiting rooms, and discovering verified neighborhood stores.",
+    step: [
+      {
+        "@type": "HowToStep",
+        name: "Search for a Doctor or Local Store",
+        text: "Use the smart search bar on Kynisto to find doctors, clinics, or neighborhood shops sorted by distance.",
+        url: "https://kynisto.in/search",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Join the Live Virtual Queue",
+        text: "Click 'Join Live Queue' on any clinic profile or scan the clinic's reception QR code to receive a live digital token number.",
+        url: "https://kynisto.in/healthcare",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Track Dynamic ETA from Home",
+        text: "Watch your live token number advance in real time and receive audio/web alerts when your consultation is 2 numbers away.",
+        url: "https://kynisto.in/healthcare",
+      },
+    ],
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased">
+    <div className="min-h-screen bg-slate-950 text-white font-sans antialiased selection:bg-orange-500 selection:text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(guideJsonLd) }}
+      />
       <Navbar3D />
 
-      <main className="max-w-4xl mx-auto px-6 pt-32 pb-24">
-        <div className="border-b border-slate-200 pb-8 mb-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-100/80 border border-indigo-300 text-indigo-800 text-xs font-bold uppercase tracking-wider mb-4">
-            <BookOpen className="w-4 h-4 text-indigo-600" />
-            <span>Editorial Guide</span>
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-32 pb-24">
+        {/* Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-bold uppercase tracking-wider mb-4">
+            <BookOpen className="w-4 h-4 text-orange-400" />
+            <span>Platform Documentation &amp; User Manual</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight mb-4">
-            The Complete Guide to Smarter Locality Living
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight mb-6 leading-tight">
+            The Complete User &amp; Merchant Guide
           </h1>
-          <p className="text-slate-600 text-base leading-relaxed">
-            How modern urban residents and local merchants leverage Kynisto to save time, eliminate crowded clinic waiting rooms, and streamline daily commerce.
+          <p className="text-slate-400 text-base sm:text-lg leading-relaxed">
+            Everything you need to know about eliminating clinic waiting rooms, messaging local shopkeepers, and digitizing your neighborhood storefront.
           </p>
         </div>
 
-        <article className="prose prose-slate max-w-none space-y-10 text-slate-700 leading-relaxed text-base">
-          <section className="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <Stethoscope className="w-6 h-6 text-sky-600" /> 1. The End of Physical Waiting Rooms
-            </h2>
-            <p>
-              Traditional outpatient clinics and specialized doctors often suffer from unpredictable wait times. Patients are forced to sit in crowded waiting rooms for 45 to 90 minutes, risking exposure to infectious illnesses and losing valuable personal time.
-            </p>
-            <p className="mt-3">
-              With <strong>Kynisto Healthcare</strong>, clinics transition to a live event-driven queue model. Patients join virtually via the web or a quick QR scan at reception, receive a live digital token number, and can wait comfortably at home or a nearby cafe until their turn is called.
-            </p>
-          </section>
+        {/* Section 1: Healthcare & Virtual Queues */}
+        <section className="p-8 sm:p-12 rounded-3xl bg-slate-900/80 border border-white/10 shadow-2xl mb-12">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 rounded-2xl bg-sky-500/10 text-sky-400 flex items-center justify-center border border-sky-500/20">
+              <Stethoscope className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-sky-400 uppercase tracking-wider">Patient Guide</span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white">How to Use Virtual OPD Queues</h2>
+            </div>
+          </div>
 
-          <section className="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <Compass className="w-6 h-6 text-indigo-600" /> 2. Real-Time Locality Discovery vs. Static Directories
-            </h2>
+          <div className="grid md:grid-cols-3 gap-6 my-8">
+            <div className="p-5 rounded-2xl bg-slate-950/60 border border-white/5">
+              <div className="w-8 h-8 rounded-full bg-sky-500/20 text-sky-400 font-bold text-sm flex items-center justify-center mb-3">
+                1
+              </div>
+              <h4 className="font-bold text-white text-base mb-2">Find Your Doctor</h4>
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                Navigate to <strong>Healthcare</strong> or search for your required specialty (General Physician, Pediatrician, Dentist). Check live clinic status and current token counters.
+              </p>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-slate-950/60 border border-white/5">
+              <div className="w-8 h-8 rounded-full bg-sky-500/20 text-sky-400 font-bold text-sm flex items-center justify-center mb-3">
+                2
+              </div>
+              <h4 className="font-bold text-white text-base mb-2">Join Queue Virtually</h4>
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                Tap <strong>Join Live Queue</strong> from home or scan the clinic&apos;s physical QR code at reception. You receive an instant digital token number with your queue position and live ETA.
+              </p>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-slate-950/60 border border-white/5">
+              <div className="w-8 h-8 rounded-full bg-sky-500/20 text-sky-400 font-bold text-sm flex items-center justify-center mb-3">
+                3
+              </div>
+              <h4 className="font-bold text-white text-base mb-2">Arrive Just in Time</h4>
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                Relax at home or at a nearby cafe. Your screen updates live as the doctor completes preceding consultations. Arrive at the clinic when you are 2 tokens away.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-sky-500/10 border border-sky-500/30 text-sky-200 text-xs sm:text-sm flex items-start gap-2.5">
+            <Sparkles className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
+            <span><strong>Running Late Feature:</strong> If delayed by traffic, tap &quot;Running Late&quot; on your digital pass to safely postpone your turn by 2 positions without losing your registration spot.</span>
+          </div>
+        </section>
+
+        {/* Section 2: Local Store Discovery & Messaging */}
+        <section className="p-8 sm:p-12 rounded-3xl bg-slate-900/80 border border-white/10 shadow-2xl mb-12">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-400 flex items-center justify-center border border-orange-500/20">
+              <ShoppingBag className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">Shopper Guide</span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white">Discovering &amp; Messaging Local Stores</h2>
+            </div>
+          </div>
+
+          <div className="space-y-4 text-slate-300 text-sm sm:text-base leading-relaxed">
             <p>
-              Traditional search engines and yellow pages provide outdated phone numbers and unverified listings. Kynisto indexes verified neighborhood stores with live operational indicators:
+              Kynisto eliminates the guesswork from neighborhood shopping. Rather than traveling to a local grocery store, pharmacy, or stationery shop only to find it closed or out of stock, you can:
             </p>
-            <ul className="list-disc list-inside space-y-2 mt-3 text-slate-700">
-              <li><strong>Live Open/Closed Status:</strong> Real-time operational hours synchronized with the merchant&apos;s daily schedule.</li>
-              <li><strong>Direct Merchant Chat:</strong> Instant end-to-end messaging for prescription inquiries, stock checks, and repair estimates.</li>
-              <li><strong>Hyperlocal Radius Filtering:</strong> Search strictly within your immediate walking or short driving radius.</li>
+            <ul className="space-y-2 text-slate-300 text-xs sm:text-sm">
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
+                <span><strong>Check Real-Time Operational Hours:</strong> View whether a store is currently open, on break, or closed before leaving your house.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
+                <span><strong>Direct Merchant Chat:</strong> Message shop owners directly to confirm prescription availability, ask for specific product brands, or request home delivery.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
+                <span><strong>Earn Loyalty Coins:</strong> Accumulate reward points on every transaction and redeem them for instant discounts at participating neighborhood businesses.</span>
+              </li>
             </ul>
-          </section>
+          </div>
+        </section>
 
-          <section className="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <ShoppingBag className="w-6 h-6 text-emerald-600" /> 3. Empowering Local Business Owners
-            </h2>
-            <p>
-              Neighborhood commerce thrives when local business owners have access to the same high-performance digital tools used by large corporations. Kynisto provides free digital storefronts, catalog management, patient flow analytics, and automated appointment scheduling to help neighborhood businesses grow sustainably.
-            </p>
-          </section>
+        {/* Section 3: Merchant & Clinic Owner Guide */}
+        <section className="p-8 sm:p-12 rounded-3xl bg-slate-900/80 border border-white/10 shadow-2xl mb-12">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+              <Store className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Business Owner Guide</span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white">How to List Your Store or Clinic</h2>
+            </div>
+          </div>
 
-          <div className="p-8 rounded-3xl bg-sky-50 border border-sky-200 text-center">
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Ready to explore your locality?</h3>
-            <p className="text-sm text-slate-600 mb-6 max-w-md mx-auto">
-              Find verified clinics, restaurants, salons, and repair shops near you today.
-            </p>
-            <Link href="/" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-sky-600 text-white font-bold text-sm shadow-md hover:bg-sky-700 transition-all">
-              <span>Start Exploring</span>
+          <div className="grid sm:grid-cols-2 gap-6 my-6 text-xs sm:text-sm text-slate-300">
+            <div className="p-5 rounded-2xl bg-slate-950/60 border border-white/5">
+              <h4 className="font-bold text-white text-base mb-2">1. Register as a Store Owner</h4>
+              <p className="text-slate-400">
+                Click <strong>Merchant Portal</strong> to register. Enter your business name, operating locality, contact phone number, and physical store photos.
+              </p>
+            </div>
+            <div className="p-5 rounded-2xl bg-slate-950/60 border border-white/5">
+              <h4 className="font-bold text-white text-base mb-2">2. Activate Virtual Queues</h4>
+              <p className="text-slate-400">
+                For clinics and appointment-based services, toggle <strong>Live OPD Queue</strong> in your dashboard to generate your clinic&apos;s printable counter QR poster.
+              </p>
+            </div>
+            <div className="p-5 rounded-2xl bg-slate-950/60 border border-white/5">
+              <h4 className="font-bold text-white text-base mb-2">3. Upload Catalog &amp; Services</h4>
+              <p className="text-slate-400">
+                List products, consultation fees, and repair packages with clear pricing and high-resolution images.
+              </p>
+            </div>
+            <div className="p-5 rounded-2xl bg-slate-950/60 border border-white/5">
+              <h4 className="font-bold text-white text-base mb-2">4. Zero Middleman Fees</h4>
+              <p className="text-slate-400">
+                Enjoy 100% of your customer earnings. Kynisto charges zero sales commissions on orders and appointments.
+              </p>
+            </div>
+          </div>
+
+          <div className="text-center pt-4">
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 hover:from-emerald-600 hover:to-teal-600 transition-all"
+            >
+              <span>Create Free Merchant Account</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-        </article>
+        </section>
       </main>
 
       <Footer3D />

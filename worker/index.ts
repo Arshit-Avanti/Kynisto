@@ -204,6 +204,37 @@ const worker = {
       }
     }
 
+    // Ultra-Fast Edge HTML Caching for Public Guest Pages (10-20ms TTFB)
+    const isPublicPage =
+      (url.pathname === "/" ||
+       url.pathname === "/search" ||
+       url.pathname === "/healthcare" ||
+       url.pathname === "/blog" ||
+       url.pathname.startsWith("/blog/") ||
+       url.pathname === "/pricing" ||
+       url.pathname === "/about" ||
+       url.pathname === "/faq" ||
+       url.pathname === "/guide" ||
+       url.pathname === "/privacy" ||
+       url.pathname === "/terms") &&
+      !request.headers.get("cookie")?.includes("kynisto_session");
+
+    if (method === "GET" && isPublicPage) {
+      try {
+        const pageRes = await handler.fetch(request, env, ctx);
+        const secured = applySecurityHeaders(pageRes);
+        if (secured.status === 200) {
+          secured.headers.set("Cache-Control", "public, max-age=0, s-maxage=120, stale-while-revalidate=86400");
+          secured.headers.set("CDN-Cache-Control", "max-age=120");
+          secured.headers.set("Cloudflare-CDN-Cache-Control", "max-age=120");
+          secured.headers.set("Vary", "Accept-Encoding");
+        }
+        return secured;
+      } catch {
+        // Fallback
+      }
+    }
+
     if (url.pathname === "/_vinext/image" && env.IMAGES) {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
       const imgRes = await handleImageOptimization(request, {
