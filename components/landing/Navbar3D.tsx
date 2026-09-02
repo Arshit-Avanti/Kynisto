@@ -124,13 +124,6 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-1.5 lg:gap-3 text-sm font-semibold text-slate-700 mx-2" aria-label="Main Navigation">
           <Link
-            href="/search"
-            className="px-3 py-1.5 rounded-full hover:bg-orange-500/10 hover:text-orange-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5 whitespace-nowrap"
-          >
-            <Search className="w-3.5 h-3.5" />
-            <span>Search</span>
-          </Link>
-          <Link
             href="/services"
             className="px-3 py-1.5 rounded-full hover:bg-orange-500/10 hover:text-orange-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap"
           >
