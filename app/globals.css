@@ -32,6 +32,32 @@ html {
   --yellow: #000000;
 
   --bg-space: #ffffff;
+}
+
+/* Mobile fit-to-scale & responsive container protection */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  position: relative;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
 .light-theme,
 .mode-light {
   --portal-bg: #F8FAFC !important;
@@ -104,6 +130,7 @@ html {
   text-shadow: none;
 }
 
+:root {
   --glass-hover: rgba(0, 0, 0, 0.06);
   --glow-orange: #000000;
   --glow-red: #000000;

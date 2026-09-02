@@ -164,11 +164,11 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
           }}
         >
           {/* Elegant 2-Line Hero Heading */}
-          <h1 className="arise-on-scroll arise-delay-1 text-center mb-5 sm:mb-7 select-none px-2">
-            <span className="block text-[1.85rem] xs:text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-tight leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] whitespace-nowrap">
+          <h1 className="arise-on-scroll arise-delay-1 text-center mb-5 sm:mb-7 select-none px-2 max-w-full">
+            <span className="block text-2xl xs:text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-tight leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] break-words sm:whitespace-nowrap">
               Life is <span className="italic font-light">Smarter</span>
             </span>
-            <span className="block text-[1.85rem] xs:text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-tight leading-tight mt-0.5 sm:mt-1.5 drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] whitespace-nowrap">
+            <span className="block text-2xl xs:text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-tight leading-tight mt-0.5 sm:mt-1.5 drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] break-words sm:whitespace-nowrap">
               with Kynisto
             </span>
           </h1>
