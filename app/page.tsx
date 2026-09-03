@@ -64,7 +64,7 @@ const modernCleanTechStyles = `
     background: transparent !important;
     color: #f8fafc !important;
   }
-  
+
   /* Mode Dark Styles */
   .mode-dark .searchBox, .mode-dark .healthSearch, .mode-dark .productIntro form, .mode-dark .locationPill, .mode-dark .storeCard, .mode-dark .advancedFilters input, .mode-dark .providerGrid article {
     border-radius: 16px !important;
@@ -415,23 +415,23 @@ const modernCleanTechStyles = `
   .searchSubmit:hover {
     box-shadow: 0 4px 15px rgba(255, 87, 34, 0.5) !important;
   }
-  
+
   /* Ambient Mesh */
   .ambientMesh {
     position: absolute; inset: 0; z-index: 0; pointer-events: none;
-    background-image: 
-      radial-gradient(at 0% 0%, hsla(253,16%,7%,0.3) 0, transparent 50%), 
-      radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%), 
+    background-image:
+      radial-gradient(at 0% 0%, hsla(253,16%,7%,0.3) 0, transparent 50%),
+      radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%),
       radial-gradient(at 100% 0%, hsla(339,49%,30%,0.2) 0, transparent 50%);
     filter: blur(80px) saturate(150%); opacity: 0.25;
   }
   .mode-light .ambientMesh {
-    background-image: 
-      radial-gradient(at 0% 0%, hsla(253,16%,97%,1) 0, transparent 50%), 
-      radial-gradient(at 50% 0%, hsla(225,39%,80%,1) 0, transparent 50%), 
+    background-image:
+      radial-gradient(at 0% 0%, hsla(253,16%,97%,1) 0, transparent 50%),
+      radial-gradient(at 50% 0%, hsla(225,39%,80%,1) 0, transparent 50%),
       radial-gradient(at 100% 0%, hsla(339,49%,80%,1) 0, transparent 50%);
   }
-  
+
   /* High Contrast Text Custom Properties */
   .mode-dark {
     --text-primary: #FFFFFF;
@@ -450,7 +450,7 @@ const modernCleanTechStyles = `
     background-image: none !important;
     color: #000000 !important;
   }
-  
+
   /* Floating 3D Cards */
   .floatingCardsContainer {
     position: relative; height: 180px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; z-index: 2; margin: 30px 0 40px 0;
@@ -493,11 +493,11 @@ const modernCleanTechStyles = `
   }
   .glassCard3D svg { margin-bottom: 12px; opacity: 0.9; transform: translateZ(20px); transition: transform 0.15s ease; }
   .glassCard3D b { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; transform: translateZ(30px); transition: transform 0.15s ease; }
-  
+
   .glassCard3D:hover::before { opacity: 1; }
-  .glassCard3D:hover { 
-    cursor: pointer; 
-    border-color: rgba(255, 87, 34, 0.8) !important; 
+  .glassCard3D:hover {
+    cursor: pointer;
+    border-color: rgba(255, 87, 34, 0.8) !important;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 87, 34, 0.3) !important;
     transform: perspective(1000px) rotateX(10deg) rotateY(-8deg) translateZ(30px) translateY(-12px);
     z-index: 10;
@@ -575,7 +575,7 @@ const modernCleanTechStyles = `
     letter-spacing: -0.02em;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
   }
-  
+
   .featureGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -681,7 +681,7 @@ const modernCleanTechStyles = `
     font-weight: 450 !important;
     letter-spacing: 0.01em !important;
   }
-  
+
 
 
   /* FLOATING GLASS NAVBAR LIGHT MODE & DARK MODE UNIFIED STYLES */
@@ -1420,7 +1420,7 @@ const CATEGORY_PHOTOS: Record<string, string> = {
 export function getStorePhoto(store: { bannerUrl?: string | null; logoUrl?: string | null; category?: string; businessType?: string; name?: string }) {
   if (store.bannerUrl && store.bannerUrl.trim()) return store.bannerUrl;
   if (store.logoUrl && store.logoUrl.trim()) return store.logoUrl;
-  
+
   const rawCat = (store.category || "").trim().toLowerCase();
   const rawType = (store.businessType || "").trim().toLowerCase();
   const rawName = (store.name || "").trim().toLowerCase();
@@ -1687,19 +1687,19 @@ export default function Home() {
       { threshold: 0.05, rootMargin: "0px 0px -20px 0px" }
     );
 
+    let frameId: number;
     const observeAll = () => {
       const elements = document.querySelectorAll(".arise-on-scroll");
       elements.forEach((el) => observer.observe(el));
     };
 
-    observeAll();
-    const timer = setTimeout(observeAll, 300);
+    frameId = requestAnimationFrame(observeAll);
 
     return () => {
-      clearTimeout(timer);
+      cancelAnimationFrame(frameId);
       observer.disconnect();
     };
-  }, [catalogStores, category, query, sortMode]);
+  }, [catalogStores.length, category, sortMode]);
 
   useEffect(() => {
     const stored = window.localStorage.getItem("kynisto-preferences");
