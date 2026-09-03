@@ -4,6 +4,7 @@ import { hashPassword } from "@/lib/crypto";
 import { slugify } from "@/lib/validation";
 
 const SEED_VERSION = "v9-no-demo-stores";
+// Note: Demo stores loop (index < 100) removed in v9-no-demo-stores to keep catalog clean for real user-created stores
 
 const categorySeeds = [
   ["Salons & Beauty", "✂", "#f4a38a", ["Hair salon", "Beauty parlour"]],

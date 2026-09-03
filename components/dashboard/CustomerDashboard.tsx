@@ -10,6 +10,7 @@ import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscri
 import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
 import KynistoWalletView from "@/components/wallet/KynistoWalletView";
 import { RoleSwitcherButton } from "@/components/auth/RoleSwitcherButton";
+import { CustomerPrescriptionCenter } from "@/components/healthcare/CustomerPrescriptionCenter";
 import { Package, Heart, Star, ShoppingCart, MapPin, Store, Calendar, CheckCircle2, MessageSquare, Ticket, BellRing } from "lucide-react";
 
 type Item = Record<string, unknown>;
@@ -268,6 +269,7 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
     {tab === "wishlist" && <WishlistPanel items={items} mutate={mutate} />}
     {tab === "cart" && <CartPanel items={items} subtotal={Number(data.subtotal ?? 0)} addresses={addresses} mutate={mutate} />}
     {tab === "orders" && <OrdersPanel items={items} mutate={mutate} />}
+    {tab === "prescriptions" && <CustomerPrescriptionCenter />}
     {tab === "reviews" && <ReviewsPanel items={reviews} remove={deleteReview} productReviews={productReviews} deliveredOrders={items} mutateProduct={mutateProductReview} />}
     {tab === "notifications" && <NotificationsPanel items={items} mutate={mutate} membershipNotifs={membershipNotifs.notifications} unreadCount={membershipNotifs.unreadCount} onMarkRead={markNotifRead} onMarkAllRead={markAllNotifsRead} />}
     {tab === "settings" && <SettingsPanel preferences={(data.preferences as Item | undefined) ?? {}} mutate={mutate} />}

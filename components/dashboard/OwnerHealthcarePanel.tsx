@@ -3,6 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState, startTransition, type FormEvent } from "react";
 import { apiFetch } from "@/lib/client-api";
 import { OwnerHealthcareQRCard } from "./OwnerHealthcareQRCard";
+import { ClinicPatientsTab } from "@/components/healthcare/ClinicPatientsTab";
+import { ClinicPrescriptionsTab } from "@/components/healthcare/ClinicPrescriptionsTab";
+import { ClinicFollowupsTab } from "@/components/healthcare/ClinicFollowupsTab";
+import { PrescriptionDesigner } from "@/components/healthcare/PrescriptionDesigner";
+import { DoctorPrescriptionModal } from "@/components/healthcare/DoctorPrescriptionModal";
+import type { PrescriptionRecord } from "@/lib/prescriptions";
 
 type Item = Record<string, string | number | null | undefined>;
 type Doctor = { id: string; name: string; specialization?: string; consultationMinutes?: number; consultationFee?: number; status?: string };
@@ -50,7 +56,16 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
   const [doctorForm, setDoctorForm] = useState<DoctorFormState>({ open: false, editing: null });
-  const [activeTab, setActiveTab] = useState<"queue" | "appointments" | "doctors" | "settings">("queue");
+  const [activeTab, setActiveTab] = useState<
+    "queue" | "patients" | "prescriptions" | "followups" | "designer" | "settings" | "appointments" | "doctors"
+  >("queue");
+  const [prescriptionModal, setPrescriptionModal] = useState<{
+    open: boolean;
+    patientName?: string;
+    patientPhone?: string;
+    queueEntryId?: string;
+    reissueTarget?: PrescriptionRecord | null;
+  }>({ open: false });
 
   const prevWaitingCountRef = useRef<number>(-1);
   const prevEntriesSignatureRef = useRef<string>("");
@@ -324,6 +339,24 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
                 Complete
               </button>
             )}
+            {(isCalling || isInConsultation) && (
+              <button
+                type="button"
+                onClick={() =>
+                  setPrescriptionModal({
+                    open: true,
+                    patientName: String(entry.patientName ?? "Patient"),
+                    patientPhone: String(entry.patientPhone ?? ""),
+                    queueEntryId: String(entry.id),
+                  })
+                }
+                className="portalButtonSm primary"
+                style={{ background: "#059669", color: "#ffffff", fontWeight: 800 }}
+                title="Create & Issue Prescription"
+              >
+                ℞ Prescribe
+              </button>
+            )}
             {/* Waiting-only */}
             {isWaiting && (
               <button onClick={() => void action("skip", { entryId: entry.id })} disabled={Boolean(busy)}>Skip</button>
@@ -457,9 +490,9 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
   return <>
     <div className="portalTitleRow">
       <div>
-        <span className="portalEyebrow">Healthcare operations</span>
-        <h1>Live Queue</h1>
-        <p>Manage today&apos;s patient flow for this provider only.</p>
+        <span className="portalEyebrow">Central Clinic & Doctor Management</span>
+        <h1>Healthcare</h1>
+        <p>Manage today&apos;s patient queue, consultation records, prescriptions, and follow-ups.</p>
       </div>
       <span className={`statusPill ${String(profile.status ?? "closed")}`}>{String(profile.status ?? "closed")}</span>
     </div>
@@ -542,6 +575,21 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
           <button onClick={() => void action("complete", { entryId: currentlyActive.id })} disabled={Boolean(busy)} className="portalButtonSm success">
             {inConsultation ? "✓ Done" : "Complete"}
           </button>
+          <button
+            type="button"
+            onClick={() =>
+              setPrescriptionModal({
+                open: true,
+                patientName: String(currentlyActive.patientName ?? "Patient"),
+                patientPhone: String(currentlyActive.patientPhone ?? ""),
+                queueEntryId: String(currentlyActive.id),
+              })
+            }
+            className="portalButtonSm primary"
+            style={{ background: "#059669", color: "#ffffff", fontWeight: 800 }}
+          >
+            ℞ Prescribe & Complete
+          </button>
           {!inConsultation && (
             <button onClick={() => void action("mark_no_show", { entryId: currentlyActive.id })} disabled={Boolean(busy)} className="portalButtonSm warning">No-show</button>
           )}
@@ -552,19 +600,55 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
     )}
 
     {/* Tab navigation */}
-    <div className="healthcareTabs">
-      {(["queue", "appointments", "doctors", "settings"] as const).map((tab) => (
-        <button
-          key={tab}
-          className={`healthcareTab ${activeTab === tab ? "active" : ""}`}
-          onClick={() => setActiveTab(tab)}
-        >
-          {tab === "queue" && `Queue (${entries.length})`}
-          {tab === "appointments" && `Appointments (${data.appointments?.length ?? 0})`}
-          {tab === "doctors" && `Doctors (${data.doctors?.length ?? 0})`}
-          {tab === "settings" && "Settings"}
-        </button>
-      ))}
+    <div className="healthcareTabs" style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
+      <button
+        className={`healthcareTab ${activeTab === "queue" ? "active" : ""}`}
+        onClick={() => setActiveTab("queue")}
+      >
+        Live Queue ({entries.length})
+      </button>
+      <button
+        className={`healthcareTab ${activeTab === "patients" ? "active" : ""}`}
+        onClick={() => setActiveTab("patients")}
+      >
+        Patients
+      </button>
+      <button
+        className={`healthcareTab ${activeTab === "prescriptions" ? "active" : ""}`}
+        onClick={() => setActiveTab("prescriptions")}
+      >
+        Prescription History
+      </button>
+      <button
+        className={`healthcareTab ${activeTab === "followups" ? "active" : ""}`}
+        onClick={() => setActiveTab("followups")}
+      >
+        Follow-ups
+      </button>
+      <button
+        className={`healthcareTab ${activeTab === "designer" ? "active" : ""}`}
+        onClick={() => setActiveTab("designer")}
+      >
+        Prescription Design
+      </button>
+      <button
+        className={`healthcareTab ${activeTab === "appointments" ? "active" : ""}`}
+        onClick={() => setActiveTab("appointments")}
+      >
+        Appointments ({data.appointments?.length ?? 0})
+      </button>
+      <button
+        className={`healthcareTab ${activeTab === "doctors" ? "active" : ""}`}
+        onClick={() => setActiveTab("doctors")}
+      >
+        Doctors ({data.doctors?.length ?? 0})
+      </button>
+      <button
+        className={`healthcareTab ${activeTab === "settings" ? "active" : ""}`}
+        onClick={() => setActiveTab("settings")}
+      >
+        Settings
+      </button>
     </div>
 
     {/* Tab content */}
@@ -680,9 +764,85 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
               {busy === "configure" ? "Saving…" : "Save queue settings"}
             </button>
           </form>
+          <div className="portalCard" style={{ marginTop: "1.5rem", padding: "1.5rem", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "16px" }}>
+            <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "#166534", marginBottom: "0.5rem" }}>
+              🎨 Prescription Design
+            </h3>
+            <p style={{ fontSize: "0.85rem", color: "#15803d", marginBottom: "1rem" }}>
+              Customize your clinic logo, doctor credentials, header, typography, colors, and margins with the live Canva-like designer.
+            </p>
+            <button
+              type="button"
+              onClick={() => setActiveTab("designer")}
+              className="portalButton"
+              style={{ background: "#059669", color: "#ffffff" }}
+            >
+              Open Prescription Designer →
+            </button>
+          </div>
           <div className="queueHistory"><h3>Daily history</h3>{renderedHistory}</div>
         </section>
       </div>
+    )}
+
+    {activeTab === "patients" && (
+      <ClinicPatientsTab
+        storeId={storeId}
+        onPrescribeForPatient={(name, phone) =>
+          setPrescriptionModal({ open: true, patientName: name, patientPhone: phone })
+        }
+        onViewPrescription={() => {
+          setActiveTab("prescriptions");
+        }}
+      />
+    )}
+
+    {activeTab === "prescriptions" && (
+      <ClinicPrescriptionsTab
+        storeId={storeId}
+        storeName={String(profile.name || "Clinic")}
+        onNewPrescription={() => setPrescriptionModal({ open: true })}
+        onReissuePrescription={(rx) =>
+          setPrescriptionModal({ open: true, reissueTarget: rx })
+        }
+      />
+    )}
+
+    {activeTab === "followups" && (
+      <ClinicFollowupsTab
+        storeId={storeId}
+        onToast={showToast}
+        onPrescribeForFollowUp={(name, phone) =>
+          setPrescriptionModal({ open: true, patientName: name, patientPhone: phone })
+        }
+      />
+    )}
+
+    {activeTab === "designer" && (
+      <PrescriptionDesigner
+        storeId={storeId}
+        storeName={String(profile.name || "Clinic")}
+        onToast={showToast}
+      />
+    )}
+
+    {prescriptionModal.open && (
+      <DoctorPrescriptionModal
+        storeId={storeId}
+        storeName={String(profile.name || "Clinic")}
+        onClose={() => setPrescriptionModal({ open: false })}
+        onSuccess={(prescriptionId, rxNumber) => {
+          setPrescriptionModal({ open: false });
+          showToast(`Prescription #${rxNumber} issued successfully!`);
+          void load();
+          setActiveTab("prescriptions");
+        }}
+        initialPatientName={prescriptionModal.patientName}
+        initialPatientPhone={prescriptionModal.patientPhone}
+        queueEntryId={prescriptionModal.queueEntryId}
+        doctors={data.doctors}
+        reissueTarget={prescriptionModal.reissueTarget}
+      />
     )}
 
     <OwnerHealthcareQRCard />

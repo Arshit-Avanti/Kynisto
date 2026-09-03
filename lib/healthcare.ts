@@ -1,6 +1,7 @@
 import { getD1 } from "@/db/runtime";
 import { ensureSeeded } from "@/db/seed";
 import { HttpError } from "@/lib/security";
+import { ensurePrescriptionTables } from "@/lib/prescriptions";
 
 export const HEALTHCARE_TYPES = [
   "hospital",
@@ -139,6 +140,7 @@ export async function ensureHealthcareTables() {
     }
 
 
+    await ensurePrescriptionTables();
     _healthcareTablesEnsured = true;
   } catch (err) {
     console.warn("Healthcare tables check notice:", err);

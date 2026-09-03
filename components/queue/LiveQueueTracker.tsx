@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef, useMemo, startTransition } from 'react';
-import { Clock, MapPin, AlertCircle, XCircle, CheckCircle2, Navigation, User, Phone, Bell, ArrowLeft, Search, Building2, Stethoscope, Activity, Sparkles, Filter, ChevronRight, Lock, RefreshCw, AlertTriangle, PartyPopper, Calendar, QrCode } from 'lucide-react';
+import { Clock, MapPin, AlertCircle, XCircle, CheckCircle2, Navigation, User, Phone, Bell, ArrowLeft, Search, Building2, Stethoscope, Activity, Sparkles, Filter, ChevronRight, Lock, RefreshCw, AlertTriangle, PartyPopper, Calendar, QrCode, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/client-api';
@@ -11,6 +11,7 @@ import { ClinicQrModal } from '@/components/queue/ClinicQrModal';
 import { UniversalHealthcareQrScanner } from '@/components/queue/UniversalHealthcareQrScanner';
 import { Navbar3D } from '@/components/landing/Navbar3D';
 import { saveQueueSession, clearQueueSession } from '@/lib/queue-persistence';
+import { CustomerPrescriptionCenter } from '@/components/healthcare/CustomerPrescriptionCenter';
 
 
 
@@ -349,6 +350,25 @@ export default function LiveQueueTracker() {
   // Clinic QR modal state
   const [qrTarget, setQrTarget] = useState<{ id: string; name: string; slug?: string } | null>(null);
   const [showUniversalScanner, setShowUniversalScanner] = useState(false);
+
+  // Customer Healthcare navigation: Find | Live Queue | Appointments | My Prescription
+  const [customerNav, setCustomerNav] = useState<'find' | 'queue' | 'appointments' | 'prescriptions'>('find');
+  const [selectedPrescriptionId, setSelectedPrescriptionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const sp = new URLSearchParams(window.location.search);
+    const tabParam = sp.get('tab');
+    const rxParam = sp.get('prescriptionId') || sp.get('rxId') || sp.get('rx');
+    if (tabParam === 'prescriptions' || tabParam === 'prescription' || rxParam) {
+      setCustomerNav('prescriptions');
+      if (rxParam) setSelectedPrescriptionId(rxParam);
+    } else if (tabParam === 'queue') {
+      setCustomerNav('queue');
+    } else if (tabParam === 'appointments') {
+      setCustomerNav('appointments');
+    }
+  }, []);
 
 
 
@@ -1393,6 +1413,138 @@ export default function LiveQueueTracker() {
         }}
       />
 
+      {/* Customer Healthcare Hub Navigation */}
+      <div className="relative z-20 pt-20 sm:pt-24 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto flex items-center justify-center">
+          <div className="inline-flex items-center gap-1 sm:gap-2 p-1.5 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-md">
+            <button
+              type="button"
+              onClick={() => {
+                setCustomerNav('find');
+                if (view === 'ticket' && (!selectedQueue || entryStatus === 'completed' || isCancelled)) {
+                  setView('list');
+                }
+              }}
+              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                customerNav === 'find' && view === 'list'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <Stethoscope className="w-4 h-4" />
+              <span>Find Clinic/Doctor</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (selectedQueue && !isCancelled && !liveCompleted && entryStatus !== 'completed' && myTokenNumber > 0) {
+                  setView('ticket');
+                } else {
+                  setView('list');
+                }
+                setCustomerNav('queue');
+              }}
+              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                (customerNav === 'queue' || view === 'ticket') && customerNav !== 'prescriptions'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <Clock className="w-4 h-4" />
+              <span>Live Queue</span>
+              {selectedQueue && !isCancelled && !liveCompleted && entryStatus !== 'completed' && myTokenNumber > 0 && (
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setCustomerNav('appointments')}
+              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                customerNav === 'appointments' && view === 'list'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <Calendar className="w-4 h-4" />
+              <span>Appointments</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setView('list');
+                setCustomerNav('prescriptions');
+              }}
+              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                customerNav === 'prescriptions'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              <span>My Prescription</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {customerNav === 'prescriptions' ? (
+        <div className="relative z-10 flex-1">
+          <CustomerPrescriptionCenter
+            initialPrescriptionId={selectedPrescriptionId}
+            onSelectClinicForBooking={(targetId, targetName) => {
+              setBookingTarget({ id: targetId, name: targetName, allowAppointments: true });
+            }}
+          />
+        </div>
+      ) : customerNav === 'appointments' ? (
+        <div className="relative z-10 max-w-6xl mx-auto w-full px-4 sm:px-6 pt-8 pb-20 flex-1">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 text-teal-800 text-xs font-black uppercase tracking-wider mb-2 border border-teal-200">
+              <Calendar className="w-3.5 h-3.5 text-teal-600" />
+              Doctor Appointments
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
+              Schedule Clinic Visits
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1 max-w-md mx-auto">
+              Book doctor consultations in advance with verified healthcare providers near you.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-7">
+            {queues
+              .filter((q) => q.allowAppointments !== 0 && q.allowAppointments !== false)
+              .map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white border border-slate-200 hover:border-emerald-500/40 rounded-3xl p-5 sm:p-7 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between"
+                >
+                  <div className="flex items-start gap-3.5 mb-4">
+                    <div className="w-11 h-11 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-600 shrink-0">
+                      <Stethoscope className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black text-slate-900 leading-tight">{item.name}</h3>
+                      <p className="text-xs text-slate-500 mt-0.5">{item.address}</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setBookingTarget({ id: String(item.id), name: item.name, allowAppointments: true })}
+                    className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm cursor-pointer transition-all"
+                  >
+                    <Calendar className="w-4 h-4" />
+                    <span>Book Appointment</span>
+                  </button>
+                </div>
+              ))}
+          </div>
+        </div>
+      ) : (
+        <>
+
       <div className="relative z-10 pt-24 sm:pt-28 pb-6 sm:pb-10 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto flex flex-col items-center text-center">
           {selectedQueue && !isCancelled && !liveCompleted && entryStatus !== 'completed' && myTokenNumber > 0 && (
@@ -1529,6 +1681,8 @@ export default function LiveQueueTracker() {
           {renderedQueuesGrid}
         </div>
       </div>
+      </>
+      )}
     </div>
 
     {bookingTarget && (

@@ -38,7 +38,9 @@ import {
   Menu,
   ChevronLeft,
   Briefcase,
-  Wallet
+  Wallet,
+  Stethoscope,
+  FileText,
 } from "lucide-react";
 
 type NavItem = {
@@ -89,7 +91,7 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { label: "Coupons", icon: Tags, tab: "coupons" },
     { label: "Reviews", icon: Star, tab: "reviews" },
     { label: "Analytics", icon: Activity, tab: "analytics" },
-    { label: "Live Queue", icon: Users, tab: "healthcare" },
+    { label: "Healthcare", icon: Stethoscope, tab: "healthcare" },
     { label: "Notifications", icon: Bell, tab: "notifications" },
     { label: "Settings", icon: Settings, tab: "settings" },
     { label: "Membership Plans", icon: Shield, tab: "memberships" },
@@ -106,6 +108,7 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { label: "Wishlist", icon: Star, tab: "wishlist" },
     { label: "Cart", icon: ShoppingCart, tab: "cart" },
     { label: "Orders", icon: Package, tab: "orders" },
+    { label: "My Prescriptions", icon: FileText, tab: "prescriptions" },
     { label: "My reviews", icon: MessageSquare, tab: "reviews" },
     { label: "Notifications", icon: Bell, tab: "notifications" },
     { label: "Settings", icon: Settings, tab: "settings" },
