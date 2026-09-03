@@ -510,9 +510,18 @@ export function CustomerPrescriptionCenter({
                       ) : (
                         <button
                           type="button"
-                          onClick={() => {
-                            if (onSelectClinicForBooking) {
-                              onSelectClinicForBooking(fu.storeId, (fu as any).clinicName || "Clinic");
+                          onClick={async () => {
+                            try {
+                              await apiFetch("/api/healthcare/follow-ups", {
+                                method: "PATCH",
+                                json: { action: "book", followUpId: fu.id },
+                              });
+                              if (onSelectClinicForBooking) {
+                                onSelectClinicForBooking(fu.storeId, (fu as any).clinicName || "Clinic");
+                              }
+                              await fetchCustomerData();
+                            } catch (err: any) {
+                              alert(err?.message || "Failed to book follow-up");
                             }
                           }}
                           className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs shadow-sm cursor-pointer transition-all flex items-center gap-1.5"

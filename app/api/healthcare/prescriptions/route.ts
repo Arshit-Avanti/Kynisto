@@ -9,6 +9,8 @@ import {
   filterToTimestamp,
   generatePrescriptionNumber,
   getDefaultTemplateLayout,
+  mergeTemplateLayout,
+  validatePrescriptionMedicines,
   calculateFollowUpDates,
   type PrescriptionFilter,
   type PrescriptionMedicine,
@@ -57,10 +59,12 @@ export async function GET(request: Request) {
       const userEmail = userRecord?.email || session.user.email || "";
 
       const cleanDigits = (p: string | null | undefined) => (p ? p.replace(/\D/g, "") : "");
+      const uDigits = cleanDigits(userPhone);
+      const pDigits = cleanDigits(rx.patient_phone);
 
       const isCustomer =
         (rx.user_id && rx.user_id === session.user.id) ||
-        (userPhone && rx.patient_phone && cleanDigits(rx.patient_phone) === cleanDigits(userPhone)) ||
+        (uDigits && pDigits && (pDigits === uDigits || (uDigits.length >= 10 && pDigits.length >= 10 && pDigits.slice(-10) === uDigits.slice(-10)))) ||
         (userEmail && rx.patient_email && rx.patient_email.toLowerCase() === userEmail.toLowerCase());
 
       if (!isOwnerOrAdmin && !isCustomer) {
@@ -119,6 +123,9 @@ export async function GET(request: Request) {
     const userId = session.user.id;
     const userRow = await db.prepare("SELECT phone FROM users WHERE id = ?").bind(userId).first<any>();
     const userPhone = userRow?.phone || "";
+    const cleanDigits = (p: string | null | undefined) => (p ? p.replace(/\D/g, "") : "");
+    const uPhoneDigits = cleanDigits(userPhone);
+    const phoneSuffix = uPhoneDigits.length >= 10 ? `%${uPhoneDigits.slice(-10)}` : userPhone;
 
     let query = `
       SELECT p.*, f.id AS fu_id, f.follow_up_date AS fu_date, f.valid_until_date AS fu_valid_until,
@@ -126,10 +133,10 @@ export async function GET(request: Request) {
              f.payment_status AS fu_pay_status, f.booking_status AS fu_book_status
       FROM healthcare_prescriptions p
       LEFT JOIN healthcare_follow_ups f ON f.prescription_id = p.id
-      WHERE (p.user_id = ? OR (p.patient_phone IS NOT NULL AND p.patient_phone != '' AND p.patient_phone = ?)) AND p.issued_at >= ?
+      WHERE (p.user_id = ? OR (p.patient_phone IS NOT NULL AND p.patient_phone != '' AND (p.patient_phone = ? OR p.patient_phone LIKE ?))) AND p.issued_at >= ?
       ORDER BY p.issued_at DESC LIMIT 100
     `;
-    const rows = await db.prepare(query).bind(userId, userPhone, minTimestamp).all<any>();
+    const rows = await db.prepare(query).bind(userId, userPhone, phoneSuffix, minTimestamp).all<any>();
     const prescriptions = (rows.results || []).map((row) => formatPrescriptionWithJoinedFollowUp(row));
 
     return noStoreJson({ prescriptions });
@@ -158,6 +165,7 @@ export async function POST(request: Request) {
     const doctorId = cleanText(body.doctorId, "Doctor ID", { max: 80, required: false }) || null;
     const doctorName = cleanText(body.doctorName, "Doctor Name", { min: 2, max: 120 });
     const doctorSpecialization = cleanText(body.doctorSpecialization, "Specialization", { max: 120, required: false }) || null;
+    const doctorRegistration = cleanText(body.doctorRegistration, "Doctor Registration", { max: 100, required: false }) || null;
 
     // Patient info
     const patientName = cleanText(body.patientName, "Patient Name", { min: 2, max: 120 });
@@ -197,50 +205,49 @@ export async function POST(request: Request) {
     const diagnosis = cleanText(body.diagnosis, "Diagnosis", { max: 2000, required: false }) || null;
     const advice = cleanText(body.advice, "Advice", { max: 2000, required: false }) || null;
 
-    // Medicines array validation
-    const rawMeds = Array.isArray(body.medicines) ? body.medicines : [];
-    if (rawMeds.length === 0) {
-      throw new HttpError(400, "At least one medicine is required to issue a prescription.", "MEDICINE_REQUIRED");
+    // Medicines array validation using robust validator
+    let medicines: PrescriptionMedicine[];
+    try {
+      medicines = validatePrescriptionMedicines(body.medicines);
+    } catch (err: any) {
+      throw new HttpError(400, err.message, err.code || "INVALID_MEDICINE");
     }
-
-    const medicines: PrescriptionMedicine[] = rawMeds.map((m: any, idx: number) => ({
-      name: cleanText(m.name, `Medicine #${idx + 1} name`, { min: 1, max: 120 }),
-      dosage: cleanText(m.dosage, "Dosage", { max: 60, required: false }) || undefined,
-      frequency: cleanText(m.frequency, "Frequency", { max: 60, required: false }) || undefined,
-      duration: cleanText(m.duration, "Duration", { max: 60, required: false }) || undefined,
-      timing: cleanText(m.timing, "Timing", { max: 60, required: false }) || undefined,
-      instructions: cleanText(m.instructions, "Instructions", { max: 250, required: false }) || undefined,
-    }));
 
     // Tests array
     const rawTests = Array.isArray(body.tests) ? body.tests : [];
     const tests = rawTests.map((t: any) => typeof t === "string" ? t.trim() : "").filter(Boolean);
 
-    // Template snapshot: fetch clinic's default template or generate one
-    const templateRow = await db
-      .prepare("SELECT layout_json FROM healthcare_prescription_templates WHERE store_id = ? AND is_default = 1 LIMIT 1")
-      .bind(storeId)
-      .first<{ layout_json: string }>();
-
+    // Template snapshot: use provided snapshot or fetch clinic's default template and merge with sound fallbacks
     let templateSnapshot: PrescriptionTemplateLayout;
-    if (templateRow?.layout_json) {
-      try {
-        templateSnapshot = JSON.parse(templateRow.layout_json);
-      } catch {
-        templateSnapshot = getDefaultTemplateLayout({
-          name: store.name,
-          address: store.address,
-          phone: store.phone,
-          logoUrl: store.logo_url,
-        });
-      }
-    } else {
-      templateSnapshot = getDefaultTemplateLayout({
+    if (body.templateSnapshot && typeof body.templateSnapshot === "object") {
+      templateSnapshot = mergeTemplateLayout(body.templateSnapshot, {
         name: store.name,
         address: store.address,
         phone: store.phone,
         logoUrl: store.logo_url,
       });
+    } else {
+      const templateRow = await db
+        .prepare("SELECT layout_json FROM healthcare_prescription_templates WHERE store_id = ? AND is_default = 1 LIMIT 1")
+        .bind(storeId)
+        .first<{ layout_json: string }>();
+
+      let parsedLayout = null;
+      if (templateRow?.layout_json) {
+        try {
+          parsedLayout = JSON.parse(templateRow.layout_json);
+        } catch {}
+      }
+      templateSnapshot = mergeTemplateLayout(parsedLayout, {
+        name: store.name,
+        address: store.address,
+        phone: store.phone,
+        logoUrl: store.logo_url,
+      });
+    }
+
+    if (doctorRegistration) {
+      templateSnapshot.doctorRegistration = doctorRegistration;
     }
 
     const rxId = `rx-${crypto.randomUUID()}`;
@@ -250,20 +257,20 @@ export async function POST(request: Request) {
     const statements: D1PreparedStatement[] = [
       db.prepare(`
         INSERT INTO healthcare_prescriptions (
-          id, prescription_number, store_id, doctor_id, doctor_name, doctor_specialization,
+          id, prescription_number, store_id, doctor_id, doctor_name, doctor_specialization, doctor_registration,
           store_name, user_id, patient_name, patient_phone, patient_age, patient_gender, patient_address,
           queue_entry_id, appointment_id, vitals_json, symptoms, diagnosis,
           medicines_json, tests_json, advice, template_snapshot_json, status,
           issued_at, created_at, updated_at
         ) VALUES (
-          ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?,
           ?, ?, ?, ?, ?, ?, ?,
           ?, ?, ?, ?, ?,
           ?, ?, ?, ?, 'issued',
           ?, ?, ?
         )
       `).bind(
-        rxId, prescriptionNumber, storeId, doctorId, doctorName, doctorSpecialization,
+        rxId, prescriptionNumber, storeId, doctorId, doctorName, doctorSpecialization, doctorRegistration,
         store.name, userId, patientName, patientPhone, patientAge, patientGender, patientAddress,
         queueEntryId, appointmentId, JSON.stringify(vitals), symptoms, diagnosis,
         JSON.stringify(medicines), JSON.stringify(tests), advice, JSON.stringify(templateSnapshot),
@@ -372,53 +379,71 @@ export async function PATCH(request: Request) {
       if (originalRx.status === "reissued") {
         throw new HttpError(400, "This prescription has already been reissued.", "ALREADY_REISSUED");
       }
+      if (originalRx.status !== "issued") {
+        throw new HttpError(400, `Cannot reissue a prescription with status '${originalRx.status}'.`, "INVALID_STATUS");
+      }
 
       const store = await db.prepare("SELECT id, name, address, phone, logo_url FROM stores WHERE id = ?").bind(storeId).first<any>();
       const newRxId = `rx-${crypto.randomUUID()}`;
       const newPrescriptionNumber = generatePrescriptionNumber();
       const now = Math.floor(Date.now() / 1000);
 
+      const doctorId = cleanText(body.doctorId ?? originalRx.doctor_id, "Doctor ID", { max: 80, required: false }) || null;
       const doctorName = cleanText(body.doctorName ?? originalRx.doctor_name, "Doctor Name", { min: 2, max: 120 });
       const doctorSpecialization = cleanText(body.doctorSpecialization ?? originalRx.doctor_specialization, "Specialization", { max: 120, required: false }) || null;
+      const doctorRegistration = cleanText(body.doctorRegistration ?? originalRx.doctor_registration, "Doctor Registration", { max: 100, required: false }) || null;
+
       const patientName = cleanText(body.patientName ?? originalRx.patient_name, "Patient Name", { min: 2, max: 120 });
       const patientPhone = cleanText(body.patientPhone ?? originalRx.patient_phone, "Patient Phone", { max: 40, required: false }) || null;
       const patientAge = body.patientAge ? numberInput(body.patientAge, "Age", { min: 0, max: 130, integer: true }) : originalRx.patient_age;
       const patientGender = cleanText(body.patientGender ?? originalRx.patient_gender, "Gender", { max: 20, required: false }) || null;
+      const patientAddress = cleanText(body.patientAddress ?? originalRx.patient_address, "Address", { max: 250, required: false }) || null;
 
-      const vitals = body.vitals ? body.vitals : JSON.parse(originalRx.vitals_json || "{}");
+      const vitals = body.vitals ? body.vitals : safeParse(originalRx.vitals_json, {});
       const symptoms = cleanText(body.symptoms ?? originalRx.symptoms, "Symptoms", { max: 2000, required: false }) || null;
       const diagnosis = cleanText(body.diagnosis ?? originalRx.diagnosis, "Diagnosis", { max: 2000, required: false }) || null;
       const advice = cleanText(body.advice ?? originalRx.advice, "Advice", { max: 2000, required: false }) || null;
 
-      const rawMeds = Array.isArray(body.medicines) ? body.medicines : JSON.parse(originalRx.medicines_json || "[]");
-      const medicines: PrescriptionMedicine[] = rawMeds.map((m: any, idx: number) => ({
-        name: cleanText(m.name, `Medicine #${idx + 1} name`, { min: 1, max: 120 }),
-        dosage: m.dosage || undefined,
-        frequency: m.frequency || undefined,
-        duration: m.duration || undefined,
-        timing: m.timing || undefined,
-        instructions: m.instructions || undefined,
-      }));
+      const rawMeds = Array.isArray(body.medicines) ? body.medicines : safeParse(originalRx.medicines_json, []);
+      let medicines: PrescriptionMedicine[];
+      try {
+        medicines = validatePrescriptionMedicines(rawMeds);
+      } catch (err: any) {
+        throw new HttpError(400, err.message, err.code || "INVALID_MEDICINE");
+      }
 
-      const rawTests = Array.isArray(body.tests) ? body.tests : JSON.parse(originalRx.tests_json || "[]");
-      const templateSnapshot = body.templateSnapshot ? body.templateSnapshot : JSON.parse(originalRx.template_snapshot_json || "{}");
+      const rawTests = Array.isArray(body.tests) ? body.tests : safeParse(originalRx.tests_json, []);
+      const tests = rawTests.map((t: any) => typeof t === "string" ? t.trim() : "").filter(Boolean);
+
+      const rawSnapshot = body.templateSnapshot ? body.templateSnapshot : safeParse(originalRx.template_snapshot_json, null);
+      const templateSnapshot = mergeTemplateLayout(rawSnapshot, {
+        name: store?.name || originalRx.store_name,
+        address: store?.address,
+        phone: store?.phone,
+        logoUrl: store?.logo_url,
+      });
+      if (doctorRegistration) {
+        templateSnapshot.doctorRegistration = doctorRegistration;
+      }
+
+      const rootOriginalId = originalRx.original_prescription_id || originalRx.id;
 
       const statements: D1PreparedStatement[] = [
-        // 1. Mark old prescription as reissued and superseded
+        // 1. Mark old prescription as reissued and superseded (preserves original record intact for audit trail)
         db.prepare("UPDATE healthcare_prescriptions SET status = 'reissued', superseded_by_id = ?, updated_at = ? WHERE id = ?")
           .bind(newRxId, now, originalRxId),
 
-        // 2. Insert new revised prescription
+        // 2. Insert new revised prescription linking to root original
         db.prepare(`
           INSERT INTO healthcare_prescriptions (
-            id, prescription_number, store_id, doctor_id, doctor_name, doctor_specialization,
+            id, prescription_number, store_id, doctor_id, doctor_name, doctor_specialization, doctor_registration,
             store_name, user_id, patient_name, patient_phone, patient_age, patient_gender, patient_address,
             queue_entry_id, appointment_id, vitals_json, symptoms, diagnosis,
             medicines_json, tests_json, advice, template_snapshot_json, status,
             original_prescription_id, correction_reason,
             issued_at, created_at, updated_at
           ) VALUES (
-            ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?,
             ?, ?, ?, ?, 'issued',
@@ -426,18 +451,71 @@ export async function PATCH(request: Request) {
             ?, ?, ?
           )
         `).bind(
-          newRxId, newPrescriptionNumber, storeId, originalRx.doctor_id, doctorName, doctorSpecialization,
-          store?.name || originalRx.store_name, originalRx.user_id, patientName, patientPhone, patientAge, patientGender, originalRx.patient_address,
+          newRxId, newPrescriptionNumber, storeId, doctorId, doctorName, doctorSpecialization, doctorRegistration,
+          store?.name || originalRx.store_name, originalRx.user_id, patientName, patientPhone, patientAge, patientGender, patientAddress,
           originalRx.queue_entry_id, originalRx.appointment_id, JSON.stringify(vitals), symptoms, diagnosis,
-          JSON.stringify(medicines), JSON.stringify(rawTests), advice, JSON.stringify(templateSnapshot),
-          originalRxId, correctionReason,
+          JSON.stringify(medicines), JSON.stringify(tests), advice, JSON.stringify(templateSnapshot),
+          rootOriginalId, correctionReason,
           now, now, now
         ),
-
-        // 3. Point existing follow-up to new prescription
-        db.prepare("UPDATE healthcare_follow_ups SET prescription_id = ?, updated_at = ? WHERE prescription_id = ?")
-          .bind(newRxId, now, originalRxId),
       ];
+
+      // 3. Handle Follow-up in Reissue
+      let updatedFollowUp: any = null;
+      const followUpConfig = body.followUp;
+      if (followUpConfig && (followUpConfig.enabled === true || followUpConfig.enabled === "true" || followUpConfig.validityDays)) {
+        const validityDays = numberInput(followUpConfig.validityDays ?? 7, "Validity days", { min: 1, max: 180, integer: true }) as number;
+        const followUpType = (["free", "paid", "discounted"].includes(followUpConfig.followUpType) ? followUpConfig.followUpType : "free") as "free" | "paid" | "discounted";
+        const followUpFee = followUpType === "free" ? 0 : Number(followUpConfig.followUpFee || 0);
+        const targetDays = followUpConfig.targetDays ? Number(followUpConfig.targetDays) : validityDays;
+        const todayStr = new Date().toISOString().split("T")[0];
+        const { followUpDate, validUntilDate } = calculateFollowUpDates(todayStr, validityDays, targetDays);
+
+        const existingFollowUp = await db
+          .prepare("SELECT id FROM healthcare_follow_ups WHERE prescription_id = ? LIMIT 1")
+          .bind(originalRxId)
+          .first<any>();
+
+        if (existingFollowUp) {
+          statements.push(
+            db.prepare(`
+              UPDATE healthcare_follow_ups
+              SET prescription_id = ?, doctor_id = ?, doctor_name = ?, patient_name = ?, patient_phone = ?,
+                  follow_up_date = ?, valid_until_date = ?, validity_days = ?, follow_up_type = ?, follow_up_fee = ?,
+                  notes = COALESCE(?, notes), updated_at = ?
+              WHERE id = ?
+            `).bind(
+              newRxId, doctorId, doctorName, patientName, patientPhone,
+              followUpDate, validUntilDate, validityDays, followUpType, followUpFee,
+              followUpConfig.notes || null, now, existingFollowUp.id
+            )
+          );
+        } else {
+          const followUpId = `fu-${crypto.randomUUID()}`;
+          statements.push(
+            db.prepare(`
+              INSERT INTO healthcare_follow_ups (
+                id, store_id, prescription_id, user_id, patient_name, patient_phone,
+                doctor_id, doctor_name, original_consultation_date, follow_up_date,
+                valid_until_date, validity_days, follow_up_type, follow_up_fee,
+                payment_status, booking_status, notes, created_at, updated_at
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'not_booked', ?, ?, ?)
+            `).bind(
+              followUpId, storeId, newRxId, originalRx.user_id, patientName, patientPhone,
+              doctorId, doctorName, todayStr, followUpDate,
+              validUntilDate, validityDays, followUpType, followUpFee,
+              followUpType === "free" ? "free" : "unpaid",
+              followUpConfig.notes || null, now, now
+            )
+          );
+        }
+      } else {
+        // Point existing follow-up to new prescription
+        statements.push(
+          db.prepare("UPDATE healthcare_follow_ups SET prescription_id = ?, updated_at = ? WHERE prescription_id = ?")
+            .bind(newRxId, now, originalRxId)
+        );
+      }
 
       await db.batch(statements);
       await writeAudit(request, session.user.id, "healthcare.prescription.reissued", "store", storeId, {
@@ -464,7 +542,8 @@ function formatPrescriptionRow(rx: any, followUp?: any) {
   const todayStr = new Date().toISOString().split("T")[0];
   let fuRecord = null;
   if (followUp) {
-    const isExp = followUp.valid_until_date && todayStr > followUp.valid_until_date && followUp.booking_status !== "completed";
+    const isBookedOrCompleted = followUp.booking_status === "booked" || followUp.booking_status === "completed";
+    const isExp = Boolean(followUp.valid_until_date && todayStr > followUp.valid_until_date && !isBookedOrCompleted);
     fuRecord = {
       id: followUp.id,
       storeId: followUp.store_id,
@@ -482,6 +561,12 @@ function formatPrescriptionRow(rx: any, followUp?: any) {
     };
   }
 
+  const rawSnapshot = safeParse(rx.template_snapshot_json, null);
+  const templateSnapshot = mergeTemplateLayout(rawSnapshot, { name: rx.store_name });
+  if (rx.doctor_registration) {
+    templateSnapshot.doctorRegistration = rx.doctor_registration;
+  }
+
   return {
     id: rx.id,
     prescriptionNumber: rx.prescription_number,
@@ -490,6 +575,7 @@ function formatPrescriptionRow(rx: any, followUp?: any) {
     doctorId: rx.doctor_id,
     doctorName: rx.doctor_name,
     doctorSpecialization: rx.doctor_specialization,
+    doctorRegistration: rx.doctor_registration || templateSnapshot.doctorRegistration || null,
     userId: rx.user_id,
     patientName: rx.patient_name,
     patientPhone: rx.patient_phone,
@@ -504,7 +590,7 @@ function formatPrescriptionRow(rx: any, followUp?: any) {
     medicines: rx.medicines_json ? safeParse(rx.medicines_json, []) : [],
     tests: rx.tests_json ? safeParse(rx.tests_json, []) : [],
     advice: rx.advice,
-    templateSnapshot: rx.template_snapshot_json ? safeParse(rx.template_snapshot_json, {}) : {},
+    templateSnapshot,
     status: rx.status,
     supersededById: rx.superseded_by_id,
     originalPrescriptionId: rx.original_prescription_id,
@@ -520,7 +606,8 @@ function formatPrescriptionWithJoinedFollowUp(row: any) {
   const todayStr = new Date().toISOString().split("T")[0];
   let fuRecord = null;
   if (row.fu_id) {
-    const isExp = row.fu_valid_until && todayStr > row.fu_valid_until && row.fu_book_status !== "completed";
+    const isBookedOrCompleted = row.fu_book_status === "booked" || row.fu_book_status === "completed";
+    const isExp = Boolean(row.fu_valid_until && todayStr > row.fu_valid_until && !isBookedOrCompleted);
     fuRecord = {
       id: row.fu_id,
       storeId: row.store_id,
@@ -537,6 +624,12 @@ function formatPrescriptionWithJoinedFollowUp(row: any) {
     };
   }
 
+  const rawSnapshot = safeParse(row.template_snapshot_json, null);
+  const templateSnapshot = mergeTemplateLayout(rawSnapshot, { name: row.store_name });
+  if (row.doctor_registration) {
+    templateSnapshot.doctorRegistration = row.doctor_registration;
+  }
+
   return {
     id: row.id,
     prescriptionNumber: row.prescription_number,
@@ -545,6 +638,7 @@ function formatPrescriptionWithJoinedFollowUp(row: any) {
     doctorId: row.doctor_id,
     doctorName: row.doctor_name,
     doctorSpecialization: row.doctor_specialization,
+    doctorRegistration: row.doctor_registration || templateSnapshot.doctorRegistration || null,
     userId: row.user_id,
     patientName: row.patient_name,
     patientPhone: row.patient_phone,
@@ -556,7 +650,7 @@ function formatPrescriptionWithJoinedFollowUp(row: any) {
     medicines: row.medicines_json ? safeParse(row.medicines_json, []) : [],
     tests: row.tests_json ? safeParse(row.tests_json, []) : [],
     advice: row.advice,
-    templateSnapshot: row.template_snapshot_json ? safeParse(row.template_snapshot_json, {}) : {},
+    templateSnapshot,
     status: row.status,
     supersededById: row.superseded_by_id,
     originalPrescriptionId: row.original_prescription_id,

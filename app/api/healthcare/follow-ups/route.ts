@@ -73,7 +73,11 @@ export async function GET(request: Request) {
 
     // 2. Customer View
     const session = await requireApiPermission(request, "profile.manage_own");
-    const userPhone = (session.user as any).phone || "";
+    const userRow = await db.prepare("SELECT phone FROM users WHERE id = ?").bind(session.user.id).first<any>();
+    const userPhone = userRow?.phone || "";
+    const cleanDigits = (p: string | null | undefined) => (p ? p.replace(/\D/g, "") : "");
+    const uPhoneDigits = cleanDigits(userPhone);
+    const phoneSuffix = uPhoneDigits.length >= 10 ? `%${uPhoneDigits.slice(-10)}` : userPhone;
 
     const rows = await db
       .prepare(`
@@ -81,11 +85,11 @@ export async function GET(request: Request) {
         FROM healthcare_follow_ups f
         JOIN healthcare_prescriptions p ON p.id = f.prescription_id
         JOIN stores s ON s.id = f.store_id
-        WHERE f.user_id = ? OR f.patient_phone = ?
+        WHERE f.user_id = ? OR (f.patient_phone IS NOT NULL AND f.patient_phone != '' AND (f.patient_phone = ? OR f.patient_phone LIKE ?))
         ORDER BY f.follow_up_date ASC
         LIMIT 50
       `)
-      .bind(session.user.id, userPhone)
+      .bind(session.user.id, userPhone, phoneSuffix)
       .all<any>();
 
     const followUps = (rows.results || []).map((row) => formatFollowUpRow(row, todayStr));
@@ -148,8 +152,27 @@ export async function PATCH(request: Request) {
 
       if (!followUp) throw new HttpError(404, "Follow-up record not found.", "NOT_FOUND");
 
+      // Security check: Only customer who owns this follow-up or clinic owner/admin may book it
+      const isOwnerOrAdmin =
+        session.user.role === "admin" ||
+        Boolean(await db.prepare("SELECT id FROM stores WHERE id = ? AND owner_id = ?").bind(followUp.store_id, session.user.id).first());
+
+      const userRow = await db.prepare("SELECT phone FROM users WHERE id = ?").bind(session.user.id).first<any>();
+      const userPhone = userRow?.phone || "";
+      const cleanDigits = (p: string | null | undefined) => (p ? p.replace(/\D/g, "") : "");
+      const uDigits = cleanDigits(userPhone);
+      const pDigits = cleanDigits(followUp.patient_phone);
+
+      const isOwnFollowUp =
+        (followUp.user_id && followUp.user_id === session.user.id) ||
+        (uDigits && pDigits && (pDigits === uDigits || (uDigits.length >= 10 && pDigits.length >= 10 && pDigits.slice(-10) === uDigits.slice(-10))));
+
+      if (!isOwnerOrAdmin && !isOwnFollowUp) {
+        throw new HttpError(403, "You are not authorized to book this follow-up.", "ACCESS_DENIED");
+      }
+
       const todayStr = new Date().toISOString().split("T")[0];
-      if (followUp.valid_until_date < todayStr) {
+      if (followUp.valid_until_date < todayStr && followUp.booking_status !== "booked") {
         throw new HttpError(400, "Follow-up period has expired.", "FOLLOW_UP_EXPIRED");
       }
 
@@ -189,7 +212,8 @@ export async function PATCH(request: Request) {
 }
 
 function formatFollowUpRow(row: any, todayStr: string) {
-  const isExp = row.valid_until_date && todayStr > row.valid_until_date && row.booking_status !== "completed";
+  const isBookedOrCompleted = row.booking_status === "booked" || row.booking_status === "completed";
+  const isExp = Boolean(row.valid_until_date && todayStr > row.valid_until_date && !isBookedOrCompleted);
   return {
     id: row.id,
     storeId: row.store_id,

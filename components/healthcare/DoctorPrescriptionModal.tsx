@@ -69,14 +69,19 @@ export function DoctorPrescriptionModal({
   const [step, setStep] = useState<"edit" | "preview">("edit");
 
   // Medical form state
+  const initialCustomDoc = !doctors.length || Boolean(reissueTarget && !doctors.some((d) => String(d.id) === reissueTarget.doctorId));
+  const [isCustomDoctor, setIsCustomDoctor] = useState<boolean>(initialCustomDoc);
   const [doctorId, setDoctorId] = useState<string>(
-    reissueTarget?.doctorId || (doctors[0]?.id ? String(doctors[0].id) : "")
+    reissueTarget?.doctorId || (!initialCustomDoc && doctors[0]?.id ? String(doctors[0].id) : "")
   );
   const [doctorName, setDoctorName] = useState<string>(
     reissueTarget?.doctorName || (doctors[0]?.name || "Doctor")
   );
   const [doctorSpecialization, setDoctorSpecialization] = useState<string>(
     reissueTarget?.doctorSpecialization || (doctors[0]?.specialization || "General Medicine")
+  );
+  const [doctorRegistration, setDoctorRegistration] = useState<string>(
+    reissueTarget?.doctorRegistration || reissueTarget?.templateSnapshot?.doctorRegistration || ""
   );
 
   const [patientName, setPatientName] = useState<string>(
@@ -212,6 +217,7 @@ export function DoctorPrescriptionModal({
     doctorId,
     doctorName,
     doctorSpecialization,
+    doctorRegistration: doctorRegistration.trim() || undefined,
     patientName: patientName || "Patient Name",
     patientPhone,
     patientAge: patientAge ? parseInt(patientAge, 10) : undefined,
@@ -226,7 +232,10 @@ export function DoctorPrescriptionModal({
       .map((t) => t.trim())
       .filter(Boolean),
     advice,
-    templateSnapshot: templateLayout,
+    templateSnapshot: {
+      ...templateLayout,
+      doctorRegistration: doctorRegistration.trim() || templateLayout.doctorRegistration,
+    },
     status: "issued",
     issuedAt: Math.floor(Date.now() / 1000),
     createdAt: Math.floor(Date.now() / 1000),
@@ -244,6 +253,17 @@ export function DoctorPrescriptionModal({
       setError("Please add at least one valid medication.");
       return;
     }
+
+    const seenMeds = new Set<string>();
+    for (const med of validMedicines) {
+      const clean = med.name.trim().toLowerCase();
+      if (seenMeds.has(clean)) {
+        setError(`Duplicate medication detected: "${med.name.trim()}". Please consolidate or specify distinct dosages.`);
+        return;
+      }
+      seenMeds.add(clean);
+    }
+
     if (isReissue && !correctionReason.trim()) {
       setError("Please provide a reason for reissuing / correcting this prescription.");
       return;
@@ -262,18 +282,30 @@ export function DoctorPrescriptionModal({
               storeId,
               prescriptionId: reissueTarget.id,
               correctionReason,
+              doctorId: doctorId || undefined,
               doctorName,
               doctorSpecialization,
+              doctorRegistration: doctorRegistration.trim() || undefined,
               patientName,
               patientPhone,
               patientAge: patientAge ? parseInt(patientAge, 10) : undefined,
               patientGender,
+              patientAddress: patientAddress.trim() || undefined,
               vitals,
               symptoms,
               diagnosis,
               medicines: validMedicines,
               tests: testsInput.split(",").map((t) => t.trim()).filter(Boolean),
               advice,
+              followUp: enableFollowUp
+                ? {
+                    enabled: true,
+                    validityDays,
+                    followUpType,
+                    followUpFee: followUpType === "free" ? 0 : followUpFee,
+                    notes: followUpNotes,
+                  }
+                : undefined,
             },
           }
         );
@@ -289,6 +321,7 @@ export function DoctorPrescriptionModal({
               doctorId: doctorId || undefined,
               doctorName,
               doctorSpecialization,
+              doctorRegistration: doctorRegistration.trim() || undefined,
               patientName,
               patientPhone,
               patientAge: patientAge ? parseInt(patientAge, 10) : undefined,
@@ -425,8 +458,16 @@ export function DoctorPrescriptionModal({
                     <div>
                       <label className="text-[11px] font-bold text-slate-500 block mb-1">Select Doctor</label>
                       <select
-                        value={doctorId}
-                        onChange={(e) => handleDoctorChange(e.target.value)}
+                        value={isCustomDoctor ? "custom" : doctorId}
+                        onChange={(e) => {
+                          if (e.target.value === "custom") {
+                            setIsCustomDoctor(true);
+                            setDoctorId("");
+                          } else {
+                            setIsCustomDoctor(false);
+                            handleDoctorChange(e.target.value);
+                          }
+                        }}
                         className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-slate-800 focus:outline-none"
                       >
                         {doctors.map((d) => (
@@ -434,20 +475,25 @@ export function DoctorPrescriptionModal({
                             Dr. {d.name} {d.specialization ? `(${d.specialization})` : ""}
                           </option>
                         ))}
+                        <option value="custom">+ Custom / Visiting Doctor</option>
                       </select>
                     </div>
-                  ) : (
+                  ) : null}
+
+                  {(isCustomDoctor || doctors.length === 0) && (
                     <div>
-                      <label className="text-[11px] font-bold text-slate-500 block mb-1">Doctor Name</label>
+                      <label className="text-[11px] font-bold text-slate-500 block mb-1">Doctor Name *</label>
                       <input
                         type="text"
                         value={doctorName}
                         onChange={(e) => setDoctorName(e.target.value)}
                         placeholder="Dr. Sharma"
                         className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-slate-800"
+                        required
                       />
                     </div>
                   )}
+
                   <div>
                     <label className="text-[11px] font-bold text-slate-500 block mb-1">Specialization</label>
                     <input
@@ -455,6 +501,17 @@ export function DoctorPrescriptionModal({
                       value={doctorSpecialization}
                       onChange={(e) => setDoctorSpecialization(e.target.value)}
                       placeholder="General Medicine / Cardiology"
+                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-500 block mb-1">Medical Registration No.</label>
+                    <input
+                      type="text"
+                      value={doctorRegistration}
+                      onChange={(e) => setDoctorRegistration(e.target.value)}
+                      placeholder="e.g., MCI-84920 or State Council Reg"
                       className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700"
                     />
                   </div>

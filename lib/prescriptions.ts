@@ -1,5 +1,3 @@
-import { getD1 } from "@/db/runtime";
-
 export interface PrescriptionMedicine {
   name: string;
   dosage?: string;
@@ -120,6 +118,7 @@ export interface PrescriptionRecord {
   supersededById?: string | null;
   originalPrescriptionId?: string | null;
   correctionReason?: string | null;
+  doctorRegistration?: string | null;
   issuedAt: number;
   createdAt: number;
   updatedAt: number;
@@ -221,6 +220,166 @@ export function getDefaultTemplateLayout(store?: {
   };
 }
 
+export function mergeTemplateLayout(
+  partial?: Partial<PrescriptionTemplateLayout> | null,
+  store?: {
+    name?: string;
+    address?: string;
+    phone?: string;
+    logoUrl?: string | null;
+    email?: string;
+    website?: string;
+  },
+): PrescriptionTemplateLayout {
+  const defaults = getDefaultTemplateLayout(store);
+  if (!partial || typeof partial !== "object") return defaults;
+
+  return {
+    ...defaults,
+    ...partial,
+    clinicName: partial.clinicName || defaults.clinicName,
+    tagline: partial.tagline !== undefined ? partial.tagline : defaults.tagline,
+    logoUrl: partial.logoUrl !== undefined ? partial.logoUrl : defaults.logoUrl,
+    showLogo: partial.showLogo !== undefined ? Boolean(partial.showLogo) : defaults.showLogo,
+    doctorHeader: partial.doctorHeader !== undefined ? partial.doctorHeader : defaults.doctorHeader,
+    doctorRegistration: partial.doctorRegistration !== undefined ? partial.doctorRegistration : defaults.doctorRegistration,
+    address: partial.address || defaults.address,
+    phone: partial.phone || defaults.phone,
+    email: partial.email !== undefined ? partial.email : defaults.email,
+    website: partial.website !== undefined ? partial.website : defaults.website,
+    fontFamily: partial.fontFamily || defaults.fontFamily,
+    titleFontSize: typeof partial.titleFontSize === "number" ? partial.titleFontSize : defaults.titleFontSize,
+    headerFontSize: typeof partial.headerFontSize === "number" ? partial.headerFontSize : defaults.headerFontSize,
+    bodyFontSize: typeof partial.bodyFontSize === "number" ? partial.bodyFontSize : defaults.bodyFontSize,
+    footerFontSize: typeof partial.footerFontSize === "number" ? partial.footerFontSize : defaults.footerFontSize,
+    lineHeight: typeof partial.lineHeight === "number" ? partial.lineHeight : defaults.lineHeight,
+    primaryColor: partial.primaryColor || defaults.primaryColor,
+    secondaryColor: partial.secondaryColor || defaults.secondaryColor,
+    backgroundColor: partial.backgroundColor || defaults.backgroundColor,
+    textColor: partial.textColor || defaults.textColor,
+    borderColor: partial.borderColor || defaults.borderColor,
+    borderStyle: partial.borderStyle || defaults.borderStyle,
+    headerLayout: partial.headerLayout || defaults.headerLayout,
+    margins: {
+      top: typeof partial.margins?.top === "number" ? partial.margins.top : defaults.margins.top,
+      bottom: typeof partial.margins?.bottom === "number" ? partial.margins.bottom : defaults.margins.bottom,
+      left: typeof partial.margins?.left === "number" ? partial.margins.left : defaults.margins.left,
+      right: typeof partial.margins?.right === "number" ? partial.margins.right : defaults.margins.right,
+    },
+    spacing: {
+      sectionGap: typeof partial.spacing?.sectionGap === "number" ? partial.spacing.sectionGap : defaults.spacing.sectionGap,
+      itemGap: typeof partial.spacing?.itemGap === "number" ? partial.spacing.itemGap : defaults.spacing.itemGap,
+    },
+    sections: {
+      vitals: partial.sections?.vitals !== undefined ? Boolean(partial.sections.vitals) : defaults.sections.vitals,
+      symptoms: partial.sections?.symptoms !== undefined ? Boolean(partial.sections.symptoms) : defaults.sections.symptoms,
+      diagnosis: partial.sections?.diagnosis !== undefined ? Boolean(partial.sections.diagnosis) : defaults.sections.diagnosis,
+      medicines: partial.sections?.medicines !== undefined ? Boolean(partial.sections.medicines) : defaults.sections.medicines,
+      tests: partial.sections?.tests !== undefined ? Boolean(partial.sections.tests) : defaults.sections.tests,
+      advice: partial.sections?.advice !== undefined ? Boolean(partial.sections.advice) : defaults.sections.advice,
+      followup: partial.sections?.followup !== undefined ? Boolean(partial.sections.followup) : defaults.sections.followup,
+      signature: partial.sections?.signature !== undefined ? Boolean(partial.sections.signature) : defaults.sections.signature,
+      disclaimer: partial.sections?.disclaimer !== undefined ? Boolean(partial.sections.disclaimer) : defaults.sections.disclaimer,
+    },
+    customText: partial.customText !== undefined ? partial.customText : defaults.customText,
+    disclaimer: partial.disclaimer || defaults.disclaimer,
+    elements: Array.isArray(partial.elements) ? partial.elements : defaults.elements,
+  };
+}
+
+export class PrescriptionValidationError extends Error {
+  code: string;
+  status: number;
+  constructor(message: string, code = "INVALID_PRESCRIPTION") {
+    super(message);
+    this.name = "PrescriptionValidationError";
+    this.code = code;
+    this.status = 400;
+  }
+}
+
+export function validatePrescriptionMedicines(rawMeds: unknown): PrescriptionMedicine[] {
+  if (!Array.isArray(rawMeds) || rawMeds.length === 0) {
+    throw new PrescriptionValidationError("At least one medicine is required to issue a prescription.", "MEDICINE_REQUIRED");
+  }
+
+  const validMedicines: PrescriptionMedicine[] = [];
+  const seenNames = new Set<string>();
+
+  for (let idx = 0; idx < rawMeds.length; idx++) {
+    const m = rawMeds[idx];
+    if (!m || typeof m !== "object") {
+      throw new PrescriptionValidationError(`Invalid medication entry at row #${idx + 1}.`, "INVALID_MEDICINE");
+    }
+
+    const rawName = typeof m.name === "string" ? m.name.trim() : "";
+    const rawDosage = typeof m.dosage === "string" ? m.dosage.trim() : "";
+    const rawFrequency = typeof m.frequency === "string" ? m.frequency.trim() : "";
+    const rawDuration = typeof m.duration === "string" ? m.duration.trim() : "";
+    const rawTiming = typeof m.timing === "string" ? m.timing.trim() : "";
+    const rawInstructions = typeof m.instructions === "string" ? m.instructions.trim() : "";
+
+    // Check if entire row is completely blank (e.g. empty extra row in form)
+    const isRowEmpty = !rawName && !rawDosage && !rawFrequency && !rawDuration && !rawTiming && !rawInstructions;
+    if (isRowEmpty) {
+      continue;
+    }
+
+    if (!rawName) {
+      throw new PrescriptionValidationError(`Medicine #${idx + 1} is missing the medication name.`, "MEDICINE_NAME_REQUIRED");
+    }
+
+    if (rawName.length > 120) {
+      throw new PrescriptionValidationError(`Medicine #${idx + 1} name exceeds maximum 120 characters.`, "MEDICINE_NAME_TOO_LONG");
+    }
+
+    if (rawDosage.length > 60) {
+      throw new PrescriptionValidationError(`Medicine #${idx + 1} dosage exceeds maximum 60 characters.`, "MEDICINE_DOSAGE_TOO_LONG");
+    }
+
+    if (rawFrequency.length > 60) {
+      throw new PrescriptionValidationError(`Medicine #${idx + 1} frequency exceeds maximum 60 characters.`, "MEDICINE_FREQUENCY_TOO_LONG");
+    }
+
+    if (rawDuration.length > 60) {
+      throw new PrescriptionValidationError(`Medicine #${idx + 1} duration exceeds maximum 60 characters.`, "MEDICINE_DURATION_TOO_LONG");
+    }
+
+    if (rawTiming.length > 60) {
+      throw new PrescriptionValidationError(`Medicine #${idx + 1} timing exceeds maximum 60 characters.`, "MEDICINE_TIMING_TOO_LONG");
+    }
+
+    if (rawInstructions.length > 250) {
+      throw new PrescriptionValidationError(`Medicine #${idx + 1} instructions exceeds maximum 250 characters.`, "MEDICINE_INSTRUCTIONS_TOO_LONG");
+    }
+
+    // Duplicate check: normalized lower-cased medicine name
+    const normalizedName = rawName.toLowerCase().replace(/\s+/g, " ");
+    if (seenNames.has(normalizedName)) {
+      throw new PrescriptionValidationError(
+        `Duplicate medicine "${rawName}" found in prescription. Each medication should be listed once with combined dosage.`,
+        "DUPLICATE_MEDICINE"
+      );
+    }
+    seenNames.add(normalizedName);
+
+    validMedicines.push({
+      name: rawName,
+      dosage: rawDosage || undefined,
+      frequency: rawFrequency || undefined,
+      duration: rawDuration || undefined,
+      timing: rawTiming || undefined,
+      instructions: rawInstructions || undefined,
+    });
+  }
+
+  if (validMedicines.length === 0) {
+    throw new PrescriptionValidationError("At least one valid medicine is required to issue a prescription.", "MEDICINE_REQUIRED");
+  }
+
+  return validMedicines;
+}
+
 export function generatePrescriptionNumber(): string {
   const d = new Date();
   const yearMonth = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -246,30 +405,74 @@ export function filterToTimestamp(filter: PrescriptionFilter = "1y"): number {
 }
 
 export function calculateFollowUpDates(
-  consultationDateString: string,
-  validityDays: number,
+  consultationDateString?: string | null,
+  validityDays: number = 7,
   targetDaysLater?: number,
 ): { followUpDate: string; validUntilDate: string; isExpired: boolean } {
-  const baseDate = new Date(consultationDateString);
-  const targetOffset = targetDaysLater ?? validityDays;
+  const validDays =
+    Number.isFinite(validityDays) && validityDays > 0 ? Math.floor(validityDays) : 7;
+  const targetOffset =
+    targetDaysLater !== undefined && Number.isFinite(targetDaysLater) && targetDaysLater >= 0
+      ? Math.floor(targetDaysLater)
+      : validDays;
 
-  const followUpD = new Date(baseDate);
-  followUpD.setDate(followUpD.getDate() + targetOffset);
+  let y: number;
+  let m: number;
+  let d: number;
 
-  const validUntilD = new Date(baseDate);
-  validUntilD.setDate(validUntilD.getDate() + Math.max(validityDays, targetOffset));
+  if (consultationDateString && typeof consultationDateString === "string") {
+    const datePart = consultationDateString.split("T")[0].trim();
+    const parts = datePart.split("-").map((p) => parseInt(p, 10));
+    if (
+      parts.length === 3 &&
+      !parts.some(isNaN) &&
+      parts[0] >= 1900 &&
+      parts[0] <= 2200 &&
+      parts[1] >= 1 &&
+      parts[1] <= 12 &&
+      parts[2] >= 1 &&
+      parts[2] <= 31
+    ) {
+      [y, m, d] = parts;
+    } else {
+      const parsed = new Date(consultationDateString);
+      if (!isNaN(parsed.getTime())) {
+        y = parsed.getUTCFullYear();
+        m = parsed.getUTCMonth() + 1;
+        d = parsed.getUTCDate();
+      } else {
+        const now = new Date();
+        y = now.getUTCFullYear();
+        m = now.getUTCMonth() + 1;
+        d = now.getUTCDate();
+      }
+    }
+  } else {
+    const now = new Date();
+    y = now.getUTCFullYear();
+    m = now.getUTCMonth() + 1;
+    d = now.getUTCDate();
+  }
 
-  const formatIso = (d: Date) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
+  const formatIsoUtc = (date: Date) => {
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
-  const followUpDate = formatIso(followUpD);
-  const validUntilDate = formatIso(validUntilD);
+  // Follow-up appointment target date (leap-year and month-boundary safe using UTC Date)
+  const followUpD = new Date(Date.UTC(y, m - 1, d));
+  followUpD.setUTCDate(followUpD.getUTCDate() + targetOffset);
 
-  const todayStr = formatIso(new Date());
+  // Validity expiration cutoff date (at least as far out as targetOffset)
+  const validUntilD = new Date(Date.UTC(y, m - 1, d));
+  validUntilD.setUTCDate(validUntilD.getUTCDate() + Math.max(validDays, targetOffset));
+
+  const followUpDate = formatIsoUtc(followUpD);
+  const validUntilDate = formatIsoUtc(validUntilD);
+
+  const todayStr = formatIsoUtc(new Date());
   const isExpired = todayStr > validUntilDate;
 
   return { followUpDate, validUntilDate, isExpired };
@@ -277,10 +480,14 @@ export function calculateFollowUpDates(
 
 let _prescriptionTablesChecked = false;
 
-export async function ensurePrescriptionTables(): Promise<void> {
+export async function ensurePrescriptionTables(database?: any): Promise<void> {
   if (_prescriptionTablesChecked) return;
   try {
-    const db = getD1();
+    let db = database;
+    if (!db) {
+      const runtime = await import("@/db/runtime");
+      db = runtime.getD1();
+    }
 
     await db.prepare(`
       CREATE TABLE IF NOT EXISTS healthcare_prescription_templates (
@@ -377,6 +584,7 @@ export async function ensurePrescriptionTables(): Promise<void> {
       "ALTER TABLE healthcare_queue_settings ADD COLUMN default_followup_type text DEFAULT 'free'",
       "ALTER TABLE healthcare_queue_settings ADD COLUMN default_followup_validity_days integer DEFAULT 7",
       "ALTER TABLE healthcare_queue_settings ADD COLUMN default_followup_fee real DEFAULT 0",
+      "ALTER TABLE healthcare_prescriptions ADD COLUMN doctor_registration text",
     ];
 
     for (const sql of settingsAlters) {

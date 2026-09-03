@@ -1,6 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import {
+  validatePrescriptionMedicines,
+  calculateFollowUpDates,
+  mergeTemplateLayout,
+  getDefaultTemplateLayout,
+  generatePrescriptionNumber,
+  filterToTimestamp,
+  PrescriptionValidationError,
+} from "../lib/prescriptions.ts";
 
 const root = new URL("../", import.meta.url);
 
@@ -154,4 +163,203 @@ test("doctor workflow, clinic prescription history, patients directory, and sett
   assert.match(clinicPatients, /Consultation History/);
   assert.match(clinicPatients, /Prescription History/);
   assert.match(clinicPatients, /Follow-up History/);
+});
+
+test("validatePrescriptionMedicines deep logic and edge case validation", () => {
+  // 1. Valid medications pass and are trimmed
+  const valid = validatePrescriptionMedicines([
+    {
+      name: "  Amoxicillin 500mg  ",
+      dosage: " 1 capsule ",
+      frequency: " 1-0-1 ",
+      duration: " 5 days ",
+      timing: " After food ",
+      instructions: " Complete the full course ",
+    },
+    {
+      name: "Paracetamol 650mg",
+      frequency: "SOS",
+    },
+  ]);
+  assert.equal(valid.length, 2);
+  assert.equal(valid[0].name, "Amoxicillin 500mg");
+  assert.equal(valid[0].dosage, "1 capsule");
+  assert.equal(valid[0].frequency, "1-0-1");
+  assert.equal(valid[0].duration, "5 days");
+  assert.equal(valid[0].timing, "After food");
+  assert.equal(valid[0].instructions, "Complete the full course");
+  assert.equal(valid[1].name, "Paracetamol 650mg");
+  assert.equal(valid[1].frequency, "SOS");
+  assert.equal(valid[1].dosage, undefined);
+
+  // 2. Rejection of empty / non-array inputs
+  assert.throws(
+    () => validatePrescriptionMedicines([]),
+    (err) => err instanceof PrescriptionValidationError && err.code === "MEDICINE_REQUIRED"
+  );
+  assert.throws(
+    () => validatePrescriptionMedicines(null),
+    (err) => err instanceof PrescriptionValidationError && err.code === "MEDICINE_REQUIRED"
+  );
+  assert.throws(
+    () => validatePrescriptionMedicines(undefined),
+    (err) => err instanceof PrescriptionValidationError && err.code === "MEDICINE_REQUIRED"
+  );
+  assert.throws(
+    () => validatePrescriptionMedicines("not-an-array"),
+    (err) => err instanceof PrescriptionValidationError && err.code === "MEDICINE_REQUIRED"
+  );
+
+  // 3. Rejection of missing / blank medicine name
+  assert.throws(
+    () => validatePrescriptionMedicines([{ name: "", dosage: "1 tab" }]),
+    (err) => err instanceof PrescriptionValidationError && err.code === "MEDICINE_NAME_REQUIRED"
+  );
+  assert.throws(
+    () => validatePrescriptionMedicines([{ name: "   " }]),
+    (err) => err instanceof PrescriptionValidationError && err.code === "MEDICINE_REQUIRED"
+  );
+  assert.throws(
+    () => validatePrescriptionMedicines([{ name: 123, dosage: "5mg" }]),
+    (err) => err instanceof PrescriptionValidationError && err.code === "MEDICINE_NAME_REQUIRED"
+  );
+
+  // 4. Rejection of name exceeding 120 chars
+  const longName = "A".repeat(125);
+  assert.throws(
+    () => validatePrescriptionMedicines([{ name: longName }]),
+    (err) => err instanceof PrescriptionValidationError && err.code === "MEDICINE_NAME_TOO_LONG"
+  );
+
+  // 5. Rejection of duplicate medicine rows (case-insensitive & whitespace trimmed)
+  assert.throws(
+    () =>
+      validatePrescriptionMedicines([
+        { name: "Metformin 500mg", frequency: "1-0-0" },
+        { name: "  metformin 500mg  ", frequency: "0-0-1" },
+      ]),
+    (err) => err instanceof PrescriptionValidationError && err.code === "DUPLICATE_MEDICINE"
+  );
+
+  // 6. Sanitization / rejection of oversized auxiliary fields
+  assert.throws(
+    () =>
+      validatePrescriptionMedicines([
+        { name: "Valid Med", instructions: "X".repeat(300) },
+      ]),
+    (err) => err instanceof PrescriptionValidationError && err.code === "MEDICINE_INSTRUCTIONS_TOO_LONG"
+  );
+  assert.throws(
+    () =>
+      validatePrescriptionMedicines([
+        { name: "Valid Med", dosage: "D".repeat(70) },
+      ]),
+    (err) => err instanceof PrescriptionValidationError && err.code === "MEDICINE_DOSAGE_TOO_LONG"
+  );
+});
+
+test("calculateFollowUpDates timezone-safe leap year and boundary logic", () => {
+  // 1. Standard 7-day validity and target
+  const std = calculateFollowUpDates("2025-03-10", 7, 7);
+  assert.equal(std.followUpDate, "2025-03-17");
+  assert.equal(std.validUntilDate, "2025-03-17");
+
+  // 2. Custom target days (3 days target, 14 days validity)
+  const custom = calculateFollowUpDates("2025-03-10", 14, 3);
+  assert.equal(custom.followUpDate, "2025-03-13");
+  assert.equal(custom.validUntilDate, "2025-03-24");
+
+  // 3. Leap year February 28 to February 29
+  const leap1 = calculateFollowUpDates("2024-02-28", 7, 1);
+  assert.equal(leap1.followUpDate, "2024-02-29");
+  assert.equal(leap1.validUntilDate, "2024-03-06");
+
+  // 4. Leap year February 29 to March 01
+  const leap2 = calculateFollowUpDates("2024-02-29", 7, 1);
+  assert.equal(leap2.followUpDate, "2024-03-01");
+  assert.equal(leap2.validUntilDate, "2024-03-07");
+
+  // 5. Non-leap year February 28 to March 01
+  const nonLeap = calculateFollowUpDates("2023-02-28", 7, 1);
+  assert.equal(nonLeap.followUpDate, "2023-03-01");
+  assert.equal(nonLeap.validUntilDate, "2023-03-07");
+
+  // 6. Month boundary crossing (31-day month: January 31 + 5 days)
+  const monthBoundary = calculateFollowUpDates("2025-01-31", 10, 5);
+  assert.equal(monthBoundary.followUpDate, "2025-02-05");
+  assert.equal(monthBoundary.validUntilDate, "2025-02-10");
+
+  // 7. Year boundary crossing (December 30 + 5 days)
+  const yearBoundary = calculateFollowUpDates("2024-12-30", 10, 5);
+  assert.equal(yearBoundary.followUpDate, "2025-01-04");
+  assert.equal(yearBoundary.validUntilDate, "2025-01-09");
+
+  // 8. Graceful fallback on invalid or empty date string (never produces NaN)
+  const invalidDate = calculateFollowUpDates("invalid-date", 7, 3);
+  assert.match(invalidDate.followUpDate, /^\d{4}-\d{2}-\d{2}$/);
+  assert.match(invalidDate.validUntilDate, /^\d{4}-\d{2}-\d{2}$/);
+  assert.ok(invalidDate.validUntilDate >= invalidDate.followUpDate);
+
+  // 9. Target days clamped so validity date is never before follow-up date
+  const clamped = calculateFollowUpDates("2025-06-01", 5, 10);
+  assert.equal(clamped.followUpDate, "2025-06-11");
+  assert.equal(clamped.validUntilDate, "2025-06-11");
+});
+
+test("mergeTemplateLayout snapshot fallbacks and customization merger", () => {
+  // 1. Null / undefined / empty input yields complete defaults
+  const emptyDefault = mergeTemplateLayout(null, { name: "Care Hospital", phone: "+91 9876543210" });
+  assert.equal(emptyDefault.clinicName, "Care Hospital");
+  assert.equal(emptyDefault.phone, "+91 9876543210");
+  assert.equal(emptyDefault.primaryColor, "#0f766e");
+  assert.equal(emptyDefault.sections.vitals, true);
+  assert.equal(emptyDefault.sections.medicines, true);
+  assert.equal(emptyDefault.sections.diagnosis, true);
+  assert.equal(emptyDefault.sections.tests, true);
+  assert.equal(emptyDefault.sections.signature, true);
+  assert.equal(emptyDefault.sections.disclaimer, true);
+  assert.equal(emptyDefault.margins.top, 24);
+  assert.equal(emptyDefault.spacing.itemGap, 10);
+  assert.ok(Array.isArray(emptyDefault.elements));
+
+  // 2. Partial layout preserves custom values and backfills missing fields
+  const partial = mergeTemplateLayout(
+    {
+      primaryColor: "#dc2626",
+      sections: { vitals: false },
+      customText: "Please bring this prescription for follow-up",
+      doctorRegistration: "MCI-45892",
+    },
+    { name: "Apex Clinic" }
+  );
+  assert.equal(partial.clinicName, "Apex Clinic");
+  assert.equal(partial.primaryColor, "#dc2626");
+  assert.equal(partial.sections.vitals, false);
+  assert.equal(partial.sections.medicines, true); // backfilled default
+  assert.equal(partial.sections.signature, true); // backfilled default
+  assert.equal(partial.customText, "Please bring this prescription for follow-up");
+  assert.equal(partial.doctorRegistration, "MCI-45892");
+  assert.equal(partial.fontFamily, "Inter, sans-serif"); // backfilled
+});
+
+test("prescription number generation and filter timestamp utilities", () => {
+  // 1. Prescription number format and uniqueness
+  const set = new Set();
+  for (let i = 0; i < 50; i++) {
+    const num = generatePrescriptionNumber();
+    assert.match(num, /^RX-\d{6}-\d{5}$/);
+    set.add(num);
+  }
+  assert.equal(set.size, 50);
+
+  // 2. Filter timestamp ranges
+  const now = Math.floor(Date.now() / 1000);
+  const t30d = filterToTimestamp("30d");
+  assert.ok(t30d <= now - 29 * 86400 && t30d >= now - 31 * 86400);
+
+  const t1y = filterToTimestamp("1y");
+  assert.ok(t1y <= now - 364 * 86400 && t1y >= now - 366 * 86400);
+
+  assert.equal(filterToTimestamp("all"), 0);
+  assert.equal(filterToTimestamp(undefined), t1y);
 });

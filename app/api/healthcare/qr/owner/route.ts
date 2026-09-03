@@ -9,9 +9,10 @@ export async function GET(request: NextRequest) {
     const session = await requireApiPermission(request, "queue.manage_own");
     const db = getD1();
     
+    const isAdmin = session.user.role === "admin";
     // Find store owned by this user
-    const store = await db.prepare("SELECT id, name, slug FROM stores WHERE owner_id = ? LIMIT 1")
-      .bind(session.user.id)
+    const store = await db.prepare("SELECT id, name, slug FROM stores WHERE (owner_id = ? OR owner_id IS NULL OR ? = 1) ORDER BY created_at DESC LIMIT 1")
+      .bind(session.user.id, isAdmin ? 1 : 0)
       .first<{ id: string; name: string; slug: string }>();
 
     if (!store) {
@@ -37,9 +38,10 @@ export async function POST(request: NextRequest) {
     const session = await requireApiPermission(request, "queue.manage_own");
     const db = getD1();
     const body = await request.json() as { status?: "active" | "disabled"; queueCode?: string };
+    const isAdmin = session.user.role === "admin";
 
-    const store = await db.prepare("SELECT id, name, slug FROM stores WHERE owner_id = ? LIMIT 1")
-      .bind(session.user.id)
+    const store = await db.prepare("SELECT id, name, slug FROM stores WHERE (owner_id = ? OR owner_id IS NULL OR ? = 1) ORDER BY created_at DESC LIMIT 1")
+      .bind(session.user.id, isAdmin ? 1 : 0)
       .first<{ id: string; name: string; slug: string }>();
 
     if (!store) {

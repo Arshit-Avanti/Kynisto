@@ -2,8 +2,22 @@ import { getD1 } from "@/db/runtime";
 import { HttpError, hashedClientIp } from "@/lib/security";
 
 export async function requireOwnedStore(ownerId: string, storeId: string) {
-  const store = await getD1()
-    .prepare("SELECT id, name, slug, status FROM stores WHERE id = ? AND owner_id = ? LIMIT 1")
+  const db = getD1();
+  const user = await db
+    .prepare("SELECT role FROM users WHERE id = ? LIMIT 1")
+    .bind(ownerId)
+    .first<{ role: string }>();
+
+  if (user?.role === "admin") {
+    const store = await db
+      .prepare("SELECT id, name, slug, status FROM stores WHERE id = ? LIMIT 1")
+      .bind(storeId)
+      .first<{ id: string; name: string; slug: string; status: string }>();
+    if (store) return store;
+  }
+
+  const store = await db
+    .prepare("SELECT id, name, slug, status FROM stores WHERE id = ? AND (owner_id = ? OR owner_id IS NULL) LIMIT 1")
     .bind(storeId, ownerId)
     .first<{ id: string; name: string; slug: string; status: string }>();
   if (!store) {

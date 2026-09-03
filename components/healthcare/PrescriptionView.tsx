@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useState, useRef } from "react";
 import {
   Printer,
   Download,
@@ -17,7 +17,11 @@ import {
   AlertTriangle,
   Building2,
 } from "lucide-react";
-import type { PrescriptionRecord, PrescriptionTemplateLayout } from "@/lib/prescriptions";
+import {
+  mergeTemplateLayout,
+  type PrescriptionRecord,
+  type PrescriptionTemplateLayout,
+} from "@/lib/prescriptions";
 
 interface PrescriptionViewProps {
   prescription: PrescriptionRecord;
@@ -32,7 +36,7 @@ export function PrescriptionView({
 }: PrescriptionViewProps) {
   const [isFullscreenViewer, setIsFullscreenViewer] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
-  const layout = prescription.templateSnapshot || {};
+  const layout = mergeTemplateLayout(prescription.templateSnapshot, { name: prescription.storeName });
   const isReissued = prescription.status === "reissued";
 
   const handlePrint = () => {
@@ -45,6 +49,15 @@ export function PrescriptionView({
     // Generate standalone printable HTML page and open print/save dialog
     if (!printRef.current) return;
     const content = printRef.current.innerHTML;
+
+    let headStyles = "";
+    if (typeof document !== "undefined") {
+      const elements = document.querySelectorAll("style, link[rel='stylesheet']");
+      elements.forEach((el) => {
+        headStyles += el.outerHTML;
+      });
+    }
+
     const printWindow = window.open("", "_blank");
     if (!printWindow) {
       window.print();
@@ -58,25 +71,40 @@ export function PrescriptionView({
           <title>Prescription_${prescription.prescriptionNumber}</title>
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          ${headStyles}
           <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Merriweather:wght@400;700&family=Roboto:wght@400;500;700&display=swap');
+            @page {
+              size: A4 portrait;
+              margin: 10mm 12mm 10mm 12mm;
+            }
             body {
               font-family: ${layout.fontFamily || "Inter, sans-serif"};
-              background: #ffffff;
-              color: ${layout.textColor || "#0f172a"};
-              margin: 0;
-              padding: 20px;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
+              background: #ffffff !important;
+              color: ${layout.textColor || "#0f172a"} !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
             }
             .a4-container {
-              max-width: 800px;
-              margin: 0 auto;
-              background: #ffffff;
+              max-width: 100% !important;
+              width: 100% !important;
+              margin: 0 auto !important;
+              background: #ffffff !important;
+              box-shadow: none !important;
+              border: none !important;
+              min-height: auto !important;
             }
             @media print {
-              body { padding: 0; }
+              body { padding: 0 !important; margin: 0 !important; }
               .no-print { display: none !important; }
+              .a4-container { min-height: auto !important; box-shadow: none !important; border: none !important; }
+              tr, .prescription-section, .signature-block {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+              }
+              thead { display: table-header-group !important; }
             }
             table { width: 100%; border-collapse: collapse; margin-top: 8px; }
             th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
@@ -176,13 +204,41 @@ export function PrescriptionView({
       {/* Printable Prescription Canvas */}
       <div
         ref={printRef}
-        className="relative w-full max-w-4xl bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden print:shadow-none print:border-none print:rounded-none"
+        className="relative w-full max-w-4xl bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden print:shadow-none print:border-none print:rounded-none print:min-h-0 print:overflow-visible print:p-0 print:m-0"
         style={{
           fontFamily: layout.fontFamily || "Inter, sans-serif",
           color: layout.textColor || "#0f172a",
           minHeight: "1050px", // Approximate A4 aspect ratio preview
         }}
       >
+        {/* Reissue / Superseded Audit Watermark & Banner */}
+        {isReissued && (
+          <div className="p-4 bg-amber-50 border-b border-amber-200 text-amber-900 text-xs font-bold flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+            <div>
+              <span className="uppercase tracking-wider font-black">SUPERSEDED PRESCRIPTION RECORD</span>
+              <p className="font-medium text-amber-800 text-[11px] mt-0.5">
+                This prescription has been superseded by a corrected prescription.
+                {prescription.correctionReason ? ` Correction Reason: ${prescription.correctionReason}` : ""}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {prescription.originalPrescriptionId && !isReissued && (
+          <div className="p-3 bg-teal-50 border-b border-teal-200 text-teal-900 text-xs font-bold flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-teal-600 shrink-0" />
+            <div>
+              <span className="uppercase tracking-wider font-black">REISSUED & AUDITED PRESCRIPTION</span>
+              {prescription.correctionReason && (
+                <p className="font-medium text-teal-800 text-[11px] mt-0.5">
+                  Correction Reason: {prescription.correctionReason}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Render Custom Canvas Elements (Badges, Stamps, Notes) */}
         {layout.elements &&
           layout.elements
@@ -291,9 +347,9 @@ export function PrescriptionView({
                   {prescription.doctorSpecialization}
                 </p>
               )}
-              {layout.doctorRegistration && (
-                <p className="text-[11px] font-mono text-slate-400 mt-0.5">
-                  Reg No: {layout.doctorRegistration}
+              {(prescription.doctorRegistration || layout.doctorRegistration) && (
+                <p className="text-[11px] font-mono text-slate-500 mt-0.5">
+                  Reg No: {prescription.doctorRegistration || layout.doctorRegistration}
                 </p>
               )}
             </div>
@@ -343,8 +399,8 @@ export function PrescriptionView({
           </div>
         </div>
 
-        {/* Vitals Ribbon (if recorded) */}
-        {prescription.vitals && Object.values(prescription.vitals).some(Boolean) && (
+        {/* Vitals Ribbon (if enabled in template sections and recorded) */}
+        {layout.sections?.vitals !== false && prescription.vitals && Object.values(prescription.vitals).some(Boolean) && (
           <div
             className="px-6 py-3.5 border-b bg-emerald-50/40 flex flex-wrap items-center gap-6 text-xs"
             style={{ borderColor: borderColor }}
@@ -378,13 +434,18 @@ export function PrescriptionView({
                 Weight: <strong className="text-slate-950 font-black">{prescription.vitals.weight}</strong> kg
               </span>
             )}
+            {prescription.vitals.height && (
+              <span className="font-bold text-slate-700">
+                Height: <strong className="text-slate-950 font-black">{prescription.vitals.height}</strong>
+              </span>
+            )}
           </div>
         )}
 
         {/* Clinical Notes & Diagnosis */}
-        {(prescription.symptoms || prescription.diagnosis) && (
+        {((layout.sections?.symptoms !== false && prescription.symptoms) || (layout.sections?.diagnosis !== false && prescription.diagnosis)) && (
           <div className="p-6 sm:p-8 border-b space-y-4" style={{ borderColor: borderColor }}>
-            {prescription.symptoms && (
+            {layout.sections?.symptoms !== false && prescription.symptoms && (
               <div>
                 <h4 className="text-[11px] font-black uppercase tracking-wider text-slate-400 mb-1">
                   Symptoms & Chief Complaints
@@ -395,7 +456,7 @@ export function PrescriptionView({
               </div>
             )}
 
-            {prescription.diagnosis && (
+            {layout.sections?.diagnosis !== false && prescription.diagnosis && (
               <div>
                 <h4 className="text-[11px] font-black uppercase tracking-wider text-slate-400 mb-1">
                   Clinical Diagnosis
@@ -409,80 +470,82 @@ export function PrescriptionView({
         )}
 
         {/* Prescription / Rx Section */}
-        <div className="p-6 sm:p-8">
-          <div className="flex items-center gap-3 mb-4">
-            <span
-              className="text-2xl sm:text-3xl font-serif font-black"
-              style={{ color: primaryColor }}
-            >
-              ℞
-            </span>
-            <h3 className="text-base sm:text-lg font-black uppercase tracking-wider text-slate-900">
-              Prescribed Medications
-            </h3>
-          </div>
+        {layout.sections?.medicines !== false && (
+          <div className="p-6 sm:p-8">
+            <div className="flex items-center gap-3 mb-4">
+              <span
+                className="text-2xl sm:text-3xl font-serif font-black"
+                style={{ color: primaryColor }}
+              >
+                ℞
+              </span>
+              <h3 className="text-base sm:text-lg font-black uppercase tracking-wider text-slate-900">
+                Prescribed Medications
+              </h3>
+            </div>
 
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="py-3 px-4 text-[10px] font-black uppercase tracking-wider text-slate-500">
-                    #
-                  </th>
-                  <th className="py-3 px-4 text-[10px] font-black uppercase tracking-wider text-slate-500">
-                    Medicine Name & Dosage
-                  </th>
-                  <th className="py-3 px-4 text-[10px] font-black uppercase tracking-wider text-slate-500">
-                    Frequency
-                  </th>
-                  <th className="py-3 px-4 text-[10px] font-black uppercase tracking-wider text-slate-500">
-                    Duration
-                  </th>
-                  <th className="py-3 px-4 text-[10px] font-black uppercase tracking-wider text-slate-500">
-                    Instructions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
-                {prescription.medicines.map((med, index) => (
-                  <tr key={index} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-3.5 px-4 font-bold text-slate-400 tabular-nums">
-                      {index + 1}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <strong className="text-slate-900 font-extrabold block text-sm sm:text-base">
-                        {med.name}
-                      </strong>
-                      {med.dosage && (
-                        <span className="text-xs font-semibold text-emerald-700">
-                          {med.dosage}
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="inline-block px-2.5 py-1 rounded-md bg-slate-100 font-extrabold text-slate-800 text-xs font-mono">
-                        {med.frequency || "As directed"}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 font-semibold text-slate-700">
-                      {med.duration || "—"}
-                    </td>
-                    <td className="py-3.5 px-4 text-xs font-medium text-slate-600">
-                      {med.timing && <span className="font-bold text-teal-700 block">{med.timing}</span>}
-                      {med.instructions && <span>{med.instructions}</span>}
-                      {!med.timing && !med.instructions && "—"}
-                    </td>
+            <div className="overflow-x-auto rounded-xl border border-slate-200">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200">
+                    <th className="py-3 px-4 text-[10px] font-black uppercase tracking-wider text-slate-500">
+                      #
+                    </th>
+                    <th className="py-3 px-4 text-[10px] font-black uppercase tracking-wider text-slate-500">
+                      Medicine Name & Dosage
+                    </th>
+                    <th className="py-3 px-4 text-[10px] font-black uppercase tracking-wider text-slate-500">
+                      Frequency
+                    </th>
+                    <th className="py-3 px-4 text-[10px] font-black uppercase tracking-wider text-slate-500">
+                      Duration
+                    </th>
+                    <th className="py-3 px-4 text-[10px] font-black uppercase tracking-wider text-slate-500">
+                      Instructions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
+                  {prescription.medicines.map((med, index) => (
+                    <tr key={index} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="py-3.5 px-4 font-bold text-slate-400 tabular-nums">
+                        {index + 1}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <strong className="text-slate-900 font-extrabold block text-sm sm:text-base">
+                          {med.name}
+                        </strong>
+                        {med.dosage && (
+                          <span className="text-xs font-semibold text-emerald-700">
+                            {med.dosage}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span className="inline-block px-2.5 py-1 rounded-md bg-slate-100 font-extrabold text-slate-800 text-xs font-mono">
+                          {med.frequency || "As directed"}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 font-semibold text-slate-700">
+                        {med.duration || "—"}
+                      </td>
+                      <td className="py-3.5 px-4 text-xs font-medium text-slate-600">
+                        {med.timing && <span className="font-bold text-teal-700 block">{med.timing}</span>}
+                        {med.instructions && <span>{med.instructions}</span>}
+                        {!med.timing && !med.instructions && "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Tests & Advice Section */}
-        {((prescription.tests && prescription.tests.length > 0) || prescription.advice) && (
+        {((layout.sections?.tests !== false && prescription.tests && prescription.tests.length > 0) || (layout.sections?.advice !== false && prescription.advice)) && (
           <div className="px-6 sm:px-8 pb-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {prescription.tests && prescription.tests.length > 0 && (
+            {layout.sections?.tests !== false && prescription.tests && prescription.tests.length > 0 && (
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
                 <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 mb-2.5 flex items-center gap-2">
                   <Activity className="w-3.5 h-3.5 text-teal-600" />
@@ -499,7 +562,7 @@ export function PrescriptionView({
               </div>
             )}
 
-            {prescription.advice && (
+            {layout.sections?.advice !== false && prescription.advice && (
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
                 <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 mb-2.5 flex items-center gap-2">
                   <FileText className="w-3.5 h-3.5 text-emerald-600" />
@@ -514,39 +577,48 @@ export function PrescriptionView({
         )}
 
         {/* Doctor Signature & Clinic Stamp Box */}
-        <div className="px-6 sm:px-8 pb-8 pt-4 flex flex-col sm:flex-row items-end justify-between gap-6 border-t border-slate-100">
-          <div className="w-full sm:w-auto text-xs text-slate-400">
-            {layout.customText && (
-              <p className="max-w-md italic mb-2">{layout.customText}</p>
-            )}
-            <p className="font-mono text-[11px]">
-              Auth Hash: {prescription.id.slice(0, 16).toUpperCase()} • Kynisto Verified Record
-            </p>
-          </div>
-
-          <div className="text-center sm:text-right shrink-0">
-            <div className="w-48 h-16 border-b border-dashed border-slate-400 mb-2 flex items-end justify-center sm:justify-end pb-1">
-              <span className="text-xs font-script italic text-slate-600">
-                Dr. {prescription.doctorName.replace(/^Dr\.\s*/i, "")}
-              </span>
+        {layout.sections?.signature !== false && (
+          <div className="px-6 sm:px-8 pb-8 pt-4 flex flex-col sm:flex-row items-end justify-between gap-6 border-t border-slate-100">
+            <div className="w-full sm:w-auto text-xs text-slate-400">
+              {layout.customText && (
+                <p className="max-w-md italic mb-2">{layout.customText}</p>
+              )}
+              <p className="font-mono text-[11px]">
+                Auth Hash: {prescription.id.slice(0, 16).toUpperCase()} • Kynisto Verified Record
+              </p>
             </div>
-            <p className="text-xs font-black text-slate-900">
-              {prescription.doctorName.startsWith("Dr.") ? prescription.doctorName : `Dr. ${prescription.doctorName}`}
-            </p>
-            <p className="text-[11px] font-semibold text-slate-500">
-              {prescription.doctorSpecialization || "Consultant Doctor"}
-            </p>
+
+            <div className="text-center sm:text-right shrink-0">
+              <div className="w-48 h-16 border-b border-dashed border-slate-400 mb-2 flex items-end justify-center sm:justify-end pb-1">
+                <span className="text-xs font-script italic text-slate-600">
+                  Dr. {prescription.doctorName.replace(/^Dr\.\s*/i, "")}
+                </span>
+              </div>
+              <p className="text-xs font-black text-slate-900">
+                {prescription.doctorName.startsWith("Dr.") ? prescription.doctorName : `Dr. ${prescription.doctorName}`}
+              </p>
+              <p className="text-[11px] font-semibold text-slate-500">
+                {prescription.doctorSpecialization || "Consultant Doctor"}
+              </p>
+              {(prescription.doctorRegistration || layout.doctorRegistration) && (
+                <p className="text-[10px] font-mono text-slate-400">
+                  Reg: {prescription.doctorRegistration || layout.doctorRegistration}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Legal Disclaimer Footer */}
-        <div
-          className="p-4 bg-slate-50 border-t text-center text-[10px] text-slate-500 leading-normal"
-          style={{ borderColor: borderColor }}
-        >
-          {layout.disclaimer ||
-            "This prescription is a valid digital medical document issued under Kynisto Healthcare protocols."}
-        </div>
+        {layout.sections?.disclaimer !== false && (
+          <div
+            className="p-4 bg-slate-50 border-t text-center text-[10px] text-slate-500 leading-normal"
+            style={{ borderColor: borderColor }}
+          >
+            {layout.disclaimer ||
+              "This prescription is a valid digital medical document issued under Kynisto Healthcare protocols."}
+          </div>
+        )}
       </div>
 
       {/* Full-Page Detailed Viewer Modal */}

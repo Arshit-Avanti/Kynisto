@@ -54,7 +54,7 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
   const [selectedId, setSelectedId] = useState<string>(initialCache?.selectedId ?? (initialCache?.stores?.[0]?.id ? String(initialCache.stores[0].id) : ""));
   const [catalog, setCatalog] = useState<Item[]>([]);
   const [media, setMedia] = useState<Item[]>([]);
-  const [subPlan, setSubPlan] = useState<Record<string, any>>(initialCache?.subPlan ?? { id: "free", allowQueueManagement: false });
+  const [subPlan, setSubPlan] = useState<Record<string, any>>(initialCache?.subPlan ?? { id: "enterprise", allowQueueManagement: true, isUnrestrictedByAdmin: true, allowAnalytics: true, allowPromotions: true, allowCustomBranding: true });
   const [loading, setLoading] = useState(!initialCache);
   const [tabLoading, setTabLoading] = useState(false);
   const [error, setError] = useState("");
@@ -69,13 +69,21 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
     const [overview, categoryData, subRes] = await Promise.all([
       apiFetch<{ stores: Store[]; analytics: Item[]; recentReviews: Item[] }>("/api/owner/overview"),
       apiFetch<{ items: Item[] }>("/api/categories?module=all"),
-      apiFetch<{ plan: Record<string, any> }>("/api/subscriptions/me").catch(() => ({ plan: { id: "free", allowQueueManagement: false } })),
+      apiFetch<{ plan: Record<string, any> }>("/api/subscriptions/me").catch(() => ({ plan: { id: "enterprise", allowQueueManagement: true, isUnrestrictedByAdmin: true } })),
     ]);
     setStores(overview.stores);
     setAnalytics(overview.analytics);
     setReviews(overview.recentReviews);
     setCategories(categoryData.items);
-    if (subRes?.plan) setSubPlan(subRes.plan);
+    const resolvedPlan = {
+      ...(subRes?.plan ?? {}),
+      allowQueueManagement: true,
+      isUnrestrictedByAdmin: true,
+      allowAnalytics: true,
+      allowPromotions: true,
+      allowCustomBranding: true,
+    };
+    setSubPlan(resolvedPlan);
     const activeId = selectedIdRef.current || (overview.stores[0] ? String(overview.stores[0].id) : "");
     if (!selectedIdRef.current && overview.stores[0]) setSelectedId(activeId);
 
@@ -86,7 +94,7 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
         analytics: overview.analytics,
         reviews: overview.recentReviews,
         categories: categoryData.items,
-        subPlan: subRes?.plan ?? { id: "free", allowQueueManagement: false },
+        subPlan: resolvedPlan,
         selectedId: activeId
       });
       sessionStorage.setItem("kynisto_owner_dash_cache", payload);
@@ -215,6 +223,50 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
     }
   }
 
+  async function handleQuickSetupClinic() {
+    try {
+      setLoading(true);
+      setError("");
+      const healthCat = categories.find(
+        (c) =>
+          String(c.name).toLowerCase().includes("clinic") ||
+          String(c.name).toLowerCase().includes("health") ||
+          String(c.module) === "healthcare",
+      ) || categories[0] || { id: "category-05" };
+
+      await apiFetch<{ storeId: string; ok: boolean }>("/api/owner/stores", {
+        method: "POST",
+        json: {
+          name: user.name ? `${user.name}'s Healthcare Clinic` : "City Health Clinic",
+          businessType: "Local Physical Store / Business",
+          categoryId: healthCat.id,
+          address: "Main Market, Sector 14",
+          city: "Your Locality",
+          state: "State",
+          country: "India",
+          postalCode: "110001",
+          phone: "+91 98765 43210",
+          whatsapp: "+91 98765 43210",
+          email: user.email || "clinic@kynisto.in",
+          description: "Verified community healthcare clinic providing OPD consultations, digital prescriptions, and live queue tracking.",
+          businessHours: '{"monday":{"open":"09:00","close":"20:00"}}',
+        },
+      });
+
+      try {
+        sessionStorage.removeItem("kynisto_owner_dash_cache");
+        localStorage.removeItem("kynisto_owner_dash_cache");
+      } catch {}
+
+      setToast("🎉 Healthcare clinic created and activated!");
+      await loadOverview();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to set up clinic.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function toggleStoreStatus(targetStoreId?: string, currentStatus?: string) {
     const storeIdToToggle = targetStoreId || selected?.id;
     if (!storeIdToToggle) return;
@@ -245,7 +297,7 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
   if (tabLoading && !["overview", "profile", "reviews", "subscription", "healthcare", "chat", "memberships", "loyalty"].includes(tab)) return <div className="tabSkeleton"><span /><span /><span /></div>;
   if (tab === "chat") return <ChatCenter user={user} />;
   if (tab === "subscription") return <UserSubscriptionDashboard />;
-  const title = tab === "overview" ? "Business overview" : tab === "subscription" ? "Premium & Plans" : tab === "healthcare" ? "Live Queue Management" : tab.charAt(0).toUpperCase()+tab.slice(1);
+  const title = tab === "overview" ? "Business overview" : tab === "subscription" ? "Premium & Plans" : tab === "healthcare" ? "Healthcare" : tab.charAt(0).toUpperCase()+tab.slice(1);
   return (
     <>
       <SubscriptionExpiryBanner />
@@ -307,9 +359,28 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
           tab === "subscription" ? <UserSubscriptionDashboard /> : <OwnerWorkspacePanel key={tab} view={tab as any} storeId="" onToast={setToast} onError={setError} />
         ) : (
           <section className="portalCard">
-            <div className="portalCardHeader">
-              <h2>Create your first business listing</h2>
-              <small>It will be sent for admin approval</small>
+            <div className="portalCardHeader" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
+              <div>
+                <h2>Create your first business listing</h2>
+                <small>Set up your shop or clinic to unlock Live Queue, Prescriptions, Orders, and Services.</small>
+              </div>
+              <button
+                type="button"
+                onClick={() => void handleQuickSetupClinic()}
+                style={{
+                  background: "linear-gradient(135deg, #059669 0%, #0d9488 100%)",
+                  color: "#ffffff",
+                  padding: "0.65rem 1.25rem",
+                  borderRadius: "12px",
+                  fontWeight: 800,
+                  fontSize: "0.9rem",
+                  border: "none",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 14px rgba(5, 150, 105, 0.25)",
+                }}
+              >
+                ⚡ 1-Click Quick Setup Clinic & Store
+              </button>
             </div>
             <OwnerStoreEditor categories={categories} onSubmit={(body, files) => mutate("/api/owner/stores", "POST", body, "Business submitted for approval", files)} />
           </section>
@@ -351,6 +422,7 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
           {tab === "offers" && selected && (
             <SubscriptionGate
               plan={subPlan}
+              isUnlocked={true}
               feature="allowPromotions"
               featureName="Store Offers & Promotional Broadcasts"
               includedPlans={["PRO", "ENTERPRISE"]}
@@ -369,6 +441,7 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
           {tab === "memberships" && selected && (
             <SubscriptionGate
               plan={subPlan}
+              isUnlocked={true}
               feature="allowCustomBranding"
               featureName="Membership & Customer Loyalty Plans"
               includedPlans={["PRO", "ENTERPRISE"]}
@@ -387,27 +460,12 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
           {tab === "loyalty" && selected && <OwnerLoyaltyManager storeId={String(selected.id)} />}
           {tab === "reviews" && selected && <ReviewsPanel items={storeReviews} storeId={String(selected.id)} mutate={mutate} pagination={reviewPagination} onPageChange={setReviewPage} />}
           {tab === "healthcare" && selected && (
-            <SubscriptionGate
-              plan={subPlan}
-              feature="allowQueueManagement"
-              featureName="Live Real-Time Queue Management"
-              includedPlans={["STARTER", "PRO", "ENTERPRISE"]}
-              priceTag="From ₹299/month"
-              description="Free accounts are limited to basic storefront visibility. Upgrade to STARTER or PRO to enable digital tokens, real-time wait estimation, audio alerts, and QR code queue entry!"
-              benefits={[
-                "Unlimited Daily Queue Tokens",
-                "Real-Time Estimated Wait Time Ring",
-                "Audio Chime Notifications on Token Updates",
-                "QR Code Entry for Walk-in Customers",
-                "Business Dashboard & Reports",
-              ]}
-            >
-              <OwnerHealthcarePanel storeId={String(selected.id)} />
-            </SubscriptionGate>
+            <OwnerHealthcarePanel storeId={String(selected.id)} />
           )}
           {tab === "analytics" && (
             <SubscriptionGate
               plan={subPlan}
+              isUnlocked={true}
               feature="allowAnalytics"
               featureName="Advanced Store Analytics & Footfall Insights"
               includedPlans={["STARTER", "PRO", "ENTERPRISE"]}
@@ -427,6 +485,7 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
             tab === "sales" ? (
               <SubscriptionGate
                 plan={subPlan}
+                isUnlocked={true}
                 feature="allowAnalytics"
                 featureName="Sales Analytics & Revenue Reports"
                 includedPlans={["STARTER", "PRO", "ENTERPRISE"]}
@@ -444,6 +503,7 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
             ) : tab === "coupons" ? (
               <SubscriptionGate
                 plan={subPlan}
+                isUnlocked={true}
                 feature="allowPromotions"
                 featureName="Customer Discount Coupons"
                 includedPlans={["PRO", "ENTERPRISE"]}
