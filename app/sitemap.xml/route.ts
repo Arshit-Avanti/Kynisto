@@ -10,27 +10,51 @@ function xml(value: string) {
 export async function GET() {
   await ensureSeeded();
   const origin = "https://kynisto.in";
-  const stores = await getD1().prepare("SELECT slug, updated_at AS updatedAt FROM stores WHERE status IN ('approved', 'active') ORDER BY updated_at DESC").all<{ slug: string; updatedAt: number }>();
+  const today = new Date().toISOString().split("T")[0] + "T00:00:00.000Z";
+  
+  const stores = await getD1()
+    .prepare("SELECT slug, updated_at AS updatedAt FROM stores WHERE status IN ('approved', 'active') ORDER BY updated_at DESC")
+    .all<{ slug: string; updatedAt: number }>();
+    
   const articles = getAllArticles();
 
-  const urls = [
-    `<url><loc>${xml(`${origin}/`)}</loc><changefreq>daily</changefreq><priority>1.0</priority></url>`,
-    `<url><loc>${xml(`${origin}/healthcare`)}</loc><changefreq>daily</changefreq><priority>0.9</priority></url>`,
-    `<url><loc>${xml(`${origin}/search`)}</loc><changefreq>daily</changefreq><priority>0.9</priority></url>`,
-    `<url><loc>${xml(`${origin}/products`)}</loc><changefreq>daily</changefreq><priority>0.9</priority></url>`,
-    `<url><loc>${xml(`${origin}/services`)}</loc><changefreq>daily</changefreq><priority>0.8</priority></url>`,
-    `<url><loc>${xml(`${origin}/blog`)}</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>`,
-    ...articles.map((article) => `<url><loc>${xml(`${origin}/blog/${article.slug}`)}</loc><lastmod>${article.updatedAt}T00:00:00.000Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`),
-    `<url><loc>${xml(`${origin}/guide`)}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>`,
-    `<url><loc>${xml(`${origin}/faq`)}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>`,
-    `<url><loc>${xml(`${origin}/about`)}</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>`,
-    `<url><loc>${xml(`${origin}/contact`)}</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>`,
-    `<url><loc>${xml(`${origin}/privacy`)}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>`,
-    `<url><loc>${xml(`${origin}/terms`)}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>`,
-    `<url><loc>${xml(`${origin}/pricing`)}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`,
-    ...(stores.results ?? []).map((store) => `<url><loc>${xml(`${origin}/stores/${store.slug}`)}</loc><lastmod>${new Date(store.updatedAt * 1000).toISOString()}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`),
+  const coreRoutes = [
+    { path: "/", priority: "1.0", changefreq: "daily" },
+    { path: "/healthcare", priority: "0.9", changefreq: "daily" },
+    { path: "/search", priority: "0.9", changefreq: "daily" },
+    { path: "/products", priority: "0.9", changefreq: "daily" },
+    { path: "/services", priority: "0.8", changefreq: "daily" },
+    { path: "/blog", priority: "0.9", changefreq: "daily" },
+    { path: "/guide", priority: "0.8", changefreq: "weekly" },
+    { path: "/faq", priority: "0.8", changefreq: "weekly" },
+    { path: "/about", priority: "0.8", changefreq: "monthly" },
+    { path: "/contact", priority: "0.8", changefreq: "monthly" },
+    { path: "/privacy", priority: "0.7", changefreq: "monthly" },
+    { path: "/terms", priority: "0.7", changefreq: "monthly" },
+    { path: "/pricing", priority: "0.7", changefreq: "weekly" },
   ];
-  return new Response(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join("")}</urlset>`, {
-    headers: { "Content-Type": "application/xml; charset=utf-8", "Cache-Control": "public, max-age=3600" },
+
+  const urls = [
+    ...coreRoutes.map(
+      (r) =>
+        `  <url>\n    <loc>${xml(`${origin}${r.path}`)}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${r.changefreq}</changefreq>\n    <priority>${r.priority}</priority>\n  </url>`
+    ),
+    ...articles.map(
+      (article) =>
+        `  <url>\n    <loc>${xml(`${origin}/blog/${article.slug}`)}</loc>\n    <lastmod>${article.updatedAt}T00:00:00.000Z</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`
+    ),
+    ...(stores.results ?? []).map(
+      (store) =>
+        `  <url>\n    <loc>${xml(`${origin}/stores/${store.slug}`)}</loc>\n    <lastmod>${new Date(store.updatedAt * 1000).toISOString()}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`
+    ),
+  ];
+
+  const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>`;
+
+  return new Response(xmlContent, {
+    headers: {
+      "Content-Type": "application/xml; charset=utf-8",
+      "Cache-Control": "public, max-age=1800, s-maxage=3600",
+    },
   });
 }
