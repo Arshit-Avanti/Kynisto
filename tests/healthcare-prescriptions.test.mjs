@@ -90,6 +90,13 @@ test("customer prescription center and detailed view UI components", async () =>
   assert.match(followUpCard, /Follow-up period expired/);
   assert.match(followUpCard, /Valid Until/i);
   assert.match(followUpCard, /Fee/i);
+
+  // CustomerPrescriptionCenter uses valid fetch functions (no ReferenceError)
+  assert.doesNotMatch(customerCenter, /fetchCustomerData/);
+  assert.match(customerCenter, /fetchFollowUps/);
+
+  // PrescriptionView displays follow-up section
+  assert.match(prescriptionView, /Recommended Follow-up Consultation/);
 });
 
 test("Canva-like prescription designer with drag & drop, resize, move, duplicate, delete", async () => {
@@ -137,6 +144,8 @@ test("doctor workflow, clinic prescription history, patients directory, and sett
   assert.match(doctorModal, /templateLayout/);
   assert.match(doctorModal, /Preview/);
   assert.match(doctorModal, /Reissue \/ Correct/);
+  assert.match(doctorModal, /Doctor name is required/);
+  assert.match(doctorModal, /Patient Address/);
 
   // Clinic subtabs and rename
   assert.match(portalShell, /\{ label: "Healthcare", icon: Stethoscope, tab: "healthcare" \}/);
@@ -256,6 +265,40 @@ test("validatePrescriptionMedicines deep logic and edge case validation", () => 
       ]),
     (err) => err instanceof PrescriptionValidationError && err.code === "MEDICINE_DOSAGE_TOO_LONG"
   );
+
+  // 7. Rejection of negative / zero / invalid durations
+  assert.throws(
+    () => validatePrescriptionMedicines([{ name: "Valid Med", duration: "-5 days" }]),
+    (err) => err instanceof PrescriptionValidationError && err.code === "INVALID_MEDICINE_DURATION"
+  );
+  assert.throws(
+    () => validatePrescriptionMedicines([{ name: "Valid Med", duration: "0 days" }]),
+    (err) => err instanceof PrescriptionValidationError && err.code === "INVALID_MEDICINE_DURATION"
+  );
+  assert.throws(
+    () => validatePrescriptionMedicines([{ name: "Valid Med", duration: "---" }]),
+    (err) => err instanceof PrescriptionValidationError && err.code === "INVALID_MEDICINE_DURATION"
+  );
+
+  // 8. Rejection of invalid frequency and timing formats
+  assert.throws(
+    () => validatePrescriptionMedicines([{ name: "Valid Med", frequency: "???" }]),
+    (err) => err instanceof PrescriptionValidationError && err.code === "INVALID_MEDICINE_FREQUENCY"
+  );
+  assert.throws(
+    () => validatePrescriptionMedicines([{ name: "Valid Med", timing: "***" }]),
+    (err) => err instanceof PrescriptionValidationError && err.code === "INVALID_MEDICINE_TIMING"
+  );
+
+  // 9. Rejection of duplicate medicine with punctuation differences
+  assert.throws(
+    () =>
+      validatePrescriptionMedicines([
+        { name: "Amoxicillin 500mg", frequency: "1-0-1" },
+        { name: "  amoxicillin 500mg. ", frequency: "1-0-1" },
+      ]),
+    (err) => err instanceof PrescriptionValidationError && err.code === "DUPLICATE_MEDICINE"
+  );
 });
 
 test("calculateFollowUpDates timezone-safe leap year and boundary logic", () => {
@@ -304,6 +347,11 @@ test("calculateFollowUpDates timezone-safe leap year and boundary logic", () => 
   const clamped = calculateFollowUpDates("2025-06-01", 5, 10);
   assert.equal(clamped.followUpDate, "2025-06-11");
   assert.equal(clamped.validUntilDate, "2025-06-11");
+
+  // 10. String number inputs are parsed properly without falling back to defaults
+  const stringInputs = calculateFollowUpDates("2025-03-10", "14", "3");
+  assert.equal(stringInputs.followUpDate, "2025-03-13");
+  assert.equal(stringInputs.validUntilDate, "2025-03-24");
 });
 
 test("mergeTemplateLayout snapshot fallbacks and customization merger", () => {

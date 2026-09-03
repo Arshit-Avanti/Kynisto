@@ -312,6 +312,7 @@ export function validatePrescriptionMedicines(rawMeds: unknown): PrescriptionMed
       throw new PrescriptionValidationError(`Invalid medication entry at row #${idx + 1}.`, "INVALID_MEDICINE");
     }
 
+    const isInvalidNameType = m.name !== undefined && m.name !== null && typeof m.name !== "string";
     const rawName = typeof m.name === "string" ? m.name.trim() : "";
     const rawDosage = typeof m.dosage === "string" ? m.dosage.trim() : "";
     const rawFrequency = typeof m.frequency === "string" ? m.frequency.trim() : "";
@@ -320,7 +321,7 @@ export function validatePrescriptionMedicines(rawMeds: unknown): PrescriptionMed
     const rawInstructions = typeof m.instructions === "string" ? m.instructions.trim() : "";
 
     // Check if entire row is completely blank (e.g. empty extra row in form)
-    const isRowEmpty = !rawName && !rawDosage && !rawFrequency && !rawDuration && !rawTiming && !rawInstructions;
+    const isRowEmpty = !isInvalidNameType && !rawName && !rawDosage && !rawFrequency && !rawDuration && !rawTiming && !rawInstructions;
     if (isRowEmpty) {
       continue;
     }
@@ -337,24 +338,45 @@ export function validatePrescriptionMedicines(rawMeds: unknown): PrescriptionMed
       throw new PrescriptionValidationError(`Medicine #${idx + 1} dosage exceeds maximum 60 characters.`, "MEDICINE_DOSAGE_TOO_LONG");
     }
 
-    if (rawFrequency.length > 60) {
-      throw new PrescriptionValidationError(`Medicine #${idx + 1} frequency exceeds maximum 60 characters.`, "MEDICINE_FREQUENCY_TOO_LONG");
+    if (rawFrequency) {
+      if (rawFrequency.length > 60) {
+        throw new PrescriptionValidationError(`Medicine #${idx + 1} frequency exceeds maximum 60 characters.`, "MEDICINE_FREQUENCY_TOO_LONG");
+      }
+      if (!/[a-zA-Z0-9]/.test(rawFrequency)) {
+        throw new PrescriptionValidationError(`Medicine #${idx + 1} has an invalid frequency format.`, "INVALID_MEDICINE_FREQUENCY");
+      }
     }
 
-    if (rawDuration.length > 60) {
-      throw new PrescriptionValidationError(`Medicine #${idx + 1} duration exceeds maximum 60 characters.`, "MEDICINE_DURATION_TOO_LONG");
+    if (rawDuration) {
+      if (rawDuration.length > 60) {
+        throw new PrescriptionValidationError(`Medicine #${idx + 1} duration exceeds maximum 60 characters.`, "MEDICINE_DURATION_TOO_LONG");
+      }
+      if (/^-\s*\d+/.test(rawDuration)) {
+        throw new PrescriptionValidationError(`Medicine #${idx + 1} duration cannot be negative.`, "INVALID_MEDICINE_DURATION");
+      }
+      if (/^0\s*(days?|weeks?|months?|d|w|m)?$/i.test(rawDuration)) {
+        throw new PrescriptionValidationError(`Medicine #${idx + 1} duration must be at least 1 day.`, "INVALID_MEDICINE_DURATION");
+      }
+      if (!/[a-zA-Z0-9]/.test(rawDuration)) {
+        throw new PrescriptionValidationError(`Medicine #${idx + 1} has an invalid duration format.`, "INVALID_MEDICINE_DURATION");
+      }
     }
 
-    if (rawTiming.length > 60) {
-      throw new PrescriptionValidationError(`Medicine #${idx + 1} timing exceeds maximum 60 characters.`, "MEDICINE_TIMING_TOO_LONG");
+    if (rawTiming) {
+      if (rawTiming.length > 60) {
+        throw new PrescriptionValidationError(`Medicine #${idx + 1} timing exceeds maximum 60 characters.`, "MEDICINE_TIMING_TOO_LONG");
+      }
+      if (!/[a-zA-Z0-9]/.test(rawTiming)) {
+        throw new PrescriptionValidationError(`Medicine #${idx + 1} has an invalid timing format.`, "INVALID_MEDICINE_TIMING");
+      }
     }
 
     if (rawInstructions.length > 250) {
       throw new PrescriptionValidationError(`Medicine #${idx + 1} instructions exceeds maximum 250 characters.`, "MEDICINE_INSTRUCTIONS_TOO_LONG");
     }
 
-    // Duplicate check: normalized lower-cased medicine name
-    const normalizedName = rawName.toLowerCase().replace(/\s+/g, " ");
+    // Duplicate check: normalized lower-cased medicine name (collapsing spaces and trailing punctuation)
+    const normalizedName = rawName.toLowerCase().replace(/[.,;:!?]+$/, "").replace(/\s+/g, " ");
     if (seenNames.has(normalizedName)) {
       throw new PrescriptionValidationError(
         `Duplicate medicine "${rawName}" found in prescription. Each medication should be listed once with combined dosage.`,
@@ -406,14 +428,17 @@ export function filterToTimestamp(filter: PrescriptionFilter = "1y"): number {
 
 export function calculateFollowUpDates(
   consultationDateString?: string | null,
-  validityDays: number = 7,
-  targetDaysLater?: number,
+  validityDays: number | string = 7,
+  targetDaysLater?: number | string,
 ): { followUpDate: string; validUntilDate: string; isExpired: boolean } {
+  const parsedValidity = Number(validityDays);
   const validDays =
-    Number.isFinite(validityDays) && validityDays > 0 ? Math.floor(validityDays) : 7;
+    Number.isFinite(parsedValidity) && parsedValidity > 0 ? Math.floor(parsedValidity) : 7;
+  const parsedTarget =
+    targetDaysLater !== undefined && targetDaysLater !== null ? Number(targetDaysLater) : NaN;
   const targetOffset =
-    targetDaysLater !== undefined && Number.isFinite(targetDaysLater) && targetDaysLater >= 0
-      ? Math.floor(targetDaysLater)
+    Number.isFinite(parsedTarget) && parsedTarget >= 0
+      ? Math.floor(parsedTarget)
       : validDays;
 
   let y: number;

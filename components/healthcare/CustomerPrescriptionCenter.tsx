@@ -161,6 +161,11 @@ export function CustomerPrescriptionCenter({
           <FollowUpCard
             followUp={selectedRx.followUp}
             onBookFollowUp={(fu) => {
+              const updatedFu = { ...fu, bookingStatus: "booked" as const, isExpired: false };
+              setSelectedRx((prev) => (prev ? { ...prev, followUp: updatedFu } : null));
+              setPrescriptions((prev) =>
+                prev.map((p) => (p.id === selectedRx.id ? { ...p, followUp: updatedFu } : p))
+              );
               if (onSelectClinicForBooking) {
                 onSelectClinicForBooking(fu.storeId, selectedRx.storeName);
               }
@@ -519,7 +524,8 @@ export function CustomerPrescriptionCenter({
                               if (onSelectClinicForBooking) {
                                 onSelectClinicForBooking(fu.storeId, (fu as any).clinicName || "Clinic");
                               }
-                              await fetchCustomerData();
+                              await fetchFollowUps();
+                              await fetchPrescriptions(activeFilter);
                             } catch (err: any) {
                               alert(err?.message || "Failed to book follow-up");
                             }

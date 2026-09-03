@@ -90,9 +90,10 @@ export async function GET(request: Request) {
       }
 
       let query = `
-        SELECT p.*, f.id AS fu_id, f.follow_up_date AS fu_date, f.valid_until_date AS fu_valid_until,
-               f.validity_days AS fu_validity_days, f.follow_up_type AS fu_type, f.follow_up_fee AS fu_fee,
-               f.payment_status AS fu_pay_status, f.booking_status AS fu_book_status
+        SELECT p.*, f.id AS fu_id, f.original_consultation_date AS fu_orig_date, f.follow_up_date AS fu_date,
+               f.valid_until_date AS fu_valid_until, f.validity_days AS fu_validity_days,
+               f.follow_up_type AS fu_type, f.follow_up_fee AS fu_fee, f.payment_status AS fu_pay_status,
+               f.booking_status AS fu_book_status, f.notes AS fu_notes, f.appointment_id AS fu_appt_id
         FROM healthcare_prescriptions p
         LEFT JOIN healthcare_follow_ups f ON f.prescription_id = p.id
         WHERE p.store_id = ? AND p.issued_at >= ?
@@ -125,18 +126,19 @@ export async function GET(request: Request) {
     const userPhone = userRow?.phone || "";
     const cleanDigits = (p: string | null | undefined) => (p ? p.replace(/\D/g, "") : "");
     const uPhoneDigits = cleanDigits(userPhone);
-    const phoneSuffix = uPhoneDigits.length >= 10 ? `%${uPhoneDigits.slice(-10)}` : userPhone;
+    const phoneSuffix = uPhoneDigits.length >= 10 ? `%${uPhoneDigits.slice(-10)}` : (userPhone ? userPhone : "__NO_PHONE__");
 
     let query = `
-      SELECT p.*, f.id AS fu_id, f.follow_up_date AS fu_date, f.valid_until_date AS fu_valid_until,
-             f.validity_days AS fu_validity_days, f.follow_up_type AS fu_type, f.follow_up_fee AS fu_fee,
-             f.payment_status AS fu_pay_status, f.booking_status AS fu_book_status
+      SELECT p.*, f.id AS fu_id, f.original_consultation_date AS fu_orig_date, f.follow_up_date AS fu_date,
+             f.valid_until_date AS fu_valid_until, f.validity_days AS fu_validity_days,
+             f.follow_up_type AS fu_type, f.follow_up_fee AS fu_fee, f.payment_status AS fu_pay_status,
+             f.booking_status AS fu_book_status, f.notes AS fu_notes, f.appointment_id AS fu_appt_id
       FROM healthcare_prescriptions p
       LEFT JOIN healthcare_follow_ups f ON f.prescription_id = p.id
-      WHERE (p.user_id = ? OR (p.patient_phone IS NOT NULL AND p.patient_phone != '' AND (p.patient_phone = ? OR p.patient_phone LIKE ?))) AND p.issued_at >= ?
+      WHERE (p.user_id = ? OR (p.patient_phone IS NOT NULL AND p.patient_phone != '' AND ? != '' AND (p.patient_phone = ? OR p.patient_phone LIKE ?))) AND p.issued_at >= ?
       ORDER BY p.issued_at DESC LIMIT 100
     `;
-    const rows = await db.prepare(query).bind(userId, userPhone, phoneSuffix, minTimestamp).all<any>();
+    const rows = await db.prepare(query).bind(userId, userPhone, userPhone, phoneSuffix, minTimestamp).all<any>();
     const prescriptions = (rows.results || []).map((row) => formatPrescriptionWithJoinedFollowUp(row));
 
     return noStoreJson({ prescriptions });
@@ -289,7 +291,15 @@ export async function POST(request: Request) {
     // Follow-up setup
     let createdFollowUp: any = null;
     const followUpConfig = body.followUp;
-    if (followUpConfig && (followUpConfig.enabled === true || followUpConfig.enabled === "true" || followUpConfig.validityDays)) {
+    const isFollowUpExplicitlyDisabled =
+      Boolean(followUpConfig) &&
+      (followUpConfig.enabled === false || followUpConfig.enabled === "false");
+    const isFollowUpEnabled =
+      Boolean(followUpConfig) &&
+      !isFollowUpExplicitlyDisabled &&
+      (followUpConfig.enabled === true || followUpConfig.enabled === "true" || Boolean(followUpConfig.validityDays));
+
+    if (isFollowUpEnabled) {
       const validityDays = numberInput(followUpConfig.validityDays ?? 7, "Validity days", { min: 1, max: 180, integer: true }) as number;
       const followUpType = (["free", "paid", "discounted"].includes(followUpConfig.followUpType) ? followUpConfig.followUpType : "free") as "free" | "paid" | "discounted";
       const followUpFee = followUpType === "free" ? 0 : Number(followUpConfig.followUpFee || 0);
@@ -461,20 +471,31 @@ export async function PATCH(request: Request) {
       ];
 
       // 3. Handle Follow-up in Reissue
-      let updatedFollowUp: any = null;
       const followUpConfig = body.followUp;
-      if (followUpConfig && (followUpConfig.enabled === true || followUpConfig.enabled === "true" || followUpConfig.validityDays)) {
+      const isFollowUpExplicitlyDisabled =
+        Boolean(followUpConfig) &&
+        (followUpConfig.enabled === false || followUpConfig.enabled === "false");
+      const isFollowUpEnabled =
+        Boolean(followUpConfig) &&
+        !isFollowUpExplicitlyDisabled &&
+        (followUpConfig.enabled === true || followUpConfig.enabled === "true" || Boolean(followUpConfig.validityDays));
+
+      if (isFollowUpEnabled) {
         const validityDays = numberInput(followUpConfig.validityDays ?? 7, "Validity days", { min: 1, max: 180, integer: true }) as number;
         const followUpType = (["free", "paid", "discounted"].includes(followUpConfig.followUpType) ? followUpConfig.followUpType : "free") as "free" | "paid" | "discounted";
         const followUpFee = followUpType === "free" ? 0 : Number(followUpConfig.followUpFee || 0);
         const targetDays = followUpConfig.targetDays ? Number(followUpConfig.targetDays) : validityDays;
-        const todayStr = new Date().toISOString().split("T")[0];
-        const { followUpDate, validUntilDate } = calculateFollowUpDates(todayStr, validityDays, targetDays);
 
         const existingFollowUp = await db
-          .prepare("SELECT id FROM healthcare_follow_ups WHERE prescription_id = ? LIMIT 1")
+          .prepare("SELECT * FROM healthcare_follow_ups WHERE prescription_id = ? LIMIT 1")
           .bind(originalRxId)
           .first<any>();
+
+        const baseConsultationDate =
+          existingFollowUp?.original_consultation_date ||
+          (originalRx.issued_at ? new Date(originalRx.issued_at * 1000).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]);
+
+        const { followUpDate, validUntilDate } = calculateFollowUpDates(baseConsultationDate, validityDays, targetDays);
 
         if (existingFollowUp) {
           statements.push(
@@ -502,13 +523,18 @@ export async function PATCH(request: Request) {
               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'not_booked', ?, ?, ?)
             `).bind(
               followUpId, storeId, newRxId, originalRx.user_id, patientName, patientPhone,
-              doctorId, doctorName, todayStr, followUpDate,
+              doctorId, doctorName, baseConsultationDate, followUpDate,
               validUntilDate, validityDays, followUpType, followUpFee,
               followUpType === "free" ? "free" : "unpaid",
               followUpConfig.notes || null, now, now
             )
           );
         }
+      } else if (isFollowUpExplicitlyDisabled) {
+        statements.push(
+          db.prepare("DELETE FROM healthcare_follow_ups WHERE prescription_id = ? AND booking_status = 'not_booked'")
+            .bind(originalRxId)
+        );
       } else {
         // Point existing follow-up to new prescription
         statements.push(
@@ -548,7 +574,10 @@ function formatPrescriptionRow(rx: any, followUp?: any) {
       id: followUp.id,
       storeId: followUp.store_id,
       prescriptionId: followUp.prescription_id,
-      doctorName: followUp.doctor_name,
+      patientName: followUp.patient_name || rx.patient_name,
+      patientPhone: followUp.patient_phone || rx.patient_phone,
+      doctorId: followUp.doctor_id || rx.doctor_id,
+      doctorName: followUp.doctor_name || rx.doctor_name,
       originalConsultationDate: followUp.original_consultation_date,
       followUpDate: followUp.follow_up_date,
       validUntilDate: followUp.valid_until_date,
@@ -558,6 +587,8 @@ function formatPrescriptionRow(rx: any, followUp?: any) {
       paymentStatus: followUp.payment_status,
       bookingStatus: isExp ? "expired" : followUp.booking_status,
       isExpired: isExp,
+      appointmentId: followUp.appointment_id || null,
+      notes: followUp.notes || null,
     };
   }
 
@@ -612,7 +643,11 @@ function formatPrescriptionWithJoinedFollowUp(row: any) {
       id: row.fu_id,
       storeId: row.store_id,
       prescriptionId: row.id,
+      patientName: row.patient_name,
+      patientPhone: row.patient_phone,
+      doctorId: row.doctor_id,
       doctorName: row.doctor_name,
+      originalConsultationDate: row.fu_orig_date || null,
       followUpDate: row.fu_date,
       validUntilDate: row.fu_valid_until,
       validityDays: row.fu_validity_days,
@@ -621,6 +656,8 @@ function formatPrescriptionWithJoinedFollowUp(row: any) {
       paymentStatus: row.fu_pay_status,
       bookingStatus: isExp ? "expired" : row.fu_book_status,
       isExpired: isExp,
+      appointmentId: row.fu_appt_id || null,
+      notes: row.fu_notes || null,
     };
   }
 
@@ -644,6 +681,7 @@ function formatPrescriptionWithJoinedFollowUp(row: any) {
     patientPhone: row.patient_phone,
     patientAge: row.patient_age,
     patientGender: row.patient_gender,
+    patientAddress: row.patient_address || null,
     vitals: row.vitals_json ? safeParse(row.vitals_json) : null,
     symptoms: row.symptoms,
     diagnosis: row.diagnosis,
@@ -657,6 +695,7 @@ function formatPrescriptionWithJoinedFollowUp(row: any) {
     correctionReason: row.correction_reason,
     issuedAt: row.issued_at,
     createdAt: row.created_at,
+    updatedAt: row.updated_at || row.created_at || row.issued_at,
     followUp: fuRecord,
   };
 }

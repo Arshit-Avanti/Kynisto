@@ -34,6 +34,8 @@ interface Doctor {
   specialization?: string;
   consultationMinutes?: number;
   consultationFee?: number;
+  registrationNumber?: string;
+  doctorRegistration?: string;
 }
 
 interface DoctorPrescriptionModalProps {
@@ -75,13 +77,15 @@ export function DoctorPrescriptionModal({
     reissueTarget?.doctorId || (!initialCustomDoc && doctors[0]?.id ? String(doctors[0].id) : "")
   );
   const [doctorName, setDoctorName] = useState<string>(
-    reissueTarget?.doctorName || (doctors[0]?.name || "Doctor")
+    reissueTarget?.doctorName || (doctors[0]?.name || "")
   );
   const [doctorSpecialization, setDoctorSpecialization] = useState<string>(
     reissueTarget?.doctorSpecialization || (doctors[0]?.specialization || "General Medicine")
   );
   const [doctorRegistration, setDoctorRegistration] = useState<string>(
-    reissueTarget?.doctorRegistration || reissueTarget?.templateSnapshot?.doctorRegistration || ""
+    reissueTarget?.doctorRegistration ||
+      reissueTarget?.templateSnapshot?.doctorRegistration ||
+      (doctors[0]?.doctorRegistration || doctors[0]?.registrationNumber || "")
   );
 
   const [patientName, setPatientName] = useState<string>(
@@ -138,11 +142,21 @@ export function DoctorPrescriptionModal({
   );
 
   // Follow-up
-  const [enableFollowUp, setEnableFollowUp] = useState<boolean>(true);
-  const [validityDays, setValidityDays] = useState<number>(7);
-  const [followUpType, setFollowUpType] = useState<"free" | "paid" | "discounted">("free");
-  const [followUpFee, setFollowUpFee] = useState<number>(0);
-  const [followUpNotes, setFollowUpNotes] = useState<string>("");
+  const [enableFollowUp, setEnableFollowUp] = useState<boolean>(
+    reissueTarget ? Boolean(reissueTarget.followUp) : true
+  );
+  const [validityDays, setValidityDays] = useState<number>(
+    reissueTarget?.followUp?.validityDays || 7
+  );
+  const [followUpType, setFollowUpType] = useState<"free" | "paid" | "discounted">(
+    reissueTarget?.followUp?.followUpType || "free"
+  );
+  const [followUpFee, setFollowUpFee] = useState<number>(
+    reissueTarget?.followUp?.followUpFee || 0
+  );
+  const [followUpNotes, setFollowUpNotes] = useState<string>(
+    reissueTarget?.followUp?.notes || ""
+  );
 
   // Clinic template layout for preview
   const [templateLayout, setTemplateLayout] = useState<PrescriptionTemplateLayout>(() =>
@@ -179,6 +193,9 @@ export function DoctorPrescriptionModal({
     if (doc) {
       setDoctorName(doc.name);
       setDoctorSpecialization(doc.specialization || "Consultant Physician");
+      if (doc.doctorRegistration || doc.registrationNumber) {
+        setDoctorRegistration(doc.doctorRegistration || doc.registrationNumber || "");
+      }
     }
   };
 
@@ -244,6 +261,10 @@ export function DoctorPrescriptionModal({
 
   const handleSubmit = async () => {
     setError(null);
+    if (!doctorName.trim()) {
+      setError("Doctor name is required.");
+      return;
+    }
     if (!patientName.trim()) {
       setError("Patient name is required.");
       return;
@@ -283,11 +304,11 @@ export function DoctorPrescriptionModal({
               prescriptionId: reissueTarget.id,
               correctionReason,
               doctorId: doctorId || undefined,
-              doctorName,
+              doctorName: doctorName.trim(),
               doctorSpecialization,
               doctorRegistration: doctorRegistration.trim() || undefined,
-              patientName,
-              patientPhone,
+              patientName: patientName.trim(),
+              patientPhone: patientPhone.trim() || undefined,
               patientAge: patientAge ? parseInt(patientAge, 10) : undefined,
               patientGender,
               patientAddress: patientAddress.trim() || undefined,
@@ -297,6 +318,7 @@ export function DoctorPrescriptionModal({
               medicines: validMedicines,
               tests: testsInput.split(",").map((t) => t.trim()).filter(Boolean),
               advice,
+              templateSnapshot: previewRecord.templateSnapshot,
               followUp: enableFollowUp
                 ? {
                     enabled: true,
@@ -305,7 +327,7 @@ export function DoctorPrescriptionModal({
                     followUpFee: followUpType === "free" ? 0 : followUpFee,
                     notes: followUpNotes,
                   }
-                : undefined,
+                : { enabled: false },
             },
           }
         );
@@ -319,14 +341,14 @@ export function DoctorPrescriptionModal({
             json: {
               storeId,
               doctorId: doctorId || undefined,
-              doctorName,
+              doctorName: doctorName.trim(),
               doctorSpecialization,
               doctorRegistration: doctorRegistration.trim() || undefined,
-              patientName,
-              patientPhone,
+              patientName: patientName.trim(),
+              patientPhone: patientPhone.trim() || undefined,
               patientAge: patientAge ? parseInt(patientAge, 10) : undefined,
               patientGender,
-              patientAddress,
+              patientAddress: patientAddress.trim() || undefined,
               queueEntryId,
               appointmentId,
               vitals,
@@ -335,6 +357,7 @@ export function DoctorPrescriptionModal({
               medicines: validMedicines,
               tests: testsInput.split(",").map((t) => t.trim()).filter(Boolean),
               advice,
+              templateSnapshot: previewRecord.templateSnapshot,
               followUp: enableFollowUp
                 ? {
                     enabled: true,
@@ -343,7 +366,7 @@ export function DoctorPrescriptionModal({
                     followUpFee: followUpType === "free" ? 0 : followUpFee,
                     notes: followUpNotes,
                   }
-                : undefined,
+                : { enabled: false },
             },
           }
         );
@@ -571,6 +594,16 @@ export function DoctorPrescriptionModal({
                       </select>
                     </div>
                   </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-500 block mb-1">Patient Address</label>
+                    <input
+                      type="text"
+                      value={patientAddress}
+                      onChange={(e) => setPatientAddress(e.target.value)}
+                      placeholder="e.g. Flat 302, Green Glen Layout, Bengaluru"
+                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -793,31 +826,31 @@ export function DoctorPrescriptionModal({
               </div>
 
               {/* Follow-up Section */}
-              {!isReissue && (
-                <div className="p-4 bg-teal-50/60 border border-teal-200 rounded-2xl space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="enableFollowUp"
-                        checked={enableFollowUp}
-                        onChange={(e) => setEnableFollowUp(e.target.checked)}
-                        className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500"
-                      />
-                      <label htmlFor="enableFollowUp" className="text-xs font-black uppercase tracking-wider text-teal-900 cursor-pointer">
-                        Schedule Follow-up Consultation
-                      </label>
-                    </div>
-
-                    {enableFollowUp && (
-                      <span className="text-[11px] font-bold text-teal-700">
-                        Valid for {validityDays} days from today
-                      </span>
-                    )}
+              <div className="p-4 bg-teal-50/60 border border-teal-200 rounded-2xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="enableFollowUp"
+                      checked={enableFollowUp}
+                      onChange={(e) => setEnableFollowUp(e.target.checked)}
+                      className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500"
+                    />
+                    <label htmlFor="enableFollowUp" className="text-xs font-black uppercase tracking-wider text-teal-900 cursor-pointer">
+                      Schedule Follow-up Consultation
+                    </label>
                   </div>
 
                   {enableFollowUp && (
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
+                    <span className="text-[11px] font-bold text-teal-700">
+                      Valid for {validityDays} days {isReissue ? "from consultation" : "from today"}
+                    </span>
+                  )}
+                </div>
+
+                {enableFollowUp && (
+                  <div className="space-y-3 pt-1">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                       <div>
                         <label className="text-[11px] font-bold text-slate-600 block mb-1">Follow-up Validity</label>
                         <select
@@ -859,9 +892,20 @@ export function DoctorPrescriptionModal({
                         />
                       </div>
                     </div>
-                  )}
-                </div>
-              )}
+
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-600 block mb-1">Follow-up Notes / Instructions (Optional)</label>
+                      <input
+                        type="text"
+                        value={followUpNotes}
+                        onChange={(e) => setFollowUpNotes(e.target.value)}
+                        placeholder="e.g. Review blood sugar levels, repeat CBC if symptoms persist"
+                        className="w-full bg-white border border-teal-300 rounded-xl px-3 py-2 text-slate-800 text-xs"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

@@ -17,7 +17,7 @@ export async function requireOwnedStore(ownerId: string, storeId: string) {
   }
 
   const store = await db
-    .prepare("SELECT id, name, slug, status FROM stores WHERE id = ? AND (owner_id = ? OR owner_id IS NULL) LIMIT 1")
+    .prepare("SELECT id, name, slug, status FROM stores WHERE id = ? AND owner_id = ? LIMIT 1")
     .bind(storeId, ownerId)
     .first<{ id: string; name: string; slug: string; status: string }>();
   if (!store) {

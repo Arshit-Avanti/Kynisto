@@ -116,9 +116,14 @@ export function PrescriptionView({
             ${content}
           </div>
           <script>
-            window.onload = function() {
+            var printed = false;
+            function triggerPrint() {
+              if (printed) return;
+              printed = true;
               window.print();
-            };
+            }
+            window.onload = triggerPrint;
+            setTimeout(triggerPrint, 350);
           </script>
         </body>
       </html>
@@ -204,11 +209,10 @@ export function PrescriptionView({
       {/* Printable Prescription Canvas */}
       <div
         ref={printRef}
-        className="relative w-full max-w-4xl bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden print:shadow-none print:border-none print:rounded-none print:min-h-0 print:overflow-visible print:p-0 print:m-0"
+        className="relative w-full max-w-4xl bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden min-h-[850px] print:min-h-0 print:h-auto print:shadow-none print:border-none print:rounded-none print:overflow-visible print:p-0 print:m-0"
         style={{
           fontFamily: layout.fontFamily || "Inter, sans-serif",
           color: layout.textColor || "#0f172a",
-          minHeight: "1050px", // Approximate A4 aspect ratio preview
         }}
       >
         {/* Reissue / Superseded Audit Watermark & Banner */}
@@ -573,6 +577,44 @@ export function PrescriptionView({
                 </p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Recommended Follow-up Section */}
+        {layout.sections?.followup !== false && prescription.followUp && (
+          <div className="px-6 sm:px-8 pb-6">
+            <div
+              className="p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+              style={{
+                backgroundColor: `${primaryColor}08`,
+                borderColor: `${primaryColor}30`,
+              }}
+            >
+              <div className="flex items-start gap-2.5">
+                <Calendar className="w-4 h-4 shrink-0 mt-0.5 text-teal-600" />
+                <div>
+                  <h4 className="font-black text-slate-800 uppercase tracking-wider text-[11px]">
+                    Recommended Follow-up Consultation
+                  </h4>
+                  <p className="font-semibold text-slate-700 mt-0.5">
+                    Target Date: <strong className="text-slate-900">{prescription.followUp.followUpDate}</strong>
+                    {prescription.followUp.validUntilDate && prescription.followUp.validUntilDate !== prescription.followUp.followUpDate && (
+                      <span> (Valid until {prescription.followUp.validUntilDate})</span>
+                    )}
+                  </p>
+                  {prescription.followUp.notes && (
+                    <p className="text-slate-500 italic mt-0.5">{prescription.followUp.notes}</p>
+                  )}
+                </div>
+              </div>
+              <div className="sm:text-right shrink-0">
+                <span className="inline-block px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-wider bg-white border border-slate-200 text-slate-700">
+                  {prescription.followUp.followUpType === "free"
+                    ? "Free Consultation"
+                    : `Fee: ₹${prescription.followUp.followUpFee || 0} (${prescription.followUp.followUpType})`}
+                </span>
+              </div>
+            </div>
           </div>
         )}
 
