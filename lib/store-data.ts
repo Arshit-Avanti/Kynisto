@@ -300,17 +300,27 @@ export async function listStores(options: {
       if (parsed.maxPrice !== undefined) serviceBindings.push(parsed.maxPrice);
       else if (parsed.minPrice !== undefined) serviceBindings.push(parsed.minPrice);
 
-      const [productRows, serviceRows] = await Promise.all([
-        productQueryParts.length > 0
-          ? db.prepare(`SELECT DISTINCT store_id FROM products p WHERE p.status = 'active' AND (${productQueryParts.join(" OR ")}) ${priceProductCondition} LIMIT 100`).bind(...productBindings).all<{ store_id: string }>().catch(() => ({ results: [] }))
-          : Promise.resolve({ results: [] }),
-        serviceQueryParts.length > 0
-          ? db.prepare(`SELECT DISTINCT store_id FROM services sv WHERE sv.status = 'active' AND (${serviceQueryParts.join(" OR ")}) ${priceServiceCondition} LIMIT 100`).bind(...serviceBindings).all<{ store_id: string }>().catch(() => ({ results: [] }))
-          : Promise.resolve({ results: [] }),
-      ]);
+      const stmts: D1PreparedStatement[] = [];
+      if (productQueryParts.length > 0) {
+        stmts.push(db.prepare(`SELECT DISTINCT store_id FROM products p WHERE p.status = 'active' AND (${productQueryParts.join(" OR ")}) ${priceProductCondition} LIMIT 100`).bind(...productBindings));
+      }
+      if (serviceQueryParts.length > 0) {
+        stmts.push(db.prepare(`SELECT DISTINCT store_id FROM services sv WHERE sv.status = 'active' AND (${serviceQueryParts.join(" OR ")}) ${priceServiceCondition} LIMIT 100`).bind(...serviceBindings));
+      }
 
-      const pIds = (productRows.results ?? []).map((r) => r.store_id);
-      const sIds = (serviceRows.results ?? []).map((r) => r.store_id);
+      let pIds: string[] = [];
+      let sIds: string[] = [];
+
+      if (stmts.length > 0) {
+        const batchResults = await db.batch<{ store_id: string }>(stmts);
+        let idx = 0;
+        if (productQueryParts.length > 0) {
+          pIds = (batchResults[idx++].results ?? []).map((r) => r.store_id);
+        }
+        if (serviceQueryParts.length > 0) {
+          sIds = (batchResults[idx++].results ?? []).map((r) => r.store_id);
+        }
+      }
       matchedCatalogStoreIds = Array.from(new Set([...pIds, ...sIds]));
     } catch {
       // Ignore catalog search error
