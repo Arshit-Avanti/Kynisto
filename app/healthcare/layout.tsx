@@ -5,8 +5,8 @@ import "./healthcare-queue-badge.css";
 export const metadata: Metadata = {
   title: "Healthcare Near You | Kynisto",
   description: "Find verified hospitals, clinics, diagnostic labs, pharmacies and live patient queues near you.",
-  alternates: { canonical: "/healthcare" },
-  openGraph: { title: "Kynisto Healthcare", description: "Verified local care and live queue status near you.", type: "website" },
+  alternates: { canonical: "https://kynisto.in/healthcare" },
+  openGraph: { title: "Kynisto Healthcare", description: "Verified local care and live queue status near you.", type: "website", url: "https://kynisto.in/healthcare" },
 };
 
 export default function HealthcareLayout({ children }: { children: React.ReactNode }) {

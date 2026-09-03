@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: RouteProps): Promise<Metadata
   return {
     title,
     description,
-    alternates: { canonical: `/stores/${store.slug}` },
+    alternates: { canonical: `https://kynisto.in/stores/${store.slug}` },
     openGraph: {
       title,
       description,
