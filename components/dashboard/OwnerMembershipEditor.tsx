@@ -682,7 +682,7 @@ function MembershipForm({
           type="number" 
           step="0.01" 
           value={price} 
-          onChange={(e) => setPrice(e.target.value)} 
+          onChange={(e) => setPrice(e.target.value === "" ? "" : Number(e.target.value))} 
           required 
         />
         {price !== "" && !isPriceValid && (

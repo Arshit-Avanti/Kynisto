@@ -38,6 +38,7 @@ type Store = {
   open: boolean;
   hours: string;
   tone: string;
+  bannerUrl?: string;
   services: string[];
 };
 

@@ -65,6 +65,9 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
     patientName?: string;
     patientPhone?: string;
     queueEntryId?: string;
+    doctorName?: string;
+    doctorId?: string;
+    tokenNumber?: number;
     reissueTarget?: PrescriptionRecord | null;
   }>({ open: false });
   const [viewingPrescriptionId, setViewingPrescriptionId] = useState<string | null>(null);
@@ -378,7 +381,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
                   <div className="flex flex-col gap-2 p-3 bg-red-50 border border-red-200 rounded">
                     <div className="text-red-700 font-semibold">🔴 Prescription Not Issued</div>
                     <div>
-                      <button onClick={() => setPrescriptionModal({ open: true, patientName: String(entry.patientName ?? "Patient"), patientPhone: String(entry.patientPhone ?? ""), queueEntryId: String(entry.id), doctorName: String(entry.doctorName ?? ""), doctorId: String(entry.doctorId ?? ""), tokenNumber: String(entry.tokenNumber ?? ""), serviceDate: String(entry.serviceDate || new Date().toISOString().split('T')[0]) })} className="portalButtonSm primary" style={{ background: '#10b981', color: 'white', padding: '8px 16px', fontSize: '14px' }}>Issue Prescription →</button>
+                      <button onClick={() => setPrescriptionModal({ open: true, patientName: String(entry.patientName ?? "Patient"), patientPhone: String(entry.patientPhone ?? ""), queueEntryId: String(entry.id), doctorName: String(entry.doctorName ?? ""), doctorId: String(entry.doctorId ?? ""), tokenNumber: entry.tokenNumber ? Number(entry.tokenNumber) : undefined })} className="portalButtonSm primary" style={{ background: '#10b981', color: 'white', padding: '8px 16px', fontSize: '14px' }}>Issue Prescription →</button>
                     </div>
                   </div>
                 )

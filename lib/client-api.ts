@@ -198,8 +198,9 @@ export async function apiFetch<T = unknown>(
         return data as T;
       } catch (err) {
         // Low-network / Offline Fallback: If network failed but we have stale cache, return it!
-        if (cached && cached.data) {
-          return cached.data;
+        const stale = getCachedData<T>(path);
+        if (stale && stale.data) {
+          return stale.data;
         }
         throw err;
       }

@@ -26,6 +26,7 @@ import {
   CheckCircle2,
   Building2,
   TrendingUp,
+  Package,
 } from "lucide-react";
 import { UPI_PAYMENT_ID, PAYMENT_QR_IMAGE } from "@/lib/subscriptions-shared";
 

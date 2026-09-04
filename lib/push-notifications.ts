@@ -62,7 +62,7 @@ export async function subscribeUserToPush(): Promise<{ ok: boolean; subscription
         const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey,
+          applicationServerKey: applicationServerKey as unknown as BufferSource,
         });
       } catch (vapidErr) {
         console.warn("VAPID subscription failed, attempting fallback subscribe:", vapidErr);

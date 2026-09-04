@@ -50,7 +50,7 @@ export async function requireConversationAccess(
     user.role === "admin" ||
     (row.kind === "store" && user.role === "store_owner" && row.ownerId === user.id) ||
     (row.kind === "store" && user.role === "customer" && Boolean(row.isParticipant)) ||
-    (row.kind !== "store" && user.role !== "admin" && Boolean(row.isParticipant));
+    (row.kind !== "store" && Boolean(row.isParticipant));
   if (!allowed) throw new HttpError(403, "Access Denied", "ACCESS_DENIED");
   return row;
 }

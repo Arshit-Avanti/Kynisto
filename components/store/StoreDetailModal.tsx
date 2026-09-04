@@ -17,17 +17,17 @@ export default function StoreDetailModal({ store, isOpen, onClose }: StoreDetail
 
   const handleDirections = () => {
     // Use GPS coordinates if available — works even for shops not on Google Maps
-    const lat = (store as Record<string, unknown>).latitude as number | undefined;
-    const lng = (store as Record<string, unknown>).longitude as number | undefined;
+    const lat = (store as unknown as Record<string, unknown>).latitude as number | undefined;
+    const lng = (store as unknown as Record<string, unknown>).longitude as number | undefined;
     const url = (lat && lng)
       ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
       : `https://www.google.com/maps/dir/?api=1&destination=${store.coordinates.lat},${store.coordinates.lng}`;
     window.open(url, '_blank');
   };
 
-  const locationVerified = Boolean((store as Record<string, unknown>).locationVerified);
-  const storeLat = ((store as Record<string, unknown>).latitude as number | undefined) ?? store.coordinates.lat;
-  const storeLng = ((store as Record<string, unknown>).longitude as number | undefined) ?? store.coordinates.lng;
+  const locationVerified = Boolean((store as unknown as Record<string, unknown>).locationVerified);
+  const storeLat = ((store as unknown as Record<string, unknown>).latitude as number | undefined) ?? store.coordinates.lat;
+  const storeLng = ((store as unknown as Record<string, unknown>).longitude as number | undefined) ?? store.coordinates.lng;
 
   const handlePurchase = () => {
     if (membershipAmount < minAmount) {

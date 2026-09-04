@@ -131,8 +131,8 @@ class D1MediaFallbackStorage implements AppMediaStorage {
       },
       httpEtag: etag,
       size: bytes.byteLength,
-      async arrayBuffer() {
-        return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+      async arrayBuffer(): Promise<ArrayBuffer> {
+        return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
       },
     };
   }

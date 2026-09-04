@@ -83,10 +83,11 @@ export function VideoBackground({
         muted
         playsInline
         poster="/images/hero-flow-poster.webp"
-        // @ts-expect-error - Webkit & Android X5 WebView inline attributes
-        webkit-playsinline="true"
-        x5-playsinline="true"
-        x5-video-player-type="h5"
+        {...({
+          "webkit-playsinline": "true",
+          "x5-playsinline": "true",
+          "x5-video-player-type": "h5",
+        } as any)}
         preload="auto"
         className="absolute inset-0 w-full h-full object-cover opacity-100 scale-105 pointer-events-none mobile-9-16-video-player"
         style={{

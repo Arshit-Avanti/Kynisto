@@ -49,6 +49,8 @@ type StoreRow = {
   queueStatus: string | null;
   queueOpeningTime: string | null;
   queueClosingTime: string | null;
+  locationVerified?: number | boolean | null;
+  locationAccuracy?: number | null;
 };
 
 export type PublicStore = ReturnType<typeof toPublicStore>;
@@ -476,10 +478,17 @@ export async function getStoreBySlug(slug: string) {
 
   const mediaRows = catalogMedia.results ?? [];
   const withMedia = (items: unknown[], ownerType: "product" | "service") => items.map((raw) => {
-    const item = raw as Record<string, unknown>;
+    const item = raw as Record<string, any>;
     const id = String(item.id);
     return {
       ...item,
+      id,
+      name: item.name,
+      description: item.description,
+      price: item.price,
+      priceFrom: item.priceFrom,
+      imageUrl: item.imageUrl,
+      available: item.available,
       media: mediaRows.filter((asset) => asset.ownerType === ownerType && String(ownerType === "product" ? asset.productId : asset.serviceId) === id),
     };
   });

@@ -39,8 +39,8 @@ export default function StoreCard3D({ store }: StoreCard3DProps) {
 
   const handleDirections = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const lat = (store as Record<string, unknown>).latitude as number | undefined ?? store.coordinates?.lat;
-    const lng = (store as Record<string, unknown>).longitude as number | undefined ?? store.coordinates?.lng;
+    const lat = (store as unknown as Record<string, unknown>).latitude as number | undefined ?? store.coordinates?.lat;
+    const lng = (store as unknown as Record<string, unknown>).longitude as number | undefined ?? store.coordinates?.lng;
     const destination = (lat && lng) ? `${lat},${lng}` : encodeURIComponent(store.address || store.name);
     const url = `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
     window.open(url, '_blank', 'noopener,noreferrer');

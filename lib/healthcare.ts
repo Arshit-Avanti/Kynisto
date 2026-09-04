@@ -494,9 +494,9 @@ export async function patientQueueState(storeId: string, userId?: string) {
     capacityAvailable,
     queueAvailable: Boolean(
       (settings.queueActivationStatus === "approved" || !settings.queueActivationStatus) &&
-      (settings.adminQueueEnabled === 1 || settings.adminQueueEnabled === true) &&
-      (settings.ownerQueueEnabled === 1 || settings.ownerQueueEnabled === true) &&
-      (settings.acceptingPatients === 1 || settings.acceptingPatients === true) &&
+      (Number(settings.adminQueueEnabled) === 1 || String(settings.adminQueueEnabled) === "true") &&
+      (Number(settings.ownerQueueEnabled) === 1 || String(settings.ownerQueueEnabled) === "true") &&
+      (Number(settings.acceptingPatients) === 1 || String(settings.acceptingPatients) === "true") &&
       (settings.verificationStatus === "verified" || settings.verificationStatus === "approved" || !settings.verificationStatus) &&
       settings.status === "open" &&
       capacityAvailable

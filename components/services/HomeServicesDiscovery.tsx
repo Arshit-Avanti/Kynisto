@@ -15,6 +15,8 @@ export interface HomeService {
   id: string;
   name: string;
   categoryName: string;
+  category?: string;
+  icon?: string;
   slug: string;
   description: string;
   startingPrice: number;

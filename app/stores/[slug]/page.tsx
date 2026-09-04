@@ -442,7 +442,7 @@ export default async function StoreProfilePage({ params }: RouteProps) {
                   </div>
                 )}
               </dl>
-              <a href={store.mapsUrl} target="_blank" rel="noreferrer" className="glass-button shimmer" style={{ display: "block", textAlign: "center", padding: "12px", color: "#ffffff", fontWeight: 600, borderRadius: "8px", textDecoration: "none", fontSize: "14px" }}>Get directions ↗</a>
+              <a href={mapsUrl} target="_blank" rel="noreferrer" className="glass-button shimmer" style={{ display: "block", textAlign: "center", padding: "12px", color: "#ffffff", fontWeight: 600, borderRadius: "8px", textDecoration: "none", fontSize: "14px" }}>Get directions ↗</a>
             </section>
             
             <section className="glass-section" style={{ padding: "24px", borderRadius: "16px" }}>

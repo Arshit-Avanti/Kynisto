@@ -12,5 +12,5 @@ export async function GET(
   headers.set("Cache-Control", object.httpMetadata?.cacheControl ?? "public, max-age=31536000, immutable");
   headers.set("ETag", object.httpEtag);
   headers.set("X-Content-Type-Options", "nosniff");
-  return new Response(object.body, { headers });
+  return new Response(object.body as unknown as BodyInit, { headers });
 }

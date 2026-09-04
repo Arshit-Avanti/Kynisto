@@ -6,7 +6,7 @@ import { apiError, HttpError, noStoreJson } from "@/lib/security";
 
 async function requireAdmin(request: Request) {
   const session = await requireApiSession(request);
-  if (!hasPermission(session.user.role, "store.manage_all")) {
+  if (!hasPermission(session.user.role, "stores.manage_all")) {
     throw new HttpError(403, "Access Denied: Admin role required.", "ACCESS_DENIED");
   }
   return session;

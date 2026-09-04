@@ -2,8 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getD1 } from "@/db/runtime";
 import { matchesHash, sha256 } from "@/lib/crypto";
-import type { Permission } from "@/lib/permissions";
-import { hasPermission, type UserRole } from "@/lib/rbac";
+import { hasPermission, type UserRole, type Permission } from "@/lib/rbac";
 import { assertSameOrigin, HttpError } from "@/lib/security";
 import {
   applicationRoleFromProfile,
@@ -51,7 +50,7 @@ function cookieOptions(request: Request, maxAge: number = 30 * DAY) {
 
 export function dashboardForRole(role: UserRole): string {
   if (role === "admin") return "/admin";
-  if (role === "store_owner" || role === "owner" || (role as string) === "shop_owner") return "/owner";
+  if (role === "store_owner" || (role as string) === "owner" || (role as string) === "shop_owner") return "/owner";
   return "/account";
 }
 
@@ -379,9 +378,9 @@ export async function requirePageRole(
   return session.user;
 }
 
-export async function redirectAuthenticatedUser(): Promise<void> {
+export async function redirectAuthenticatedUser(destination = "/"): Promise<void> {
   const session = await getSessionUser();
-  if (session) redirect(session.user.mustChangePassword ? "/change-password" : "/");
+  if (session) redirect(session.user.mustChangePassword ? "/change-password" : destination);
 }
 
 export async function destroySession(request: Request): Promise<void> {

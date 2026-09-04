@@ -114,7 +114,7 @@ export interface PrescriptionRecord {
   tests?: string[];
   advice?: string | null;
   templateSnapshot: PrescriptionTemplateLayout;
-  status: "issued" | "reissued" | "cancelled";
+  status: "issued" | "reissued" | "cancelled" | "draft";
   supersededById?: string | null;
   originalPrescriptionId?: string | null;
   correctionReason?: string | null;
@@ -131,6 +131,8 @@ export interface FollowUpRecord {
   id: string;
   storeId: string;
   prescriptionId: string;
+  prescriptionNumber?: string;
+  enabled?: boolean;
   userId?: string | null;
   patientName: string;
   patientPhone?: string | null;

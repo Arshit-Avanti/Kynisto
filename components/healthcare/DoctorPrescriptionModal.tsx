@@ -209,7 +209,7 @@ export function DoctorPrescriptionModal({
               if (draft.patientAge) setPatientAge(String(draft.patientAge));
               if (draft.patientGender) setPatientGender(draft.patientGender);
               if (draft.followUp) {
-                setEnableFollowUp(draft.followUp.enabled);
+                setEnableFollowUp(Boolean(draft.followUp.enabled ?? true));
                 if (draft.followUp.validityDays) setValidityDays(draft.followUp.validityDays);
                 if (draft.followUp.followUpType) setFollowUpType(draft.followUp.followUpType);
                 if (draft.followUp.followUpFee) setFollowUpFee(draft.followUp.followUpFee);

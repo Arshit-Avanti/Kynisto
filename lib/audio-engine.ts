@@ -7,6 +7,10 @@ class GlobalAudioEngine {
   private registeredVideos: Set<HTMLVideoElement> = new Set();
   private subscribers: Set<AudioStateCallback> = new Set();
 
+  public getIsMuted(): boolean {
+    return this.isMuted;
+  }
+
   constructor() {
     if (typeof window !== "undefined") {
       this.attachGlobalUnlockListeners();

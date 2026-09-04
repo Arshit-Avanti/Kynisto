@@ -41,6 +41,7 @@ export type SupabaseProfile = {
   avatar_url?: string | null;
   role?: string | null;
   onboarding_completed?: boolean | null;
+  role_selected_at?: string | number | null;
   created_at?: string | null;
   updated_at?: string | null;
 };
@@ -210,5 +211,5 @@ export async function getSupabaseProfile(
 }
 
 export async function verifyGoogleApplicationSession(accessToken: string): Promise<SupabaseAuthUser> {
-  return verifySupabaseAccessToken(accessToken);
+  return getSupabaseUser(accessToken);
 }

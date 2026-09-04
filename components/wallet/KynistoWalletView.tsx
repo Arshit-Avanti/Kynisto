@@ -133,7 +133,18 @@ export default function KynistoWalletView() {
   const [qrInputToken, setQrInputToken] = useState("");
   const [scanning, setScanning] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const [scanResult, setScanResult] = useState<{ success?: boolean; message?: string; error?: string; kynistoPointsEarned?: number; storePointsEarned?: number; storeName?: string } | null>(null);
+  const [scanResult, setScanResult] = useState<{
+    success?: boolean;
+    message?: string;
+    error?: string;
+    kynistoPointsEarned?: number;
+    storePointsEarned?: number;
+    storeName?: string;
+    isHealthcare?: boolean;
+    tokenNumber?: number;
+    queueCode?: string;
+    redirectUrl?: string;
+  } | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);

@@ -423,7 +423,7 @@ export default function HealthcareQueueQRPage() {
                 ...res.queueState,
                 entry: prevEntry,
               },
-            };
+            } as QueueResponse;
           }
           currentActiveEntry = nextEntry ?? null;
           return res;
@@ -540,7 +540,7 @@ export default function HealthcareQueueQRPage() {
       }
 
       if (res && res.ok && res.queueState) {
-        setData((prev) => prev ? { ...prev, queueState: res.queueState, record: res.record ?? prev.record } : prev);
+        setData((prev) => prev ? ({ ...prev, queueState: res.queueState as any, record: res.record ?? prev.record } as QueueResponse) : prev);
         if (res.queueState.entry) {
           notifiedPositionsRef.current.set(String(res.queueState.entry.id), res.queueState.entry.position);
           prevEntryStatus.current = res.queueState.entry.status;

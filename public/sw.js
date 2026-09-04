@@ -30,6 +30,22 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// ⚡ Low-network timeout helper for seamless offline & low-bandwidth connectivity
+function fetchWithTimeout(request, timeoutMs = 2500) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("Network timeout")), timeoutMs);
+    fetch(request)
+      .then((res) => {
+        clearTimeout(timer);
+        resolve(res);
+      })
+      .catch((err) => {
+        clearTimeout(timer);
+        reject(err);
+      });
+  });
+}
+
 // ⚡ Ultra-Fast Fetch Interceptor (Cache-First for Static Assets, SWR for Read APIs)
 self.addEventListener("fetch", (event) => {
   const request = event.request;
@@ -76,7 +92,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       caches.open(API_CACHE).then((cache) =>
         cache.match(request).then((cached) => {
-          const networkFetch = fetch(request)
+          const networkFetch = fetchWithTimeout(request, 3000)
             .then((networkResponse) => {
               if (networkResponse.ok) {
                 cache.put(request, networkResponse.clone());
@@ -92,10 +108,11 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 3. Navigation Pages -> Network-First with Offline / Cache Fallback
+  // 3. Navigation Pages -> Network with Fast 2.5s Timeout Fallback to Offline / Cache
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request).catch(() => caches.match(request).then((res) => res || caches.match("/")))
+      fetchWithTimeout(request, 2500)
+        .catch(() => caches.match(request).then((res) => res || caches.match("/")))
     );
   }
 });

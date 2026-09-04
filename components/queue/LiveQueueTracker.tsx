@@ -512,7 +512,7 @@ export default function LiveQueueTracker() {
           } else {
             setEntryStatus(state.entry.status);
           }
-        } else if (state.completedEntry && currentEntryIdRef.current && String(state.completedEntry.id) === String(currentEntryIdRef.current)) {
+        } else if ((state as any).completedEntry && currentEntryIdRef.current && String((state as any).completedEntry.id) === String(currentEntryIdRef.current)) {
           // Explicit completed entry matching our active consultation
           setEntryStatus('completed');
           setLiveCompleted(true);
@@ -884,7 +884,7 @@ export default function LiveQueueTracker() {
       // 3. Trigger Native Desktop/Mobile Push Notification
       if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
         const title = `🚨 YOUR TURN HAS ARRIVED!`;
-        const options: NotificationOptions = {
+        const options: any = {
           body: `Token #${myTokenNumber} is up now at ${selectedQueue.name}! Please enter the consultation room immediately.`,
           icon: "/icons/icon-192x192.png",
           badge: "/icons/badge-72x72.png",

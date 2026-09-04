@@ -141,7 +141,7 @@ export async function PATCH(request: Request) {
     const currentStore = await requireOwnedStore(session.user.id, storeId);
 
     // Fast Shop Status Toggle (OPEN / CLOSED) for Shop Owners
-    if (body.action === "toggle_status" || (body.status && ["active", "closed", "approved", "inactive"].includes(body.status) && !body.name)) {
+    if (body.action === "toggle_status" || (typeof body.status === "string" && ["active", "closed", "approved", "inactive"].includes(body.status) && !body.name)) {
       const targetStatus = body.status ? (body.status === "closed" ? "closed" : "active") : (currentStore.status === "closed" ? "active" : "closed");
       await getD1()
         .prepare("UPDATE stores SET status = ?, updated_at = ? WHERE id = ? AND owner_id = ?")

@@ -148,7 +148,7 @@ export function CobeGlobe({ className }: { className?: string }) {
     const textureLoader = new THREE.TextureLoader();
     textureLoader.load(
       "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg",
-      (texture) => {
+      (texture: THREE.Texture) => {
         earthMaterial.map = texture;
         earthMaterial.needsUpdate = true;
       },
@@ -160,7 +160,7 @@ export function CobeGlobe({ className }: { className?: string }) {
 
     textureLoader.load(
       "https://unpkg.com/three-globe/example/img/earth-topology.png",
-      (bumpMap) => {
+      (bumpMap: THREE.Texture) => {
         earthMaterial.bumpMap = bumpMap;
         earthMaterial.bumpScale = 0.04;
         earthMaterial.needsUpdate = true;
@@ -201,7 +201,7 @@ export function CobeGlobe({ className }: { className?: string }) {
 
     textureLoader.load(
       "https://unpkg.com/three-globe/example/img/earth-clouds.png",
-      (cloudTex) => {
+      (cloudTex: THREE.Texture) => {
         cloudMaterial.map = cloudTex;
         cloudMaterial.needsUpdate = true;
       }

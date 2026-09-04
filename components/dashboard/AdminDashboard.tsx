@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, useMemo, type FormEvent } from "react";
 import { apiFetch } from "@/lib/client-api";
 import type { SessionUser } from "@/lib/auth";
 import { ChatCenter } from "@/components/dashboard/ChatCenter";
@@ -118,7 +118,7 @@ export function AdminDashboard({ user }: { user: SessionUser }) {
           {showCreate && tab === "categories" && <CreateCategory onSubmit={async (body) => { await mutate("/api/admin/categories", "POST", body, "Category created"); setShowCreate(false); }} />}
           {showCreate && tab === "stores" && <StoreEditor store={editingStore ?? undefined} categories={categories} owners={(data.owners as Item[] | undefined) ?? []} onSubmit={async (body) => { await mutate("/api/admin/stores", editingStore ? "PATCH" : "POST", editingStore ? { ...(body as object), action: "update", storeId: editingStore.id } : body, editingStore ? "Store updated" : "Store created"); setShowCreate(false); setEditingStore(null); }} />}
           {["users", "owners", "customers"].includes(tab) && <UsersTableV2 items={items} mutate={mutate} />}
-          {tab === "stores" && <StoresTableV2 items={items} owners={(data.owners as Item[] | undefined) ?? []} mutate={mutate} onEdit={(store) => { setEditingStore(store); setShowCreate(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} />}
+          {tab === "stores" && <StoresTableV2 items={items} owners={(data.owners as Item[] | undefined) ?? []} mutate={mutate} onEdit={(store: any) => { setEditingStore(store as any); setShowCreate(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} />}
           {tab === "categories" && <CategoriesTableV2 items={items} mutate={mutate} />}
           {tab === "reviews" && <ReviewsTable items={items} mutate={mutate} />}
           {tab === "reports" && <ReportsTable items={items} mutate={mutate} />}
@@ -183,7 +183,7 @@ function AdminServicesPanel({ mutate }: { mutate: (p: string, m: string, j: unkn
     return items.filter((item) => String(item.status) === filterStatus);
   }, [items, filterStatus]);
 
-  const selection = useAdminBulkSelection(filteredItems.map((item) => String(item.id)));
+  const selection = useAdminBulkSelection(filteredItems.map((item: any) => String(item.id)));
   const selectedIds = selection.selectedIds;
 
   if (loading) return <div className="portalSkeleton"><span /><span /><span /></div>;
@@ -222,7 +222,7 @@ function AdminServicesPanel({ mutate }: { mutate: (p: string, m: string, j: unkn
                 </tr>
               </thead>
               <tbody>
-                {filteredItems.map((item) => {
+                {filteredItems.map((item: any) => {
                   const id = String(item.id);
                   const isSelected = selection.selected.has(id);
                   return (
@@ -276,7 +276,7 @@ function AdminServicesPanel({ mutate }: { mutate: (p: string, m: string, j: unkn
           <BulkDeleteBar
             count={selectedIds.length}
             itemLabel="service"
-            onDelete={() => mutate("/api/admin/services", "DELETE", { action: "bulk_delete", serviceIds: selectedIds }, `${selectedIds.length} services deleted`).then(() => { selection.clear(); void loadServices(); })}
+            onDelete={() => mutate("/api/admin/services", "DELETE", { action: "bulk_delete", serviceIds: selectedIds }, `${selectedIds.length} services deleted`).then(() => { selection.clear(); void loadServices(); return true; })}
             onDeleted={selection.clear}
           >
             <button

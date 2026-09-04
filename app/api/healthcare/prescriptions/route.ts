@@ -216,13 +216,14 @@ export async function POST(request: Request) {
     }
 
     // Medical info
+    const rawVitals = (body.vitals || {}) as Record<string, unknown>;
     const vitals: PrescriptionVitals = {
-      bp: cleanText(body.vitals?.bp, "BP", { max: 20, required: false }) || undefined,
-      pulse: cleanText(body.vitals?.pulse, "Pulse", { max: 20, required: false }) || undefined,
-      temperature: cleanText(body.vitals?.temperature, "Temperature", { max: 20, required: false }) || undefined,
-      weight: cleanText(body.vitals?.weight, "Weight", { max: 20, required: false }) || undefined,
-      spo2: cleanText(body.vitals?.spo2, "SpO2", { max: 20, required: false }) || undefined,
-      height: cleanText(body.vitals?.height, "Height", { max: 20, required: false }) || undefined,
+      bp: cleanText(rawVitals.bp, "BP", { max: 20, required: false }) || undefined,
+      pulse: cleanText(rawVitals.pulse, "Pulse", { max: 20, required: false }) || undefined,
+      temperature: cleanText(rawVitals.temperature, "Temperature", { max: 20, required: false }) || undefined,
+      weight: cleanText(rawVitals.weight, "Weight", { max: 20, required: false }) || undefined,
+      spo2: cleanText(rawVitals.spo2, "SpO2", { max: 20, required: false }) || undefined,
+      height: cleanText(rawVitals.height, "Height", { max: 20, required: false }) || undefined,
     };
 
     const symptoms = cleanText(body.symptoms, "Symptoms", { max: 2000, required: false }) || null;
@@ -358,16 +359,15 @@ export async function POST(request: Request) {
 
     // Follow-up setup
     let createdFollowUp: any = null;
-    const followUpConfig = body.followUp;
+    const followUpConfig = (body.followUp && typeof body.followUp === "object" ? body.followUp : null) as Record<string, any> | null;
     const isFollowUpExplicitlyDisabled =
-      Boolean(followUpConfig) &&
-      (followUpConfig.enabled === false || followUpConfig.enabled === "false");
+      followUpConfig?.enabled === false || followUpConfig?.enabled === "false";
     const isFollowUpEnabled =
-      Boolean(followUpConfig) &&
+      followUpConfig !== null &&
       !isFollowUpExplicitlyDisabled &&
       (followUpConfig.enabled === true || followUpConfig.enabled === "true" || Boolean(followUpConfig.validityDays));
 
-    if (isFollowUpEnabled) {
+    if (isFollowUpEnabled && followUpConfig) {
       const validityDays = numberInput(followUpConfig.validityDays ?? 7, "Validity days", { min: 1, max: 180, integer: true }) as number;
       const followUpType = (["free", "paid", "discounted"].includes(followUpConfig.followUpType) ? followUpConfig.followUpType : "free") as "free" | "paid" | "discounted";
       const followUpFee = followUpType === "free" ? 0 : Number(followUpConfig.followUpFee || 0);
@@ -539,16 +539,15 @@ export async function PATCH(request: Request) {
       ];
 
       // 3. Handle Follow-up in Reissue
-      const followUpConfig = body.followUp;
+      const followUpConfig = (body.followUp && typeof body.followUp === "object" ? body.followUp : null) as Record<string, any> | null;
       const isFollowUpExplicitlyDisabled =
-        Boolean(followUpConfig) &&
-        (followUpConfig.enabled === false || followUpConfig.enabled === "false");
+        followUpConfig?.enabled === false || followUpConfig?.enabled === "false";
       const isFollowUpEnabled =
-        Boolean(followUpConfig) &&
+        followUpConfig !== null &&
         !isFollowUpExplicitlyDisabled &&
         (followUpConfig.enabled === true || followUpConfig.enabled === "true" || Boolean(followUpConfig.validityDays));
 
-      if (isFollowUpEnabled) {
+      if (isFollowUpEnabled && followUpConfig) {
         const validityDays = numberInput(followUpConfig.validityDays ?? 7, "Validity days", { min: 1, max: 180, integer: true }) as number;
         const followUpType = (["free", "paid", "discounted"].includes(followUpConfig.followUpType) ? followUpConfig.followUpType : "free") as "free" | "paid" | "discounted";
         const followUpFee = followUpType === "free" ? 0 : Number(followUpConfig.followUpFee || 0);
@@ -576,7 +575,7 @@ export async function PATCH(request: Request) {
             `).bind(
               newRxId, doctorId, doctorName, patientName, patientPhone,
               followUpDate, validUntilDate, validityDays, followUpType, followUpFee,
-              followUpConfig.notes || null, now, existingFollowUp.id
+              followUpConfig?.notes || null, now, existingFollowUp.id
             )
           );
         } else {
@@ -594,7 +593,7 @@ export async function PATCH(request: Request) {
               doctorId, doctorName, baseConsultationDate, followUpDate,
               validUntilDate, validityDays, followUpType, followUpFee,
               followUpType === "free" ? "free" : "unpaid",
-              followUpConfig.notes || null, now, now
+              followUpConfig?.notes || null, now, now
             )
           );
         }

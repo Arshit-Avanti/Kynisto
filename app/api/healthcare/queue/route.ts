@@ -17,7 +17,8 @@ export async function GET(request: Request) {
       storeId = String(active.storeId);
     }
     const state = await patientQueueState(storeId, session.user.id);
-    const etag = `"${storeId}-${state?.status ?? 'none'}-${state?.currentTokenNumber ?? 0}-${state?.waitingCount ?? 0}-${state?.entry?.status ?? 'none'}-${state?.entry?.tokenNumber ?? 0}-${state?.entry?.position ?? 0}"`;
+    const s = state as any;
+    const etag = `"${storeId}-${s?.queueStatus ?? 'none'}-${s?.currentTokenNumber ?? 0}-${s?.waitingCount ?? 0}-${s?.entry?.status ?? 'none'}-${s?.entry?.tokenNumber ?? 0}-${s?.entry?.position ?? 0}"`;
     const ifNoneMatch = request.headers.get("if-none-match");
     if (ifNoneMatch === etag) {
       return new Response(null, { status: 304, headers: { ETag: etag, "Cache-Control": "no-cache" } });
@@ -71,7 +72,8 @@ export async function POST(request: Request) {
         .bind(session.user.id).run().catch(() => {});
 
       const state = await patientQueueState(storeId, session.user.id);
-      if (state?.entry && (state.entry.status === 'waiting' || state.entry.status === 'called' || state.entry.status === 'in_consultation')) {
+      const s = state as any;
+      if (s?.entry && (s.entry.status === 'waiting' || s.entry.status === 'called' || s.entry.status === 'in_consultation')) {
         return noStoreJson({ state, existing: true });
       }
       if (state?.activeQueue && state.activeQueue.storeId !== storeId) {

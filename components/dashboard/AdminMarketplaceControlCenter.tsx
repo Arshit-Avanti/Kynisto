@@ -1636,8 +1636,8 @@ export function AdminMarketplaceControlCenter() {
                     <th style={{ padding: "14px", textAlign: "left", background: "#0F172A", color: "#94A3B8", fontSize: "12px", fontWeight: 800, borderBottom: "2px solid rgba(255,255,255,0.1)", borderRadius: "12px 0 0 0", minWidth: "220px" }}>
                       FEATURE NAME / KEY
                     </th>
-                    {(plans.filter((p) => p.role === "store_owner" || p.role === "business").length > 0
-                      ? plans.filter((p) => p.role === "store_owner" || p.role === "business")
+                    {(plans.filter((p) => p.role === "store_owner" || (p.role as string) === "business").length > 0
+                      ? plans.filter((p) => p.role === "store_owner" || (p.role as string) === "business")
                       : [
                           { id: "starter", name: "Starter Business", role: "store_owner", priceMonthly: 299 },
                           { id: "pro", name: "Pro Business", role: "store_owner", priceMonthly: 499 },
@@ -1681,8 +1681,8 @@ export function AdminMarketplaceControlCenter() {
                         <div style={{ fontSize: "11px", color: "#94A3B8", fontFamily: "monospace" }}>key: {feat.key}</div>
                       </td>
 
-                      {(plans.filter((p) => p.role === "store_owner" || p.role === "business").length > 0
-                        ? plans.filter((p) => p.role === "store_owner" || p.role === "business")
+                      {(plans.filter((p) => p.role === "store_owner" || (p.role as string) === "business").length > 0
+                        ? plans.filter((p) => p.role === "store_owner" || (p.role as string) === "business")
                         : [
                             { id: "starter", name: "Starter Business" },
                             { id: "pro", name: "Pro Business" },

@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   turbo: {
     rules: {
       "*.sql": {
@@ -9,13 +9,13 @@ const nextConfig: NextConfig = {
       },
     },
   },
-  webpack: (config) => {
+  webpack: (config: any) => {
     config.module.rules.push({
       test: /\.sql$/,
       use: "raw-loader",
     });
     return config;
   },
-};
+} as unknown as NextConfig;
 
 export default nextConfig;

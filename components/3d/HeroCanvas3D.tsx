@@ -657,12 +657,12 @@ export function HeroCanvas3D() {
       window.removeEventListener("resize", handleResize);
 
       // Traversal cleanup for deep disposal
-      scene.traverse((obj) => {
+      scene.traverse((obj: any) => {
         if (obj instanceof THREE.Mesh) {
           if (obj.geometry) obj.geometry.dispose();
           if (obj.material) {
             if (Array.isArray(obj.material)) {
-              obj.material.forEach((mat) => mat.dispose());
+              obj.material.forEach((mat: any) => mat.dispose());
             } else {
               obj.material.dispose();
             }

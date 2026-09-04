@@ -57,7 +57,8 @@ export function roleInput(value: unknown): "customer" | "store_owner" {
   return value;
 }
 
-export function booleanInput(value: unknown): boolean {
+export function booleanInput(value: unknown, fallback = false): boolean {
+  if (value === undefined || value === null || value === "") return fallback;
   return value === true || value === "true" || value === 1;
 }
 

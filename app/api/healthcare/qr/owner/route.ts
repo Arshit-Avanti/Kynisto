@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { requireApiPermission } from "@/lib/auth";
 import { getOrCreatePermanentQueueId, getQrAnalytics } from "@/lib/healthcare-qr";
-import { apiError, noStoreJson } from "@/lib/security";
+import { apiError, HttpError, noStoreJson } from "@/lib/security";
 import { getD1 } from "@/db/runtime";
 
 export async function GET(request: NextRequest) {

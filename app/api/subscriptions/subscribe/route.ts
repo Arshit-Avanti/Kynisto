@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { getD1 } from "@/db/runtime";
-import { ensureSubscriptionTables, getPlanConfig } from "@/lib/subscriptions";
+import { ensureSubscriptionTables, getPlanConfig, hasUserClaimedTrial } from "@/lib/subscriptions";
 
 export const dynamic = "force-dynamic";
 

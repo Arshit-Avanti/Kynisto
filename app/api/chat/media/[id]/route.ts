@@ -28,14 +28,16 @@ export async function GET(
     const object = await getMediaBucket().get(key);
     if (!object) throw new HttpError(404, "Media file not found.", "MEDIA_FILE_NOT_FOUND");
     const headers = new Headers();
-    object.writeHttpMetadata(headers);
+    if ("writeHttpMetadata" in object && typeof (object as any).writeHttpMetadata === "function") {
+      (object as any).writeHttpMetadata(headers);
+    }
     headers.set("Content-Type", object.httpMetadata?.contentType ?? (thumbnail ? "image/jpeg" : media.contentType));
     headers.set("Cache-Control", "private, max-age=3600");
     headers.set("ETag", object.httpEtag);
     headers.set("X-Content-Type-Options", "nosniff");
     headers.set("Accept-Ranges", "bytes");
     headers.set("Content-Disposition", `${url.searchParams.get("download") === "1" ? "attachment" : "inline"}; filename="${safeDownloadName(thumbnail ? `thumbnail-${media.originalName}` : media.originalName)}"`);
-    return new Response(object.body, { headers });
+    return new Response(object.body as unknown as BodyInit, { headers });
   } catch (error) {
     return apiError(error);
   }

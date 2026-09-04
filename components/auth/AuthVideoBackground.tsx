@@ -43,7 +43,7 @@ export function AuthVideoBackground() {
         .then(() => {
           // Autoplay started successfully
           // Unmute if user has interacted or audio engine permits
-          if (!audioEngine.isMuted()) {
+          if (!audioEngine.getIsMuted()) {
             video.muted = false;
             video.volume = 1.0;
           }
@@ -216,10 +216,11 @@ export function AuthVideoBackground() {
         autoPlay
         muted
         playsInline
-        // @ts-expect-error - Webkit & Android X5 WebView inline attributes
-        webkit-playsinline="true"
-        x5-playsinline="true"
-        x5-video-player-type="h5"
+        {...({
+          "webkit-playsinline": "true",
+          "x5-playsinline": "true",
+          "x5-video-player-type": "h5",
+        } as any)}
         preload="auto"
         onEnded={handleEnded}
         onTimeUpdate={handleTimeUpdate}
