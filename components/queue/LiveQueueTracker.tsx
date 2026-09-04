@@ -683,6 +683,24 @@ export default function LiveQueueTracker() {
     setView('list');
   }, [selectedQueue]);
 
+  const handleBackToHub = useCallback(() => {
+    setView('list');
+    setSelectedQueue(null);
+    setEntryStatus('waiting');
+    setLiveCompleted(false);
+    setIsCancelled(false);
+    setMyTokenNumber(0);
+    setUserPosition(0);
+    setCurrentEntryId(null);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('storeId');
+      url.searchParams.delete('action');
+      window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
+    }
+    void fetchHealthcareQueues();
+  }, [fetchHealthcareQueues]);
+
   // 3. Auto-detect user's active joined queue in database on load — runs ONCE on mount only
   const queuesRef = useRef(queues);
   queuesRef.current = queues;
@@ -1109,7 +1127,7 @@ export default function LiveQueueTracker() {
 
   const isCompleted = entryStatus === 'completed';
 
-  if (isCancelled && selectedQueue) {
+  if (view === 'ticket' && isCancelled && selectedQueue) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center text-slate-900">
         <XCircle className="w-20 h-20 text-rose-500 mb-6 animate-pulse" />
@@ -1119,17 +1137,17 @@ export default function LiveQueueTracker() {
         </p>
         <div className="flex gap-4 mt-8">
           <button
-            onClick={() => setView('list')}
+            onClick={handleBackToHub}
             className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg transition-all cursor-pointer"
           >
-            Find Another Clinic
+            Back to Healthcare Hub
           </button>
         </div>
       </div>
     );
   }
 
-  if (isCompleted && selectedQueue) {
+  if (view === 'ticket' && isCompleted && selectedQueue) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center text-slate-900">
         <CheckCircle2 className="w-20 h-20 text-emerald-600 mb-6 animate-bounce" />
@@ -1137,9 +1155,17 @@ export default function LiveQueueTracker() {
         <p className="text-lg text-slate-600 font-medium mt-3 max-w-md">
           Thank you for visiting <span className="text-slate-900 font-bold">{selectedQueue.name}</span>!
         </p>
-        <div className="flex gap-4 mt-8">
+        <div className="flex flex-wrap gap-4 mt-8 justify-center">
+          {prescriptionId ? (
+            <button
+              onClick={() => setViewingPrescriptionId(prescriptionId)}
+              className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-2"
+            >
+              <span>View Prescription 📄</span>
+            </button>
+          ) : null}
           <button
-            onClick={() => setView('list')}
+            onClick={handleBackToHub}
             className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg transition-all cursor-pointer"
           >
             Back to Healthcare Hub

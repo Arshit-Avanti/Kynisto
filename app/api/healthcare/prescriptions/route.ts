@@ -368,7 +368,9 @@ export async function POST(request: Request) {
     let createdFollowUp: any = null;
     const followUpConfig = (body.followUp && typeof body.followUp === "object" ? body.followUp : null) as Record<string, any> | null;
     const isFollowUpExplicitlyDisabled =
-      followUpConfig?.enabled === false || followUpConfig?.enabled === "false";
+      followUpConfig?.enabled === false ||
+      followUpConfig?.enabled === "false" ||
+      Number(followUpConfig?.validityDays) === 0;
     const isFollowUpEnabled =
       followUpConfig !== null &&
       !isFollowUpExplicitlyDisabled &&
@@ -548,7 +550,9 @@ export async function PATCH(request: Request) {
       // 3. Handle Follow-up in Reissue
       const followUpConfig = (body.followUp && typeof body.followUp === "object" ? body.followUp : null) as Record<string, any> | null;
       const isFollowUpExplicitlyDisabled =
-        followUpConfig?.enabled === false || followUpConfig?.enabled === "false";
+        followUpConfig?.enabled === false ||
+        followUpConfig?.enabled === "false" ||
+        Number(followUpConfig?.validityDays) === 0;
       const isFollowUpEnabled =
         followUpConfig !== null &&
         !isFollowUpExplicitlyDisabled &&

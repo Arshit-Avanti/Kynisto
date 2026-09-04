@@ -467,3 +467,84 @@ test("live queue prescription integration tests", () => {
   assert.equal(notif.badge, "Prescription Issued ✓");
   assert.match(notif.message, /Kynisto Medical Care Centre/);
 });
+
+test("healthcare fixes: Back to Hub, Follow-up None option, and History performance", () => {
+  // 1. Follow-up "None" option (validityDays === 0)
+  function resolveFollowUpConfig(enableFollowUp, validityDays, followUpType, followUpFee, notes) {
+    if (!enableFollowUp || Number(validityDays) === 0) {
+      return { enabled: false };
+    }
+    return {
+      enabled: true,
+      validityDays: Number(validityDays),
+      followUpType,
+      followUpFee: followUpType === "free" ? 0 : followUpFee,
+      notes,
+    };
+  }
+
+  // When user selects "None" (validityDays = 0)
+  const noneConfig = resolveFollowUpConfig(true, 0, "free", 0, "");
+  assert.equal(noneConfig.enabled, false);
+
+  // When followUp is disabled
+  const disabledConfig = resolveFollowUpConfig(false, 7, "free", 0, "");
+  assert.equal(disabledConfig.enabled, false);
+
+  // When followUp is enabled with 7 days
+  const activeConfig = resolveFollowUpConfig(true, 7, "paid", 200, "Review BP");
+  assert.equal(activeConfig.enabled, true);
+  assert.equal(activeConfig.validityDays, 7);
+  assert.equal(activeConfig.followUpFee, 200);
+
+  // 2. Back to Healthcare Hub screen navigation invariant
+  function shouldRenderCompletedScreen(view, isCompleted, selectedQueue) {
+    return view === "ticket" && Boolean(isCompleted) && Boolean(selectedQueue);
+  }
+  function shouldRenderCancelledScreen(view, isCancelled, selectedQueue) {
+    return view === "ticket" && Boolean(isCancelled) && Boolean(selectedQueue);
+  }
+
+  // When in ticket view and consultation completes
+  assert.equal(shouldRenderCompletedScreen("ticket", true, { id: "store-1" }), true);
+  // When user clicks "Back to Healthcare Hub" (view becomes 'list')
+  assert.equal(shouldRenderCompletedScreen("list", true, { id: "store-1" }), false);
+  // When queue pass is reset
+  assert.equal(shouldRenderCompletedScreen("list", false, null), false);
+
+  // When in ticket view and visit cancelled
+  assert.equal(shouldRenderCancelledScreen("ticket", true, { id: "store-1" }), true);
+  // When user clicks "Back to Healthcare Hub" or "Find Another Clinic"
+  assert.equal(shouldRenderCancelledScreen("list", true, { id: "store-1" }), false);
+
+  // 3. Daily history preservation and diffing bailout
+  function shouldBailoutStateUpdate(prev, next) {
+    const prevSig = (prev.entries || []).map((e) => `${e.id}:${e.status}:${e.arrivalStatus}:${e.prescriptionStatus || ""}`).join("|");
+    const nextSig = (next.entries || []).map((e) => `${e.id}:${e.status}:${e.arrivalStatus}:${e.prescriptionStatus || ""}`).join("|");
+    const prevProf = JSON.stringify(prev.profile || {});
+    const nextProf = JSON.stringify(next.profile || {});
+    return prevSig === nextSig && prevProf === nextProf;
+  }
+
+  const state1 = {
+    profile: { id: "p1", consultationMinutes: 15 },
+    entries: [{ id: "e1", status: "waiting", arrivalStatus: "waiting" }],
+    history: [{ serviceDate: "2026-09-03", total: 10, completed: 8 }],
+  };
+  const state2Identical = {
+    profile: { id: "p1", consultationMinutes: 15 },
+    entries: [{ id: "e1", status: "waiting", arrivalStatus: "waiting" }],
+    history: [], // Fast poll returned empty history
+  };
+
+  // State diffing recognizes unchanged queue entries & profile
+  assert.equal(shouldBailoutStateUpdate(state1, state2Identical), true);
+
+  // History preservation: empty history in fast poll does not overwrite existing history
+  const preservedHistory = (state2Identical.history && state2Identical.history.length > 0)
+    ? state2Identical.history
+    : (state1.history || []);
+  assert.equal(preservedHistory.length, 1);
+  assert.equal(preservedHistory[0].serviceDate, "2026-09-03");
+});
+

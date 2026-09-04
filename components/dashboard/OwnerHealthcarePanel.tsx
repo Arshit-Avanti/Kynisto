@@ -77,6 +77,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
 
   const prevWaitingCountRef = useRef<number>(-1);
   const prevEntriesSignatureRef = useRef<string>("");
+  const sseActiveRef = useRef<boolean>(false);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -86,7 +87,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
   const handleIncomingData = useCallback((result: Data) => {
     const entries = result.entries ?? [];
     const waitingCount = entries.filter((e) => e.status === "waiting" || e.status === "called").length;
-    const currentSignature = entries.map((e) => `${e.id}:${e.status}:${e.arrivalStatus}`).join("|");
+    const currentSignature = entries.map((e) => `${e.id}:${e.status}:${e.arrivalStatus}:${(e as any).prescriptionStatus || ""}`).join("|");
 
     if (prevWaitingCountRef.current !== -1) {
       if (waitingCount > prevWaitingCountRef.current) {
@@ -105,7 +106,42 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
     prevEntriesSignatureRef.current = currentSignature;
 
     startTransition(() => {
-      setData(result);
+      setData((prev) => {
+        const newHistory = (result.history && result.history.length > 0) ? result.history : (prev.history || []);
+        const newAnalytics = (result.analytics && result.analytics.length > 0) ? result.analytics : (prev.analytics || []);
+        const newEvents = (result.events && result.events.length > 0) ? result.events : (prev.events || []);
+
+        // Deep diff comparison to prevent pointless component re-renders that cause UI stutter & lag
+        const prevEntriesSig = (prev.entries ?? []).map((e) => `${e.id}:${e.status}:${e.arrivalStatus}:${(e as any).prescriptionStatus || ""}`).join("|");
+        const nextEntriesSig = currentSignature;
+        const prevProfileSig = JSON.stringify(prev.profile ?? {});
+        const nextProfileSig = JSON.stringify(result.profile ?? {});
+        const prevApptsSig = JSON.stringify(prev.appointments ?? []);
+        const nextApptsSig = JSON.stringify(result.appointments ?? []);
+        const prevDocsSig = JSON.stringify(prev.doctors ?? []);
+        const nextDocsSig = JSON.stringify(result.doctors ?? []);
+        const prevHistorySig = JSON.stringify(prev.history ?? []);
+        const nextHistorySig = JSON.stringify(newHistory);
+
+        if (
+          prevEntriesSig === nextEntriesSig &&
+          prevProfileSig === nextProfileSig &&
+          prevApptsSig === nextApptsSig &&
+          prevDocsSig === nextDocsSig &&
+          prevHistorySig === nextHistorySig
+        ) {
+          // No data has changed: return exact previous state reference to completely avoid re-render
+          return prev;
+        }
+
+        return {
+          ...prev,
+          ...result,
+          history: newHistory,
+          analytics: newAnalytics,
+          events: newEvents,
+        };
+      });
       setError("");
     });
   }, [showToast]);
@@ -130,7 +166,8 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
     const scheduleNextPoll = () => {
       if (isDisposed) return;
       const isHidden = typeof document !== "undefined" && document.hidden;
-      const delay = isHidden ? 15000 : Math.floor(1300 + Math.random() * 400);
+      // High-performance polling: If SSE is active, poll lazily; otherwise poll smoothly every 4s
+      const delay = isHidden ? 20000 : (sseActiveRef.current ? 12000 : 4000);
       pollTimer = setTimeout(() => {
         if (isDisposed) return;
         void load(true);
@@ -151,6 +188,12 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
     let source: EventSource | null = null;
     try {
       source = new EventSource(`/api/healthcare/queue/manage-stream?storeId=${encodeURIComponent(storeId)}`);
+      source.onopen = () => {
+        sseActiveRef.current = true;
+      };
+      source.onerror = () => {
+        sseActiveRef.current = false;
+      };
       source.addEventListener("queue", (event) => {
         try {
           const payload = JSON.parse((event as MessageEvent).data) as { queue: Data };
@@ -174,6 +217,13 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
       }
     };
   }, [load, storeId, handleIncomingData]);
+
+  // Ensure daily history is loaded when settings tab is opened
+  useEffect(() => {
+    if (activeTab === "settings" && (!data.history || data.history.length === 0)) {
+      void load(false);
+    }
+  }, [activeTab, data.history, load]);
 
   // --- Queue actions ---
   const action = useCallback(async (name: string, extra: Record<string, unknown> = {}) => {
@@ -453,7 +503,15 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
   }, [entries, action, busy]);
 
   const renderedHistory = useMemo(() => {
-    return (data.history ?? []).slice(0, 7).map((day) => (
+    const list = data.history ?? [];
+    if (!list.length) {
+      return (
+        <div style={{ padding: "16px", textAlign: "center", color: "#64748b", fontSize: "13px" }}>
+          No previous queue history recorded yet.
+        </div>
+      );
+    }
+    return list.slice(0, 7).map((day) => (
       <div key={String(day.serviceDate)} className="historyRow">
         <span className="historyDate">{String(day.serviceDate)}</span>
         <b>{String(day.completed)}/{String(day.total)} completed</b>

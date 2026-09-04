@@ -417,6 +417,28 @@ export function DoctorPrescriptionModal({
       ...templateLayout,
       doctorRegistration: doctorRegistration.trim() || templateLayout.doctorRegistration,
     },
+    followUp: enableFollowUp && validityDays > 0
+      ? {
+          id: "preview-fu-id",
+          storeId,
+          prescriptionId: reissueTarget?.id || "preview-id",
+          patientName: patientName || "Patient Name",
+          patientPhone: patientPhone || null,
+          doctorId: doctorId || null,
+          doctorName: doctorName || "Doctor",
+          originalConsultationDate: new Date().toISOString().split("T")[0],
+          followUpDate: new Date(Date.now() + validityDays * 86400000).toISOString().split("T")[0],
+          validUntilDate: new Date(Date.now() + validityDays * 86400000).toISOString().split("T")[0],
+          validityDays,
+          followUpType,
+          followUpFee: followUpType === "free" ? 0 : followUpFee,
+          paymentStatus: followUpType === "free" ? "free" : "unpaid",
+          bookingStatus: "not_booked",
+          notes: followUpNotes || null,
+          createdAt: Math.floor(Date.now() / 1000),
+          updatedAt: Math.floor(Date.now() / 1000),
+        }
+      : null,
     status: "issued",
     issuedAt: Math.floor(Date.now() / 1000),
     createdAt: Math.floor(Date.now() / 1000),
@@ -461,7 +483,7 @@ export function DoctorPrescriptionModal({
           tests: testsInput.split(",").map((t) => t.trim()).filter(Boolean),
           advice,
           templateSnapshot: previewRecord.templateSnapshot,
-          followUp: enableFollowUp
+          followUp: enableFollowUp && validityDays > 0
             ? {
                 enabled: true,
                 validityDays,
@@ -543,7 +565,7 @@ export function DoctorPrescriptionModal({
               tests: testsInput.split(",").map((t) => t.trim()).filter(Boolean),
               advice,
               templateSnapshot: previewRecord.templateSnapshot,
-              followUp: enableFollowUp
+              followUp: enableFollowUp && validityDays > 0
                 ? {
                     enabled: true,
                     validityDays,
@@ -584,7 +606,7 @@ export function DoctorPrescriptionModal({
               tests: testsInput.split(",").map((t) => t.trim()).filter(Boolean),
               advice,
               templateSnapshot: previewRecord.templateSnapshot,
-              followUp: enableFollowUp
+              followUp: enableFollowUp && validityDays > 0
                 ? {
                     enabled: true,
                     validityDays,
@@ -1264,7 +1286,13 @@ export function DoctorPrescriptionModal({
                       type="checkbox"
                       id="enableFollowUp"
                       checked={enableFollowUp}
-                      onChange={(e) => setEnableFollowUp(e.target.checked)}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setEnableFollowUp(checked);
+                        if (checked && validityDays === 0) {
+                          setValidityDays(7);
+                        }
+                      }}
                       className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500"
                     />
                     <label htmlFor="enableFollowUp" className="text-xs font-black uppercase tracking-wider text-teal-900 cursor-pointer">
@@ -1274,7 +1302,7 @@ export function DoctorPrescriptionModal({
 
                   {enableFollowUp && (
                     <span className="text-[11px] font-bold text-teal-700">
-                      Valid for {validityDays} days {isReissue ? "from consultation" : "from today"}
+                      {validityDays > 0 ? `Valid for ${validityDays} days ${isReissue ? "from consultation" : "from today"}` : "No follow-up"}
                     </span>
                   )}
                 </div>
@@ -1286,9 +1314,16 @@ export function DoctorPrescriptionModal({
                         <label className="text-[11px] font-bold text-slate-600 block mb-1">Follow-up Validity</label>
                         <select
                           value={validityDays}
-                          onChange={(e) => setValidityDays(Number(e.target.value))}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            setValidityDays(val);
+                            if (val === 0) {
+                              setEnableFollowUp(false);
+                            }
+                          }}
                           className="w-full bg-white border border-teal-300 rounded-xl px-3 py-2 text-slate-800 font-bold"
                         >
+                          <option value="0">None</option>
                           <option value="1">1 day</option>
                           <option value="3">3 days</option>
                           <option value="5">5 days</option>
