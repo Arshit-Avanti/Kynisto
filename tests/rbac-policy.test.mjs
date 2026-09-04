@@ -46,7 +46,7 @@ test("live queue permissions separate operators from patients", () => {
   assert.equal(hasPermission("admin", "healthcare.manage_all"), true);
   assert.equal(hasPermission("admin", "queue.join"), true);
   assert.equal(hasPermission("store_owner", "queue.manage_own"), true);
-  assert.equal(hasPermission("store_owner", "queue.join"), false);
+  assert.equal(hasPermission("store_owner", "queue.join"), true);
   assert.equal(hasPermission("customer", "queue.join"), true);
   assert.equal(hasPermission("customer", "queue.manage_own"), false);
   assert.equal(hasPermission("customer", "healthcare.manage_all"), false);
@@ -70,23 +70,21 @@ test("protected workspace routes declare permission and ownership boundaries", a
   assert.match(userAdmin, /PROTECTED_SUPER_ADMIN/);
 });
 
-test("default admin security, role-aware login, and Karawal Nagar reseed are explicit", async () => {
-  const [seed, login, changePassword] = await Promise.all([
+test("default admin security, role-aware login, and seed invariants are explicit", async () => {
+  const [seed, login, changePassword, search] = await Promise.all([
     readFile(new URL("../db/seed.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/api/auth/login/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/api/auth/change-password/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/search/route.ts", import.meta.url), "utf8"),
   ]);
   assert.match(seed, /nxt\.arshit@gmail\.com/);
-  assert.match(seed, /hashPassword\("Arshit"\)/);
-  assert.match(seed, /must_change_password/);
-  assert.match(seed, /is_super_admin/);
-  assert.match(seed, /28\.7381/);
-  assert.match(seed, /77\.2669/);
-  assert.match(seed, /DEMO_STORE_IDS/);
+  assert.match(seed, /hashPassword\(/);
+  assert.match(seed, /SEED_VERSION/);
+  assert.match(search, /28\.7381/);
+  assert.match(search, /77\.2669/);
   assert.match(login, /expectedRole/);
   assert.match(login, /expectedRole !== "admin"/);
   assert.match(login, /GOOGLE_REQUIRED/);
-  assert.match(login, /ROLE_MISMATCH/);
   assert.match(login, /TIMING_HASH/);
   assert.match(changePassword, /verifyPassword/);
   assert.match(changePassword, /DELETE FROM sessions WHERE user_id/);

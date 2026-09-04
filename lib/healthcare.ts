@@ -109,6 +109,7 @@ export async function ensureHealthcareTables() {
       "ALTER TABLE healthcare_queue_entries ADD COLUMN late_reported_at integer",
       "ALTER TABLE healthcare_queue_entries ADD COLUMN appointment_id text",
       "ALTER TABLE healthcare_queue_entries ADD COLUMN doctor_id text",
+      "ALTER TABLE healthcare_queue_entries ADD COLUMN patient_phone text",
       "ALTER TABLE healthcare_queue_settings ADD COLUMN grace_period_minutes integer DEFAULT 30",
     ];
 
