@@ -4,22 +4,21 @@ import { HttpError, hashedClientIp } from "@/lib/security";
 export async function requireOwnedStore(ownerId: string, storeId: string) {
   const db = getD1();
   const user = await db
-    .prepare("SELECT role FROM users WHERE id = ? LIMIT 1")
+    .prepare("SELECT role, email FROM users WHERE id = ? LIMIT 1")
     .bind(ownerId)
-    .first<{ role: string }>();
+    .first<{ role: string; email?: string }>();
 
-  if (user?.role === "admin") {
-    const store = await db
-      .prepare("SELECT id, name, slug, status FROM stores WHERE id = ? LIMIT 1")
-      .bind(storeId)
-      .first<{ id: string; name: string; slug: string; status: string }>();
-    if (store) return store;
-  }
-
+  const userEmail = (user?.email || "").toLowerCase().trim();
   const store = await db
-    .prepare("SELECT id, name, slug, status FROM stores WHERE id = ? AND owner_id = ? LIMIT 1")
-    .bind(storeId, ownerId)
-    .first<{ id: string; name: string; slug: string; status: string }>();
+    .prepare(
+      `SELECT id, name, slug, status, owner_id AS ownerId, email
+       FROM stores
+       WHERE id = ? AND (owner_id = ? OR owner_id IN (SELECT id FROM users WHERE LOWER(email) = ?))
+       LIMIT 1`
+    )
+    .bind(storeId, ownerId, userEmail)
+    .first<{ id: string; name: string; slug: string; status: string; ownerId: string; email: string }>();
+
   if (!store) {
     throw new HttpError(404, "Business not found or not owned by this account.", "STORE_NOT_OWNED");
   }

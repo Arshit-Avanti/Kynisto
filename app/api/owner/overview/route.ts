@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   try {
     const session = await requireApiPermission(request, "store.manage_own");
     const db = getD1();
-    const isAdmin = session.user.role === "admin";
+    const userEmail = (session.user.email || "").toLowerCase().trim();
     const [stores, analytics, recentReviews] = await Promise.all([
       db
         .prepare(
@@ -20,28 +20,32 @@ export async function GET(request: Request) {
             COALESCE(c.name, s.business_type, 'Local Business') AS category, sc.name AS subcategory, s.created_at AS createdAt, s.updated_at AS updatedAt
            FROM stores s LEFT JOIN categories c ON c.id = s.category_id
            LEFT JOIN categories sc ON sc.id = s.subcategory_id
-           WHERE (s.owner_id = ? OR s.owner_id IS NULL OR ? = 1) ORDER BY s.created_at DESC`,
+           WHERE (s.owner_id = ? OR s.owner_id IN (SELECT id FROM users WHERE LOWER(email) = ?))
+           ORDER BY s.created_at DESC`,
         )
-        .bind(session.user.id, isAdmin ? 1 : 0)
+        .bind(session.user.id, userEmail)
         .all(),
       db
         .prepare(
           `SELECT ae.event_type AS eventType, COUNT(*) AS total
            FROM analytics_events ae
-           WHERE (ae.store_id IN (SELECT id FROM stores WHERE owner_id = ? OR owner_id IS NULL) OR ? = 1)
-             AND ae.occurred_at >= unixepoch() - 2592000
+           WHERE ae.store_id IN (
+             SELECT id FROM stores WHERE owner_id = ? OR owner_id IN (SELECT id FROM users WHERE LOWER(email) = ?)
+           )
+           AND ae.occurred_at >= unixepoch() - 2592000
            GROUP BY ae.event_type`,
         )
-        .bind(session.user.id, isAdmin ? 1 : 0)
+        .bind(session.user.id, userEmail)
         .all(),
       db
         .prepare(
           `SELECT r.id, r.store_id AS storeId, s.name AS storeName, r.reviewer_name AS reviewerName,
             r.rating, r.title, r.comment, r.owner_reply AS ownerReply, r.status, r.created_at AS createdAt
            FROM reviews r JOIN stores s ON s.id = r.store_id
-           WHERE (s.owner_id = ? OR s.owner_id IS NULL OR ? = 1) ORDER BY r.created_at DESC LIMIT 20`,
+           WHERE (s.owner_id = ? OR s.owner_id IN (SELECT id FROM users WHERE LOWER(email) = ?))
+           ORDER BY r.created_at DESC LIMIT 20`,
         )
-        .bind(session.user.id, isAdmin ? 1 : 0)
+        .bind(session.user.id, userEmail)
         .all(),
     ]);
     return Response.json({
@@ -51,7 +55,7 @@ export async function GET(request: Request) {
     }, {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
-        "Cache-Control": "private, max-age=15, stale-while-revalidate=60",
+        "Cache-Control": "private, no-cache, no-store, must-revalidate",
       },
     });
   } catch (error) {

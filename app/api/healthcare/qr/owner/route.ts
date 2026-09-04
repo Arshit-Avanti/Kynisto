@@ -9,14 +9,18 @@ export async function GET(request: NextRequest) {
     const session = await requireApiPermission(request, "queue.manage_own");
     const db = getD1();
     
-    const isAdmin = session.user.role === "admin";
+    const userEmail = (session.user.email || "").toLowerCase().trim();
     // Find store owned by this user
-    const store = await db.prepare("SELECT id, name, slug FROM stores WHERE (owner_id = ? OR owner_id IS NULL OR ? = 1) ORDER BY created_at DESC LIMIT 1")
-      .bind(session.user.id, isAdmin ? 1 : 0)
+    const store = await db.prepare(
+      `SELECT id, name, slug FROM stores
+       WHERE (owner_id = ? OR owner_id IN (SELECT id FROM users WHERE LOWER(email) = ?))
+       ORDER BY created_at DESC LIMIT 1`
+    )
+      .bind(session.user.id, userEmail)
       .first<{ id: string; name: string; slug: string }>();
 
     if (!store) {
-      return noStoreJson({ ok: false, message: "No store found for this owner." }, { status: 404 });
+      return noStoreJson({ ok: false, message: "No store found for this account." }, { status: 404 });
     }
 
     const qrRecord = await getOrCreatePermanentQueueId(store.id, session.user.id);
@@ -38,14 +42,18 @@ export async function POST(request: NextRequest) {
     const session = await requireApiPermission(request, "queue.manage_own");
     const db = getD1();
     const body = await request.json() as { status?: "active" | "disabled"; queueCode?: string };
-    const isAdmin = session.user.role === "admin";
+    const userEmail = (session.user.email || "").toLowerCase().trim();
 
-    const store = await db.prepare("SELECT id, name, slug FROM stores WHERE (owner_id = ? OR owner_id IS NULL OR ? = 1) ORDER BY created_at DESC LIMIT 1")
-      .bind(session.user.id, isAdmin ? 1 : 0)
+    const store = await db.prepare(
+      `SELECT id, name, slug FROM stores
+       WHERE (owner_id = ? OR owner_id IN (SELECT id FROM users WHERE LOWER(email) = ?))
+       ORDER BY created_at DESC LIMIT 1`
+    )
+      .bind(session.user.id, userEmail)
       .first<{ id: string; name: string; slug: string }>();
 
     if (!store) {
-      return noStoreJson({ ok: false, message: "No store found for this owner." }, { status: 404 });
+      return noStoreJson({ ok: false, message: "No store found for this account." }, { status: 404 });
     }
     
     const now = Math.floor(Date.now() / 1000);

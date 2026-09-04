@@ -33,16 +33,21 @@ function Status({ value }: { value: unknown }) { const text=String(value??"pendi
 export function OwnerDashboard({ user }: { user: SessionUser }) {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") ?? "overview";
-  // Load initial cached overview data for instant 0ms load times across session and persistent storage
+  // Load initial cached overview data scoped strictly to current user ID
   const initialCache = useMemo(() => {
     if (typeof window === "undefined") return null;
     try {
-      const raw = sessionStorage.getItem("kynisto_owner_dash_cache") || localStorage.getItem("kynisto_owner_dash_cache");
+      // Clear legacy unscoped cache key to prevent cross-account store leaks
+      sessionStorage.removeItem("kynisto_owner_dash_cache");
+      localStorage.removeItem("kynisto_owner_dash_cache");
+
+      const scopedKey = `kynisto_owner_dash_cache_${user.id}`;
+      const raw = sessionStorage.getItem(scopedKey) || localStorage.getItem(scopedKey);
       return raw ? JSON.parse(raw) : null;
     } catch {
       return null;
     }
-  }, []);
+  }, [user.id]);
 
   const [stores, setStores] = useState<Store[]>(initialCache?.stores ?? []);
   const [reviews, setReviews] = useState<Item[]>(initialCache?.reviews ?? []);
@@ -84,8 +89,10 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
       allowCustomBranding: true,
     };
     setSubPlan(resolvedPlan);
-    const activeId = selectedIdRef.current || (overview.stores[0] ? String(overview.stores[0].id) : "");
-    if (!selectedIdRef.current && overview.stores[0]) setSelectedId(activeId);
+    const activeId = overview.stores.some((s) => s.id === selectedIdRef.current)
+      ? selectedIdRef.current
+      : (overview.stores[0] ? String(overview.stores[0].id) : "");
+    setSelectedId(activeId);
 
     // Save payload in sessionStorage & localStorage for instant subsequent page renders (<15ms)
     try {
@@ -97,12 +104,13 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
         subPlan: resolvedPlan,
         selectedId: activeId
       });
-      sessionStorage.setItem("kynisto_owner_dash_cache", payload);
-      localStorage.setItem("kynisto_owner_dash_cache", payload);
+      const scopedKey = `kynisto_owner_dash_cache_${user.id}`;
+      sessionStorage.setItem(scopedKey, payload);
+      localStorage.setItem(scopedKey, payload);
     } catch {
       // Ignore storage quota errors
     }
-  }, []);
+  }, [user.id]);
 
   const load = useCallback(async () => {
     if (!initialCache) setLoading(true);
