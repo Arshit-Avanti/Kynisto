@@ -42,9 +42,17 @@ export async function healthcareQueueDashboard(storeId: string, options: { inclu
       e.appointment_id AS appointmentId, e.doctor_id AS doctorId,
       doc.name AS doctorName,
       COALESCE(e.patient_name, e.emergency_patient_name, u.name) AS patientName,
-      COALESCE(e.contact_details, e.emergency_patient_phone, u.phone) AS patientPhone
+      COALESCE(e.contact_details, e.emergency_patient_phone, u.phone) AS patientPhone,
+      p.id AS prescriptionId,
+      p.prescription_number AS prescriptionNumber,
+      p.status AS prescriptionStatus,
+      p.issued_at AS prescriptionIssuedAt,
+      (SELECT f.follow_up_date FROM healthcare_follow_ups f WHERE f.prescription_id = p.id LIMIT 1) AS prescriptionFollowUpDate,
+      (SELECT f.follow_up_fee FROM healthcare_follow_ups f WHERE f.prescription_id = p.id LIMIT 1) AS prescriptionFollowUpFee,
+      (SELECT f.booking_status FROM healthcare_follow_ups f WHERE f.prescription_id = p.id LIMIT 1) AS prescriptionFollowUpStatus
       FROM healthcare_queue_entries e LEFT JOIN users u ON u.id = e.user_id
       LEFT JOIN healthcare_doctors doc ON doc.id = e.doctor_id
+      LEFT JOIN healthcare_prescriptions p ON p.queue_entry_id = e.id AND p.status IN ('draft', 'issued')
       WHERE e.store_id = ? AND e.service_date = ?
       ORDER BY CASE e.status WHEN 'called' THEN 0 WHEN 'in_consultation' THEN 0 WHEN 'waiting' THEN 1 ELSE 2 END,
         e.is_emergency DESC, e.token_number ASC LIMIT 100`).bind(storeId, today).all(),

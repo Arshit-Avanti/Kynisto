@@ -51,6 +51,10 @@ interface DoctorPrescriptionModalProps {
   doctors?: Doctor[];
   // For Reissue / Correction mode
   reissueTarget?: PrescriptionRecord | null;
+  // Live Queue Consultation Context
+  patientId?: string;
+  queueTokenNumber?: string;
+  consultationDate?: string;
 }
 
 export function DoctorPrescriptionModal({
@@ -64,11 +68,15 @@ export function DoctorPrescriptionModal({
   appointmentId,
   doctors = [],
   reissueTarget,
+  patientId,
+  queueTokenNumber,
+  consultationDate,
 }: DoctorPrescriptionModalProps) {
   const isReissue = Boolean(reissueTarget);
 
   // Form step: "edit" | "preview"
   const [step, setStep] = useState<"edit" | "preview">("edit");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Medical form state
   const initialCustomDoc = !doctors.length || Boolean(reissueTarget && !doctors.some((d) => String(d.id) === reissueTarget.doctorId));
@@ -180,11 +188,49 @@ export function DoctorPrescriptionModal({
     };
   }, [storeId, reissueTarget]);
 
+  useEffect(() => {
+    if (queueEntryId && !isReissue) {
+      let mounted = true;
+      apiFetch<{ prescriptions?: PrescriptionRecord[] }>(
+        `/api/healthcare/prescriptions?queueEntryId=${encodeURIComponent(queueEntryId)}`
+      )
+        .then((res) => {
+          if (mounted && res?.prescriptions && res.prescriptions.length > 0) {
+            const draft = res.prescriptions.find((p) => p.status === "draft");
+            if (draft) {
+              if (draft.diagnosis) setDiagnosis(draft.diagnosis);
+              if (draft.medicines && draft.medicines.length > 0) setMedicines(draft.medicines);
+              if (draft.tests && draft.tests.length > 0) setTestsInput(draft.tests.join(", "));
+              if (draft.advice) setAdvice(draft.advice);
+              if (draft.symptoms) setSymptoms(draft.symptoms);
+              if (draft.vitals) setVitals(draft.vitals);
+              if (draft.patientName) setPatientName(draft.patientName);
+              if (draft.patientPhone) setPatientPhone(draft.patientPhone);
+              if (draft.patientAge) setPatientAge(String(draft.patientAge));
+              if (draft.patientGender) setPatientGender(draft.patientGender);
+              if (draft.followUp) {
+                setEnableFollowUp(draft.followUp.enabled);
+                if (draft.followUp.validityDays) setValidityDays(draft.followUp.validityDays);
+                if (draft.followUp.followUpType) setFollowUpType(draft.followUp.followUpType);
+                if (draft.followUp.followUpFee) setFollowUpFee(draft.followUp.followUpFee);
+                if (draft.followUp.notes) setFollowUpNotes(draft.followUp.notes);
+              }
+            }
+          }
+        })
+        .catch(() => {});
+      return () => {
+        mounted = false;
+      };
+    }
+  }, [queueEntryId, isReissue]);
+
   // Correction reason (for reissue)
   const [correctionReason, setCorrectionReason] = useState<string>("");
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [draftSuccess, setDraftSuccess] = useState(false);
 
   // Update doctor details when doctor selected
   const handleDoctorChange = (selectedId: string) => {
@@ -257,6 +303,62 @@ export function DoctorPrescriptionModal({
     issuedAt: Math.floor(Date.now() / 1000),
     createdAt: Math.floor(Date.now() / 1000),
     updatedAt: Math.floor(Date.now() / 1000),
+  };
+
+  const handleSaveDraft = async () => {
+    setError(null);
+    if (!doctorName.trim()) {
+      setError("Doctor name is required to save draft.");
+      return;
+    }
+    if (!patientName.trim()) {
+      setError("Patient name is required to save draft.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await apiFetch("/api/healthcare/prescriptions", {
+        method: "POST",
+        json: {
+          action: "save_draft",
+          status: "draft",
+          storeId,
+          doctorId: doctorId || undefined,
+          doctorName: doctorName.trim(),
+          doctorSpecialization,
+          doctorRegistration: doctorRegistration.trim() || undefined,
+          patientName: patientName.trim(),
+          patientPhone: patientPhone.trim() || undefined,
+          patientAge: patientAge ? parseInt(patientAge, 10) : undefined,
+          patientGender,
+          patientAddress: patientAddress.trim() || undefined,
+          queueEntryId,
+          appointmentId,
+          vitals,
+          symptoms,
+          diagnosis,
+          medicines: medicines.filter((m) => m.name.trim().length > 0),
+          tests: testsInput.split(",").map((t) => t.trim()).filter(Boolean),
+          advice,
+          templateSnapshot: previewRecord.templateSnapshot,
+          followUp: enableFollowUp
+            ? {
+                enabled: true,
+                validityDays,
+                followUpType,
+                followUpFee: followUpType === "free" ? 0 : followUpFee,
+                notes: followUpNotes,
+              }
+            : { enabled: false },
+        },
+      });
+      setDraftSuccess(true);
+      setTimeout(() => setDraftSuccess(false), 4500);
+    } catch (err: any) {
+      setError(err?.message || "Failed to save draft.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -437,6 +539,13 @@ export function DoctorPrescriptionModal({
             </div>
           )}
 
+          {draftSuccess && (
+            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-bold flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>✓ Prescription draft saved successfully! You can resume and issue anytime.</span>
+            </div>
+          )}
+
           {step === "preview" ? (
             <div>
               <div className="mb-4 p-3 bg-teal-50 border border-teal-200 rounded-xl text-teal-800 text-xs font-bold flex items-center gap-2">
@@ -450,6 +559,41 @@ export function DoctorPrescriptionModal({
             </div>
           ) : (
             <div className="space-y-6">
+              {/* Live Queue Context */}
+              {queueEntryId && (
+                <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-2xl flex flex-wrap items-center gap-x-6 gap-y-2">
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-indigo-500" />
+                    <div>
+                      <p className="text-[10px] text-indigo-400 font-bold uppercase">Patient</p>
+                      <p className="text-sm font-black text-indigo-900">{patientName || "Walk-in"} {patientAge ? `(${patientAge}${patientGender ? ` / ${patientGender.charAt(0)}` : ""})` : ""}</p>
+                      {patientId && <p className="text-[10px] font-bold text-indigo-600">{patientId}</p>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-indigo-500" />
+                    <div>
+                      <p className="text-[10px] text-indigo-400 font-bold uppercase">Queue Token</p>
+                      <p className="text-sm font-black text-indigo-900">{queueTokenNumber || "N/A"}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-indigo-500" />
+                    <div>
+                      <p className="text-[10px] text-indigo-400 font-bold uppercase">Date</p>
+                      <p className="text-sm font-black text-indigo-900">{consultationDate || new Date().toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Stethoscope className="w-4 h-4 text-indigo-500" />
+                    <div>
+                      <p className="text-[10px] text-indigo-400 font-bold uppercase">Consultation</p>
+                      <p className="text-sm font-black text-indigo-900">{doctorName ? `Dr. ${doctorName}` : "Unassigned"} • {storeName}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* If Reissue: Show Reason Input */}
               {isReissue && (
                 <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl">
@@ -922,14 +1066,24 @@ export function DoctorPrescriptionModal({
 
           <div className="flex items-center gap-3">
             {step === "edit" ? (
-              <button
-                type="button"
-                onClick={() => setStep("preview")}
-                className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm transition-colors flex items-center gap-1.5 cursor-pointer"
-              >
-                <Eye className="w-4 h-4" />
-                <span>Preview Before Issuing</span>
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={handleSaveDraft}
+                  disabled={submitting}
+                  className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm transition-colors cursor-pointer"
+                >
+                  Save Draft
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStep("preview")}
+                  className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Eye className="w-4 h-4" />
+                  <span>Preview Before Issuing</span>
+                </button>
+              </>
             ) : (
               <button
                 type="button"
@@ -943,7 +1097,14 @@ export function DoctorPrescriptionModal({
 
             <button
               type="button"
-              onClick={handleSubmit}
+              onClick={() => {
+                const validMedicines = medicines.filter((m) => m.name.trim().length > 0);
+                if (validMedicines.length === 0) {
+                  setError("Please add at least one valid medication.");
+                  return;
+                }
+                setShowConfirmModal(true);
+              }}
               disabled={submitting}
               className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs sm:text-sm shadow-md shadow-emerald-500/20 flex items-center gap-2 cursor-pointer transition-all"
             >
@@ -953,6 +1114,34 @@ export function DoctorPrescriptionModal({
           </div>
         </div>
       </div>
+      
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+            <h3 className="text-lg font-black text-slate-800 mb-2">Issue Prescription?</h3>
+            <p className="text-sm text-slate-600 mb-6 font-medium">
+              Once issued, the prescription cannot be silently edited.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowConfirmModal(false);
+                  handleSubmit();
+                }}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm"
+              >
+                Issue Prescription
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -332,8 +332,10 @@ export async function activeHealthcareQueueForUser(userId: string, sweep = true)
   return getD1().prepare(`SELECT e.id, e.store_id AS storeId, s.name AS storeName, s.slug AS storeSlug,
     e.token_number AS tokenNumber, e.status, e.expires_at AS expiresAt,
     e.late_minutes AS lateMinutes, e.late_reported_at AS lateReportedAt,
-    e.arrival_status AS arrivalStatus, e.appointment_id AS appointmentId
+    e.arrival_status AS arrivalStatus, e.appointment_id AS appointmentId,
+    p.id AS prescriptionId, p.prescription_number AS prescriptionNumber, p.status AS prescriptionStatus
     FROM healthcare_queue_entries e JOIN stores s ON s.id = e.store_id
+    LEFT JOIN healthcare_prescriptions p ON p.queue_entry_id = e.id AND p.status IN ('draft', 'issued')
     WHERE e.active_key = ? AND e.status IN ('waiting','called','in_consultation') LIMIT 1`)
     .bind(`customer:${userId}`).first<Record<string, string | number | null>>();
 }
@@ -413,6 +415,7 @@ export async function patientQueueState(storeId: string, userId?: string) {
           e.joined_at AS joinedAt, e.expires_at AS expiresAt, e.reminder_sent_at AS reminderSentAt,
           e.late_minutes AS lateMinutes, e.late_reported_at AS lateReportedAt,
           e.appointment_id AS appointmentId, e.doctor_id AS doctorId,
+          p.id AS prescriptionId, p.prescription_number AS prescriptionNumber, p.status AS prescriptionStatus, p.issued_at AS prescriptionIssuedAt,
           (SELECT COUNT(*) FROM healthcare_queue_entries a
             WHERE a.store_id = e.store_id AND a.service_date = e.service_date AND a.status = 'waiting'
             AND (a.is_emergency > e.is_emergency OR (a.is_emergency = e.is_emergency AND a.token_number < e.token_number)))
@@ -420,6 +423,7 @@ export async function patientQueueState(storeId: string, userId?: string) {
             WHERE called.store_id = e.store_id AND called.service_date = e.service_date AND called.status IN ('called','in_consultation') AND called.id <> e.id)
           + 1 AS position
          FROM healthcare_queue_entries e
+         LEFT JOIN healthcare_prescriptions p ON p.queue_entry_id = e.id AND p.status IN ('draft', 'issued')
          WHERE e.store_id = ? AND e.user_id = ? AND e.service_date = ? AND e.status IN ('waiting','called','in_consultation')
          ORDER BY CASE e.status WHEN 'waiting' THEN 0 ELSE 1 END, e.joined_at DESC LIMIT 1`,
       )
@@ -429,8 +433,10 @@ export async function patientQueueState(storeId: string, userId?: string) {
     completedEntry = await db
       .prepare(
         `SELECT e.id, e.token_number AS tokenNumber, e.status, e.arrival_status AS arrivalStatus,
-          e.joined_at AS joinedAt, e.expires_at AS expiresAt, e.reminder_sent_at AS reminderSentAt
+          e.joined_at AS joinedAt, e.expires_at AS expiresAt, e.reminder_sent_at AS reminderSentAt,
+          p.id AS prescriptionId, p.prescription_number AS prescriptionNumber, p.status AS prescriptionStatus, p.issued_at AS prescriptionIssuedAt
          FROM healthcare_queue_entries e
+         LEFT JOIN healthcare_prescriptions p ON p.queue_entry_id = e.id AND p.status IN ('draft', 'issued')
          WHERE e.store_id = ? AND e.user_id = ? AND e.service_date = ? AND e.status = 'completed'
          ORDER BY e.joined_at DESC LIMIT 1`,
       )

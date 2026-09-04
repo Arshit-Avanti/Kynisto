@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState, startTransition, type FormEvent } from "react";
 import { apiFetch } from "@/lib/client-api";
 import { OwnerHealthcareQRCard } from "./OwnerHealthcareQRCard";
-import { ClinicPatientsTab } from "@/components/healthcare/ClinicPatientsTab";
+import { ClinicPatientsTab, PatientHistoryModal } from "@/components/healthcare/ClinicPatientsTab";
 import { ClinicPrescriptionsTab } from "@/components/healthcare/ClinicPrescriptionsTab";
 import { ClinicFollowupsTab } from "@/components/healthcare/ClinicFollowupsTab";
 import { PrescriptionDesigner } from "@/components/healthcare/PrescriptionDesigner";
 import { DoctorPrescriptionModal } from "@/components/healthcare/DoctorPrescriptionModal";
+import { PrescriptionView } from "@/components/healthcare/PrescriptionView";
 import type { PrescriptionRecord } from "@/lib/prescriptions";
 
 type Item = Record<string, string | number | null | undefined>;
@@ -66,6 +67,8 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
     queueEntryId?: string;
     reissueTarget?: PrescriptionRecord | null;
   }>({ open: false });
+  const [viewingPrescriptionId, setViewingPrescriptionId] = useState<string | null>(null);
+  const [viewingPatientHistory, setViewingPatientHistory] = useState<{ id: string; name: string; phone?: string } | null>(null);
 
   const prevWaitingCountRef = useRef<number>(-1);
   const prevEntriesSignatureRef = useRef<string>("");
@@ -297,22 +300,91 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
       const isCalling = entry.status === "called";
       const isInConsultation = entry.status === "in_consultation";
       const isWaiting = entry.status === "waiting";
+      const isCompleted = entry.status === "completed";
+      
+      // If we don't want to show certain statuses we can skip them, but user says "completed patients of the day remain visible".
+      if (entry.status === "cancelled" || entry.status === "removed" || entry.status === "no_show" || entry.status === "skipped") {
+        return null;
+      }
+
       return (
-        <article key={String(entry.id)} className={isActive ? "active" : ""}>
+        <article key={String(entry.id)} className={isActive ? "active" : ""} style={isCompleted ? { opacity: 0.8, background: '#f8fafc' } : {}}>
           <b>#{entry.tokenNumber}</b>
-          <span>
-            <strong>
-              {entry.isEmergency ? "🚨 Emergency · " : entry.isWalkIn ? "Walk-in · " : ""}
-              {String(entry.patientName ?? "Patient")}
-            </strong>
-            <small className="flex items-center gap-1.5 flex-wrap">
-              {renderStatusBadge(String(entry.status))}
-              {renderArrivalBadge(entry)}
-              {entry.doctorName && <span className="text-slate-400">Dr. {String(entry.doctorName)}</span>}
-              <span className="text-slate-500">{new Date(Number(entry.joinedAt) * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-              {entry.patientPhone && <span className="text-slate-500">{String(entry.patientPhone)}</span>}
-            </small>
-          </span>
+          <div className="flex flex-col flex-1 gap-2" style={{ flex: 1 }}>
+            <span>
+              <strong>
+                {entry.isEmergency ? "🚨 Emergency · " : entry.isWalkIn ? "Walk-in · " : ""}
+                {String(entry.patientName ?? "Patient")}
+              </strong>
+              <small className="flex items-center gap-1.5 flex-wrap">
+                {renderStatusBadge(String(entry.status))}
+                {renderArrivalBadge(entry)}
+                {entry.doctorName && <span className="text-slate-400">Dr. {String(entry.doctorName)}</span>}
+                <span className="text-slate-500">{new Date(Number(entry.joinedAt) * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                {entry.patientPhone && <span className="text-slate-500">{String(entry.patientPhone)}</span>}
+              </small>
+            </span>
+            
+            {/* PRESCRIPTION SECTION */}
+            <div className="mt-2 p-3 bg-slate-50 rounded border border-slate-200 text-sm">
+              {isWaiting || isCalling ? (
+                <div className="text-slate-500">Prescription: Not available yet</div>
+              ) : isInConsultation ? (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPrescriptionModal({
+                        open: true,
+                        patientName: String(entry.patientName ?? "Patient"),
+                        patientPhone: String(entry.patientPhone ?? ""),
+                        queueEntryId: String(entry.id),
+                        doctorName: String(entry.doctorName ?? ""),
+                        doctorId: String(entry.doctorId ?? ""),
+                      })
+                    }
+                    className="portalButtonSm primary"
+                    style={{ background: "#059669", color: "#ffffff", fontWeight: 800 }}
+                  >
+                    ℞ Issue Prescription
+                  </button>
+                </div>
+              ) : isCompleted ? (
+                entry.prescriptionStatus === 'issued' ? (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="healthcareBadge" style={{ background: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0' }}>
+                        🟢 Prescription Issued ✓ {entry.prescriptionNumber ? `(${entry.prescriptionNumber})` : ''}
+                      </span>
+                      {entry.prescriptionFollowUpDate && (
+                        <span className="healthcareBadge" style={{ background: '#f3f4f6', color: '#374151' }}>
+                          📅 Follow-up: {entry.prescriptionFollowUpDate} {entry.prescriptionFollowUpFee ? `· ₹${entry.prescriptionFollowUpFee}` : ''}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => setViewingPrescriptionId(String(entry.prescriptionId || entry.id))} className="portalButtonSm">👁️ View Prescription</button>
+                      <button onClick={() => setViewingPatientHistory({ id: String(entry.id), name: String(entry.patientName), phone: String(entry.patientPhone || "") })} className="portalButtonSm">📋 View Patient History</button>
+                    </div>
+                  </div>
+                ) : entry.prescriptionStatus === 'draft' ? (
+                  <div className="flex flex-col gap-2">
+                    <div><span className="healthcareBadge" style={{ background: '#fef08a', color: '#854d0e', border: '1px solid #fde047' }}>🟡 Draft Saved</span></div>
+                    <div>
+                      <button onClick={() => setPrescriptionModal({ open: true, patientName: String(entry.patientName ?? "Patient"), patientPhone: String(entry.patientPhone ?? ""), queueEntryId: String(entry.id), doctorName: String(entry.doctorName ?? ""), doctorId: String(entry.doctorId ?? "") })} className="portalButtonSm">✏️ Continue Prescription →</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2 p-3 bg-red-50 border border-red-200 rounded">
+                    <div className="text-red-700 font-semibold">🔴 Prescription Not Issued</div>
+                    <div>
+                      <button onClick={() => setPrescriptionModal({ open: true, patientName: String(entry.patientName ?? "Patient"), patientPhone: String(entry.patientPhone ?? ""), queueEntryId: String(entry.id), doctorName: String(entry.doctorName ?? ""), doctorId: String(entry.doctorId ?? ""), tokenNumber: String(entry.tokenNumber ?? ""), serviceDate: String(entry.serviceDate || new Date().toISOString().split('T')[0]) })} className="portalButtonSm primary" style={{ background: '#10b981', color: 'white', padding: '8px 16px', fontSize: '14px' }}>Issue Prescription →</button>
+                    </div>
+                  </div>
+                )
+              ) : null}
+            </div>
+          </div>
           <div className="tableActions">
             {/* Arrival management */}
             {(isWaiting || isCalling || isInConsultation) && (
@@ -337,24 +409,6 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
             {(isCalling || isInConsultation) && (
               <button onClick={() => void action("complete", { entryId: entry.id })} disabled={Boolean(busy)} className="portalButtonSm success">
                 Complete
-              </button>
-            )}
-            {(isCalling || isInConsultation) && (
-              <button
-                type="button"
-                onClick={() =>
-                  setPrescriptionModal({
-                    open: true,
-                    patientName: String(entry.patientName ?? "Patient"),
-                    patientPhone: String(entry.patientPhone ?? ""),
-                    queueEntryId: String(entry.id),
-                  })
-                }
-                className="portalButtonSm primary"
-                style={{ background: "#059669", color: "#ffffff", fontWeight: 800 }}
-                title="Create & Issue Prescription"
-              >
-                ℞ Prescribe
               </button>
             )}
             {/* Waiting-only */}
@@ -845,7 +899,69 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
       />
     )}
 
+    {viewingPrescriptionId && (
+      <QuickPrescriptionModal
+        storeId={storeId}
+        queueEntryId={viewingPrescriptionId}
+        onClose={() => setViewingPrescriptionId(null)}
+      />
+    )}
+
+    {viewingPatientHistory && (
+      <PatientHistoryModal
+        storeId={storeId}
+        patientName={viewingPatientHistory.name}
+        patientPhone={viewingPatientHistory.phone}
+        onClose={() => setViewingPatientHistory(null)}
+        onViewPrescription={(rxId) => {
+          setViewingPatientHistory(null);
+          setViewingPrescriptionId(rxId);
+        }}
+      />
+    )}
+
     <OwnerHealthcareQRCard />
     {toast && <div className="portalToast" role="status">✓ {toast}</div>}
   </>;
+}
+
+function QuickPrescriptionModal({ storeId, queueEntryId, onClose }: { storeId: string; queueEntryId: string; onClose: () => void }) {
+  const [rx, setRx] = useState<PrescriptionRecord | null>(null);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    apiFetch<{ prescription?: PrescriptionRecord; prescriptions?: PrescriptionRecord[] }>(
+      `/api/healthcare/prescriptions?queueEntryId=${encodeURIComponent(queueEntryId)}`
+    )
+      .then((res) => {
+        if (res?.prescription) {
+          setRx(res.prescription);
+        } else if (res?.prescriptions && res.prescriptions.length > 0) {
+          const found = res.prescriptions.find((p: PrescriptionRecord) => p.queueEntryId === queueEntryId || p.id === queueEntryId) || res.prescriptions[0];
+          setRx(found);
+        } else {
+          return apiFetch<{ prescriptions: PrescriptionRecord[] }>(`/api/healthcare/prescriptions?storeId=${encodeURIComponent(storeId)}`)
+            .then((storeRes) => {
+              const found = storeRes?.prescriptions?.find((p: PrescriptionRecord) => p.queueEntryId === queueEntryId || p.id === queueEntryId);
+              if (found) setRx(found);
+              else setError("Prescription not found.");
+            });
+        }
+      })
+      .catch((e: Error) => setError(e.message || "Failed to load prescription"));
+  }, [storeId, queueEntryId]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 sm:p-6 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden flex flex-col relative">
+        <button onClick={onClose} className="absolute top-4 right-4 z-10 p-2 bg-white/80 hover:bg-slate-100 rounded-full shadow-sm text-slate-500 cursor-pointer">
+          ✕
+        </button>
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+          {error ? <div className="p-8 text-center text-red-500 font-medium">{error}</div> :
+           rx ? <PrescriptionView prescription={rx} onClose={onClose} /> :
+           <div className="p-8 text-center text-slate-500 font-medium">Loading prescription details...</div>}
+        </div>
+      </div>
+    </div>
+  );
 }

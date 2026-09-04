@@ -258,102 +258,157 @@ export function ClinicPatientsTab({
 
       {/* Patient Profile Modal (Patient Overview) */}
       {selectedPatient && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-          <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-200 p-6 my-8 max-h-[90vh] overflow-y-auto space-y-6">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700 font-black text-lg">
-                  {selectedPatient.patientName.charAt(0)}
-                </div>
-                <div>
-                  <div className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 w-fit mb-1">
-                    Patient Overview
-                  </div>
-                  <h3 className="text-xl font-black text-slate-900">
-                    {selectedPatient.patientName}
-                  </h3>
-                  <p className="text-xs text-slate-500 font-medium">
-                    {selectedPatient.patientId && <span className="font-mono font-bold text-slate-700">{selectedPatient.patientId} • </span>}
-                    {selectedPatient.patientPhone || "No contact"} • {selectedPatient.patientAge ? `${selectedPatient.patientAge} years` : "Age not specified"} • {selectedPatient.patientGender || "Gender not specified"}
-                  </p>
-                </div>
-              </div>
+        <PatientHistoryModal
+          storeId={storeId}
+          patientName={selectedPatient.patientName}
+          patientPhone={selectedPatient.patientPhone}
+          patientId={selectedPatient.patientId}
+          onClose={() => setSelectedPatient(null)}
+          onViewPrescription={onViewPrescription}
+        />
+      )}
+    </div>
+  );
+}
 
-              <div className="flex items-center gap-2">
-                {onPrescribeForPatient && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const name = selectedPatient.patientName;
-                      const phone = selectedPatient.patientPhone;
-                      setSelectedPatient(null);
-                      onPrescribeForPatient(name, phone);
-                    }}
-                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-sm cursor-pointer"
-                  >
-                    + New Prescription
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setSelectedPatient(null)}
-                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+export interface PatientHistoryModalProps {
+  storeId: string;
+  patientName: string;
+  patientPhone?: string;
+  patientId?: string;
+  onClose: () => void;
+  onViewPrescription?: (rxId: string) => void;
+}
+
+export function PatientHistoryModal({
+  storeId,
+  patientName,
+  patientPhone,
+  patientId,
+  onClose,
+  onViewPrescription,
+}: PatientHistoryModalProps) {
+  const [selectedPatient, setSelectedPatient] = useState<PatientDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"consultations" | "prescriptions" | "followups">("prescriptions");
+
+  useEffect(() => {
+    let mounted = true;
+    async function fetchPatientData() {
+      setLoading(true);
+      try {
+        const q = patientPhone && patientPhone !== "Not recorded"
+          ? `phone=${encodeURIComponent(patientPhone)}`
+          : `name=${encodeURIComponent(patientName)}`;
+        const data = await apiFetch<{ patient: PatientDetail }>(
+          `/api/healthcare/patients?storeId=${encodeURIComponent(storeId)}&${q}`
+        );
+        if (mounted && data?.patient) {
+          setSelectedPatient({
+            ...data.patient,
+            patientId: patientId || data.patient.patientId,
+          });
+        }
+      } catch {
+        if (mounted) {
+          setSelectedPatient({
+            patientId,
+            patientName,
+            patientPhone,
+            totalVisits: 0,
+            consultationHistory: [],
+            prescriptionHistory: [],
+            followUpHistory: [],
+          });
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+    fetchPatientData();
+    return () => { mounted = false; };
+  }, [storeId, patientName, patientPhone, patientId]);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div className="bg-white p-6 rounded-2xl">
+          <div className="portalSkeleton"><span /><span /><span /></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!selectedPatient) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+      <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-200 p-6 my-8 max-h-[90vh] overflow-y-auto space-y-6">
+        {/* Modal Header */}
+        <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700 font-black text-lg">
+              {selectedPatient.patientName.charAt(0)}
             </div>
-
-            {/* Section 1: Basic Patient Information */}
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5">
-                <User className="w-4 h-4 text-teal-600" />
-                Basic Patient Information
-              </h4>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Patient ID</span>
-                  <strong className="font-mono text-slate-800">{selectedPatient.patientId || "N/A"}</strong>
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Contact</span>
-                  <strong className="text-slate-800">{selectedPatient.patientPhone || "Not recorded"}</strong>
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Age & Gender</span>
-                  <strong className="text-slate-800">
-                    {selectedPatient.patientAge ? `${selectedPatient.patientAge}y` : "—"}, {selectedPatient.patientGender || "—"}
-                  </strong>
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">Total Visits</span>
-                  <strong className="text-slate-800">{selectedPatient.totalVisits} visits</strong>
-                </div>
-              </div>
-              {selectedPatient.patientAddress && (
-                <div className="mt-3 pt-3 border-t border-slate-200 text-xs flex items-center gap-1.5 text-slate-600">
-                  <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span>{selectedPatient.patientAddress}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Section 2: Prescription History */}
             <div>
-              <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-emerald-600" />
-                Prescription History ({selectedPatient.prescriptionHistory.length})
-              </h4>
+              <div className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 w-fit mb-1">
+                Patient History
+              </div>
+              <h3 className="text-xl font-black text-slate-900">
+                {selectedPatient.patientName}
+              </h3>
+              <p className="text-xs text-slate-500 font-medium">
+                {selectedPatient.patientId && <span className="font-mono font-bold text-slate-700">{selectedPatient.patientId} • </span>}
+                {selectedPatient.patientPhone || "No contact"} • {selectedPatient.patientAge ? `${selectedPatient.patientAge} years` : "Age not specified"} • {selectedPatient.patientGender || "Gender not specified"}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex items-center gap-4 border-b border-slate-200">
+          <button
+            type="button"
+            onClick={() => setActiveTab("prescriptions")}
+            className={`pb-2 text-sm font-bold border-b-2 transition-colors ${activeTab === "prescriptions" ? "border-emerald-600 text-emerald-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+          >
+            Prescriptions ({selectedPatient.prescriptionHistory.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("consultations")}
+            className={`pb-2 text-sm font-bold border-b-2 transition-colors ${activeTab === "consultations" ? "border-emerald-600 text-emerald-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+          >
+            Consultations ({selectedPatient.consultationHistory.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("followups")}
+            className={`pb-2 text-sm font-bold border-b-2 transition-colors ${activeTab === "followups" ? "border-emerald-600 text-emerald-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+          >
+            Follow-ups ({selectedPatient.followUpHistory.length})
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        <div className="space-y-4">
+          {activeTab === "prescriptions" && (
+            <div>
               {selectedPatient.prescriptionHistory.length === 0 ? (
                 <p className="text-xs text-slate-400 italic">No prescriptions issued yet.</p>
               ) : (
                 <div className="space-y-2">
                   {selectedPatient.prescriptionHistory.map((rx) => (
-                    <div
-                      key={rx.id}
-                      className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs"
-                    >
+                    <div key={rx.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
@@ -382,22 +437,16 @@ export function ClinicPatientsTab({
                 </div>
               )}
             </div>
+          )}
 
-            {/* Section 3: Consultation History */}
+          {activeTab === "consultations" && (
             <div>
-              <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-teal-600" />
-                Consultation History ({selectedPatient.consultationHistory.length})
-              </h4>
               {selectedPatient.consultationHistory.length === 0 ? (
                 <p className="text-xs text-slate-400 italic">No queue consultation records.</p>
               ) : (
                 <div className="space-y-2">
                   {selectedPatient.consultationHistory.map((q) => (
-                    <div
-                      key={q.id}
-                      className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs"
-                    >
+                    <div key={q.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
                       <div className="flex items-center gap-3">
                         <span className="w-7 h-7 rounded-lg bg-teal-100 text-teal-800 font-black flex items-center justify-center">
                           #{q.tokenNumber || "—"}
@@ -417,22 +466,16 @@ export function ClinicPatientsTab({
                 </div>
               )}
             </div>
+          )}
 
-            {/* Section 4: Follow-up History */}
+          {activeTab === "followups" && (
             <div>
-              <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-cyan-600" />
-                Follow-up History ({selectedPatient.followUpHistory.length})
-              </h4>
               {selectedPatient.followUpHistory.length === 0 ? (
                 <p className="text-xs text-slate-400 italic">No follow-ups recorded.</p>
               ) : (
                 <div className="space-y-2">
                   {selectedPatient.followUpHistory.map((fu) => (
-                    <div
-                      key={fu.id}
-                      className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs"
-                    >
+                    <div key={fu.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
                       <div>
                         <strong className="text-slate-900 block font-bold">
                           Follow-up: {fu.date}
@@ -449,9 +492,9 @@ export function ClinicPatientsTab({
                 </div>
               )}
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

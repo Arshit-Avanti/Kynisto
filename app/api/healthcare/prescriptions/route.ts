@@ -29,9 +29,31 @@ export async function GET(request: Request) {
     const filter = (url.searchParams.get("filter") || "1y") as PrescriptionFilter;
     const storeId = url.searchParams.get("storeId");
     const id = url.searchParams.get("id");
+    const queueEntryIdParam = url.searchParams.get("queueEntryId");
     const search = url.searchParams.get("search")?.trim().toLowerCase() || "";
     const patientPhone = url.searchParams.get("patientPhone")?.trim() || "";
     const minTimestamp = filterToTimestamp(filter);
+
+    if (queueEntryIdParam) {
+      const rx = await db
+        .prepare("SELECT * FROM healthcare_prescriptions WHERE queue_entry_id = ? ORDER BY CASE status WHEN 'issued' THEN 0 ELSE 1 END, updated_at DESC LIMIT 1")
+        .bind(queueEntryIdParam)
+        .first<any>();
+
+      if (!rx) {
+        return noStoreJson({ ok: true, prescription: null });
+      }
+      
+      const followUp = await db
+        .prepare("SELECT * FROM healthcare_follow_ups WHERE prescription_id = ? LIMIT 1")
+        .bind(rx.id)
+        .first<any>();
+
+      return noStoreJson({
+        ok: true,
+        prescription: formatPrescriptionRow(rx, followUp),
+      });
+    }
 
     // 1. Single Prescription by ID
     if (id) {
@@ -207,12 +229,14 @@ export async function POST(request: Request) {
     const diagnosis = cleanText(body.diagnosis, "Diagnosis", { max: 2000, required: false }) || null;
     const advice = cleanText(body.advice, "Advice", { max: 2000, required: false }) || null;
 
-    // Medicines array validation using robust validator
-    let medicines: PrescriptionMedicine[];
+    // Medicines array validation
+    const isDraft = body.action === "save_draft" || body.status === "draft";
+    let medicines: any[] = [];
     try {
       medicines = validatePrescriptionMedicines(body.medicines);
     } catch (err: any) {
-      throw new HttpError(400, err.message, err.code || "INVALID_MEDICINE");
+      if (!isDraft) throw new HttpError(400, err.message, err.code || "INVALID_MEDICINE");
+      medicines = Array.isArray(body.medicines) ? body.medicines : [];
     }
 
     // Tests array
@@ -252,40 +276,84 @@ export async function POST(request: Request) {
       templateSnapshot.doctorRegistration = doctorRegistration;
     }
 
-    const rxId = `rx-${crypto.randomUUID()}`;
-    const prescriptionNumber = generatePrescriptionNumber();
+    let rxId = `rx-${crypto.randomUUID()}`;
+    let prescriptionNumber = generatePrescriptionNumber();
     const now = Math.floor(Date.now() / 1000);
 
-    const statements: D1PreparedStatement[] = [
-      db.prepare(`
-        INSERT INTO healthcare_prescriptions (
-          id, prescription_number, store_id, doctor_id, doctor_name, doctor_specialization, doctor_registration,
-          store_name, user_id, patient_name, patient_phone, patient_age, patient_gender, patient_address,
-          queue_entry_id, appointment_id, vitals_json, symptoms, diagnosis,
-          medicines_json, tests_json, advice, template_snapshot_json, status,
-          issued_at, created_at, updated_at
-        ) VALUES (
-          ?, ?, ?, ?, ?, ?, ?,
-          ?, ?, ?, ?, ?, ?, ?,
-          ?, ?, ?, ?, ?,
-          ?, ?, ?, ?, 'issued',
-          ?, ?, ?
+    const statements: D1PreparedStatement[] = [];
+    const rxStatus = isDraft ? "draft" : "issued";
+    const issuedAt = isDraft ? 0 : now;
+
+    let existingDraftId = null;
+    if (queueEntryId) {
+      const existingDraft = await db.prepare("SELECT id, prescription_number FROM healthcare_prescriptions WHERE queue_entry_id = ? AND status = 'draft' LIMIT 1").bind(queueEntryId).first<any>();
+      if (existingDraft) {
+        existingDraftId = existingDraft.id;
+        rxId = existingDraft.id;
+        prescriptionNumber = existingDraft.prescription_number;
+      }
+    }
+
+    if (existingDraftId) {
+      statements.push(
+        db.prepare(`
+          UPDATE healthcare_prescriptions SET
+            doctor_id = ?, doctor_name = ?, doctor_specialization = ?, doctor_registration = ?,
+            patient_name = ?, patient_phone = ?, patient_age = ?, patient_gender = ?, patient_address = ?,
+            appointment_id = ?, vitals_json = ?, symptoms = ?, diagnosis = ?,
+            medicines_json = ?, tests_json = ?, advice = ?, template_snapshot_json = ?,
+            status = ?, issued_at = ?, updated_at = ?
+          WHERE id = ?
+        `).bind(
+          doctorId, doctorName, doctorSpecialization, doctorRegistration,
+          patientName, patientPhone, patientAge, patientGender, patientAddress,
+          appointmentId, JSON.stringify(vitals), symptoms, diagnosis,
+          JSON.stringify(medicines), JSON.stringify(tests), advice, JSON.stringify(templateSnapshot),
+          rxStatus, issuedAt, now, rxId
         )
-      `).bind(
-        rxId, prescriptionNumber, storeId, doctorId, doctorName, doctorSpecialization, doctorRegistration,
-        store.name, userId, patientName, patientPhone, patientAge, patientGender, patientAddress,
-        queueEntryId, appointmentId, JSON.stringify(vitals), symptoms, diagnosis,
-        JSON.stringify(medicines), JSON.stringify(tests), advice, JSON.stringify(templateSnapshot),
-        now, now, now
-      ),
-    ];
+      );
+    } else {
+      statements.push(
+        db.prepare(`
+          INSERT INTO healthcare_prescriptions (
+            id, prescription_number, store_id, doctor_id, doctor_name, doctor_specialization, doctor_registration,
+            store_name, user_id, patient_name, patient_phone, patient_age, patient_gender, patient_address,
+            queue_entry_id, appointment_id, vitals_json, symptoms, diagnosis,
+            medicines_json, tests_json, advice, template_snapshot_json, status,
+            issued_at, created_at, updated_at
+          ) VALUES (
+            ?, ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?,
+            ?, ?, ?
+          )
+        `).bind(
+          rxId, prescriptionNumber, storeId, doctorId, doctorName, doctorSpecialization, doctorRegistration,
+          store.name, userId, patientName, patientPhone, patientAge, patientGender, patientAddress,
+          queueEntryId, appointmentId, JSON.stringify(vitals), symptoms, diagnosis,
+          JSON.stringify(medicines), JSON.stringify(tests), advice, JSON.stringify(templateSnapshot), rxStatus,
+          issuedAt, now, now
+        )
+      );
+    }
 
     // If linked to active queue entry, mark consultation completed
-    if (queueEntryId) {
+    if (queueEntryId && !isDraft) {
       statements.push(
         db.prepare("UPDATE healthcare_queue_entries SET status = 'completed', completed_at = ?, left_at = ?, updated_at = ? WHERE id = ?")
           .bind(now, now, now, queueEntryId)
       );
+    }
+
+    if (isDraft) {
+      await db.batch(statements);
+      return noStoreJson({
+        ok: true,
+        status: "draft",
+        prescriptionId: rxId,
+        prescriptionNumber,
+      });
     }
 
     // Follow-up setup

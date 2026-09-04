@@ -192,6 +192,8 @@ interface PatientQueueStateResponse {
       status: 'waiting' | 'called' | 'in_consultation' | 'completed' | 'cancelled' | 'left' | 'no_show' | 'expired';
       arrivalStatus: string;
       position: number;
+      prescriptionStatus?: 'not_issued' | 'draft' | 'issued';
+      prescriptionId?: string;
     } | null;
   } | null;
 }
@@ -328,6 +330,8 @@ export default function LiveQueueTracker() {
   const [myTokenNumber, setMyTokenNumber] = useState<number>(0);
   const [isQueueOpen, setIsQueueOpen] = useState<boolean>(true);
   const [entryStatus, setEntryStatus] = useState<'waiting' | 'called' | 'in_consultation' | 'completed' | 'cancelled' | 'left' | 'no_show' | 'expired'>('waiting');
+  const [prescriptionStatus, setPrescriptionStatus] = useState<'not_issued' | 'draft' | 'issued' | undefined>(undefined);
+  const [prescriptionId, setPrescriptionId] = useState<string | undefined>(undefined);
   const [currentEntryId, setCurrentEntryId] = useState<string | null>(null);
   const [liveCompleted, setLiveCompleted] = useState<boolean>(false);
   const prevEntryStatusRef = useRef<string | null>(null);
@@ -354,6 +358,7 @@ export default function LiveQueueTracker() {
   // Customer Healthcare navigation: Find | Live Queue | Appointments | My Prescription
   const [customerNav, setCustomerNav] = useState<'find' | 'queue' | 'appointments' | 'prescriptions'>('find');
   const [selectedPrescriptionId, setSelectedPrescriptionId] = useState<string | null>(null);
+  const [viewingPrescriptionId, setViewingPrescriptionId] = useState<string | undefined | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -491,6 +496,8 @@ export default function LiveQueueTracker() {
             setTotalInQueue(Math.max(1, state.waitingCount || newPos));
             const ownerConsultationMins = state.consultationMinutes || 15;
             setEstimatedWait(newPos > 1 ? (newPos - 1) * ownerConsultationMins : 0);
+            setPrescriptionStatus(state.entry.prescriptionStatus);
+            setPrescriptionId(state.entry.prescriptionId);
           } else if (state.entry.status === 'completed') {
             setEntryStatus('completed');
             setLiveCompleted(true);
@@ -601,6 +608,8 @@ export default function LiveQueueTracker() {
         setTotalInQueue(Math.max(1, response.state.waitingCount || pos));
         const mins = consultationMinutes || item.consultationMinutes || 15;
         setEstimatedWait(pos > 1 ? (pos - 1) * mins : 0);
+        setPrescriptionStatus(entry.prescriptionStatus);
+        setPrescriptionId(entry.prescriptionId);
       } else if (response && (response.tokenNumber || response.position)) {
         setCurrentEntryId(response.entry?.id || null);
         const pos = response.position || optPos;
@@ -729,6 +738,8 @@ export default function LiveQueueTracker() {
               const mins = qs.consultationMinutes || 15;
               const pos = qs.entry.position || 1;
               setEstimatedWait(pos > 1 ? (pos - 1) * mins : 0);
+              setPrescriptionStatus(qs.entry.prescriptionStatus);
+              setPrescriptionId(qs.entry.prescriptionId);
             }
           }
 
@@ -1332,6 +1343,50 @@ export default function LiveQueueTracker() {
               </div>
             </div>
 
+            {prescriptionStatus === 'issued' ? (
+              <div className="mb-8 p-6 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl shadow-xl">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <span className="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-black uppercase tracking-wider mb-2">Prescription Issued ✓</span>
+                    <h4 className="text-xl font-black">Your Prescription is Ready!</h4>
+                    <p className="text-sm text-emerald-100 font-medium mt-1">Your official clinic prescription from {selectedQueue.name} is now available.</p>
+                  </div>
+                  <button onClick={() => setViewingPrescriptionId(prescriptionId)} className="px-5 py-2.5 bg-white text-emerald-800 font-extrabold text-sm rounded-xl shadow-lg hover:bg-emerald-50 transition-all cursor-pointer">
+                    View Prescription →
+                  </button>
+                </div>
+                <div className="mt-4 pt-4 border-t border-emerald-400/30">
+                  <button onClick={() => router.push('/healthcare?tab=prescriptions')} className="text-emerald-100 hover:text-white text-sm font-bold flex items-center transition-colors cursor-pointer">
+                    <FileText className="w-4 h-4 mr-2" /> View All Prescriptions in My Prescription
+                  </button>
+                </div>
+              </div>
+            ) : prescriptionStatus === 'draft' ? (
+              <div className="mb-8 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-xl flex items-start text-yellow-900 shadow-sm">
+                <FileText className="w-5 h-5 text-yellow-500 mr-3 mt-0.5 shrink-0" />
+                <div>
+                  <h4 className="font-bold">Prescription: 🟡 Preparing</h4>
+                  <p className="text-sm font-medium text-yellow-800">Doctor is currently preparing your digital prescription.</p>
+                </div>
+              </div>
+            ) : (liveCompleted || entryStatus === 'completed') ? (
+              <div className="mb-8 p-4 bg-rose-50 border-l-4 border-rose-500 rounded-xl flex items-start text-rose-900 shadow-sm">
+                <FileText className="w-5 h-5 text-rose-500 mr-3 mt-0.5 shrink-0" />
+                <div>
+                  <h4 className="font-bold">Prescription: 🔴 Not Issued</h4>
+                  <p className="text-sm font-medium text-rose-800">Doctor consultation completed. Awaiting official doctor validation and prescription issuance.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="mb-8 p-4 bg-slate-50 border-l-4 border-slate-400 rounded-xl flex items-start text-slate-700 shadow-sm">
+                <FileText className="w-5 h-5 text-slate-500 mr-3 mt-0.5 shrink-0" />
+                <div>
+                  <h4 className="font-bold">Prescription: ⏳ Waiting for doctor consultation</h4>
+                  <p className="text-sm font-medium text-slate-600">Your prescription will be prepared and issued by the doctor after consultation.</p>
+                </div>
+              </div>
+            )}
+
             {isLate && (
               <div className="mb-8 p-4 bg-amber-50 border-l-4 border-amber-500 rounded-xl flex items-start text-amber-900">
                 <AlertCircle className="w-5 h-5 text-amber-500 mr-3 mt-0.5 shrink-0" />
@@ -1742,6 +1797,22 @@ export default function LiveQueueTracker() {
           setView('ticket');
         }}
       />
+    )}
+
+    {viewingPrescriptionId && (
+      <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6" onClick={(e) => { if (e.target === e.currentTarget) setViewingPrescriptionId(null); }}>
+        <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-5xl h-[95vh] sm:h-[90vh] flex flex-col overflow-hidden relative animate-in slide-in-from-bottom-8 sm:zoom-in-95 duration-200">
+            <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/80">
+                <h3 className="text-lg font-black text-slate-900">Digital Prescription</h3>
+                <button onClick={() => setViewingPrescriptionId(null)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full cursor-pointer transition-colors">
+                    <XCircle className="w-6 h-6" />
+                </button>
+            </div>
+            <div className="flex-1 overflow-y-auto bg-slate-50 relative p-4">
+               <CustomerPrescriptionCenter initialPrescriptionId={viewingPrescriptionId} />
+            </div>
+        </div>
+      </div>
     )}
 
     </>

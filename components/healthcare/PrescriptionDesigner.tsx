@@ -864,6 +864,23 @@ export function PrescriptionDesigner({
                   </div>
                 </div>
               </div>
+
+              <div>
+                <label className="text-xs font-black uppercase tracking-wider text-slate-500 block mb-1">
+                  Line Height (e.g. 1.2, 1.5)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="1.0"
+                  max="2.5"
+                  value={layout.lineHeight || 1.5}
+                  onChange={(e) =>
+                    updateLayout((p) => ({ ...p, lineHeight: Number(e.target.value) }))
+                  }
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800"
+                />
+              </div>
             </div>
           )}
 
@@ -930,7 +947,7 @@ export function PrescriptionDesigner({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="text-xs font-black uppercase tracking-wider text-slate-500 block mb-1">
                     Primary Color
@@ -957,7 +974,7 @@ export function PrescriptionDesigner({
 
                 <div>
                   <label className="text-xs font-black uppercase tracking-wider text-slate-500 block mb-1">
-                    Accent Color
+                    Secondary Color
                   </label>
                   <div className="flex items-center gap-2">
                     <input
@@ -973,6 +990,78 @@ export function PrescriptionDesigner({
                       value={layout.secondaryColor}
                       onChange={(e) =>
                         updateLayout((p) => ({ ...p, secondaryColor: e.target.value }))
+                      }
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-black uppercase tracking-wider text-slate-500 block mb-1">
+                    Background Color
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={layout.backgroundColor || "#ffffff"}
+                      onChange={(e) =>
+                        updateLayout((p) => ({ ...p, backgroundColor: e.target.value }))
+                      }
+                      className="w-8 h-8 rounded-lg cursor-pointer border-0"
+                    />
+                    <input
+                      type="text"
+                      value={layout.backgroundColor || "#ffffff"}
+                      onChange={(e) =>
+                        updateLayout((p) => ({ ...p, backgroundColor: e.target.value }))
+                      }
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-black uppercase tracking-wider text-slate-500 block mb-1">
+                    Text Color
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={layout.textColor || "#1e293b"}
+                      onChange={(e) =>
+                        updateLayout((p) => ({ ...p, textColor: e.target.value }))
+                      }
+                      className="w-8 h-8 rounded-lg cursor-pointer border-0"
+                    />
+                    <input
+                      type="text"
+                      value={layout.textColor || "#1e293b"}
+                      onChange={(e) =>
+                        updateLayout((p) => ({ ...p, textColor: e.target.value }))
+                      }
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-black uppercase tracking-wider text-slate-500 block mb-1">
+                    Border Color
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={layout.borderColor || "#e2e8f0"}
+                      onChange={(e) =>
+                        updateLayout((p) => ({ ...p, borderColor: e.target.value }))
+                      }
+                      className="w-8 h-8 rounded-lg cursor-pointer border-0"
+                    />
+                    <input
+                      type="text"
+                      value={layout.borderColor || "#e2e8f0"}
+                      onChange={(e) =>
+                        updateLayout((p) => ({ ...p, borderColor: e.target.value }))
                       }
                       className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-mono font-bold"
                     />
@@ -1090,7 +1179,7 @@ export function PrescriptionDesigner({
                 <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 block">
                   Canvas Margins & Gap (px)
                 </span>
-                <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                   <div>
                     <label className="text-[10px] font-bold text-slate-400 block">Top/Bottom</label>
                     <input
@@ -1108,6 +1197,22 @@ export function PrescriptionDesigner({
                     />
                   </div>
                   <div>
+                    <label className="text-[10px] font-bold text-slate-400 block">Left/Right</label>
+                    <input
+                      type="number"
+                      min="10"
+                      max="60"
+                      value={layout.margins.left}
+                      onChange={(e) =>
+                        updateLayout((p) => ({
+                          ...p,
+                          margins: { ...p.margins, left: Number(e.target.value), right: Number(e.target.value) },
+                        }))
+                      }
+                      className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 font-bold"
+                    />
+                  </div>
+                  <div>
                     <label className="text-[10px] font-bold text-slate-400 block">Section Gap</label>
                     <input
                       type="number"
@@ -1118,6 +1223,22 @@ export function PrescriptionDesigner({
                         updateLayout((p) => ({
                           ...p,
                           spacing: { ...p.spacing, sectionGap: Number(e.target.value) },
+                        }))
+                      }
+                      className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 block">Item Gap</label>
+                    <input
+                      type="number"
+                      min="2"
+                      max="20"
+                      value={layout.spacing.itemGap}
+                      onChange={(e) =>
+                        updateLayout((p) => ({
+                          ...p,
+                          spacing: { ...p.spacing, itemGap: Number(e.target.value) },
                         }))
                       }
                       className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 font-bold"
