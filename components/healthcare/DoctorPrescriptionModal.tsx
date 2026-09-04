@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   X,
   Stethoscope,
@@ -17,6 +17,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Sparkles,
+  Search,
 } from "lucide-react";
 import { apiFetch } from "@/lib/client-api";
 import {
@@ -46,6 +47,8 @@ interface DoctorPrescriptionModalProps {
   // Pre-fill fields if issued from queue or appointment
   initialPatientName?: string;
   initialPatientPhone?: string;
+  initialUserId?: string;
+  initialPatientEmail?: string;
   queueEntryId?: string;
   appointmentId?: string;
   doctors?: Doctor[];
@@ -64,6 +67,8 @@ export function DoctorPrescriptionModal({
   onSuccess,
   initialPatientName = "",
   initialPatientPhone = "",
+  initialUserId = "",
+  initialPatientEmail = "",
   queueEntryId,
   appointmentId,
   doctors = [],
@@ -111,6 +116,105 @@ export function DoctorPrescriptionModal({
   const [patientAddress, setPatientAddress] = useState<string>(
     reissueTarget?.patientAddress || ""
   );
+
+  // User Selection (Sync with Customer "My Prescription")
+  const [userId, setUserId] = useState<string>(
+    reissueTarget?.userId || initialUserId || ""
+  );
+  const [patientEmail, setPatientEmail] = useState<string>(
+    (reissueTarget as any)?.patientEmail || initialPatientEmail || ""
+  );
+  const [selectedUser, setSelectedUser] = useState<{
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+  } | null>(null);
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+  const [userSearchResults, setUserSearchResults] = useState<
+    Array<{ id: string; name: string; email: string; phone?: string }>
+  >([]);
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const userPickerRef = useRef<HTMLDivElement>(null);
+
+  const handleSearchUsers = useCallback(
+    (query: string) => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+      setIsSearchingUsers(true);
+      searchTimeoutRef.current = setTimeout(async () => {
+        try {
+          const res = await apiFetch<{
+            ok: boolean;
+            users: Array<{ id: string; name: string; email: string; phone?: string }>;
+          }>(
+            `/api/healthcare/patients?storeId=${encodeURIComponent(storeId)}&searchUsers=1&query=${encodeURIComponent(query)}`
+          );
+          if (res?.users) {
+            setUserSearchResults(res.users);
+          }
+        } catch {
+          setUserSearchResults([]);
+        } finally {
+          setIsSearchingUsers(false);
+        }
+      }, 200);
+    },
+    [storeId]
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userPickerRef.current && !userPickerRef.current.contains(e.target as Node)) {
+        setShowUserDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const targetUid = reissueTarget?.userId || initialUserId;
+    if (targetUid && !selectedUser) {
+      apiFetch<{
+        ok: boolean;
+        users: Array<{ id: string; name: string; email: string; phone?: string }>;
+      }>(
+        `/api/healthcare/patients?storeId=${encodeURIComponent(storeId)}&searchUsers=1&query=${encodeURIComponent(targetUid)}`
+      )
+        .then((res) => {
+          const found = res?.users?.find((u) => u.id === targetUid);
+          if (found) {
+            setSelectedUser(found);
+            setUserId(found.id);
+            setPatientEmail(found.email);
+            if (!patientName) setPatientName(found.name);
+            if (!patientPhone && found.phone) setPatientPhone(found.phone);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [initialUserId, reissueTarget, storeId, selectedUser, patientName, patientPhone]);
+
+  const handleSelectUser = (u: { id: string; name: string; email: string; phone?: string }) => {
+    setSelectedUser(u);
+    setUserId(u.id);
+    setPatientName(u.name);
+    setPatientEmail(u.email);
+    if (u.phone) {
+      setPatientPhone(u.phone);
+    }
+    setShowUserDropdown(false);
+    setUserSearchQuery("");
+  };
+
+  const handleClearSelectedUser = () => {
+    setSelectedUser(null);
+    setUserId("");
+    setPatientEmail("");
+    setUserSearchQuery("");
+  };
 
   // Vitals
   const [vitals, setVitals] = useState<PrescriptionVitals>(
@@ -260,6 +364,19 @@ export function DoctorPrescriptionModal({
   };
 
   const handleRemoveMedicine = (index: number) => {
+    if (medicines.length <= 1) {
+      setMedicines([
+        {
+          name: "",
+          dosage: "1 Tab",
+          frequency: "1-0-1",
+          duration: "3 days",
+          timing: "After food",
+          instructions: "",
+        },
+      ]);
+      return;
+    }
     setMedicines((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -281,6 +398,7 @@ export function DoctorPrescriptionModal({
     doctorName,
     doctorSpecialization,
     doctorRegistration: doctorRegistration.trim() || undefined,
+    userId: userId || undefined,
     patientName: patientName || "Patient Name",
     patientPhone,
     patientAge: patientAge ? parseInt(patientAge, 10) : undefined,
@@ -327,6 +445,8 @@ export function DoctorPrescriptionModal({
           doctorName: doctorName.trim(),
           doctorSpecialization,
           doctorRegistration: doctorRegistration.trim() || undefined,
+          userId: userId || undefined,
+          patientEmail: patientEmail.trim() || undefined,
           patientName: patientName.trim(),
           patientPhone: patientPhone.trim() || undefined,
           patientAge: patientAge ? parseInt(patientAge, 10) : undefined,
@@ -409,6 +529,8 @@ export function DoctorPrescriptionModal({
               doctorName: doctorName.trim(),
               doctorSpecialization,
               doctorRegistration: doctorRegistration.trim() || undefined,
+              userId: userId || undefined,
+              patientEmail: patientEmail.trim() || undefined,
               patientName: patientName.trim(),
               patientPhone: patientPhone.trim() || undefined,
               patientAge: patientAge ? parseInt(patientAge, 10) : undefined,
@@ -446,6 +568,8 @@ export function DoctorPrescriptionModal({
               doctorName: doctorName.trim(),
               doctorSpecialization,
               doctorRegistration: doctorRegistration.trim() || undefined,
+              userId: userId || undefined,
+              patientEmail: patientEmail.trim() || undefined,
               patientName: patientName.trim(),
               patientPhone: patientPhone.trim() || undefined,
               patientAge: patientAge ? parseInt(patientAge, 10) : undefined,
@@ -685,11 +809,135 @@ export function DoctorPrescriptionModal({
                 </div>
 
                 <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-teal-600" />
-                    Patient Details
-                  </h3>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5 text-teal-600" />
+                      Patient Details
+                    </h3>
+                    {selectedUser ? (
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        Account Linked
+                      </span>
+                    ) : null}
+                  </div>
+
+                  {/* 🔗 CHOOSE USER TO SYNC WITH CUSTOMER "MY PRESCRIPTION" */}
+                  <div ref={userPickerRef} className="p-3 bg-white border border-teal-200 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-black uppercase tracking-wide text-teal-900 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-teal-600" />
+                        <span>Choose User (Syncs to Customer &quot;My Prescription&quot;)</span>
+                      </label>
+                      <span className="text-[10px] text-teal-600 font-semibold">
+                        Auto-syncs by Gmail ID or Name
+                      </span>
+                    </div>
+
+                    {selectedUser ? (
+                      <div className="p-2.5 bg-emerald-50 border border-emerald-300 rounded-xl flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-8 h-8 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                            {selectedUser.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs font-black text-emerald-950 flex items-center gap-2 truncate">
+                              <span>{selectedUser.name}</span>
+                              <span className="text-[10px] px-1.5 py-0.5 bg-emerald-200/80 text-emerald-800 rounded font-semibold shrink-0">
+                                ✓ Synced Account
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-emerald-700 font-medium flex items-center gap-2 truncate">
+                              <span>✉️ {selectedUser.email}</span>
+                              {selectedUser.phone ? <span>• 📞 {selectedUser.phone}</span> : null}
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleClearSelectedUser}
+                          className="px-2.5 py-1 text-xs font-bold text-rose-600 hover:text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 rounded-lg transition-colors cursor-pointer shrink-0"
+                        >
+                          Change
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <div className="relative">
+                          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+                          <input
+                            type="text"
+                            value={userSearchQuery}
+                            onFocus={() => {
+                              setShowUserDropdown(true);
+                              if (!userSearchResults.length) handleSearchUsers("");
+                            }}
+                            onChange={(e) => {
+                              setUserSearchQuery(e.target.value);
+                              setShowUserDropdown(true);
+                              handleSearchUsers(e.target.value);
+                            }}
+                            placeholder="Search user by Name or Gmail ID (e.g. arshit@gmail.com)..."
+                            className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-8 py-2 text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-teal-500"
+                          />
+                          {userSearchQuery ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setUserSearchQuery("");
+                                handleSearchUsers("");
+                              }}
+                              className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
+                            >
+                              ✕
+                            </button>
+                          ) : null}
+                        </div>
+
+                        {showUserDropdown && (
+                          <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 max-h-56 overflow-y-auto divide-y divide-slate-100">
+                            {isSearchingUsers ? (
+                              <div className="p-3 text-center text-xs text-slate-400 font-medium">
+                                Searching users...
+                              </div>
+                            ) : userSearchResults.length > 0 ? (
+                              userSearchResults.map((u) => (
+                                <div
+                                  key={u.id}
+                                  onClick={() => handleSelectUser(u)}
+                                  className="p-2.5 hover:bg-teal-50/80 cursor-pointer transition-colors flex items-center justify-between gap-3 text-left"
+                                >
+                                  <div className="min-w-0">
+                                    <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5 truncate">
+                                      <User className="w-3 h-3 text-teal-600 shrink-0" />
+                                      <span>{u.name}</span>
+                                    </div>
+                                    <div className="text-[11px] text-slate-500 font-medium flex items-center gap-2 truncate mt-0.5">
+                                      <span className="text-teal-700 font-semibold">✉️ {u.email}</span>
+                                      {u.phone ? <span>• 📞 {u.phone}</span> : null}
+                                    </div>
+                                  </div>
+                                  <span className="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-1 rounded-lg shrink-0">
+                                    Select & Sync
+                                  </span>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="p-3 text-center text-xs text-slate-500">
+                                {userSearchQuery ? (
+                                  <span>No registered user found matching &quot;{userSearchQuery}&quot;. You can still enter details manually below.</span>
+                                ) : (
+                                  <span>Type a name or Gmail ID to search registered users...</span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div>
                       <label className="text-[11px] font-bold text-slate-500 block mb-1">Patient Name *</label>
                       <input
@@ -697,7 +945,7 @@ export function DoctorPrescriptionModal({
                         value={patientName}
                         onChange={(e) => setPatientName(e.target.value)}
                         placeholder="Full Name"
-                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-slate-800"
+                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-slate-800 focus:outline-none focus:border-teal-500"
                         required
                       />
                     </div>
@@ -708,7 +956,19 @@ export function DoctorPrescriptionModal({
                         value={patientPhone}
                         onChange={(e) => setPatientPhone(e.target.value)}
                         placeholder="+91 98765..."
-                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800"
+                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:border-teal-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-500 block mb-1">
+                        Gmail / Email <span className="text-[10px] text-teal-600 font-semibold">(Syncs to customer)</span>
+                      </label>
+                      <input
+                        type="email"
+                        value={patientEmail}
+                        onChange={(e) => setPatientEmail(e.target.value)}
+                        placeholder="patient@gmail.com"
+                        className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:border-teal-500"
                       />
                     </div>
                   </div>
@@ -868,34 +1128,53 @@ export function DoctorPrescriptionModal({
                 </div>
 
                 <div className="space-y-3">
+                  {/* Column Header for Desktop */}
+                  <div className="hidden lg:flex items-center gap-2 px-3 text-[11px] font-black uppercase tracking-wider text-slate-400">
+                    <div className="flex-1 min-w-[200px]">Medicine Name & Strength</div>
+                    <div className="w-28">Dosage</div>
+                    <div className="w-40">Frequency</div>
+                    <div className="w-28">Duration</div>
+                    <div className="w-36">Timing</div>
+                    <div className="w-12 text-center">Action</div>
+                  </div>
+
                   {medicines.map((med, idx) => (
                     <div
                       key={idx}
-                      className="p-3 bg-white border border-slate-200 rounded-xl grid grid-cols-1 sm:grid-cols-12 gap-2 text-xs items-center shadow-2xs"
+                      className="p-3 bg-white border border-slate-200 rounded-xl flex flex-wrap lg:flex-nowrap gap-2 text-xs items-center shadow-2xs"
                     >
-                      <div className="sm:col-span-4">
+                      <div className="flex-1 min-w-[200px] w-full lg:w-auto">
+                        <label className="block lg:hidden text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">
+                          Medicine Name & Strength
+                        </label>
                         <input
                           type="text"
                           value={med.name}
                           onChange={(e) => handleUpdateMedicine(idx, "name", e.target.value)}
-                          placeholder="Medicine name (e.g. Amoxicillin 500mg)"
-                          className="w-full border border-slate-200 rounded-lg px-2.5 py-1.5 font-bold text-slate-900"
+                          placeholder="e.g. Amoxicillin 500mg, Paracetamol"
+                          className="w-full border border-slate-200 rounded-lg px-2.5 py-2 font-bold text-slate-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
                         />
                       </div>
-                      <div className="sm:col-span-2">
+                      <div className="w-28 flex-1 sm:flex-none">
+                        <label className="block lg:hidden text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">
+                          Dosage
+                        </label>
                         <input
                           type="text"
                           value={med.dosage || ""}
                           onChange={(e) => handleUpdateMedicine(idx, "dosage", e.target.value)}
-                          placeholder="Dosage (1 Tab)"
-                          className="w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-800"
+                          placeholder="1 Tab / 5ml"
+                          className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
                         />
                       </div>
-                      <div className="sm:col-span-2">
+                      <div className="w-40 flex-1 sm:flex-none">
+                        <label className="block lg:hidden text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">
+                          Frequency
+                        </label>
                         <select
                           value={med.frequency || "1-0-1"}
                           onChange={(e) => handleUpdateMedicine(idx, "frequency", e.target.value)}
-                          className="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-slate-800 font-bold"
+                          className="w-full border border-slate-200 rounded-lg px-2 py-2 text-slate-800 font-bold bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none cursor-pointer"
                         >
                           <option value="1-0-1">1-0-1 (Morning-Night)</option>
                           <option value="1-1-1">1-1-1 (TDS)</option>
@@ -905,34 +1184,42 @@ export function DoctorPrescriptionModal({
                           <option value="Once daily">Once daily</option>
                         </select>
                       </div>
-                      <div className="sm:col-span-2">
+                      <div className="w-28 flex-1 sm:flex-none">
+                        <label className="block lg:hidden text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">
+                          Duration
+                        </label>
                         <input
                           type="text"
                           value={med.duration || ""}
                           onChange={(e) => handleUpdateMedicine(idx, "duration", e.target.value)}
-                          placeholder="Duration (5 days)"
-                          className="w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-800"
+                          placeholder="5 days"
+                          className="w-full border border-slate-200 rounded-lg px-2.5 py-2 text-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
                         />
                       </div>
-                      <div className="sm:col-span-1">
+                      <div className="w-36 flex-1 sm:flex-none">
+                        <label className="block lg:hidden text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">
+                          Timing
+                        </label>
                         <select
                           value={med.timing || "After food"}
                           onChange={(e) => handleUpdateMedicine(idx, "timing", e.target.value)}
-                          className="w-full border border-slate-200 rounded-lg px-1 py-1.5 text-[11px]"
+                          className="w-full border border-slate-200 rounded-lg px-2 py-2 text-xs text-slate-800 bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none cursor-pointer"
                         >
                           <option value="After food">After food</option>
                           <option value="Before food">Before food</option>
                           <option value="With food">With food</option>
                         </select>
                       </div>
-                      <div className="sm:col-span-1 text-right">
+                      <div className="flex items-center justify-end w-full lg:w-12 pt-1 lg:pt-0 shrink-0">
                         <button
                           type="button"
                           onClick={() => handleRemoveMedicine(idx)}
-                          disabled={medicines.length <= 1}
-                          className="p-1.5 text-rose-500 hover:text-rose-700 disabled:opacity-30 cursor-pointer"
+                          title="Delete / Clear Medicine Row"
+                          aria-label="Delete Medicine"
+                          className="h-9 px-3 lg:px-0 lg:w-9 flex items-center justify-center gap-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-all shadow-2xs cursor-pointer font-bold shrink-0"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4 text-rose-600 shrink-0" />
+                          <span className="lg:hidden text-xs text-rose-700 font-bold">Delete</span>
                         </button>
                       </div>
                     </div>

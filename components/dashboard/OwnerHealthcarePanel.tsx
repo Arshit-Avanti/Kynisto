@@ -64,6 +64,8 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
     open: boolean;
     patientName?: string;
     patientPhone?: string;
+    userId?: string;
+    patientEmail?: string;
     queueEntryId?: string;
     doctorName?: string;
     doctorId?: string;
@@ -341,6 +343,8 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
                         open: true,
                         patientName: String(entry.patientName ?? "Patient"),
                         patientPhone: String(entry.patientPhone ?? ""),
+                        userId: entry.userId ? String(entry.userId) : undefined,
+                        patientEmail: entry.patientEmail ? String(entry.patientEmail) : undefined,
                         queueEntryId: String(entry.id),
                         doctorName: String(entry.doctorName ?? ""),
                         doctorId: String(entry.doctorId ?? ""),
@@ -374,14 +378,14 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
                   <div className="flex flex-col gap-2">
                     <div><span className="healthcareBadge" style={{ background: '#fef08a', color: '#854d0e', border: '1px solid #fde047' }}>🟡 Draft Saved</span></div>
                     <div>
-                      <button onClick={() => setPrescriptionModal({ open: true, patientName: String(entry.patientName ?? "Patient"), patientPhone: String(entry.patientPhone ?? ""), queueEntryId: String(entry.id), doctorName: String(entry.doctorName ?? ""), doctorId: String(entry.doctorId ?? "") })} className="portalButtonSm">✏️ Continue Prescription →</button>
+                      <button onClick={() => setPrescriptionModal({ open: true, patientName: String(entry.patientName ?? "Patient"), patientPhone: String(entry.patientPhone ?? ""), userId: entry.userId ? String(entry.userId) : undefined, patientEmail: entry.patientEmail ? String(entry.patientEmail) : undefined, queueEntryId: String(entry.id), doctorName: String(entry.doctorName ?? ""), doctorId: String(entry.doctorId ?? "") })} className="portalButtonSm">✏️ Continue Prescription →</button>
                     </div>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2 p-3 bg-red-50 border border-red-200 rounded">
                     <div className="text-red-700 font-semibold">🔴 Prescription Not Issued</div>
                     <div>
-                      <button onClick={() => setPrescriptionModal({ open: true, patientName: String(entry.patientName ?? "Patient"), patientPhone: String(entry.patientPhone ?? ""), queueEntryId: String(entry.id), doctorName: String(entry.doctorName ?? ""), doctorId: String(entry.doctorId ?? ""), tokenNumber: entry.tokenNumber ? Number(entry.tokenNumber) : undefined })} className="portalButtonSm primary" style={{ background: '#10b981', color: 'white', padding: '8px 16px', fontSize: '14px' }}>Issue Prescription →</button>
+                      <button onClick={() => setPrescriptionModal({ open: true, patientName: String(entry.patientName ?? "Patient"), patientPhone: String(entry.patientPhone ?? ""), userId: entry.userId ? String(entry.userId) : undefined, patientEmail: entry.patientEmail ? String(entry.patientEmail) : undefined, queueEntryId: String(entry.id), doctorName: String(entry.doctorName ?? ""), doctorId: String(entry.doctorId ?? ""), tokenNumber: entry.tokenNumber ? Number(entry.tokenNumber) : undefined })} className="portalButtonSm primary" style={{ background: '#10b981', color: 'white', padding: '8px 16px', fontSize: '14px' }}>Issue Prescription →</button>
                     </div>
                   </div>
                 )
@@ -639,6 +643,8 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
                 open: true,
                 patientName: String(currentlyActive.patientName ?? "Patient"),
                 patientPhone: String(currentlyActive.patientPhone ?? ""),
+                userId: currentlyActive.userId ? String(currentlyActive.userId) : undefined,
+                patientEmail: currentlyActive.patientEmail ? String(currentlyActive.patientEmail) : undefined,
                 queueEntryId: String(currentlyActive.id),
               })
             }
@@ -896,6 +902,8 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
         }}
         initialPatientName={prescriptionModal.patientName}
         initialPatientPhone={prescriptionModal.patientPhone}
+        initialUserId={prescriptionModal.userId}
+        initialPatientEmail={prescriptionModal.patientEmail}
         queueEntryId={prescriptionModal.queueEntryId}
         doctors={data.doctors}
         reissueTarget={prescriptionModal.reissueTarget}

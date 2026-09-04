@@ -21,6 +21,30 @@ export async function GET(request: Request) {
     }
 
     const db = getD1();
+
+    // 0. Search Registered Users (for linking prescription to customer account)
+    if (url.searchParams.get("searchUsers") === "1" || url.searchParams.has("userQuery")) {
+      const query = (url.searchParams.get("query") || url.searchParams.get("userQuery") || "").trim().toLowerCase();
+      let sql = "SELECT id, name, email, phone FROM users WHERE status = 'active'";
+      const params: any[] = [];
+      if (query) {
+        sql += " AND (LOWER(name) LIKE ? OR LOWER(email) LIKE ? OR (phone IS NOT NULL AND phone LIKE ?))";
+        const like = `%${query}%`;
+        params.push(like, like, like);
+      }
+      sql += " ORDER BY name ASC LIMIT 30";
+      const usersList = await db.prepare(sql).bind(...params).all<any>();
+      return noStoreJson({
+        ok: true,
+        users: (usersList.results || []).map((u) => ({
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          phone: u.phone || "",
+        })),
+      });
+    }
+
     const search = url.searchParams.get("search")?.trim().toLowerCase() || "";
     const detailPatientPhone = url.searchParams.get("phone")?.trim();
     const detailPatientName = url.searchParams.get("name")?.trim();

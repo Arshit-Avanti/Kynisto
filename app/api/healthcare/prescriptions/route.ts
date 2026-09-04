@@ -204,10 +204,17 @@ export async function POST(request: Request) {
     const queueEntryId = cleanText(body.queueEntryId, "Queue Entry", { max: 80, required: false }) || null;
     const appointmentId = cleanText(body.appointmentId, "Appointment", { max: 80, required: false }) || null;
 
+    const patientEmail = cleanText(body.patientEmail, "Patient Email", { max: 120, required: false }) || null;
+
     if (queueEntryId && (!userId || !patientPhone)) {
       const qEntry = await db.prepare("SELECT user_id, patient_phone FROM healthcare_queue_entries WHERE id = ?").bind(queueEntryId).first<any>();
       if (!userId && qEntry?.user_id) userId = qEntry.user_id;
       if (!patientPhone && qEntry?.patient_phone) patientPhone = qEntry.patient_phone;
+    }
+
+    if (!userId && patientEmail) {
+      const matchedUser = await db.prepare("SELECT id FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1").bind(patientEmail).first<{ id: string }>();
+      if (matchedUser?.id) userId = matchedUser.id;
     }
 
     if (!userId && patientPhone) {

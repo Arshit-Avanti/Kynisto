@@ -43,6 +43,8 @@ export async function healthcareQueueDashboard(storeId: string, options: { inclu
       doc.name AS doctorName,
       COALESCE(e.patient_name, e.emergency_patient_name, u.name) AS patientName,
       COALESCE(e.contact_details, e.emergency_patient_phone, u.phone) AS patientPhone,
+      e.user_id AS userId,
+      u.email AS patientEmail,
       p.id AS prescriptionId,
       p.prescription_number AS prescriptionNumber,
       p.status AS prescriptionStatus,
