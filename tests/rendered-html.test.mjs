@@ -96,18 +96,26 @@ test("allows administrators to use owner and customer capabilities, including li
 });
 
 test("publishes SEO discovery endpoints and structured local business data", async () => {
-  const [layout, profile, robots, sitemap] = await Promise.all([
+  const [layout, profile, robots, sitemap, worker, publicRobots] = await Promise.all([
     readFile(new URL("app/layout.tsx", root), "utf8"),
     readFile(new URL("app/stores/[slug]/page.tsx", root), "utf8"),
     readFile(new URL("app/robots.txt/route.ts", root), "utf8"),
     readFile(new URL("app/sitemap.xml/route.ts", root), "utf8"),
+    readFile(new URL("worker/index.ts", root), "utf8"),
+    readFile(new URL("public/robots.txt", root), "utf8"),
   ]);
   assert.match(layout, /openGraph/);
   assert.match(layout, /summary_large_image/);
+  assert.doesNotMatch(layout, /search_term_string/);
   assert.match(profile, /LocalBusiness/);
   assert.match(profile, /AggregateRating/);
   assert.match(robots, /Sitemap/);
+  assert.doesNotMatch(robots, /search_term_string/);
+  assert.doesNotMatch(robots, /Disallow: \/\*\?\*q=\*/);
+  assert.doesNotMatch(publicRobots, /search_term_string/);
   assert.match(sitemap, /sitemaps\.org\/schemas\/sitemap/);
+  assert.match(worker, /search_term_string/);
+  assert.match(worker, /Response\.redirect\("https:\/\/kynisto\.in\/", 301\)/);
 });
 
 test("ships participant-scoped real-time chat and the admin chat center", async () => {

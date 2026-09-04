@@ -66,6 +66,25 @@ const worker = {
       return Response.redirect(`https://${canonicalHost}${url.pathname}${url.search}`, 301);
     }
 
+    // Handle legacy schema.org templated search URLs (e.g. /?q={search_term_string})
+    if (
+      url.search.includes("{search_term_string}") ||
+      url.search.includes("%7Bsearch_term_string%7D") ||
+      url.search.includes("%7bsearch_term_string%7d") ||
+      url.pathname.includes("{search_term_string}") ||
+      url.pathname.includes("%7Bsearch_term_string%7D")
+    ) {
+      return Response.redirect("https://kynisto.in/", 301);
+    }
+
+    if (url.pathname === "/" && url.searchParams.has("q")) {
+      const q = url.searchParams.get("q")?.trim();
+      if (q && !q.includes("{search_term_string}")) {
+        return Response.redirect(`https://kynisto.in/search?q=${encodeURIComponent(q)}`, 301);
+      }
+      return Response.redirect("https://kynisto.in/", 301);
+    }
+
     if (url.pathname === "/robots.txt") {
       const origin = "https://kynisto.in";
       return new Response(
