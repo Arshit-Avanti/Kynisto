@@ -438,7 +438,8 @@ export default function LiveQueueTracker() {
     const scheduleNext = () => {
       if (isDisposed) return;
       const isHidden = typeof document !== 'undefined' && document.hidden;
-      const delay = isHidden ? 20000 : Math.floor(4500 + Math.random() * 1000);
+      const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || ('ontouchstart' in window));
+      const delay = isHidden ? 25000 : isMobile ? Math.floor(9500 + Math.random() * 2000) : Math.floor(4500 + Math.random() * 1000);
       timer = setTimeout(() => {
         if (isDisposed) return;
         fetchHealthcareQueues();
@@ -1115,16 +1116,14 @@ export default function LiveQueueTracker() {
               className={`py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
                 hasLiveQueue
                   ? "shrink-0 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80"
-                  : canBook
-                    ? "flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80"
-                    : "w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white border-none shadow-sm hover:shadow"
+                  : "flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80"
               }`}
             >
-              <Building2 className={`w-3.5 h-3.5 shrink-0 ${!hasLiveQueue && !canBook ? "text-white" : "text-emerald-600"}`} />
+              <Building2 className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
               <span>Profile</span>
             </Link>
 
-            {canBook && (
+            {canBook ? (
               <button
                 type="button"
                 className={`py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
@@ -1136,6 +1135,18 @@ export default function LiveQueueTracker() {
               >
                 <Calendar className={`w-3.5 h-3.5 shrink-0 ${!hasLiveQueue ? "text-white" : "text-teal-600"}`} />
                 <span>Book Appt</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className={`py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-xl transition-all flex items-center justify-center space-x-1.5 opacity-60 cursor-not-allowed text-slate-400 border border-slate-200 bg-slate-50 ${
+                  hasLiveQueue ? "shrink-0" : "flex-1"
+                }`}
+                title="Appointments not available at this clinic"
+              >
+                <Calendar className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                <span>No Appts</span>
               </button>
             )}
 
@@ -1544,78 +1555,80 @@ export default function LiveQueueTracker() {
       />
 
       {/* Customer Healthcare Hub Navigation */}
-      <div className="relative z-20 pt-20 sm:pt-24 px-4 sm:px-6">
+      <div className="relative z-20 pt-20 sm:pt-24 px-3 sm:px-6 mb-6 sm:mb-8">
         <div className="max-w-6xl mx-auto flex items-center justify-center">
-          <div className="inline-flex items-center gap-1 sm:gap-2 p-1.5 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-md">
-            <button
-              type="button"
-              onClick={() => {
-                setCustomerNav('find');
-                if (view === 'ticket' && (!selectedQueue || entryStatus === 'completed' || isCancelled)) {
+          <div className="w-full sm:w-auto overflow-x-auto no-scrollbar py-1 px-1 flex justify-start sm:justify-center">
+            <div className="inline-flex items-center gap-1 sm:gap-2 p-1 sm:p-1.5 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-md shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setCustomerNav('find');
+                  if (view === 'ticket' && (!selectedQueue || entryStatus === 'completed' || isCancelled)) {
+                    setView('list');
+                  }
+                }}
+                className={`shrink-0 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  customerNav === 'find' && view === 'list'
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
+                    : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <Stethoscope className="w-4 h-4 shrink-0" />
+                <span>Find Clinic<span className="hidden sm:inline">/Doctor</span></span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (selectedQueue && !isCancelled && !liveCompleted && entryStatus !== 'completed' && myTokenNumber > 0) {
+                    setView('ticket');
+                  } else {
+                    setView('list');
+                  }
+                  setCustomerNav('queue');
+                }}
+                className={`shrink-0 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  (customerNav === 'queue' || view === 'ticket') && customerNav !== 'prescriptions'
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
+                    : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <Clock className="w-4 h-4 shrink-0" />
+                <span>Live Queue</span>
+                {selectedQueue && !isCancelled && !liveCompleted && entryStatus !== 'completed' && myTokenNumber > 0 && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setCustomerNav('appointments')}
+                className={`shrink-0 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  customerNav === 'appointments' && view === 'list'
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
+                    : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <Calendar className="w-4 h-4 shrink-0" />
+                <span>Appointments</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
                   setView('list');
-                }
-              }}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                customerNav === 'find' && view === 'list'
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
-                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
-              }`}
-            >
-              <Stethoscope className="w-4 h-4" />
-              <span>Find Clinic/Doctor</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                if (selectedQueue && !isCancelled && !liveCompleted && entryStatus !== 'completed' && myTokenNumber > 0) {
-                  setView('ticket');
-                } else {
-                  setView('list');
-                }
-                setCustomerNav('queue');
-              }}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                (customerNav === 'queue' || view === 'ticket') && customerNav !== 'prescriptions'
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
-                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
-              }`}
-            >
-              <Clock className="w-4 h-4" />
-              <span>Live Queue</span>
-              {selectedQueue && !isCancelled && !liveCompleted && entryStatus !== 'completed' && myTokenNumber > 0 && (
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setCustomerNav('appointments')}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                customerNav === 'appointments' && view === 'list'
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
-                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
-              }`}
-            >
-              <Calendar className="w-4 h-4" />
-              <span>Appointments</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setView('list');
-                setCustomerNav('prescriptions');
-              }}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                customerNav === 'prescriptions'
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
-                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
-              }`}
-            >
-              <FileText className="w-4 h-4" />
-              <span>My Prescription</span>
-            </button>
+                  setCustomerNav('prescriptions');
+                }}
+                className={`shrink-0 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  customerNav === 'prescriptions'
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
+                    : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <FileText className="w-4 h-4 shrink-0" />
+                <span><span className="hidden sm:inline">My </span>Prescriptions</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

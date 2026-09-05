@@ -8,6 +8,10 @@ export function ShaderCanvas() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    // Skip heavy WebGL loops on mobile/touch devices to maintain 60-120fps scrolling
+    const isMobile = typeof window !== "undefined" && (window.innerWidth < 1024 || "ontouchstart" in window || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0));
+    if (isMobile) return;
     
     // Zero-lag rendering: use WebGL
     const gl = canvas.getContext("webgl", { alpha: true, antialias: false });

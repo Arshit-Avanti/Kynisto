@@ -47,7 +47,8 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
 
   useEffect(() => {
     const onScroll = () => {
-      setScrolled(window.scrollY > 15);
+      const isPast = window.scrollY > 15;
+      setScrolled((prev) => (prev !== isPast ? isPast : prev));
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -105,58 +106,87 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 pt-[calc(env(safe-area-inset-top,0px)+12px)] sm:pt-4 px-3 sm:px-6 pointer-events-none">
       <div
-        className={`max-w-6xl mx-auto rounded-full transition-all duration-300 pointer-events-auto border flex items-center justify-between px-3 sm:px-6 py-1.5 sm:py-2.5 shadow-lg ${
+        className={`max-w-6xl mx-auto rounded-full transition-all duration-300 pointer-events-auto border flex items-center justify-between px-3 sm:px-6 py-1.5 sm:py-2.5 ${
           scrolled
-            ? "bg-white/95 backdrop-blur-md border-slate-300/80 shadow-slate-200/50"
-            : "bg-white/90 backdrop-blur-md border-slate-200/80 shadow-slate-100/50"
+            ? "bg-white/95 backdrop-blur-md border-slate-300/80 shadow-lg shadow-slate-200/50"
+            : "bg-transparent border-transparent shadow-none"
         }`}
       >
         {/* Brand Logo - Responsive for Mobile & Desktop */}
         <Link href="/" className="inline-flex items-center gap-1.5 shrink-0" onClick={() => setMobileMenuOpen(false)}>
           <div className="block sm:hidden">
-            <KynistoLogo showTagline={false} variant="dark" size="sm" />
+            <KynistoLogo showTagline={false} variant={scrolled ? "dark" : "light"} size="sm" />
           </div>
           <div className="hidden sm:block">
-            <KynistoLogo showTagline variant="dark" size="sm" />
+            <KynistoLogo showTagline variant={scrolled ? "dark" : "light"} size="sm" />
           </div>
         </Link>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-1.5 lg:gap-3 text-sm font-semibold text-slate-700 mx-2" aria-label="Main Navigation">
+        <nav
+          className={`hidden md:flex items-center gap-1.5 lg:gap-3 text-sm font-semibold mx-2 ${
+            scrolled ? "text-slate-700" : "text-white"
+          }`}
+          aria-label="Main Navigation"
+        >
           <Link
             href="/services"
-            className="px-3 py-1.5 rounded-full hover:bg-orange-500/10 hover:text-orange-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap"
+            className={`px-3 py-1.5 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap ${
+              scrolled
+                ? "hover:bg-orange-500/10 hover:text-orange-600"
+                : "text-white hover:bg-white/20 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)] font-bold"
+            }`}
           >
             Services
           </Link>
           <Link
             href="/healthcare"
-            className="px-3 py-1.5 rounded-full hover:bg-emerald-500/10 hover:text-emerald-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5 whitespace-nowrap"
+            className={`px-3 py-1.5 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5 whitespace-nowrap ${
+              scrolled
+                ? "hover:bg-emerald-500/10 hover:text-emerald-600"
+                : "text-white hover:bg-white/20 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)] font-bold"
+            }`}
           >
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span>Healthcare</span>
           </Link>
           <Link
             href="/blog"
-            className="px-3 py-1.5 rounded-full hover:bg-orange-500/10 hover:text-orange-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap"
+            className={`px-3 py-1.5 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap ${
+              scrolled
+                ? "hover:bg-orange-500/10 hover:text-orange-600"
+                : "text-white hover:bg-white/20 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)] font-bold"
+            }`}
           >
             Guides &amp; Blog
           </Link>
           <Link
             href={dashboardHref}
-            className="px-3 py-1.5 rounded-full hover:bg-orange-500/10 hover:text-orange-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap"
+            className={`px-3 py-1.5 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap ${
+              scrolled
+                ? "hover:bg-orange-500/10 hover:text-orange-600"
+                : "text-white hover:bg-white/20 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)] font-bold"
+            }`}
           >
             Dashboard
           </Link>
           <Link
             href="/wallet"
-            className="px-3 py-1.5 rounded-full hover:bg-orange-500/10 hover:text-orange-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap"
+            className={`px-3 py-1.5 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap ${
+              scrolled
+                ? "hover:bg-orange-500/10 hover:text-orange-600"
+                : "text-white hover:bg-white/20 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)] font-bold"
+            }`}
           >
             Wallet
           </Link>
           <Link
             href="/pricing"
-            className="px-3 py-1.5 rounded-full hover:bg-orange-500/10 hover:text-orange-600 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap"
+            className={`px-3 py-1.5 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap ${
+              scrolled
+                ? "hover:bg-orange-500/10 hover:text-orange-600"
+                : "text-white hover:bg-white/20 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)] font-bold"
+            }`}
           >
             Pricing
           </Link>
@@ -165,14 +195,20 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
         {/* Right CTA / User Greeting Pill & Mobile 3-Dash Menu */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {user ? (
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 hover:border-slate-300 text-xs font-semibold text-slate-800 shrink-0 whitespace-nowrap transition-all hover:shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div
+              className={`hidden sm:flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold shrink-0 whitespace-nowrap transition-all hover:shadow-sm ${
+                scrolled
+                  ? "bg-slate-100 border border-slate-200 hover:border-slate-300 text-slate-800"
+                  : "bg-black/35 backdrop-blur-md border border-white/25 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]"
+              }`}
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>Welcome, {firstName}</span>
               <button
                 type="button"
                 onClick={() => void handleLogout()}
                 disabled={isLoggingOut}
-                className="text-slate-400 hover:text-rose-500 ml-1 transition-colors text-xs font-bold cursor-pointer"
+                className="text-slate-400 hover:text-rose-400 ml-1 transition-colors text-xs font-bold cursor-pointer"
                 title="Sign out"
               >
                 {isLoggingOut ? "..." : "✕"}
@@ -181,7 +217,11 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
           ) : (
             <Link
               href="/login"
-              className="hidden sm:inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-slate-950 hover:bg-slate-900 text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all whitespace-nowrap"
+              className={`hidden sm:inline-flex items-center justify-center px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all whitespace-nowrap ${
+                scrolled
+                  ? "bg-slate-950 hover:bg-slate-900 text-white"
+                  : "bg-white hover:bg-slate-100 text-slate-900 font-extrabold"
+              }`}
             >
               Sign In
             </Link>
@@ -191,7 +231,11 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
           {user && (
             <Link
               href={dashboardHref}
-              className="sm:hidden p-1.5 rounded-full bg-orange-100 text-orange-700 border border-orange-200 flex items-center justify-center text-xs font-bold shrink-0"
+              className={`sm:hidden p-1.5 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                scrolled
+                  ? "bg-orange-100 text-orange-700 border border-orange-200"
+                  : "bg-black/40 text-white border border-white/20"
+              }`}
               title={`Account: ${user.name}`}
             >
               <User className="w-4 h-4" />
@@ -206,7 +250,9 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
               className={`w-9 h-9 rounded-full transition-all duration-200 flex items-center justify-center shadow-md active:scale-90 focus:outline-none focus:ring-2 focus:ring-orange-500/40 ${
                 mobileMenuOpen
                   ? "bg-orange-500 text-white shadow-orange-500/30"
-                  : "bg-slate-900 text-white hover:bg-slate-800"
+                  : scrolled
+                  ? "bg-slate-900 text-white hover:bg-slate-800"
+                  : "bg-black/40 backdrop-blur-md border border-white/20 text-white hover:bg-black/60"
               }`}
               aria-label="Open Kynisto navigation menu"
               aria-expanded={mobileMenuOpen}

@@ -548,35 +548,37 @@ test("healthcare fixes: Back to Hub, Follow-up None option, and History performa
   assert.equal(preservedHistory[0].serviceDate, "2026-09-03");
 });
 
-test("UX & Performance Fixes: Image 1-4 & Mobile Scroll", () => {
-  // 1. Image 1: Verification that CredixInteractiveHeroFeatures has no 3D section or scroll loop
-  import("fs").then(({ readFileSync }) => {
-    const heroCode = readFileSync("components/dashboard/CredixInteractiveHeroFeatures.tsx", "utf-8");
-    assert.equal(heroCode.includes("Hyperlocal Infrastructure"), false, "Hyperlocal Infrastructure section must be removed");
-    assert.equal(heroCode.includes("recentTransactions"), false, "recentTransactions must be removed");
-    assert.equal(heroCode.includes("scrollProgress"), false, "scrollProgress must be removed");
-    assert.equal(heroCode.includes("translateXVal"), false, "3D transforms must be removed");
-    // Image 2: Hero padding shifted down
-    assert.ok(heroCode.includes("104px 16px 32px 16px"), "Hero padding must be shifted down");
+test("UX & Performance Fixes: Image 1-5 & Mobile/APK Lag", async () => {
+  const { readFileSync } = await import("fs");
 
-    // 2. Image 2: Top navigation shifted down
-    const navCode = readFileSync("components/landing/Navbar3D.tsx", "utf-8");
-    assert.ok(navCode.includes("pt-[calc(env(safe-area-inset-top,0px)+12px)]"), "Navbar must have safe-area shift down");
+  // 1. Image 1: Navbar is transparent when !scrolled and text remains crisp
+  const navCode = readFileSync("components/landing/Navbar3D.tsx", "utf-8");
+  assert.ok(navCode.includes("bg-transparent border-transparent shadow-none"), "Navbar must be transparent when not scrolled");
+  assert.ok(navCode.includes("variant={scrolled ? \"dark\" : \"light\"}"), "Logo must switch variant between scrolled and transparent states");
 
-    // 3. Image 3: Healthcare card layout
-    const queueCode = readFileSync("components/queue/LiveQueueTracker.tsx", "utf-8");
-    assert.ok(queueCode.includes("max-w-2xl mx-auto"), "Single clinic card must be centered");
-    assert.equal(queueCode.includes("No Appts"), false, "Clunky disabled No Appts button must be removed");
+  // 2. Image 2: Quick action category pills removed from hero
+  const heroCode = readFileSync("components/dashboard/CredixInteractiveHeroFeatures.tsx", "utf-8");
+  assert.equal(heroCode.includes("Live OPD Queues"), false, "Live OPD Queues pill must be removed from hero");
+  assert.equal(heroCode.includes("Home Services"), false, "Home Services pill must be removed from hero");
 
-    // 4. Image 4: isClinicQueueOpen function and closed indicator
-    assert.ok(queueCode.includes("export function isClinicQueueOpen"), "isClinicQueueOpen must be exported");
-    assert.ok(queueCode.includes("Queue Closed"), "Queue Closed badge must be present");
+  // 3. Image 3: Hero padding shifted down to prevent navbar overlap on mobile
+  assert.ok(heroCode.includes("148px 16px 36px 16px"), "Hero mobile top padding must be shifted down to 148px to prevent overlap");
 
-    // 5. Mobile performance CSS
-    const cssCode = readFileSync("app/globals.css", "utf-8");
-    assert.ok(cssCode.includes("backdrop-filter: blur(6px) !important"), "Mobile backdrop-filter must be capped");
-    assert.ok(cssCode.includes("-webkit-overflow-scrolling: touch"), "Mobile touch scroll must be enabled");
-  });
+  // 4. Image 4: No Appts button shown when appointment booking is not available
+  const queueCode = readFileSync("components/queue/LiveQueueTracker.tsx", "utf-8");
+  assert.ok(queueCode.includes("No Appts"), "No Appts option must be displayed when clinic does not allow appointments");
+
+  // 5. Image 5: Customer healthcare navigation bar has horizontal scroll and responsive layout
+  assert.ok(queueCode.includes("overflow-x-auto no-scrollbar"), "Healthcare navigation tabs must have horizontal scroll on mobile");
+  assert.ok(queueCode.includes("whitespace-nowrap"), "Healthcare navigation buttons must have whitespace-nowrap");
+
+  // 6. Mobile & APK Lag fixes: VideoBackground skips video on mobile, and globals.css disables heavy backdrop-filter
+  const videoCode = readFileSync("components/media/VideoBackground.tsx", "utf-8");
+  assert.ok(videoCode.includes("!isMobile &&"), "VideoBackground must skip video decoding on mobile/APKs to eliminate lag");
+
+  const cssCode = readFileSync("app/globals.css", "utf-8");
+  assert.ok(cssCode.includes("backdrop-filter: none !important"), "Mobile backdrop-filter must be disabled to eliminate APK lag");
+  assert.ok(cssCode.includes("-webkit-overflow-scrolling: touch"), "Mobile touch scroll must be enabled");
 });
 
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, ArrowRight } from "lucide-react";
 
@@ -44,7 +43,7 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
         id="top"
         style={{
           textAlign: "center",
-          padding: isDesktop ? "88px 16px 36px 16px" : "104px 16px 32px 16px",
+          padding: isDesktop ? "88px 16px 36px 16px" : "148px 16px 36px 16px",
           minHeight: isDesktop ? "calc(100vh - 100px)" : "auto",
           display: "flex",
           flexDirection: "column",
@@ -119,35 +118,6 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
               <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-white stroke-[2.5]" />
             </button>
           </form>
-
-          {/* Quick Interactive Category Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mt-3 sm:mt-4 max-w-xl mx-auto px-1">
-            <Link
-              href="/healthcare"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-950/70 hover:bg-slate-900/90 border border-white/20 hover:border-emerald-400/60 backdrop-blur-xl text-white text-[11px] sm:text-xs font-bold shadow-lg active:scale-95 transition-all hover:scale-105"
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Live OPD Queues</span>
-            </Link>
-            <Link
-              href="/services"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-950/70 hover:bg-slate-900/90 border border-white/20 hover:border-orange-400/60 backdrop-blur-xl text-white text-[11px] sm:text-xs font-bold shadow-lg active:scale-95 transition-all hover:scale-105"
-            >
-              <span>⚡ Home Services</span>
-            </Link>
-            <Link
-              href="/products"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-950/70 hover:bg-slate-900/90 border border-white/20 hover:border-sky-400/60 backdrop-blur-xl text-white text-[11px] sm:text-xs font-bold shadow-lg active:scale-95 transition-all hover:scale-105"
-            >
-              <span>🛍️ Local Stores</span>
-            </Link>
-            <Link
-              href="/blog"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-950/70 hover:bg-slate-900/90 border border-white/20 hover:border-amber-400/60 backdrop-blur-xl text-white text-[11px] sm:text-xs font-bold shadow-lg active:scale-95 transition-all hover:scale-105"
-            >
-              <span>📖 Guides &amp; Blog</span>
-            </Link>
-          </div>
         </div>
       </section>
     </div>

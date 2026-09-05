@@ -50,6 +50,30 @@ body {
   text-size-adjust: 100%;
 }
 
+/* High-Performance Mobile & APK (Android WebView) Optimizations */
+@media (max-width: 768px), (pointer: coarse) {
+  html {
+    scroll-behavior: auto !important; /* Disables janky software scroll interpolation on touch devices */
+  }
+
+  body {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: none;
+  }
+
+  /* Disable expensive backdrop-filter compositing in mobile webviews / APKs */
+  .backdrop-blur-sm,
+  .backdrop-blur,
+  .backdrop-blur-md,
+  .backdrop-blur-lg,
+  .backdrop-blur-xl,
+  .backdrop-blur-2xl,
+  .backdrop-blur-3xl {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
 img,
 video,
 canvas,
