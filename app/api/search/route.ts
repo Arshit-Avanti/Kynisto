@@ -200,13 +200,19 @@ export async function GET(request: Request) {
       ORDER BY s.rating_average DESC, s.view_count DESC LIMIT 20
     `;
 
-    // EXECUTE ALL QUERIES CONCURRENTLY
-    const [healthcareRes, storesRes, servicesRes, productsRes, recommendedRes] = await Promise.all([
-      db.prepare(healthcareQuery).bind(...healthcareBindings).all<any>().catch(() => ({ results: [] })),
-      db.prepare(storesQuery).bind(...storesBindings).all<any>().catch(() => ({ results: [] })),
-      db.prepare(servicesQuery).bind(...servicesBindings).all<any>().catch(() => ({ results: [] })),
-      db.prepare(productsQuery).bind(...productsBindings).all<any>().catch(() => ({ results: [] })),
-      db.prepare(recommendedQuery).all<any>().catch(() => ({ results: [] })),
+    // BATCH ALL QUERIES IN A SINGLE ROUND-TRIP TO ELIMINATE N+1 LATENCY
+    const [healthcareRes, storesRes, servicesRes, productsRes, recommendedRes] = await db.batch<any>([
+      db.prepare(healthcareQuery).bind(...healthcareBindings),
+      db.prepare(storesQuery).bind(...storesBindings),
+      db.prepare(servicesQuery).bind(...servicesBindings),
+      db.prepare(productsQuery).bind(...productsBindings),
+      db.prepare(recommendedQuery),
+    ]).catch(() => [
+      { results: [] },
+      { results: [] },
+      { results: [] },
+      { results: [] },
+      { results: [] },
     ]);
 
     // Format & Calculate Distances

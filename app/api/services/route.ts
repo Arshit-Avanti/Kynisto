@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getD1 } from "@/db/runtime";
 import { apiError, noStoreJson } from "@/lib/security";
+import { microCacheJson } from "@/lib/micro-cache";
 
 export async function GET(request: NextRequest) {
   try {
@@ -71,13 +72,9 @@ export async function GET(request: NextRequest) {
       city: string;
     }>();
 
-    return NextResponse.json(
+    return microCacheJson(
       { ok: true, items: items.results || [] },
-      {
-        headers: {
-          "Cache-Control": "public, max-age=15, s-maxage=60, stale-while-revalidate=300",
-        },
-      }
+      "public, max-age=15, s-maxage=60, stale-while-revalidate=300"
     );
   } catch (error) {
     return apiError(error);
