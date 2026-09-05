@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    KYNISTO CLEAN MINIMALIST LIGHT DESIGN SYSTEM WITH 3D WAVE TERRAIN
    ========================================================================== */
 
@@ -23,7 +23,7 @@
   background-color: var(--kyn-bg-page);
   color: var(--kyn-text-main);
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  overflow-x: hidden;
+  overflow-x: clip;
   letter-spacing: -0.01em;
 }
 

@@ -1543,7 +1543,7 @@ export default function LiveQueueTracker() {
 
   return (
     <>
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900 flex flex-col font-sans relative overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900 flex flex-col font-sans relative">
       <Navbar3D />
 
       <div

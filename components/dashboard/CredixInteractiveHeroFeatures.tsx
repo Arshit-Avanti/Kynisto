@@ -36,7 +36,7 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
   };
 
   return (
-    <div className="w-full relative overflow-hidden max-w-[100vw]">
+    <div className="w-full relative max-w-full">
       {/* 1. HERO SECTION (Perfect Horizontal & Vertical Viewport Centering) */}
       <section
         className="hero"

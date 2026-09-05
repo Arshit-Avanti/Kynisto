@@ -579,6 +579,8 @@ test("UX & Performance Fixes: Image 1-5 & Mobile/APK Lag", async () => {
   const cssCode = readFileSync("app/globals.css", "utf-8");
   assert.ok(cssCode.includes("backdrop-filter: none !important"), "Mobile backdrop-filter must be disabled to eliminate APK lag");
   assert.ok(cssCode.includes("-webkit-overflow-scrolling: touch"), "Mobile touch scroll must be enabled");
+  assert.ok(cssCode.includes("touch-action: pan-y pinch-zoom"), "Vertical touch-action pan-y must be enabled on mobile for smooth scrolling");
+  assert.ok(cssCode.includes("overflow-x: clip"), "overflow-x: clip must be used to prevent breaking mobile scroll containers");
 });
 
 

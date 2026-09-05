@@ -1947,7 +1947,7 @@ export default function Home() {
   };
 
   return (
-    <main className={`site theme-${accent} density-${density} mode-${themeMode} pb-0 min-h-screen overflow-x-hidden`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
+    <main className={`site theme-${accent} density-${density} mode-${themeMode} pb-0 min-h-screen`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
       <VideoBackground videoSrc="/videos/hero-flow.mp4" mobileVideoSrc="/videos/hero-flow.mp4" />
       <SubscriptionExpiryBanner />
       <WelcomeRewardModal userRole={userRole} userId={userId} />
