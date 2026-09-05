@@ -88,7 +88,7 @@ export default function RootLayout({
             __html: `(function(){try{if(window.location.hostname.endsWith(".workers.dev")){window.location.replace("https://kynisto.in"+window.location.pathname+window.location.search+window.location.hash);}}catch(e){}})();`,
           }}
         />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd).replace(/</g, "\\u003c") }} />
         <SupabaseAuthManager />
         <AppReturnBanner />
         <AdSenseManager />

@@ -30,9 +30,11 @@ export async function GET(request: Request) {
         results: result.pagination.total,
       }).catch((error) => console.warn("Analytics error:", error));
     }
-    return Response.json(result, {
-      headers: { "Cache-Control": "public, max-age=30, s-maxage=120, stale-while-revalidate=600" },
-    });
+    // Set Cache-Control header via microCacheJson
+    return microCacheJson(
+      result,
+      "public, max-age=30, s-maxage=120, stale-while-revalidate=600"
+    );
   } catch (error) {
     return apiError(error);
   }

@@ -44,7 +44,7 @@ export default function GuidePage() {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased selection:bg-orange-500 selection:text-white">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(guideJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(guideJsonLd).replace(/</g, "\\u003c") }}
       />
       <Navbar3D />
 
