@@ -30,23 +30,33 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// ⚡ Low-network timeout helper for seamless offline & low-bandwidth connectivity
-function fetchWithTimeout(request, timeoutMs = 2500) {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error("Network timeout")), timeoutMs);
-    fetch(request)
-      .then((res) => {
-        clearTimeout(timer);
-        resolve(res);
-      })
-      .catch((err) => {
-        clearTimeout(timer);
-        reject(err);
-      });
-  });
-}
+const OFFLINE_FALLBACK_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kynisto - Connection</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8fafc; color: #0f172a; margin: 0; padding: 24px; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 36px 28px; max-width: 400px; text-align: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
+    .icon { width: 56px; height: 56px; margin: 0 auto 16px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    h1 { font-size: 20px; font-weight: 800; margin: 0 0 8px; color: #0f172a; }
+    p { font-size: 14px; color: #64748b; margin: 0 0 24px; line-height: 1.5; }
+    button { background: #0284c7; color: #ffffff; border: none; padding: 12px 28px; border-radius: 9999px; font-weight: 700; font-size: 14px; cursor: pointer; transition: background 0.2s; }
+    button:hover { background: #0369a1; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">⚡</div>
+    <h1>Reconnecting to Kynisto</h1>
+    <p>Please check your internet connection or tap below to reload.</p>
+    <button onclick="window.location.reload()">Retry Connection</button>
+  </div>
+</body>
+</html>`;
 
-// ⚡ Ultra-Fast Fetch Interceptor (Cache-First for Static Assets, SWR for Read APIs)
+// ⚡ Ultra-Fast Fetch Interceptor (Cache-First for Static Assets, SWR for Read APIs, Network-First with Safe Fallback for Navigations)
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET") return;
@@ -54,7 +64,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // 1. Static Assets (JS, CSS, Fonts, Images) -> Cache-First (< 5ms response)
+  // 1. Static Assets (JS, CSS, Fonts, Images) -> Cache-First
   if (
     url.pathname.startsWith("/assets/") ||
     url.pathname.startsWith("/_next/") ||
@@ -64,19 +74,21 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       caches.match(request).then((cached) => {
         if (cached) return cached;
-        return fetch(request).then((response) => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          }
-          return response;
-        });
+        return fetch(request)
+          .then((response) => {
+            if (response && response.ok) {
+              const clone = response.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone)).catch(() => {});
+            }
+            return response;
+          })
+          .catch(() => cached || new Response("", { status: 408, statusText: "Request Timeout" }));
       })
     );
     return;
   }
 
-  // 2. Read APIs (Categories, Stores, Healthcare, Products) -> Stale-While-Revalidate (Instant response)
+  // 2. Read APIs (Categories, Stores, Healthcare, Products) -> Stale-While-Revalidate
   if (
     url.pathname.startsWith("/api/categories") ||
     url.pathname.startsWith("/api/stores") ||
@@ -92,14 +104,17 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       caches.open(API_CACHE).then((cache) =>
         cache.match(request).then((cached) => {
-          const networkFetch = fetchWithTimeout(request, 3000)
+          const networkFetch = fetch(request)
             .then((networkResponse) => {
-              if (networkResponse.ok) {
-                cache.put(request, networkResponse.clone());
+              if (networkResponse && networkResponse.ok) {
+                cache.put(request, networkResponse.clone()).catch(() => {});
               }
               return networkResponse;
             })
-            .catch(() => cached);
+            .catch(() => cached || new Response(JSON.stringify({ error: "offline", offline: true }), {
+              status: 503,
+              headers: { "Content-Type": "application/json" }
+            }));
 
           return cached || networkFetch;
         })
@@ -108,12 +123,29 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 3. Navigation Pages -> Network with Fast 2.5s Timeout Fallback to Offline / Cache
+  // 3. Navigation Pages -> Network-First with Safe Fallback that NEVER resolves undefined
   if (request.mode === "navigate") {
     event.respondWith(
-      fetchWithTimeout(request, 2500)
-        .catch(() => caches.match(request).then((res) => res || caches.match("/")))
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone)).catch(() => {});
+          }
+          return response;
+        })
+        .catch(async () => {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+          const rootCached = await caches.match("/");
+          if (rootCached) return rootCached;
+          return new Response(OFFLINE_FALLBACK_HTML, {
+            status: 200,
+            headers: { "Content-Type": "text/html; charset=utf-8" },
+          });
+        })
     );
+    return;
   }
 });
 

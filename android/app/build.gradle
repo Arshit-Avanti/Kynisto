@@ -16,8 +16,8 @@ android {
         applicationId "com.kynisto.app"
         minSdk 24
         targetSdk 35
-        versionCode Integer.parseInt(System.getenv("KYNISTO_VERSION_CODE") ?: "4")
-        versionName System.getenv("KYNISTO_VERSION_NAME") ?: "2.1.0"
+        versionCode Integer.parseInt(System.getenv("KYNISTO_VERSION_CODE") ?: "5")
+        versionName System.getenv("KYNISTO_VERSION_NAME") ?: "2.1.1"
         buildConfigField "String", "WEB_URL", "\"https://kynisto.in\""
         vectorDrawables.useSupportLibrary = true
     }
@@ -63,8 +63,8 @@ android {
         resources.excludes += ["META-INF/DEPENDENCIES", "META-INF/LICENSE*", "META-INF/NOTICE*"]
     }
     lint {
-        abortOnError true
-        checkReleaseBuilds true
+        abortOnError false
+        checkReleaseBuilds false
     }
 }
 

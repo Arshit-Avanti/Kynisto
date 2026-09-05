@@ -23,7 +23,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Kynisto"
         android:usesCleartextTraffic="false">
-        <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing" android:value="true" />
+        <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing" android:value="false" />
         <activity
             android:name=".MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|uiMode"
@@ -37,6 +37,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="kynisto.in" />
+                <data android:scheme="https" android:host="www.kynisto.in" />
                 <data android:scheme="https" android:host="kynisto.nxt-arshit.workers.dev" />
             </intent-filter>
             <intent-filter>

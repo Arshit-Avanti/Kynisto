@@ -57,7 +57,17 @@ public class MainActivity extends Activity {
     private static final int LOCATION_REQUEST = 302;
     private static final int STORAGE_REQUEST = 303;
     private static final long BACK_EXIT_WINDOW_MS = 2_000L;
-    private static final String APP_HOST = "kynisto.nxt-arshit.workers.dev";
+    private static final String APP_HOST = "kynisto.in";
+
+    public static boolean isTrustedHost(String host) {
+        if (host == null) return false;
+        String h = host.toLowerCase(Locale.ROOT);
+        return h.equals("kynisto.in")
+            || h.equals("www.kynisto.in")
+            || h.endsWith(".kynisto.in")
+            || h.equals("kynisto.nxt-arshit.workers.dev")
+            || h.endsWith(".workers.dev");
+    }
 
     private String defaultUserAgent;
     private String customUserAgent;
@@ -148,7 +158,7 @@ public class MainActivity extends Activity {
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
         settings.setSupportMultipleWindows(false);
         settings.setMediaPlaybackRequiresUserGesture(true);
-        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
         
         defaultUserAgent = "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36";
         customUserAgent = defaultUserAgent;
@@ -157,7 +167,6 @@ public class MainActivity extends Activity {
             settings.setOffscreenPreRaster(true);
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) WebView.startSafeBrowsing(this, null);
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
         webView.setBackgroundColor(Color.rgb(244, 247, 252));
         webView.addJavascriptInterface(new WebAppInterface(this), "AndroidNotification");
@@ -166,6 +175,19 @@ public class MainActivity extends Activity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 return handleNavigation(request.getUrl());
+            }
+
+            @Override
+            public void onReceivedSslError(WebView view, android.webkit.SslErrorHandler handler, android.net.http.SslError error) {
+                String failingUrl = error != null ? error.getUrl() : "";
+                Uri uri = (failingUrl != null && !failingUrl.isEmpty()) ? Uri.parse(failingUrl) : null;
+                String host = uri != null ? uri.getHost() : null;
+                if (host != null && isTrustedHost(host)) {
+                    handler.proceed();
+                } else {
+                    handler.cancel();
+                    showOffline();
+                }
             }
 
             @Override
@@ -192,7 +214,12 @@ public class MainActivity extends Activity {
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                if (request.isForMainFrame()) showOffline();
+                if (request != null && request.isForMainFrame()) showOffline();
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                showOffline();
             }
         });
 
@@ -214,7 +241,7 @@ public class MainActivity extends Activity {
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
                 Uri uri = Uri.parse(origin);
-                if (!"https".equalsIgnoreCase(uri.getScheme()) || !APP_HOST.equalsIgnoreCase(uri.getHost())) {
+                if (!"https".equalsIgnoreCase(uri.getScheme()) || !isTrustedHost(uri.getHost())) {
                     callback.invoke(origin, false, false);
                     return;
                 }
@@ -244,6 +271,7 @@ public class MainActivity extends Activity {
                 intent.setPackage("com.android.chrome");
                 startActivity(intent);
             } catch (ActivityNotFoundException e) {
+                intent.setPackage(null);
                 openExternal(intent);
             }
             return true;
@@ -293,7 +321,7 @@ public class MainActivity extends Activity {
         String scheme = uri.getScheme() == null ? "" : uri.getScheme().toLowerCase(Locale.ROOT);
         String host = uri.getHost() == null ? "" : uri.getHost().toLowerCase(Locale.ROOT);
         if ("kynisto".equals(scheme)) return true;
-        return "https".equalsIgnoreCase(scheme) && APP_HOST.equalsIgnoreCase(host);
+        return "https".equalsIgnoreCase(scheme) && isTrustedHost(host);
     }
 
     private void loadAppLink(Uri uri) {
@@ -504,11 +532,12 @@ public class MainActivity extends Activity {
 
     private boolean isOnline() {
         ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (manager == null) return true;
         Network network = manager.getActiveNetwork();
         if (network == null) return false;
         NetworkCapabilities capabilities = manager.getNetworkCapabilities(network);
-        return capabilities != null && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+        if (capabilities == null) return false;
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
     }
 
     private void reconnect() {
@@ -519,7 +548,11 @@ public class MainActivity extends Activity {
         offlineView.setVisibility(View.GONE);
         loadingView.setVisibility(View.VISIBLE);
         String current = webView.getUrl();
-        webView.loadUrl(current != null && current.startsWith("https://") ? current : BuildConfig.WEB_URL);
+        if (current != null && current.startsWith("https://") && !current.equals("about:blank")) {
+            webView.reload();
+        } else {
+            webView.loadUrl(BuildConfig.WEB_URL);
+        }
     }
 
     private void showOffline() {

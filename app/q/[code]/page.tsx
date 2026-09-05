@@ -801,7 +801,7 @@ export default function HealthcareQueueQRPage() {
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
             <a
-              href="/downloads/Kynisto-2.0.0-release.apk"
+              href="/downloads/Kynisto-2.1.0-release.apk"
               className="font-bold text-indigo-300 hover:text-white underline"
             >
               Get App
