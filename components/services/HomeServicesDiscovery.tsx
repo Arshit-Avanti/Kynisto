@@ -27,9 +27,72 @@ export interface HomeService {
   city?: string;
 }
 
+const defaultHomeServices: HomeService[] = [
+  {
+    id: "srv-1",
+    name: "AC Deep Cleaning & Servicing",
+    categoryName: "AC & Appliances",
+    category: "AC & Appliances",
+    icon: "❄️",
+    slug: "ac-deep-cleaning",
+    description: "Complete jet pump wash, filter sanitization, gas check, and cooling coil maintenance.",
+    startingPrice: 499,
+    estimatedArrival: "45 mins",
+    storeName: "CoolBreeze Climate Services",
+    storePhone: "+919876543210",
+    area: "Indiranagar",
+    city: "Bangalore",
+  },
+  {
+    id: "srv-2",
+    name: "Complete Home Electrical Health Check & Repair",
+    categoryName: "Electricians",
+    category: "Electricians",
+    icon: "⚡",
+    slug: "electrical-health-check",
+    description: "Inspection of wiring, MCB distribution board, socket replacement, earthing test.",
+    startingPrice: 299,
+    estimatedArrival: "30 mins",
+    storeName: "VoltsPro Electricals",
+    storePhone: "+919876543211",
+    area: "Koramangala",
+    city: "Bangalore",
+  },
+  {
+    id: "srv-3",
+    name: "Kitchen & Bathroom Plumbing Diagnostics",
+    categoryName: "Plumbing",
+    category: "Plumbing",
+    icon: "🔧",
+    slug: "plumbing-diagnostics",
+    description: "Leak detection, pipeline blockage removal, tap and mixer fitting, low water pressure fix.",
+    startingPrice: 349,
+    estimatedArrival: "40 mins",
+    storeName: "AquaFix Master Plumbers",
+    storePhone: "+919876543212",
+    area: "HSR Layout",
+    city: "Bangalore",
+  },
+  {
+    id: "srv-4",
+    name: "Intense Deep House Sanitization & Cleaning",
+    categoryName: "Cleaning & Hygiene",
+    category: "Cleaning & Hygiene",
+    icon: "✨",
+    slug: "house-sanitization",
+    description: "Floor buffing, tile scrubbing, stain removal, kitchen chimney degreasing, germ protection.",
+    startingPrice: 999,
+    estimatedArrival: "60 mins",
+    storeName: "PristinePro Home Cleaners",
+    storePhone: "+919876543213",
+    area: "Whitefield",
+    city: "Bangalore",
+  }
+];
+
 export function HomeServicesDiscovery() {
-  const [services, setServices] = useState<HomeService[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [services, setServices] = useState<HomeService[]>(() => defaultHomeServices);
+  const [loading, setLoading] = useState(false);
   const [userRole, setUserRole] = useState<"admin" | "store_owner" | "customer" | null>(null);
   const [savedCount, setSavedCount] = useState(0);
   const [locationLabel, setLocationLabel] = useState("Your Locality");

@@ -1,20 +1,41 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { VideoBackground } from "@/components/media/VideoBackground";
 import { CredixInteractiveHeroFeatures } from "@/components/dashboard/CredixInteractiveHeroFeatures";
-import { ShaderCanvas } from "@/components/ui/ShaderCanvas";
 import { apiFetch } from "@/lib/client-api";
-import { getSupabaseBrowserClient, syncSupabaseAccessCookie } from "@/lib/supabase-browser";
-import { WelcomeRewardModal } from "@/components/subscription/WelcomeRewardModal";
-import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
-import { EfferdFeatures6 } from "@/components/blocks/features-6";
-import { Footer3D } from "@/components/landing/Footer3D";
 import { Navbar3D } from "@/components/landing/Navbar3D";
-import { EditorialFaqSection } from "@/components/landing/EditorialFaqSection";
-import { EditorialGuidesSection } from "@/components/landing/EditorialGuidesSection";
+import { turboCore } from "@/lib/turbocore";
+import { turboTouch } from "@/lib/turbotouch";
+
+// Code-split below-the-fold & non-critical components to minimize initial bundle
+const WelcomeRewardModal = dynamic(
+  () => import("@/components/subscription/WelcomeRewardModal").then((mod) => mod.WelcomeRewardModal),
+  { ssr: false }
+);
+
+const SubscriptionExpiryBanner = dynamic(
+  () => import("@/components/subscription/SubscriptionExpiryBanner").then((mod) => mod.SubscriptionExpiryBanner),
+  { ssr: false }
+);
+
+const Footer3D = dynamic(
+  () => import("@/components/landing/Footer3D").then((mod) => mod.Footer3D),
+  { ssr: true }
+);
+
+const EditorialFaqSection = dynamic(
+  () => import("@/components/landing/EditorialFaqSection").then((mod) => mod.EditorialFaqSection),
+  { ssr: true }
+);
+
+const EditorialGuidesSection = dynamic(
+  () => import("@/components/landing/EditorialGuidesSection").then((mod) => mod.EditorialGuidesSection),
+  { ssr: true }
+);
 
 type Category = {
   name: string;
@@ -856,6 +877,46 @@ const modernCleanTechStyles = `
      MOBILE RESPONSIVE & HIGH CONTRAST AUDIT (max-width: 768px)
      ========================================================================== */
   @media (max-width: 768px) {
+    /* Reset expensive GPU composition layers on mobile / low-RAM phones */
+    *, *::before, *::after {
+      will-change: auto !important;
+    }
+    .backdrop-blur-2xl, .backdrop-blur-xl, .backdrop-blur-lg, .backdrop-blur-md,
+    .searchBox, .featureCard, .glassCard3D, .topbar, .storeCard, .providerGrid article,
+    .efferdBentoCard, .apple-glass-card, .advancedFilters, .filterGroup, .emptyState,
+    .mobileTopAppBar, .mobileFullDrawer, .mobileBottomAppDock, .mobileNavDrawer,
+    .mode-light .storeCard, .mode-dark .storeCard, .light-theme .storeCard, .dark-theme .storeCard,
+    .mode-light .featureCard, .mode-dark .featureCard, .light-theme .featureCard, .dark-theme .featureCard,
+    .mode-light .efferdBentoCard, .mode-dark .efferdBentoCard,
+    .mode-light .advancedFilters, .mode-dark .advancedFilters,
+    .mode-light .filterGroup, .mode-dark .filterGroup,
+    .mode-light .emptyState, .mode-dark .emptyState,
+    .mode-light .mobileTopAppBar, .mode-dark .mobileTopAppBar,
+    .mode-light .mobileFullDrawer, .mode-dark .mobileFullDrawer,
+    .mode-light .mobileBottomAppDock, .mode-dark .mobileBottomAppDock {
+      backdrop-filter: blur(6px) !important;
+      -webkit-backdrop-filter: blur(6px) !important;
+    }
+    .arise-on-scroll {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+      will-change: auto !important;
+    }
+    .storeCard,
+    .glassCard3D,
+    .floatingCardsContainer,
+    .featureCard,
+    .providerGrid article {
+      transform: none !important;
+      transform-style: flat !important;
+      perspective: none !important;
+      will-change: auto !important;
+    }
+    .storeCard:hover, .providerGrid article:hover {
+      transform: none !important;
+    }
+
     /* Fixed Floating Topbar Header on Mobile */
     .topbar,
     .mode-light .topbar,
@@ -888,7 +949,7 @@ const modernCleanTechStyles = `
       padding: 70px 14px 28px 14px !important;
       text-align: center !important;
       max-width: 100vw !important;
-      overflow-x: hidden !important;
+      overflow-x: clip !important;
     }
 
     .heroTitleClassical,
@@ -1044,8 +1105,8 @@ const modernCleanTechStyles = `
       border: 1px solid rgba(255, 255, 255, 0.12) !important;
       padding: 16px 18px !important;
       border-radius: 16px !important;
-      transform: translateZ(0) !important;
-      will-change: transform, opacity !important;
+      transform: none !important;
+      will-change: auto !important;
       contain: layout style paint !important;
       box-sizing: border-box !important;
       max-width: 100% !important;
@@ -1230,7 +1291,7 @@ const modernCleanTechStyles = `
       margin-top: 28px !important;
       padding: 0 14px !important;
       max-width: 100% !important;
-      overflow-x: hidden !important;
+      overflow-x: clip !important;
       box-sizing: border-box !important;
     }
 
@@ -1384,55 +1445,71 @@ const categories: Category[] = [
 ];
 
 const CATEGORY_PHOTOS: Record<string, string> = {
-  "Salon": "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80",
-  "Salons & Beauty": "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80",
-  "Grocery": "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=800&q=80",
-  "Grocery & Essentials": "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=800&q=80",
-  "Supermarket": "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=800&q=80",
-  "Clinic": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80",
-  "Clinics & Doctors": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80",
-  "Hospital": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=800&q=80",
-  "Stationery": "https://images.unsplash.com/photo-1456735190829-bb75b0004266?auto=format&fit=crop&w=800&q=80",
-  "Stationery & Printing": "https://images.unsplash.com/photo-1456735190829-bb75b0004266?auto=format&fit=crop&w=800&q=80",
-  "Pharmacy": "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=800&q=80",
-  "Pharmacies": "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=800&q=80",
-  "Bakery": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80",
-  "Bakeries": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80",
-  "Repair": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
-  "Mobile & Electronics Repair": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
-  "Pet care": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=800&q=80",
-  "Pet Care": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=800&q=80",
-  "Fitness": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80",
-  "Fitness & Yoga": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80",
-  "Café": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80",
-  "Cafés": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80",
-  "Restaurants": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-  "Home Services": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=800&q=80",
-  "Hardware": "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?auto=format&fit=crop&w=800&q=80",
-  "Education & Coaching": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
-  "Fashion": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80",
-  "Automobile Services": "https://images.unsplash.com/photo-1486006920555-c77dce18193b?auto=format&fit=crop&w=800&q=80",
-  "Dental Care": "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=800&q=80",
-  "Opticians": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80",
-  "Florists": "https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80",
-  "Default": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80",
+  "Salon": "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=400&q=65",
+  "Salons & Beauty": "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=400&q=65",
+  "Grocery": "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=400&q=65",
+  "Grocery & Essentials": "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=400&q=65",
+  "Supermarket": "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=400&q=65",
+  "Clinic": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=400&q=65",
+  "Clinics & Doctors": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=400&q=65",
+  "Hospital": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=400&q=65",
+  "Stationery": "https://images.unsplash.com/photo-1456735190829-bb75b0004266?auto=format&fit=crop&w=400&q=65",
+  "Stationery & Printing": "https://images.unsplash.com/photo-1456735190829-bb75b0004266?auto=format&fit=crop&w=400&q=65",
+  "Pharmacy": "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=400&q=65",
+  "Pharmacies": "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=400&q=65",
+  "Bakery": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=65",
+  "Bakeries": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=65",
+  "Repair": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=400&q=65",
+  "Mobile & Electronics Repair": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=400&q=65",
+  "Pet care": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=400&q=65",
+  "Pet Care": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=400&q=65",
+  "Fitness": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=400&q=65",
+  "Fitness & Yoga": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=400&q=65",
+  "Café": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=400&q=65",
+  "Cafés": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=400&q=65",
+  "Restaurants": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=65",
+  "Home Services": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=400&q=65",
+  "Hardware": "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?auto=format&fit=crop&w=400&q=65",
+  "Education & Coaching": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=400&q=65",
+  "Fashion": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=400&q=65",
+  "Automobile Services": "https://images.unsplash.com/photo-1486006920555-c77dce18193b?auto=format&fit=crop&w=400&q=65",
+  "Dental Care": "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=400&q=65",
+  "Opticians": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=400&q=65",
+  "Florists": "https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=400&q=65",
+  "Default": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=400&q=65",
 };
 
 export function getStorePhoto(store: { bannerUrl?: string | null; logoUrl?: string | null; category?: string; businessType?: string; name?: string }) {
-  if (store.bannerUrl && store.bannerUrl.trim()) return store.bannerUrl;
-  if (store.logoUrl && store.logoUrl.trim()) return store.logoUrl;
-  
-  const rawCat = (store.category || "").trim().toLowerCase();
-  const rawType = (store.businessType || "").trim().toLowerCase();
-  const rawName = (store.name || "").trim().toLowerCase();
+  let photo = "";
+  if (store.bannerUrl && store.bannerUrl.trim()) photo = store.bannerUrl;
+  else if (store.logoUrl && store.logoUrl.trim()) photo = store.logoUrl;
+  else {
+    const rawCat = (store.category || "").trim().toLowerCase();
+    const rawType = (store.businessType || "").trim().toLowerCase();
+    const rawName = (store.name || "").trim().toLowerCase();
 
-  for (const [key, url] of Object.entries(CATEGORY_PHOTOS)) {
-    const k = key.toLowerCase();
-    if (rawCat && (rawCat.includes(k) || k.includes(rawCat))) return url;
-    if (rawType && (rawType.includes(k) || k.includes(rawType))) return url;
-    if (rawName && rawName.includes(k)) return url;
+    for (const [key, url] of Object.entries(CATEGORY_PHOTOS)) {
+      const k = key.toLowerCase();
+      if (rawCat && (rawCat.includes(k) || k.includes(rawCat))) { photo = url; break; }
+      if (rawType && (rawType.includes(k) || k.includes(rawType))) { photo = url; break; }
+      if (rawName && rawName.includes(k)) { photo = url; break; }
+    }
+    if (!photo) photo = CATEGORY_PHOTOS["Default"];
   }
-  return CATEGORY_PHOTOS["Default"];
+
+  // Optimize Unsplash images on mobile networks: downsample dimensions and quality
+  if (photo && photo.includes("images.unsplash.com")) {
+    try {
+      const u = new URL(photo);
+      u.searchParams.set("w", "400");
+      u.searchParams.set("q", "65");
+      u.searchParams.set("auto", "format");
+      photo = u.toString();
+    } catch {
+      photo = photo.replace(/w=\d+/, "w=400").replace(/q=\d+/, "q=65");
+    }
+  }
+  return photo;
 }
 
 const stores: Store[] = [
@@ -1608,6 +1685,13 @@ const stores: Store[] = [
   },
 ];
 
+const defaultFallbackStores: Store[] = stores.filter((s) => !["Clinic", "Pharmacy", "Pet care"].includes(s.category));
+
+// ⚡ TurboCore: Hydrate reactive client memory bus immediately
+if (typeof window !== "undefined") {
+  turboCore.init(defaultFallbackStores, categories);
+}
+
 type SortMode = "all" | "open" | "nearest" | "rated" | "newest";
 type Accent = "royal" | "navy" | "cyan";
 type Density = "comfortable" | "compact";
@@ -1618,10 +1702,16 @@ export default function Home() {
   const [category, setCategory] = useState("All");
   const [sortMode, setSortMode] = useState<SortMode>("all");
   const [saved, setSaved] = useState<Array<string | number>>([]);
-  const [catalogStores, setCatalogStores] = useState<Store[]>([]);
-  const [catalogCategories, setCatalogCategories] = useState<Category[]>(categories);
-  const [catalogTotal, setCatalogTotal] = useState(0);
-  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [catalogStores, setCatalogStores] = useState<Store[]>(() => {
+    const ramResult = turboCore.queryStores({ limit: 6 });
+    return (ramResult.items.length > 0 ? ramResult.items : defaultFallbackStores.slice(0, 6)) as Store[];
+  });
+  const [catalogCategories, setCatalogCategories] = useState<Category[]>(() => {
+    const cachedCats = turboCore.getCategories();
+    return (cachedCats.length > 0 ? cachedCats : categories) as Category[];
+  });
+  const [catalogTotal, setCatalogTotal] = useState(() => defaultFallbackStores.length);
+  const [catalogLoading, setCatalogLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [displayLimit, setDisplayLimit] = useState(6);
@@ -1640,7 +1730,6 @@ export default function Home() {
   const [customizing, setCustomizing] = useState(false);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [toast, setToast] = useState("");
-  const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
@@ -1654,53 +1743,40 @@ export default function Home() {
     };
   }, [mobileOpen]);
 
+  // Performance-optimized reveal: On mobile touch devices, reveal immediately to eliminate scroll stutter
   useEffect(() => {
-    let scrollTicking = false;
-    const handleScroll = () => {
-      if (!scrollTicking) {
-        scrollTicking = true;
-        requestAnimationFrame(() => {
-          setIsScrolled(window.scrollY > 20);
-          scrollTicking = false;
-        });
-      }
-    };
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    if (typeof window === "undefined") return;
 
-  // Continuous Scroll-Triggered "Arise / Emerge" Animation Observer (Re-triggers dynamically on every scroll in/out)
-  useEffect(() => {
-    if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") return;
+    const isMobile = window.innerWidth <= 768 || window.matchMedia("(pointer: coarse)").matches;
+    if (isMobile) {
+      document.querySelectorAll(".arise-on-scroll").forEach((el) => el.classList.add("arisen"));
+      return;
+    }
+
+    if (typeof IntersectionObserver === "undefined") {
+      document.querySelectorAll(".arise-on-scroll").forEach((el) => el.classList.add("arisen"));
+      return;
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("arisen");
-          } else {
-            // Remove arisen class when out of view so it arises again on every scroll!
-            entry.target.classList.remove("arisen");
+            observer.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.05, rootMargin: "0px 0px -20px 0px" }
+      { threshold: 0.05, rootMargin: "0px 0px 40px 0px" }
     );
 
-    const observeAll = () => {
-      const elements = document.querySelectorAll(".arise-on-scroll");
-      elements.forEach((el) => observer.observe(el));
-    };
-
-    observeAll();
-    const timer = setTimeout(observeAll, 300);
+    const elements = document.querySelectorAll(".arise-on-scroll:not(.arisen)");
+    elements.forEach((el) => observer.observe(el));
 
     return () => {
-      clearTimeout(timer);
       observer.disconnect();
     };
-  }, [catalogStores, category, query, sortMode]);
+  }, [category, query, sortMode]);
 
   useEffect(() => {
     const stored = window.localStorage.getItem("kynisto-preferences");
@@ -1758,10 +1834,35 @@ export default function Home() {
   useEffect(() => {
     setDisplayLimit(6);
     const controller = new AbortController();
-    const timer = window.setTimeout(async () => {
+    const isDefaultView =
+      category === "All" &&
+      !query.trim() &&
+      !areaFilter.trim() &&
+      !pinFilter.trim() &&
+      !businessTypeFilter.trim() &&
+      sortMode === "all";
+
+    // ⚡ TurboCore: Synchronous RAM query (< 1ms instant UI update)
+    if (!areaFilter.trim() && !pinFilter.trim() && !businessTypeFilter.trim()) {
+      const ramResult = turboCore.queryStores({
+        category,
+        query: query.trim(),
+        sortMode,
+        limit: 6,
+      });
+      if (ramResult.items.length > 0) {
+        setCatalogStores(ramResult.items as Store[]);
+        setCatalogTotal(ramResult.total);
+      }
+    }
+
+    if (!isDefaultView && catalogStores.length === 0) {
       setCatalogLoading(true);
+    }
+
+    const timer = window.setTimeout(async () => {
       const parameters = new URLSearchParams({
-        limit: "12",
+        limit: "6",
         page: "1",
         lat: String(currentCoords.latitude),
         lng: String(currentCoords.longitude),
@@ -1776,12 +1877,10 @@ export default function Home() {
       if (sortMode === "rated") parameters.set("sort", "rated");
       if (sortMode === "newest") parameters.set("sort", "newest");
       try {
-        const response = await fetch(`/api/stores?${parameters}`, { signal: controller.signal });
-        if (!response.ok) throw new Error("Unable to load nearby stores.");
-        const data = await response.json() as {
+        const data = await apiFetch<{
           items: Array<Store & { services?: string[] }>;
           pagination: { total: number; hasMore: boolean };
-        };
+        }>(`/api/stores?${parameters}`, { signal: controller.signal });
         const seen = new Set<string | number>();
         const uniqueItems = data.items.filter((store) => {
           const key = store.id ?? store.slug;
@@ -1789,20 +1888,21 @@ export default function Home() {
           seen.add(key);
           return true;
         });
-        setCatalogStores(uniqueItems.map((store) => ({ ...store, services: store.services ?? [] })));
+        const mappedStores = uniqueItems.map((store) => ({ ...store, services: store.services ?? [] }));
+        turboCore.updateStores(mappedStores);
+        setCatalogStores(mappedStores);
         setCatalogTotal(data.pagination.total);
         setHasMore(data.pagination.hasMore);
         setNextPage(2);
       } catch (error) {
         if (!(error instanceof DOMException && error.name === "AbortError")) {
-          const fallbackStores = stores.filter((store) => !["Clinic", "Pharmacy", "Pet care"].includes(store.category));
-          setCatalogStores(fallbackStores);
-          setCatalogTotal(fallbackStores.length);
+          setCatalogStores(defaultFallbackStores);
+          setCatalogTotal(defaultFallbackStores.length);
         }
       } finally {
         if (!controller.signal.aborted) setCatalogLoading(false);
       }
-    }, 250);
+    }, isDefaultView ? 0 : 250);
     return () => { controller.abort(); window.clearTimeout(timer); };
   }, [areaFilter, businessTypeFilter, category, currentCoords, pinFilter, query, sortMode]);
 
@@ -1949,7 +2049,7 @@ export default function Home() {
   return (
     <main className={`site theme-${accent} density-${density} mode-${themeMode} pb-0 min-h-screen`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
       <VideoBackground videoSrc="/videos/hero-flow.mp4" mobileVideoSrc="/videos/hero-flow.mp4" />
-      <SubscriptionExpiryBanner />
+      <SubscriptionExpiryBanner userId={userId} />
       <WelcomeRewardModal userRole={userRole} userId={userId} />
       <Navbar3D user={userId ? { id: userId, name: userName || undefined, role: userRole || undefined } : null} />
       <div className="mobileNav" style={{ display: "none" }} aria-hidden="true">
@@ -1971,8 +2071,8 @@ export default function Home() {
             height: "100vh",
             zIndex: 99999,
             background: "rgba(10, 15, 30, 0.98)",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
             display: "flex",
             flexDirection: "column",
             padding: "24px 20px 32px 20px",
@@ -2303,6 +2403,7 @@ export default function Home() {
                 className={`categoryTile tone-${item.tone} arise-on-scroll arise-delay-${(index % 6) + 1}`}
                 type="button"
                 aria-pressed={active}
+                onPointerDown={() => turboTouch.haptic(8)}
                 onClick={() => {
                   setCategory(active ? "All" : item.name);
                   document.getElementById("places")?.scrollIntoView({ behavior: "smooth" });
@@ -2342,6 +2443,7 @@ export default function Home() {
                 key={value}
                 type="button"
                 aria-pressed={sortMode === value}
+                onPointerDown={() => turboTouch.haptic(8)}
                 onClick={() => setSortMode(value)}
               >
                 {value === "open" && <span className="openDot" aria-hidden="true" />}
@@ -2371,7 +2473,117 @@ export default function Home() {
             <span className="kicker" style={{ color: "#FFFFFF", fontWeight: 700 }}>📍 Verified Local Services</span>
             <h2 className="highContrastText" style={{ fontSize: "1.8rem", fontWeight: 800, margin: "4px 0 0 0", color: "#FFFFFF" }}>Recommended Stores Nearby Me</h2>
           </div>
+          <div className="resultsBar" style={{ margin: 0 }}>
+            <span style={{ color: "#cbd5e1", fontSize: "0.85rem", fontWeight: 600 }}><b>{catalogTotal}</b> places found</span>
+          </div>
         </div>
+
+        {(catalogLoading && results.length === 0) ? (
+          <div className="storeGrid resultSkeleton" aria-label="Loading nearby businesses" aria-busy="true">
+            {Array.from({ length: 4 }, (_, index) => (
+              <article className="storeCard" key={index} style={{ minHeight: "220px", background: "rgba(255,255,255,0.04)", borderRadius: "16px" }}>
+                <div style={{ height: "120px", background: "rgba(255,255,255,0.06)", borderRadius: "16px 16px 0 0" }} />
+                <div style={{ padding: "14px" }}>
+                  <div style={{ height: "14px", width: "60%", background: "rgba(255,255,255,0.1)", borderRadius: "4px", marginBottom: "8px" }} />
+                  <div style={{ height: "10px", width: "85%", background: "rgba(255,255,255,0.06)", borderRadius: "4px" }} />
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : results.length > 0 ? (
+          <>
+            <div className="storeGrid">
+              {results.slice(0, displayLimit).map((store) => (
+                <article className="storeCard arise-on-scroll" key={store.id}>
+                  <button
+                    type="button"
+                    className={`storeVisual tone-${store.tone}`}
+                    aria-label={`View ${store.name} details`}
+                    onClick={() => setSelectedStore(store)}
+                    style={{ position: "relative", overflow: "hidden" }}
+                  >
+                    <img
+                      src={getStorePhoto(store)}
+                      alt={store.name}
+                      loading="lazy"
+                      decoding="async"
+                      width={360}
+                      height={180}
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        zIndex: 1,
+                      }}
+                    />
+                    <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(11,15,23,0.75) 0%, transparent 60%)", pointerEvents: "none", zIndex: 2 }} />
+                    <span className={`statusBadge ${store.open ? "isOpen" : "isClosed"}`} style={{ zIndex: 3 }}>{store.open ? "Open now" : "Closed"}</span>
+                    <span className="distanceBadge" style={{ zIndex: 3 }}>{store.distance.toFixed(1)} km</span>
+                  </button>
+                  <div className="storeBody">
+                    <div className="storeTopline">
+                      <span className="categoryLabel">{store.category}</span>
+                      <span className="rating" aria-label={`${store.rating} out of 5 stars`}>
+                        <span style={{ display: "flex", alignItems: "center", gap: "2px" }}><Icons.Star /> <b>{store.rating}</b></span> ({store.reviews})
+                      </span>
+                    </div>
+                    <h3>{store.name}</h3>
+                    <p className="address"><Icons.Location /> {store.address}</p>
+                    <div className="storeMeta">
+                      <span>{store.walk}</span>
+                      <i aria-hidden="true" />
+                      <span>{store.hours}</span>
+                    </div>
+                    <div className="cardActions">
+                      {store.slug ? (
+                        <Link className="detailsButton" href={`/stores/${store.slug}`}>View profile</Link>
+                      ) : (
+                        <button className="detailsButton" type="button" onClick={() => setSelectedStore(store)}>View details</button>
+                      )}
+                      <button
+                        className={`saveIcon ${saved.includes(store.id) ? "isSaved" : ""}`}
+                        type="button"
+                        aria-label={`${saved.includes(store.id) ? "Remove" : "Save"} ${store.name}`}
+                        aria-pressed={saved.includes(store.id)}
+                        onClick={() => void toggleSaved(store)}
+                      >
+                        <Icons.Heart />
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+            {(hasMore || results.length > displayLimit) && (
+              <div className="loadMoreRow" style={{ textAlign: "center", marginTop: "24px" }}>
+                <button
+                  type="button"
+                  className="detailsButton"
+                  style={{ padding: "10px 24px", borderRadius: "12px", fontSize: "14px", fontWeight: 700 }}
+                  onClick={() => void loadMore()}
+                  disabled={loadingMore}
+                >
+                  {loadingMore ? "Loading more places..." : `Show more nearby places`}
+                </button>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="emptyState" style={{ textAlign: "center", padding: "32px 16px" }}>
+            <h3 style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF", fontSize: "1.1rem", fontWeight: 700, marginBottom: "8px" }}>No places match that search</h3>
+            <p style={{ color: "#94a3b8", fontSize: "0.9rem", marginBottom: "16px" }}>Try another service or clear your current filters.</p>
+            <button
+              type="button"
+              className="detailsButton"
+              style={{ padding: "8px 20px", borderRadius: "10px" }}
+              onClick={resetFilters}
+            >
+              Show all nearby places
+            </button>
+          </div>
+        )}
       </section>
 
 
@@ -2489,6 +2701,8 @@ export default function Home() {
               <img
                 src={getStorePhoto(selectedStore)}
                 alt={selectedStore.name}
+                loading="lazy"
+                decoding="async"
                 style={{
                   position: "absolute",
                   inset: 0,

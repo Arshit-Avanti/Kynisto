@@ -12,6 +12,7 @@ import { AppReturnBanner } from "@/components/ui/AppReturnBanner";
 import { AudioPermissionModal } from "@/components/ui/AudioPermissionModal";
 import { NotificationPermissionModal } from "@/components/ui/NotificationPermissionModal";
 import { MobileBottomNav } from "@/components/landing/MobileBottomNav";
+import { TurboCoreRuntime } from "@/components/TurboCoreRuntime";
 
 export async function generateMetadata(): Promise<Metadata> {
   const canonicalBase = "https://kynisto.in";
@@ -57,13 +58,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Google AdSense (Top of Head) */}
+        {/* Google AdSense verification meta */}
         <meta name="google-adsense-account" content="ca-pub-9178031569606873" />
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9178031569606873"
-          crossOrigin="anonymous"
-        />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
         <link rel="preconnect" href="https://googleads.g.doubleclick.net" crossOrigin="anonymous" />
@@ -76,9 +72,27 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        {/* TurboCore Inline Hardware Profiler: Zero-FOUC TurboLite mode engagement */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var m=navigator.deviceMemory,c=navigator.hardwareConcurrency,n=navigator.connection||navigator.mozConnection||navigator.webkitConnection;var s=n&&(n.effectiveType==='2g'||n.effectiveType==='slow-2g'||n.effectiveType==='3g'||n.saveData);if((m&&m<=2)||(c&&c<=4)||s){document.documentElement.classList.add('turbo-lite');}}catch(e){}})();`,
+          }}
+        />
+
+        {/* Non-blocking web fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+        <link
+          rel="preload"
+          as="style"
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+          media="all"
+        />
         <link rel="preconnect" href="https://kynisto.in" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://kynisto.in" />
       </head>
@@ -89,9 +103,15 @@ export default function RootLayout({
           }}
         />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
+        <TurboCoreRuntime />
         <SupabaseAuthManager />
         <AppReturnBanner />
         <AdSenseManager />
+        <Script
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9178031569606873"
+          strategy="lazyOnload"
+          crossOrigin="anonymous"
+        />
         {children}
         <AppUpdateManager />
         <AudioPermissionModal />

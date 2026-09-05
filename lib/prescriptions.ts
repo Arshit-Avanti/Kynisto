@@ -404,10 +404,13 @@ export function validatePrescriptionMedicines(rawMeds: unknown): PrescriptionMed
   return validMedicines;
 }
 
+let _rxSeq = Math.floor(Math.random() * 1000);
+
 export function generatePrescriptionNumber(): string {
   const d = new Date();
   const yearMonth = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}`;
-  const rand = Math.floor(10000 + Math.random() * 90000);
+  _rxSeq = (_rxSeq + 1) % 90000;
+  const rand = 10000 + _rxSeq;
   return `RX-${yearMonth}-${rand}`;
 }
 

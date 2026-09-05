@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, ArrowRight } from "lucide-react";
 
@@ -11,16 +10,6 @@ interface CredixInteractiveHeroFeaturesProps {
 
 export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInteractiveHeroFeaturesProps) {
   const router = useRouter();
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 1024);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize, { passive: true });
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const handleSearchSubmit = (event?: React.FormEvent) => {
     if (event) {
@@ -37,14 +26,14 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
 
   return (
     <div className="w-full relative max-w-full">
-      {/* 1. HERO SECTION (Perfect Horizontal & Vertical Viewport Centering) */}
+      {/* 1. HERO SECTION (Responsive Viewport Centering with zero JS listener overhead) */}
       <section
         className="hero"
         id="top"
         style={{
           textAlign: "center",
-          padding: isDesktop ? "88px 16px 36px 16px" : "148px 16px 36px 16px",
-          minHeight: isDesktop ? "calc(100vh - 100px)" : "auto",
+          padding: "148px 16px 36px 16px",
+          minHeight: "auto",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",

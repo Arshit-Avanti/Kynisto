@@ -1,9 +1,13 @@
 // Kynisto High-Performance PWA & Web Push Service Worker
-const CACHE_NAME = "kynisto-static-v4";
-const API_CACHE = "kynisto-api-v4";
+const CACHE_NAME = "kynisto-turbocore-2026.08.14.400";
+const API_CACHE = "kynisto-turbocore-api-2026.08.14.400";
 const PRECACHE_URLS = [
   "/",
   "/healthcare",
+  "/services",
+  "/wallet",
+  "/pricing",
+  "/products",
   "/manifest.webmanifest",
   "/icons/icon-192x192.png",
   "/icons/badge-72x72.png",
@@ -28,6 +32,13 @@ self.addEventListener("activate", (event) => {
       )
     ).then(() => self.clients.claim())
   );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
+  if (event.data && event.data.type === "CLEAR_OLD_CACHES") {
+    caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k))));
+  }
 });
 
 const OFFLINE_FALLBACK_HTML = `<!DOCTYPE html>
@@ -123,27 +134,46 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 3. Navigation Pages -> Network-First with Safe Fallback that NEVER resolves undefined
+  // 3. Navigation Pages -> Instant Cache Response (< 5ms) with Background Revalidation
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response && response.status === 200) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone)).catch(() => {});
-          }
-          return response;
-        })
-        .catch(async () => {
-          const cached = await caches.match(request);
-          if (cached) return cached;
-          const rootCached = await caches.match("/");
-          if (rootCached) return rootCached;
-          return new Response(OFFLINE_FALLBACK_HTML, {
-            status: 200,
-            headers: { "Content-Type": "text/html; charset=utf-8" },
-          });
-        })
+      (async () => {
+        const cached = await caches.match(request);
+        const fallback = cached || (await caches.match("/")) || new Response(OFFLINE_FALLBACK_HTML, {
+          status: 200,
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        });
+
+        // ⚡ Sub-5ms delivery: if page is already cached, return immediately & update in background
+        if (cached) {
+          fetch(request)
+            .then((response) => {
+              if (response && response.status === 200) {
+                const clone = response.clone();
+                caches.open(CACHE_NAME).then((cache) => cache.put(request, clone)).catch(() => {});
+              }
+            })
+            .catch(() => {});
+          return cached;
+        }
+
+        // Uncached route: Race network fetch with timeout fallback to ensure it never hangs
+        const networkPromise = fetch(request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              const clone = response.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone)).catch(() => {});
+              return response;
+            }
+            return fallback;
+          })
+          .catch(() => fallback);
+
+        return Promise.race([
+          networkPromise,
+          new Promise((resolve) => setTimeout(() => resolve(fallback), 2000)),
+        ]).then((res) => res || fallback).catch(() => fallback);
+      })()
     );
     return;
   }

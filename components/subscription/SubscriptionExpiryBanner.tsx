@@ -4,12 +4,16 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AlertTriangle, ArrowRight } from "lucide-react";
 
+import { apiFetch } from "@/lib/client-api";
+
 interface SubscriptionExpiryBannerProps {
+  userId?: string | null;
   daysRemaining?: number;
   isExpiringSoon?: boolean;
 }
 
 export function SubscriptionExpiryBanner({
+  userId,
   daysRemaining: initialDaysRemaining,
   isExpiringSoon: initialIsExpiringSoon,
 }: SubscriptionExpiryBannerProps) {
@@ -24,20 +28,24 @@ export function SubscriptionExpiryBanner({
   );
 
   useEffect(() => {
+    // Only check subscriptions if the user is authenticated or initial values were passed
+    if (!userId && initialIsExpiringSoon === undefined) {
+      setLoaded(true);
+      return;
+    }
+
     let isMounted = true;
 
     async function checkSubscription() {
       try {
-        const res = await fetch("/api/subscriptions/me");
-        if (!res.ok) return;
-        const data = await res.json();
+        const data = await apiFetch<{ subscription?: { expiresAt?: number; status?: string; isExpired?: boolean; isExpiringSoon?: boolean; daysRemaining?: number } }>("/api/subscriptions/me");
         const sub = data?.subscription;
         if (!sub) return;
 
         const now = Math.floor(Date.now() / 1000);
         const expiresAt = sub.expiresAt;
         const status = sub.status;
-        const isExpired = sub.isExpired || expiresAt <= now;
+        const isExpired = sub.isExpired || (expiresAt ? expiresAt <= now : false);
 
         if (status === "active" && !isExpired && expiresAt) {
           const diff = expiresAt - now;
@@ -63,7 +71,7 @@ export function SubscriptionExpiryBanner({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [userId, initialIsExpiringSoon]);
 
   if (!loaded || !shouldShow) {
     return null;

@@ -15,18 +15,39 @@ export function VideoBackground({
   const [isMobile, setIsMobile] = useState<boolean>(true); // Default true on SSR to avoid heavy video spin-up
 
   useEffect(() => {
-    // Detect mobile device, Android WebView (APK), iOS, or touch device
+    // Detect mobile device, Android WebView (APK), iOS, touch device on small screen, or low-bandwidth / saveData connection
     const checkMobile = () => {
       const ua = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
-      const isTouch = typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0);
-      const isSmallScreen = typeof window !== "undefined" && window.innerWidth < 1024;
       const isMobileUA = /Android|iPhone|iPad|iPod|Mobile|wv|Cordova|Capacitor/i.test(ua);
-      setIsMobile(isSmallScreen || isMobileUA || isTouch);
+      const isTouch = typeof window !== "undefined" && ("ontouchstart" in window || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0));
+      const isSmallScreen = typeof window !== "undefined" && window.innerWidth < 1024;
+      const isMobileViewport = isMobileUA || (isTouch && isSmallScreen) || (typeof window !== "undefined" && window.innerWidth < 768);
+
+      // Low-bandwidth / data-saver detection
+      const nav = typeof navigator !== "undefined" ? (navigator as any) : null;
+      const conn = nav?.connection || nav?.mozConnection || nav?.webkitConnection;
+      const isSaveData = Boolean(conn?.saveData);
+      const isSlowConn = Boolean(
+        conn && (conn.effectiveType === "slow-2g" || conn.effectiveType === "2g" || conn.effectiveType === "3g")
+      );
+      const isReducedData = typeof window !== "undefined" && Boolean(window.matchMedia?.("(prefers-reduced-data: reduce)")?.matches);
+
+      setIsMobile(isMobileViewport || isSaveData || isSlowConn || isReducedData);
     };
 
     checkMobile();
     window.addEventListener("resize", checkMobile, { passive: true });
-    return () => window.removeEventListener("resize", checkMobile);
+    const nav = typeof navigator !== "undefined" ? (navigator as any) : null;
+    const conn = nav?.connection || nav?.mozConnection || nav?.webkitConnection;
+    if (conn?.addEventListener) {
+      conn.addEventListener("change", checkMobile);
+    }
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+      if (conn?.removeEventListener) {
+        conn.removeEventListener("change", checkMobile);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -87,10 +108,12 @@ export function VideoBackground({
         minHeight: "100dvh",
         zIndex: -1,
         pointerEvents: "none",
-        backgroundImage: "url('/images/hero-flow-poster.webp')",
+        backgroundImage: isMobile
+          ? "radial-gradient(ellipse at 50% 15%, rgba(14, 165, 233, 0.22) 0%, rgba(10, 16, 30, 0.95) 75%), url('/images/hero-flow-poster-mobile.webp')"
+          : "url('/images/hero-flow-poster.webp')",
         backgroundSize: "cover",
         backgroundPosition: "center center",
-        backgroundColor: "#0284c7",
+        backgroundColor: "#070e1c",
       }}
     >
       {/* High Performance Native Video Player on Desktop Only: 0% CPU on mobile/APKs */}

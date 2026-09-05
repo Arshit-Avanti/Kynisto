@@ -16,8 +16,8 @@ android {
         applicationId "com.kynisto.app"
         minSdk 24
         targetSdk 35
-        versionCode Integer.parseInt(System.getenv("KYNISTO_VERSION_CODE") ?: "5")
-        versionName System.getenv("KYNISTO_VERSION_NAME") ?: "2.1.1"
+        versionCode Integer.parseInt(System.getenv("KYNISTO_VERSION_CODE") ?: "6")
+        versionName System.getenv("KYNISTO_VERSION_NAME") ?: "2.2.0"
         buildConfigField "String", "WEB_URL", "\"https://kynisto.in\""
         vectorDrawables.useSupportLibrary = true
     }

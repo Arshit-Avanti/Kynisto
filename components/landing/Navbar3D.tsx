@@ -5,7 +5,6 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { apiFetch } from "@/lib/client-api";
-import { signOutSupabaseBrowser } from "@/lib/supabase-browser";
 import {
   Home,
   User,
@@ -46,15 +45,31 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
+    if (initialUser !== undefined) {
+      setUser(initialUser ?? null);
+    }
+  }, [initialUser]);
+
+  useEffect(() => {
+    let ticking = false;
     const onScroll = () => {
-      const isPast = window.scrollY > 15;
-      setScrolled((prev) => (prev !== isPast ? isPast : prev));
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(() => {
+          const isPast = window.scrollY > 15;
+          setScrolled((prev) => (prev !== isPast ? isPast : prev));
+          ticking = false;
+        });
+      }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
+    // If initialUser was explicitly provided (including null for guests), do not fetch /api/auth/me
+    if (initialUser !== undefined) return;
+
     let active = true;
     const fetchUser = async () => {
       try {
@@ -74,7 +89,7 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
     return () => {
       active = false;
     };
-  }, [user]);
+  }, [user, initialUser]);
 
   const dashboardHref =
     user?.role === "admin"
@@ -92,7 +107,10 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
       setIsLoggingOut(true);
       await apiFetch("/api/auth/logout", { method: "POST", json: {} });
     } finally {
-      await signOutSupabaseBrowser().catch(() => undefined);
+      try {
+        const { signOutSupabaseBrowser } = await import("@/lib/supabase-browser");
+        await signOutSupabaseBrowser().catch(() => undefined);
+      } catch {}
       setUser(null);
       setMobileMenuOpen(false);
       setIsLoggingOut(false);

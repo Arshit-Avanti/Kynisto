@@ -124,7 +124,7 @@ const ProgressRing = ({ progress, max = 1000 }: { progress: number, max?: number
 export default function KynistoWalletView() {
   const [activeTab, setActiveTab] = useState<'kynisto' | 'loyalty' | 'memberships' | 'history'>('kynisto');
   const [walletData, setWalletData] = useState<WalletData>(defaultWalletData);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [redeeming, setRedeeming] = useState(false);
   const [redeemResult, setRedeemResult] = useState<{reward?: string; coupon?: string; error?: string} | null>(null);
 
@@ -381,12 +381,12 @@ export default function KynistoWalletView() {
     <div className="mx-auto max-w-4xl space-y-6 relative pb-32">
       {/* Soft Ambient Radial Backlight Glow */}
       <div className="fixed inset-0 pointer-events-none -z-10 flex items-center justify-center overflow-hidden">
-        <div className="w-[120vw] h-[120vw] bg-[radial-gradient(ellipse_at_center,_rgba(99,102,241,0.25)_0%,_rgba(168,85,247,0.15)_30%,_transparent_70%)] blur-[120px]" />
+        <div className="w-[120vw] h-[120vw] bg-[radial-gradient(ellipse_at_center,_rgba(99,102,241,0.25)_0%,_rgba(168,85,247,0.15)_30%,_transparent_70%)] blur-2xl opacity-50" />
       </div>
 
       {/* Header */}
       <div className="overflow-hidden rounded-3xl bg-white dark:bg-black p-4 sm:p-6 border border-gray-200 dark:border-gray-800 shadow-[0_0_40px_rgba(99,102,241,0.15)] relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[radial-gradient(circle_at_center,_rgba(99,102,241,0.15)_0%,_rgba(168,85,247,0.08)_50%,_transparent_80%)] blur-[80px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[radial-gradient(circle_at_center,_rgba(99,102,241,0.15)_0%,_rgba(168,85,247,0.08)_50%,_transparent_80%)] blur-xl pointer-events-none" />
         <div className="flex items-center space-x-3 sm:space-x-4 relative z-10">
           <div className="rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-700 p-3 sm:p-4 shadow-lg text-white shrink-0">
             <Wallet className="h-6 w-6 sm:h-8 sm:w-8" />

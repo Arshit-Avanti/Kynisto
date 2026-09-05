@@ -350,7 +350,7 @@ const defaultHealthcareProviders: HealthcareQueueItem[] = [
 export default function LiveQueueTracker() {
   const router = useRouter();
   const [view, setView] = useState<'list' | 'ticket'>('list');
-  const [queues, setQueues] = useState<HealthcareQueueItem[]>([]);
+  const [queues, setQueues] = useState<HealthcareQueueItem[]>(() => defaultHealthcareProviders);
   const [selectedQueue, setSelectedQueue] = useState<HealthcareQueueItem | null>(null);
   
   // Real patient state from D1 Database (managed by owner/admin)

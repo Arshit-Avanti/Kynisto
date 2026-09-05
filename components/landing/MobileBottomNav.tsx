@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/client-api";
+import { turboTouch } from "@/lib/turbotouch";
 import {
   Home,
   Stethoscope,
@@ -20,11 +21,19 @@ interface MobileNavUser {
 }
 
 export function MobileBottomNav() {
+  const router = useRouter();
   const pathname = usePathname() || "/";
   const [user, setUser] = useState<MobileNavUser | null>(null);
 
   useEffect(() => {
     let active = true;
+    // Proactively pre-warm top-level tab routes into client router cache
+    try {
+      router.prefetch("/healthcare");
+      router.prefetch("/services");
+      router.prefetch("/wallet");
+    } catch {}
+
     const checkUser = async () => {
       try {
         const res = await apiFetch<{ user: MobileNavUser | null }>("/api/auth/me");
@@ -39,7 +48,7 @@ export function MobileBottomNav() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [router]);
 
   const dashboardHref =
     user?.role === "admin"
@@ -114,7 +123,18 @@ export function MobileBottomNav() {
               <Link
                 key={item.id}
                 href={item.href}
-                className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-full transition-all duration-200 group focus:outline-none ${
+                prefetch={true}
+                onTouchStart={() => {
+                  try { router.prefetch(item.href); } catch {}
+                }}
+                onPointerDown={() => {
+                  turboTouch.haptic(8);
+                  try { router.prefetch(item.href); } catch {}
+                }}
+                onMouseEnter={() => {
+                  try { router.prefetch(item.href); } catch {}
+                }}
+                className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-full transition-all duration-150 group focus:outline-none ${
                   isActive
                     ? "bg-gradient-to-tr from-orange-500/25 to-amber-500/15 border border-orange-500/40 text-orange-400 shadow-sm shadow-orange-500/10 scale-105"
                     : "text-slate-400 hover:text-slate-200 active:scale-95"
