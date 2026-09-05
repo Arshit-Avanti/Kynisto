@@ -29,7 +29,11 @@ export function sites(): Plugin {
       const hostingConfig = resolve(root, ".openai", "hosting.json");
       const drizzleSource = resolve(root, "drizzle");
 
-      await rm(outputDirectory, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+      try {
+        await rm(outputDirectory, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
+      } catch {
+        // Windows file locking / OneDrive sync resilience
+      }
       await mkdir(outputDirectory, { recursive: true });
 
       if (await exists(hostingConfig)) {

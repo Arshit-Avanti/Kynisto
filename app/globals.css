@@ -4899,4 +4899,22 @@ html, body {
   font-family: 'Cormorant Garamond', Georgia, Cambria, 'Times New Roman', Times, serif;
 }
 
-
+@media (max-width: 768px) {
+  /* Hardware accelerated smooth touch scroll */
+  html, body {
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+  /* Cap expensive GPU backdrop-filters on mobile devices to prevent GPU thrashing and memory exhaustion */
+  .backdrop-blur-2xl,
+  .backdrop-blur-xl,
+  .backdrop-blur-lg,
+  .backdrop-blur-md {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+  }
+  /* Reduce layer memory on low RAM phones */
+  .arise-on-scroll {
+    will-change: auto !important;
+  }
+}

@@ -103,7 +103,7 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
   const pathname = usePathname() || "/";
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top,0.5rem)] sm:pt-3 px-2 sm:px-6 pointer-events-none">
+    <header className="fixed top-0 left-0 right-0 z-50 pt-[calc(env(safe-area-inset-top,0px)+12px)] sm:pt-4 px-3 sm:px-6 pointer-events-none">
       <div
         className={`max-w-6xl mx-auto rounded-full transition-all duration-300 pointer-events-auto border flex items-center justify-between px-3 sm:px-6 py-1.5 sm:py-2.5 shadow-lg ${
           scrolled

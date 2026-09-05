@@ -1975,7 +1975,7 @@ export default function Home() {
             WebkitBackdropFilter: "blur(24px)",
             display: "flex",
             flexDirection: "column",
-            padding: "20px 20px 32px 20px",
+            padding: "24px 20px 32px 20px",
             overflowY: "auto",
             boxSizing: "border-box",
           }}

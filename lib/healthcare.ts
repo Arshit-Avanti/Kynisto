@@ -2,6 +2,7 @@ import { getD1 } from "@/db/runtime";
 import { ensureSeeded } from "@/db/seed";
 import { HttpError } from "@/lib/security";
 import { ensurePrescriptionTables } from "@/lib/prescriptions";
+import { microCache } from "@/lib/micro-cache";
 
 export const HEALTHCARE_TYPES = [
   "hospital",
@@ -274,6 +275,7 @@ const _storeResetCache = new Map<string, { date: string; checkedAt: number }>();
 const _storeSummaryCache = new Map<string, { data: Record<string, string | number | null>; cachedAt: number }>();
 
 export function invalidateHealthcareCache(storeId?: string) {
+  microCache.clear();
   if (storeId) {
     _storeSummaryCache.delete(storeId);
     _storeSweepCache.delete(storeId);

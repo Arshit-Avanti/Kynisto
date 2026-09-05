@@ -8,17 +8,21 @@ import { microCache, microCacheJson } from "@/lib/micro-cache";
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
-    const cacheKey = `healthcare:${url.searchParams.toString()}`;
-    const cached = microCache.get<any>(cacheKey);
-    if (cached) {
-      return microCacheJson(cached, "public, max-age=10, stale-while-revalidate=30");
+    const params = url.searchParams;
+    const isQueueRequested = params.has("queue") || params.has("queueStatus") || params.has("status");
+    const cacheKey = `healthcare:${params.toString()}`;
+
+    if (!isQueueRequested) {
+      const cached = microCache.get<any>(cacheKey);
+      if (cached) {
+        return microCacheJson(cached, "public, max-age=10, stale-while-revalidate=30");
+      }
     }
 
     await ensureSeeded();
     await expireHealthcareQueueEntries();
 
     const db = getD1();
-    const params = url.searchParams;
     const conditions = [
       "s.status NOT IN ('suspended','deleted','rejected')",
       "(c.module = 'healthcare' OR c.slug IN ('clinics-doctors', 'pharmacies', 'dental-care', 'opticians', 'pet-care') OR c.name LIKE '%Clinic%' OR c.name LIKE '%Doctor%' OR c.name LIKE '%Hospital%' OR c.name LIKE '%Pharm%' OR c.name LIKE '%Dental%' OR c.name LIKE '%Health%' OR c.name LIKE '%Optic%' OR hp.store_id IS NOT NULL)",
@@ -106,6 +110,11 @@ export async function GET(request: Request) {
       items: result.results ?? [],
       types: HEALTHCARE_TYPES.map((value) => ({ value, label: HEALTHCARE_LABELS[value] })),
     };
+
+    if (isQueueRequested) {
+      return microCacheJson(data, "no-cache, no-store, must-revalidate");
+    }
+
     microCache.set(cacheKey, data, 1_000);
     return microCacheJson(data, "public, max-age=1, stale-while-revalidate=5");
   } catch (error) { return apiError(error); }

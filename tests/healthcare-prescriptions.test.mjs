@@ -548,3 +548,35 @@ test("healthcare fixes: Back to Hub, Follow-up None option, and History performa
   assert.equal(preservedHistory[0].serviceDate, "2026-09-03");
 });
 
+test("UX & Performance Fixes: Image 1-4 & Mobile Scroll", () => {
+  // 1. Image 1: Verification that CredixInteractiveHeroFeatures has no 3D section or scroll loop
+  import("fs").then(({ readFileSync }) => {
+    const heroCode = readFileSync("components/dashboard/CredixInteractiveHeroFeatures.tsx", "utf-8");
+    assert.equal(heroCode.includes("Hyperlocal Infrastructure"), false, "Hyperlocal Infrastructure section must be removed");
+    assert.equal(heroCode.includes("recentTransactions"), false, "recentTransactions must be removed");
+    assert.equal(heroCode.includes("scrollProgress"), false, "scrollProgress must be removed");
+    assert.equal(heroCode.includes("translateXVal"), false, "3D transforms must be removed");
+    // Image 2: Hero padding shifted down
+    assert.ok(heroCode.includes("104px 16px 32px 16px"), "Hero padding must be shifted down");
+
+    // 2. Image 2: Top navigation shifted down
+    const navCode = readFileSync("components/landing/Navbar3D.tsx", "utf-8");
+    assert.ok(navCode.includes("pt-[calc(env(safe-area-inset-top,0px)+12px)]"), "Navbar must have safe-area shift down");
+
+    // 3. Image 3: Healthcare card layout
+    const queueCode = readFileSync("components/queue/LiveQueueTracker.tsx", "utf-8");
+    assert.ok(queueCode.includes("max-w-2xl mx-auto"), "Single clinic card must be centered");
+    assert.equal(queueCode.includes("No Appts"), false, "Clunky disabled No Appts button must be removed");
+
+    // 4. Image 4: isClinicQueueOpen function and closed indicator
+    assert.ok(queueCode.includes("export function isClinicQueueOpen"), "isClinicQueueOpen must be exported");
+    assert.ok(queueCode.includes("Queue Closed"), "Queue Closed badge must be present");
+
+    // 5. Mobile performance CSS
+    const cssCode = readFileSync("app/globals.css", "utf-8");
+    assert.ok(cssCode.includes("backdrop-filter: blur(6px) !important"), "Mobile backdrop-filter must be capped");
+    assert.ok(cssCode.includes("-webkit-overflow-scrolling: touch"), "Mobile touch scroll must be enabled");
+  });
+});
+
+

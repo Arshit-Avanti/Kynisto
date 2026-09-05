@@ -178,6 +178,37 @@ interface HealthcareQueueItem {
   allowAppointments?: number | boolean;
 }
 
+export function isClinicQueueOpen(item: HealthcareQueueItem): boolean {
+  const ownerEnabled = item.ownerQueueEnabled === 1 || item.ownerQueueEnabled === true;
+  const adminEnabled = item.adminQueueEnabled === 1 || item.adminQueueEnabled === true;
+  if (!ownerEnabled || !adminEnabled) return false;
+
+  const accepting = item.acceptingPatients === 1 || item.acceptingPatients === true || item.acceptingPatients === undefined;
+  if (!accepting) return false;
+
+  if (item.queueStatus === 'closed' || item.queueStatus === 'no_queue') return false;
+
+  if (item.openingTime && item.closingTime) {
+    const parseMinutes = (timeStr: string) => {
+      const match = String(timeStr).match(/^(\d{1,2}):(\d{2})$/);
+      if (!match) return null;
+      return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
+    };
+    const openM = parseMinutes(item.openingTime);
+    const closeM = parseMinutes(item.closingTime);
+    if (openM !== null && closeM !== null) {
+      const istDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+      const currentMinutes = istDate.getHours() * 60 + istDate.getMinutes();
+      const withinHours = openM <= closeM
+        ? currentMinutes >= openM && currentMinutes <= closeM
+        : currentMinutes >= openM || currentMinutes <= closeM;
+      if (!withinHours) return false;
+    }
+  }
+
+  return item.queueStatus === 'open';
+}
+
 interface PatientQueueStateResponse {
   activeStoreId: string | null;
   state: {
@@ -388,7 +419,7 @@ export default function LiveQueueTracker() {
   // 1. Fetch real healthcare provider dataset from backend API
   const fetchHealthcareQueues = useCallback(async () => {
     try {
-      const data = await apiFetch<{ items: HealthcareQueueItem[] }>('/api/healthcare');
+      const data = await apiFetch<{ items: HealthcareQueueItem[] }>('/api/healthcare?queue=all');
       if (data && data.items) {
         setQueues(data.items);
       }
@@ -961,113 +992,119 @@ export default function LiveQueueTracker() {
       { id: 'Dental', label: 'Dental Care', icon: Sparkles },
     ];
 
-    return filters.map(({ id, label, icon: Icon }) => (
-      <button
-        key={id}
-        onClick={() => handleFilterSelect(id)}
-        className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 ${
-          activeFilter === id
-            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/25 border border-emerald-500/30 scale-[1.02]'
-            : 'bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 shadow-sm'
-        }`}
-      >
-        <Icon className={`w-3.5 h-3.5 ${activeFilter === id ? 'text-white' : 'text-emerald-600'}`} />
-        <span>{label}</span>
-      </button>
-    ));
+    return filters.map(({ id, label, icon: Icon }) => {
+      const isActive = activeFilter === id;
+      return (
+        <button
+          key={id}
+          type="button"
+          onClick={() => handleFilterSelect(id)}
+          className={`inline-flex items-center gap-2 px-4.5 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0 select-none ${
+            isActive
+              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20 border border-emerald-500/30 scale-[1.02]'
+              : 'bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200/80 hover:border-slate-300 shadow-xs active:scale-95'
+          }`}
+        >
+          <Icon className={`w-3.5 h-3.5 transition-colors ${isActive ? 'text-white' : 'text-emerald-600'}`} />
+          <span>{label}</span>
+        </button>
+      );
+    });
   }, [activeFilter, handleFilterSelect]);
 
   const renderedQueuesGrid = useMemo(() => {
     return filteredQueues.map((item) => {
       const ownerEnabled = item.ownerQueueEnabled === 1 || item.ownerQueueEnabled === true;
       const adminEnabled = item.adminQueueEnabled === 1 || item.adminQueueEnabled === true;
-      const accepting = item.acceptingPatients === 1 || item.acceptingPatients === true || item.acceptingPatients === undefined;
       const hasLiveQueue = ownerEnabled && adminEnabled && item.queueStatus !== 'no_queue';
+      const isClosed = !isClinicQueueOpen(item);
       const isPaused = hasLiveQueue && item.queueStatus === 'paused';
-      const isClosed = !hasLiveQueue || !accepting || item.queueStatus === 'closed' || isPaused;
       const consultationMins = item.consultationMinutes || 15;
+      const canBook = item.allowAppointments !== 0 && item.allowAppointments !== false;
 
       return (
         <div
           key={item.id}
           style={{ contain: "content", transform: "translate3d(0,0,0)", willChange: "transform" }}
-          className="bg-white border border-slate-200/90 hover:border-emerald-500/40 rounded-3xl p-5 sm:p-7 transition-all duration-300 shadow-sm hover:shadow-xl flex flex-col justify-between group relative overflow-hidden active:scale-[0.99]"
+          className="bg-white border border-slate-200/90 hover:border-emerald-500/40 rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-sm hover:shadow-lg flex flex-col justify-between group relative overflow-hidden active:scale-[0.99]"
         >
           <div>
             <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
               <div className="flex items-center flex-wrap gap-1.5 min-w-0">
-                <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-extrabold uppercase tracking-wide">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-[11px] font-bold uppercase tracking-wider">
                   {item.providerType || 'Clinic'}
                 </span>
                 {item.subcategory && (
-                  <span className="px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-teal-700 text-[11px] font-extrabold uppercase tracking-wide">
+                  <span className="px-2.5 py-0.5 rounded-full bg-teal-50 border border-teal-200/80 text-teal-700 text-[11px] font-bold uppercase tracking-wider">
                     {item.subcategory}
                   </span>
                 )}
               </div>
 
               {!hasLiveQueue ? (
-                <span className="inline-flex items-center text-[11px] font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200 whitespace-nowrap shrink-0">
+                <span className="inline-flex items-center text-[11px] font-semibold text-slate-500 bg-slate-100/90 px-2.5 py-0.5 rounded-full border border-slate-200 whitespace-nowrap shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-400 mr-1.5" />
                   No Live Queue
                 </span>
               ) : isPaused ? (
-                <span className="inline-flex items-center text-[11px] font-bold text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200 whitespace-nowrap shrink-0">
+                <span className="inline-flex items-center text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 whitespace-nowrap shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5" />
                   Queue Paused
                 </span>
               ) : isClosed ? (
-                <span className="inline-flex items-center text-[11px] font-bold text-rose-700 bg-rose-50 px-3 py-1 rounded-full border border-rose-200 whitespace-nowrap shrink-0">
+                <span className="inline-flex items-center text-[11px] font-bold text-rose-700 bg-rose-50 px-3 py-1 rounded-full border border-rose-200 whitespace-nowrap shrink-0 shadow-sm">
                   <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1.5" />
                   Queue Closed
                 </span>
               ) : (
                 <span className="inline-flex items-center text-[11px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 whitespace-nowrap shrink-0 shadow-sm">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
-                  ● Live Queue Open
+                  Live Queue Open
                 </span>
               )}
             </div>
 
-            <div className="flex items-start gap-3.5 mb-3">
-              <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shrink-0 mt-0.5 shadow-sm">
+            <div className="flex items-start gap-3.5 mb-4">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 mt-0.5 shadow-xs">
                 <Stethoscope className="w-5 h-5" />
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="text-lg sm:text-xl font-black text-slate-900 group-hover:text-emerald-600 transition-colors leading-tight">
+                <h3 className="text-base sm:text-lg font-black text-slate-900 group-hover:text-emerald-600 transition-colors leading-snug">
                   {item.name}
                 </h3>
-                <p className="flex items-center text-slate-600 text-xs sm:text-sm font-medium mt-1">
+                <p className="flex items-center text-slate-500 text-xs sm:text-sm font-medium mt-1">
                   <MapPin className="w-3.5 h-3.5 mr-1 text-teal-600 shrink-0" />
                   <span className="truncate">{item.address}</span>
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-200/80 mb-5 text-center">
+            <div className="grid grid-cols-3 gap-2 p-3 bg-slate-50/80 rounded-2xl border border-slate-200/70 mb-5 text-center">
               <div>
-                <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
                   Waiting
                 </span>
-                <span className="text-sm sm:text-lg font-black text-slate-900 tabular-nums">
+                <span className="text-sm sm:text-base font-black text-slate-900 tabular-nums">
                   {hasLiveQueue ? (isClosed ? 0 : item.waitingCount) : "OPD Listed"}
                 </span>
               </div>
               <div>
-                <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
                   Avg Speed
                 </span>
-                <span className="text-sm sm:text-lg font-black text-emerald-600 tabular-nums">
+                <span className="text-sm sm:text-base font-black text-emerald-600 tabular-nums">
                   {hasLiveQueue ? `${consultationMins}m` : "Walk-in"}
                 </span>
               </div>
               <div>
-                <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-0.5">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
                   Status
                 </span>
-                <span className={`text-sm sm:text-lg font-black tabular-nums ${isClosed ? "text-slate-400" : "text-emerald-600"}`}>
-                  {isClosed ? "Closed" : "Active"}
-                </span>
+                {isClosed ? (
+                  <span className="text-sm sm:text-lg font-black tabular-nums text-rose-600">Closed</span>
+                ) : (
+                  <span className="text-sm sm:text-lg font-black tabular-nums text-emerald-600">Active</span>
+                )}
               </div>
             </div>
           </div>
@@ -1075,47 +1112,59 @@ export default function LiveQueueTracker() {
           <div className="flex items-center gap-2 pt-1">
             <Link
               href={`/stores/${item.slug || item.id}`}
-              className={`py-2.5 px-4 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 cursor-pointer ${
-                hasLiveQueue ? "shrink-0" : "w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white border-none shadow-md"
+              className={`py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+                hasLiveQueue
+                  ? "shrink-0 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80"
+                  : canBook
+                    ? "flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80"
+                    : "w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white border-none shadow-sm hover:shadow"
               }`}
             >
-              <Building2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <Building2 className={`w-3.5 h-3.5 shrink-0 ${!hasLiveQueue && !canBook ? "text-white" : "text-emerald-600"}`} />
               <span>Profile</span>
             </Link>
 
-            {item.allowAppointments === 0 || item.allowAppointments === false ? (
+            {canBook && (
               <button
                 type="button"
-                className="py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 opacity-60 cursor-pointer text-slate-400 border border-slate-200 bg-slate-50 shrink-0"
-                onClick={() => setBookingTarget({ id: String(item.id), name: item.name, allowAppointments: false })}
-                title="This clinic does not allow online appointments"
-              >
-                <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                <span className="text-slate-400">No Appts</span>
-              </button>
-            ) : (
-              <button
-                className="py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center space-x-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 cursor-pointer shrink-0"
+                className={`py-2.5 px-3.5 font-bold text-xs sm:text-sm rounded-xl transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+                  hasLiveQueue
+                    ? "shrink-0 bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200/80"
+                    : "flex-1 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white border-none shadow-sm hover:shadow"
+                }`}
                 onClick={() => setBookingTarget({ id: String(item.id), name: item.name, allowAppointments: true })}
               >
-                <Calendar className="w-3.5 h-3.5 text-teal-600" />
+                <Calendar className={`w-3.5 h-3.5 shrink-0 ${!hasLiveQueue ? "text-white" : "text-teal-600"}`} />
                 <span>Book Appt</span>
               </button>
             )}
 
             {hasLiveQueue && (
-              <button
-                onClick={() => handleJoinQueue(item)}
-                disabled={isClosed || isJoining}
-                className={`flex-1 py-2.5 px-4 font-bold text-xs sm:text-sm rounded-2xl transition-all shadow-md flex items-center justify-center space-x-1.5 group/btn ${
-                  isClosed
-                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
-                    : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-500/20 cursor-pointer'
-                }`}
-              >
-                <span>{isPaused ? 'Queue Paused' : isClosed ? 'Queue Closed' : isJoining ? 'Joining...' : 'Visit Live Queue'}</span>
-                {!isClosed && !isJoining && <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />}
-              </button>
+              isPaused ? (
+                <button
+                  disabled
+                  className="flex-1 py-2.5 px-4 font-bold text-xs sm:text-sm rounded-2xl bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 flex items-center justify-center space-x-1.5"
+                >
+                  <span>Queue Paused</span>
+                </button>
+              ) : isClosed ? (
+                <button
+                  disabled
+                  className="flex-1 py-2.5 px-4 font-bold text-xs sm:text-sm rounded-2xl bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 flex items-center justify-center space-x-1.5"
+                >
+                  <span>Queue Closed</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleJoinQueue(item)}
+                  disabled={isJoining}
+                  className="flex-1 py-2.5 px-4 font-bold text-xs sm:text-sm rounded-xl transition-all shadow-sm flex items-center justify-center space-x-1.5 group/btn bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-500/20 hover:shadow-md cursor-pointer"
+                >
+                  <span>{isJoining ? 'Joining...' : 'Visit Live Queue'}</span>
+                  {!isJoining && <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />}
+                </button>
+              )
             )}
           </div>
         </div>
@@ -1758,7 +1807,7 @@ export default function LiveQueueTracker() {
           {renderedCategoryFilters}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-7">
+        <div className={`grid grid-cols-1 ${filteredQueues.length === 1 ? 'max-w-2xl mx-auto' : 'md:grid-cols-2 max-w-5xl mx-auto'} gap-6 sm:gap-8`}>
           {renderedQueuesGrid}
         </div>
       </div>

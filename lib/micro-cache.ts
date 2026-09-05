@@ -53,8 +53,13 @@ export function microCacheJson(
 ): Response {
   const headers = new Headers(init.headers);
   headers.set("Cache-Control", cacheControl);
-  headers.set("CDN-Cache-Control", "max-age=60");
-  headers.set("Cloudflare-CDN-Cache-Control", "max-age=60");
+  if (cacheControl.includes("no-cache") || cacheControl.includes("no-store")) {
+    headers.set("CDN-Cache-Control", "no-store");
+    headers.set("Cloudflare-CDN-Cache-Control", "no-store");
+  } else {
+    headers.set("CDN-Cache-Control", "max-age=60");
+    headers.set("Cloudflare-CDN-Cache-Control", "max-age=60");
+  }
   headers.set("Content-Type", "application/json; charset=utf-8");
   return new Response(JSON.stringify(data), { ...init, headers });
 }
