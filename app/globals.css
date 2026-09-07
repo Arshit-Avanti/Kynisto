@@ -1186,7 +1186,6 @@ textarea:focus {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 16px;
   margin-top: 32px;
-  perspective: 1200px;
 }
 
 @media (max-width: 1200px) {
@@ -1221,34 +1220,33 @@ textarea:focus {
   align-items: center;
   text-align: left;
   border-radius: 20px;
-  background: rgba(13, 22, 42, 0.85);
+  background: rgba(13, 22, 42, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: #ffffff;
   cursor: pointer;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.12);
-  transform-style: preserve-3d;
-  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
-              box-shadow 0.28s ease,
-              border-color 0.28s ease,
-              background 0.28s ease;
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1),
+              box-shadow 0.2s ease,
+              border-color 0.2s ease,
+              background 0.2s ease;
   overflow: hidden;
 }
 
-/* 3D Perspective Hover Lift */
+/* Smooth GPU Hover Lift */
 .categoryTile:hover {
-  transform: translateY(-7px) scale(1.03) rotateX(3deg) rotateY(-2deg) translateZ(20px);
+  transform: translateY(-4px) scale(1.02);
   border-color: rgba(249, 115, 22, 0.65);
-  background: rgba(18, 30, 58, 0.95);
-  box-shadow: 0 22px 45px -10px rgba(0, 0, 0, 0.75),
-              0 0 28px rgba(249, 115, 22, 0.35),
+  background: rgba(18, 30, 58, 0.96);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.75),
+              0 0 24px rgba(249, 115, 22, 0.3),
               inset 0 1px 2px rgba(255, 255, 255, 0.25);
   z-index: 10;
 }
 
 .categoryTile:active {
-  transform: translateY(-2px) scale(0.98) translateZ(0);
+  transform: translateY(-1px) scale(0.98);
 }
 
 /* Laser Shimmer Sweep */
@@ -1923,7 +1921,7 @@ footer > p { color: var(--muted); font-size: 11px; }
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
 .appUpdatePrompt{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));z-index:250;width:min(430px,calc(100% - 28px));padding:10px 11px 10px 14px;display:flex;align-items:center;gap:10px;transform:translateX(-50%) translateZ(0);will-change:transform,opacity;contain:layout style paint;border:1px solid rgba(255,255,255,.22);border-radius:15px;background:#0b1736;color:#fff;box-shadow:0 8px 24px rgba(2,7,18,.22)}.appUpdatePrompt span{min-width:0;flex:1;display:grid}.appUpdatePrompt b{font-size:11px}.appUpdatePrompt small{color:#b8c6e2;font-size:8px}.appUpdatePrompt button{min-height:34px;padding:0 11px;border:0;border-radius:9px;background:#2457ff;color:#fff;cursor:pointer;font-size:9px;font-weight:750}.appUpdatePrompt button:last-child{width:32px;padding:0;background:rgba(255,255,255,.1);font-size:18px}
-.storeGrid>*,.categoryGrid>*,.offerGrid>*{content-visibility:auto;contain-intrinsic-size:260px}
+.storeGrid>*,.offerGrid>*{content-visibility:auto;contain-intrinsic-size:260px}
 
 @media (max-width: 1100px) {
   .topbar, .hero, .categorySection, .trustStrip, footer { width: calc(100% - 56px); padding-left: 0; padding-right: 0; }

@@ -61,7 +61,7 @@ export function VideoBackground({
     video.playsInline = true;
 
     const playVideo = () => {
-      if (video.paused) {
+      if (video.paused && window.scrollY <= window.innerHeight * 0.7) {
         video.play().catch(() => {
           video.muted = true;
           video.play().catch(() => {});
@@ -71,28 +71,57 @@ export function VideoBackground({
 
     video.addEventListener("loadeddata", playVideo);
     video.addEventListener("canplay", playVideo);
-    video.addEventListener("pause", playVideo);
 
     playVideo();
+
+    // Pause video when scrolled past hero to free GPU/CPU resources
+    let ticking = false;
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        if (!video) return;
+        const pastHero = window.scrollY > window.innerHeight * 0.7;
+        if (pastHero) {
+          if (!video.paused) {
+            video.pause();
+          }
+        } else {
+          if (video.paused && document.visibilityState !== "hidden") {
+            video.play().catch(() => {});
+          }
+        }
+      });
+    };
+
+    const handleVisibilityChange = () => {
+      if (!video) return;
+      if (document.visibilityState === "hidden") {
+        video.pause();
+      } else if (window.scrollY <= window.innerHeight * 0.7) {
+        video.play().catch(() => {});
+      }
+    };
 
     const handleFirstInteraction = () => {
       playVideo();
       window.removeEventListener("touchstart", handleFirstInteraction);
       window.removeEventListener("click", handleFirstInteraction);
-      window.removeEventListener("scroll", handleFirstInteraction);
     };
 
     window.addEventListener("touchstart", handleFirstInteraction, { passive: true });
     window.addEventListener("click", handleFirstInteraction, { passive: true });
-    window.addEventListener("scroll", handleFirstInteraction, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       video.removeEventListener("loadeddata", playVideo);
       video.removeEventListener("canplay", playVideo);
-      video.removeEventListener("pause", playVideo);
       window.removeEventListener("touchstart", handleFirstInteraction);
       window.removeEventListener("click", handleFirstInteraction);
-      window.removeEventListener("scroll", handleFirstInteraction);
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [isMobile]);
 

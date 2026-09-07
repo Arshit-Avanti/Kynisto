@@ -2370,7 +2370,14 @@ export default function Home() {
       {/* Interactive Credix Hero + Features Section with Continuous Scroll-Driven 3D Dashboard Motion */}
       <CredixInteractiveHeroFeatures query={query} setQuery={setQuery} />
 
-      <section className="categorySection w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 relative z-20" aria-labelledby="category-heading">
+      <section
+        className="categorySection w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 relative z-20 rounded-3xl"
+        style={{
+          background: "linear-gradient(to bottom, rgba(7, 14, 28, 0.45) 0%, rgba(7, 14, 28, 0.88) 15%, rgba(7, 14, 28, 0.98) 100%)",
+          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.5)",
+        }}
+        aria-labelledby="category-heading"
+      >
         <div className="sectionHeading compactHeading arise-on-scroll flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-[11px] font-bold text-orange-400 mb-2 uppercase tracking-wider">
@@ -2394,13 +2401,13 @@ export default function Home() {
           </button>
         </div>
         <div className="categoryGrid">
-          {catalogCategories.map((item, index) => {
+          {catalogCategories.map((item) => {
             const active = category === item.name;
             const count = item.storeCount ?? catalogStores.filter((store) => store.category === item.name).length;
             return (
               <button
                 key={item.name}
-                className={`categoryTile tone-${item.tone} arise-on-scroll arise-delay-${(index % 6) + 1}`}
+                className={`categoryTile tone-${item.tone}`}
                 type="button"
                 aria-pressed={active}
                 onPointerDown={() => turboTouch.haptic(8)}
