@@ -18,6 +18,7 @@ interface MobileNavUser {
   id: string;
   name?: string;
   role?: "admin" | "store_owner" | "customer";
+  ownerType?: "shop" | "healthcare";
 }
 
 export function MobileBottomNav() {
@@ -54,7 +55,9 @@ export function MobileBottomNav() {
     user?.role === "admin"
       ? "/admin"
       : user?.role === "store_owner"
-      ? "/owner"
+      ? user.ownerType === "healthcare"
+        ? "/healthcare/dashboard"
+        : "/owner"
       : user
       ? "/account"
       : "/login?returnTo=/account";
@@ -73,7 +76,7 @@ export function MobileBottomNav() {
       label: "Healthcare",
       href: "/healthcare",
       icon: Stethoscope,
-      isActive: pathname.startsWith("/healthcare") || pathname.startsWith("/queue"),
+      isActive: pathname === "/healthcare" || pathname.startsWith("/healthcare?") || pathname.startsWith("/queue"),
       ariaLabel: "Healthcare Tab",
     },
     {
@@ -101,6 +104,7 @@ export function MobileBottomNav() {
         pathname.startsWith("/dashboard") ||
         pathname.startsWith("/account") ||
         pathname.startsWith("/owner") ||
+        pathname.startsWith("/healthcare/dashboard") ||
         pathname.startsWith("/admin") ||
         pathname.startsWith("/login"),
       ariaLabel: "Account Tab",

@@ -22,8 +22,8 @@ export async function POST(request: Request) {
 
     // Validate role
     const role = body.role;
-    if (role !== "customer" && role !== "shop_owner") {
-      throw new ValidationError("Role must be 'customer' or 'shop_owner'.");
+    if (role !== "customer" && role !== "shop_owner" && role !== "healthcare_owner") {
+      throw new ValidationError("Role must be 'customer', 'shop_owner', or 'healthcare_owner'.");
     }
 
     // Validate password
@@ -60,8 +60,9 @@ export async function POST(request: Request) {
     }
 
     // Determine username prefix
-    const dbRole: UserRole = role === "shop_owner" ? "store_owner" : "customer";
-    const prefix = role === "shop_owner" ? "kynshop" : "kyncus";
+    const isHealthcare = role === "healthcare_owner";
+    const dbRole: UserRole = (role === "shop_owner" || isHealthcare) ? "store_owner" : "customer";
+    const prefix = isHealthcare ? "kyndoc" : role === "shop_owner" ? "kynshop" : "kyncus";
 
     // Atomically increment the counter and generate unique username
     // Use UPDATE ... RETURNING for atomic increment
@@ -101,7 +102,7 @@ export async function POST(request: Request) {
         .prepare(
           `UPDATE users 
            SET username = ?, password_hash = ?, password_salt = ?, password_iterations = ?, 
-               role = ?, updated_at = ? 
+               role = ?, owner_type = ?, updated_at = ? 
            WHERE id = ?`,
         )
         .bind(
@@ -110,6 +111,7 @@ export async function POST(request: Request) {
           passwordData.salt,
           passwordData.iterations,
           dbRole,
+          isHealthcare ? "healthcare" : "shop",
           now,
           userId,
         ),

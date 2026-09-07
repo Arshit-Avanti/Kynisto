@@ -10,7 +10,7 @@ import {
 } from "@/lib/supabase-browser";
 // verifyGoogleApplicationSession
 
-type SelectedRole = "customer" | "shop_owner" | "admin";
+type SelectedRole = "customer" | "shop_owner" | "healthcare_owner" | "admin";
 
 function getFriendlyErrorMessage(error: unknown): string {
   if (!error) return "profile query failed";
@@ -54,6 +54,7 @@ export function GoogleRoleOnboarding() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<SelectedRole | "">("");
   const [error, setError] = useState("");
+  const [ownerExpanded, setOwnerExpanded] = useState(false);
 
   useEffect(() => {
     if (loaded.current) return;
@@ -88,7 +89,9 @@ export function GoogleRoleOnboarding() {
               
               if (onboardingCompleted) {
                 const existingRole = profile?.role || session.user.user_metadata?.role;
-                const dest = (existingRole === "shop_owner" || existingRole === "owner" || existingRole === "store_owner") ? "/owner" : "/";
+                const existingOwnerType = (profile as Record<string, unknown>)?.owner_type || session.user.user_metadata?.owner_type;
+                const isHealthcareUser = existingRole === "healthcare_owner" || existingOwnerType === "healthcare";
+                const dest = isHealthcareUser ? "/healthcare/dashboard" : (existingRole === "shop_owner" || existingRole === "owner" || existingRole === "store_owner") ? "/owner" : "/";
                 window.location.replace(dest);
                 return;
               }
@@ -145,12 +148,13 @@ export function GoogleRoleOnboarding() {
     setBusy(selectedRole);
     setError("");
     try {
-      if (selectedRole !== "customer" && selectedRole !== "shop_owner" && selectedRole !== "admin") {
+      if (selectedRole !== "customer" && selectedRole !== "shop_owner" && selectedRole !== "healthcare_owner" && selectedRole !== "admin") {
         throw new Error("invalid role");
       }
 
       const metadata = user.user_metadata || {};
-      const targetRole = selectedRole === "shop_owner" ? "shop_owner" : selectedRole === "admin" ? "admin" : "customer";
+      const isHealthcare = selectedRole === "healthcare_owner";
+      const targetRole = isHealthcare ? "healthcare_owner" : selectedRole === "shop_owner" ? "shop_owner" : selectedRole === "admin" ? "admin" : "customer";
 
       // 1. Primary update: D1 database user role via API
       const { apiFetch } = await import("@/lib/client-api");
@@ -169,6 +173,7 @@ export function GoogleRoleOnboarding() {
             full_name: metadata.full_name || metadata.name || "",
             avatar_url: metadata.avatar_url || metadata.picture || "",
             role: targetRole,
+            owner_type: isHealthcare ? "healthcare" : "shop",
             onboarding_completed: true,
             updated_at: new Date().toISOString(),
           },
@@ -176,7 +181,9 @@ export function GoogleRoleOnboarding() {
         );
         await supabase.auth.updateUser({
           data: {
-            role: targetRole,
+            role: isHealthcare ? "healthcare_owner" : targetRole,
+            subrole: targetRole,
+            owner_type: isHealthcare ? "healthcare" : "shop",
             onboarding_completed: true,
             role_selected_at: new Date().toISOString(),
           },
@@ -188,12 +195,13 @@ export function GoogleRoleOnboarding() {
       // 3. Save to localStorage for instant client-side role memory
       try {
         localStorage.setItem("kynisto_permanent_role", targetRole);
+        localStorage.setItem("kynisto_owner_type", isHealthcare ? "healthcare" : "shop");
       } catch {
         // Ignore storage restriction errors
       }
 
       // 4. Route to the permanent workspace based on selected role
-      const destination = (targetRole === "shop_owner") ? "/owner" : (targetRole === "admin") ? "/admin" : "/";
+      const destination = isHealthcare ? "/healthcare/dashboard" : (targetRole === "shop_owner") ? "/owner" : (targetRole === "admin") ? "/admin" : "/";
       
       // Delay to ensure Cloudflare D1 read replicas synchronize the role update
       await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -275,35 +283,99 @@ export function GoogleRoleOnboarding() {
         </p>
       )}
       <div className="onboardingRoleGrid">
-        <button
-          type="button"
-          disabled={Boolean(busy)}
-          onClick={() => void selectRole("customer")}
-        >
-          <i aria-hidden="true">C</i>
-          <span>
-            <b>Customer</b>
-            <small>
-              Discover local shops, order products, book services &amp; join queues.
-            </small>
-          </span>
-          <em>{busy === "customer" ? "Setting up…" : "Continue as Customer →"}</em>
-        </button>
+        {!ownerExpanded ? (
+          <>
+            <button
+              type="button"
+              disabled={Boolean(busy)}
+              onClick={() => void selectRole("customer")}
+            >
+              <i aria-hidden="true">C</i>
+              <span>
+                <b>Customer</b>
+                <small>
+                  Discover local shops, order products, book services &amp; join queues.
+                </small>
+              </span>
+              <em>{busy === "customer" ? "Setting up…" : "Continue as Customer →"}</em>
+            </button>
 
-        <button
-          type="button"
-          disabled={Boolean(busy)}
-          onClick={() => void selectRole("shop_owner")}
-        >
-          <i aria-hidden="true">S</i>
-          <span>
-            <b>Shop / Service Owner</b>
-            <small>
-              Manage your physical store, Healthcare clinic, live queues &amp; service catalog.
-            </small>
-          </span>
-          <em>{busy === "shop_owner" ? "Setting up…" : "Continue as Shop Owner →"}</em>
-        </button>
+            <button
+              type="button"
+              disabled={Boolean(busy)}
+              onClick={() => setOwnerExpanded(true)}
+            >
+              <i aria-hidden="true">S</i>
+              <span>
+                <b>Shop Owner</b>
+                <small>
+                  Manage your physical store, Healthcare clinic, live queues &amp; service catalog.
+                </small>
+              </span>
+              <em>Choose business type →</em>
+            </button>
+          </>
+        ) : (
+          <>
+            <div style={{ gridColumn: "1 / -1", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+              <span style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--ink, #0f172a)" }}>
+                Select your business workspace type:
+              </span>
+              <button
+                type="button"
+                onClick={() => setOwnerExpanded(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#2563eb",
+                  fontWeight: 700,
+                  fontSize: "0.85rem",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.25rem",
+                  padding: "0.25rem 0.5rem",
+                }}
+              >
+                ← Back
+              </button>
+            </div>
+
+            <button
+              type="button"
+              disabled={Boolean(busy)}
+              onClick={() => void selectRole("healthcare_owner")}
+              style={{
+                borderColor: busy === "healthcare_owner" ? "#059669" : "rgba(16, 185, 129, 0.4)",
+                background: "linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.04) 100%)",
+              }}
+            >
+              <i aria-hidden="true" style={{ background: "linear-gradient(135deg, #059669, #10b981)", color: "#fff" }}>H</i>
+              <span>
+                <b style={{ color: "#065f46" }}>Healthcare Owner</b>
+                <small>
+                  Hospitals, Clinics, Doctors, Dental &amp; Diagnostic Centers. Digital Prescriptions, Appointments, Doctors &amp; Live OPD Queues.
+                </small>
+              </span>
+              <em style={{ color: "#059669" }}>{busy === "healthcare_owner" ? "Setting up…" : "Continue as Healthcare Owner →"}</em>
+            </button>
+
+            <button
+              type="button"
+              disabled={Boolean(busy)}
+              onClick={() => void selectRole("shop_owner")}
+            >
+              <i aria-hidden="true">S</i>
+              <span>
+                <b>Shop Owner</b>
+                <small>
+                  Retail Stores, Salons, Supermarkets, Restaurants, Electronics &amp; Local Services. Products, Orders &amp; Live Queues.
+                </small>
+              </span>
+              <em>{busy === "shop_owner" ? "Setting up…" : "Continue as Shop Owner →"}</em>
+            </button>
+          </>
+        )}
       </div>
       {error && (
         <div className="authCallbackActions">

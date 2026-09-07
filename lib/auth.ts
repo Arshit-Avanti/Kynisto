@@ -22,6 +22,7 @@ export type SessionUser = {
   name: string;
   email: string;
   role: UserRole;
+  ownerType?: "shop" | "healthcare";
   status: "active" | "suspended" | "disabled" | "banned";
   avatarUrl: string | null;
   mustChangePassword: boolean;
@@ -48,10 +49,49 @@ function cookieOptions(request: Request, maxAge: number = 30 * DAY) {
   };
 }
 
-export function dashboardForRole(role: UserRole): string {
+export function dashboardForRole(role: UserRole, ownerType?: string): string {
   if (role === "admin") return "/admin";
-  if (role === "store_owner" || (role as string) === "owner" || (role as string) === "shop_owner") return "/owner";
+  if (role === "store_owner" || (role as string) === "owner" || (role as string) === "shop_owner" || (role as string) === "healthcare_owner") {
+    if (ownerType === "healthcare" || (role as string) === "healthcare_owner") {
+      return "/healthcare/dashboard";
+    }
+    return "/owner";
+  }
   return "/account";
+}
+
+export async function resolveOwnerType(userId: string, email: string, role: UserRole): Promise<"shop" | "healthcare"> {
+  if (role !== "store_owner" && (role as string) !== "owner" && (role as string) !== "shop_owner") {
+    return "shop";
+  }
+  try {
+    const db = getD1();
+    const userRow = await db
+      .prepare("SELECT owner_type AS ownerType FROM users WHERE id = ? LIMIT 1")
+      .bind(userId)
+      .first<{ ownerType: string | null }>()
+      .catch(() => null);
+    if (userRow?.ownerType === "healthcare") return "healthcare";
+
+    const normalizedEmail = (email || "").toLowerCase().trim();
+    const clinicStore = await db
+      .prepare(`
+        SELECT s.id FROM stores s
+        JOIN categories c ON c.id = s.category_id
+        LEFT JOIN healthcare_provider_profiles hp ON hp.store_id = s.id
+        WHERE (s.owner_id = ? OR s.owner_id IN (SELECT id FROM users WHERE LOWER(email) = ?))
+        AND (c.module = 'healthcare' OR hp.store_id IS NOT NULL OR s.business_type LIKE '%Health%' OR s.business_type LIKE '%Clinic%')
+        LIMIT 1
+      `)
+      .bind(userId, normalizedEmail)
+      .first<{ id: string }>()
+      .catch(() => null);
+
+    if (clinicStore) return "healthcare";
+  } catch {
+    // Fallback to shop
+  }
+  return "shop";
 }
 
 export async function createSession(
@@ -108,11 +148,14 @@ export async function createSession(
     throw new HttpError(404, "User record not found.", "USER_NOT_FOUND");
   }
 
+  const ownerType = await resolveOwnerType(userRecord.id, userRecord.email, userRecord.role);
+
   const sessionUser: SessionUser = {
     id: userRecord.id,
     name: userRecord.name,
     email: userRecord.email,
     role: userRecord.role,
+    ownerType,
     status: userRecord.status,
     avatarUrl: userRecord.avatarUrl,
     mustChangePassword: Boolean(userRecord.mustChangePassword),
@@ -174,6 +217,7 @@ export async function getSessionUser(): Promise<AuthSession | null> {
       const isAdminEmail = sessionRecord.email.toLowerCase().trim() === "nxt.arshit@gmail.com";
       const isSuperAdmin = Boolean(sessionRecord.isSuperAdmin) || isAdminEmail;
       const effectiveRole: UserRole = isSuperAdmin ? "admin" : sessionRecord.role;
+      const ownerType = await resolveOwnerType(sessionRecord.userId, sessionRecord.email, effectiveRole);
 
       return {
         sessionId: sessionRecord.sessionId,
@@ -185,6 +229,7 @@ export async function getSessionUser(): Promise<AuthSession | null> {
           name: sessionRecord.name,
           email: sessionRecord.email,
           role: effectiveRole,
+          ownerType,
           status: sessionRecord.status,
           avatarUrl: sessionRecord.avatarUrl,
           mustChangePassword: Boolean(sessionRecord.mustChangePassword),
@@ -233,6 +278,7 @@ export async function getSessionUser(): Promise<AuthSession | null> {
       const isAdminEmail = cachedSession.email.toLowerCase().trim() === "nxt.arshit@gmail.com";
       const isSuperAdmin = Boolean(cachedSession.isSuperAdmin) || isAdminEmail;
       const effectiveRole: UserRole = isSuperAdmin ? "admin" : cachedSession.role;
+      const ownerType = await resolveOwnerType(cachedSession.userId, cachedSession.email, effectiveRole);
 
       return {
         sessionId: cachedSession.sessionId,
@@ -244,6 +290,7 @@ export async function getSessionUser(): Promise<AuthSession | null> {
           name: cachedSession.name,
           email: cachedSession.email,
           role: effectiveRole,
+          ownerType,
           status: cachedSession.status,
           avatarUrl: cachedSession.avatarUrl,
           mustChangePassword: Boolean(cachedSession.mustChangePassword),
@@ -282,6 +329,8 @@ export async function getSessionUser(): Promise<AuthSession | null> {
       // Ignore cache write failures
     }
 
+    const ownerType = await resolveOwnerType(identity.userId, identity.email, identity.role);
+
     return {
       sessionId,
       csrfTokenHash: "",
@@ -292,6 +341,7 @@ export async function getSessionUser(): Promise<AuthSession | null> {
         name: identity.name,
         email: identity.email,
         role: identity.role,
+        ownerType,
         status: "active",
         avatarUrl: identity.avatarUrl,
         mustChangePassword: false,

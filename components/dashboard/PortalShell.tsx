@@ -91,7 +91,7 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { label: "Coupons", icon: Tags, tab: "coupons" },
     { label: "Reviews", icon: Star, tab: "reviews" },
     { label: "Analytics", icon: Activity, tab: "analytics" },
-    { label: "Healthcare", icon: Stethoscope, tab: "healthcare" },
+    { label: "Live Queue", icon: Activity, tab: "queue" },
     { label: "Notifications", icon: Bell, tab: "notifications" },
     { label: "Settings", icon: Settings, tab: "settings" },
     { label: "Membership Plans", icon: Shield, tab: "memberships" },
@@ -117,13 +117,34 @@ const navByRole: Record<UserRole, NavItem[]> = {
   ],
 };
 
+const healthcareOwnerNav: NavItem[] = [
+  { label: "Clinic Overview", icon: LayoutDashboard, tab: "overview" },
+  { label: "Healthcare", icon: Stethoscope, tab: "healthcare" },
+  { label: "Live Queue", icon: Activity, tab: "queue" },
+  { label: "Doctors", icon: Stethoscope, tab: "doctors" },
+  { label: "Appointments", icon: Users, tab: "appointments" },
+  { label: "Prescriptions", icon: FileText, tab: "prescriptions" },
+  { label: "Prescription Designer", icon: Crown, tab: "designer" },
+  { label: "Patients Directory", icon: UserCheck, tab: "patients" },
+  { label: "Follow-ups", icon: AlertCircle, tab: "followups" },
+  { label: "Clinical Tools & Vitals", icon: Activity, tab: "clinical_tools" },
+  { label: "Clinic Profile", icon: Building2, tab: "profile" },
+  { label: "Clinic Media", icon: ImageIcon, tab: "media" },
+  { label: "OPD Analytics", icon: TrendingUp, tab: "analytics" },
+  { label: "Reviews", icon: Star, tab: "reviews" },
+  { label: "Clinic Settings", icon: Settings, tab: "settings" },
+  { label: "Premium & Plans", icon: Crown, tab: "subscription" },
+  { label: "Messages", icon: MessageSquare, tab: "chat", badge: "chat" },
+  { label: "Support", icon: HelpCircle, tab: "support" },
+];
+
 export function PortalShell({
   user,
   workspaceRole,
   children,
 }: {
   user: SessionUser;
-  workspaceRole?: UserRole;
+  workspaceRole?: UserRole | "healthcare_owner";
   children: React.ReactNode;
 }) {
   const router = useRouter();
@@ -134,14 +155,19 @@ export function PortalShell({
   const [open, setOpen] = useState(false);
   const [chatUnread, setChatUnread] = useState(0);
   const [subPlan, setSubPlan] = useState<Record<string, any>>({ id: "free" });
-  const rawRole = String(workspaceRole ?? user?.role ?? "customer");
-  const activeWorkspaceRole: UserRole = (rawRole === "owner" || rawRole === "shop_owner" || rawRole === "store_owner")
+  const rawRole = String(workspaceRole ?? (user?.ownerType === "healthcare" ? "healthcare_owner" : user?.role) ?? "customer");
+  const activeWorkspaceRole: UserRole | "healthcare_owner" = (rawRole === "healthcare_owner")
+    ? "healthcare_owner"
+    : (rawRole === "owner" || rawRole === "shop_owner" || rawRole === "store_owner")
     ? "store_owner"
     : (rawRole === "admin" ? "admin" : "customer");
-  const nav = useMemo(() => navByRole[activeWorkspaceRole] ?? navByRole.customer ?? [], [activeWorkspaceRole]);
+  const nav = useMemo(() => {
+    if (activeWorkspaceRole === "healthcare_owner") return healthcareOwnerNav;
+    return navByRole[activeWorkspaceRole] ?? navByRole.customer ?? [];
+  }, [activeWorkspaceRole]);
 
   useEffect(() => {
-    if (activeWorkspaceRole === "store_owner") {
+    if (activeWorkspaceRole === "store_owner" || activeWorkspaceRole === "healthcare_owner") {
       apiFetch<{ plan: Record<string, any> }>("/api/subscriptions/me")
         .then((result) => {
           if (result?.plan) setSubPlan(result.plan);
@@ -226,7 +252,7 @@ export function PortalShell({
     <div className={`portal portalShell ${dark ? "dark-theme" : "light-theme"}`} style={{ background: dark ? "linear-gradient(135deg, #020617 0%, #0f172a 100%)" : "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)" }}>
       <aside className={`portalSidebar ${open ? "isOpen" : ""}`} style={{ overflowY: "auto", background: dark ? "rgba(15, 23, 42, 0.88)" : "rgba(255, 255, 255, 0.95)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderRight: dark ? "1px solid rgba(0, 240, 255, 0.15)" : "1px solid #e2e8f0", boxShadow: "0 0 30px rgba(0,0,0,0.15)" }}>
         <Link className="portalBrand" href="/" style={{ filter: dark ? "drop-shadow(0 0 10px rgba(255,255,255,0.2))" : "none" }}><KynistoLogo /></Link>
-        <div className="portalRole" style={{ background: dark ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.03)", borderRadius: "12px", margin: "0 1rem" }}><small style={{ color: dark ? "#94a3b8" : "#64748b" }}>Workspace</small><strong style={{ color: dark ? "#e2e8f0" : "#0f172a", textShadow: dark ? "0 0 10px rgba(255,255,255,0.2)" : "none" }}>{activeWorkspaceRole === "admin" ? (user?.isSuperAdmin ? "Super Administration" : "Administration") : activeWorkspaceRole === "store_owner" ? `${user?.role === "admin" ? "Admin · " : ""}Shop owner` : `${user?.role === "admin" ? "Admin · " : ""}Customer account`}</strong></div>
+        <div className="portalRole" style={{ background: dark ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.03)", borderRadius: "12px", margin: "0 1rem" }}><small style={{ color: dark ? "#94a3b8" : "#64748b" }}>Workspace</small><strong style={{ color: dark ? "#e2e8f0" : "#0f172a", textShadow: dark ? "0 0 10px rgba(255,255,255,0.2)" : "none" }}>{activeWorkspaceRole === "admin" ? (user?.isSuperAdmin ? "Super Administration" : "Administration") : activeWorkspaceRole === "healthcare_owner" ? `${user?.role === "admin" ? "Admin · " : ""}Healthcare Clinic` : activeWorkspaceRole === "store_owner" ? `${user?.role === "admin" ? "Admin · " : ""}Shop owner` : `${user?.role === "admin" ? "Admin · " : ""}Customer account`}</strong></div>
         <nav style={{ padding: "0 1rem" }}>
           {nav.map((item) => {
             const Icon = item.icon;

@@ -6,6 +6,9 @@ export const dynamic = "force-dynamic";
 
 export default async function OnboardingPage() {
   const session = await getSessionUser();
+  if (session?.user?.ownerType === "healthcare") {
+    redirect("/healthcare/dashboard");
+  }
   if (session?.user?.role === "store_owner") {
     redirect("/owner");
   }

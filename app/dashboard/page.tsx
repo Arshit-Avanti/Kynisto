@@ -6,5 +6,5 @@ export const dynamic = "force-dynamic";
 export default async function DashboardRouter() {
   const session = await getSessionUser();
   if (!session) redirect("/login?returnTo=%2Fdashboard");
-  redirect(dashboardForRole(session.user.role));
+  redirect(dashboardForRole(session.user.role, session.user.ownerType));
 }

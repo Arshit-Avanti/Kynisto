@@ -26,6 +26,7 @@ export const users = sqliteTable(
     role: text("role", { enum: ["admin", "store_owner", "customer"] })
       .notNull()
       .default("customer"),
+    ownerType: text("owner_type").default("shop"),
     status: text("status", { enum: ["active", "suspended", "disabled", "banned"] })
       .notNull()
       .default("active"),

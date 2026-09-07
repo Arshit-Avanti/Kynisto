@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSession } from "@/lib/auth";
+import { createSession, dashboardForRole, resolveOwnerType } from "@/lib/auth";
 import { apiError, assertSameOrigin } from "@/lib/security";
 import {
   applicationRoleFromProfile,
@@ -140,14 +140,11 @@ export async function POST(request: Request) {
       supabaseUser.user_metadata?.role_selected_at
     );
 
+    const ownerType = await resolveOwnerType(identity.id, identity.email, identity.role);
     const needsOnboarding = !onboardingCompleted;
     const redirectTo = needsOnboarding
       ? "/onboarding"
-      : identity.role === "store_owner"
-      ? "/owner"
-      : identity.role === "admin"
-      ? "/admin"
-      : "/";
+      : dashboardForRole(identity.role, ownerType);
 
     return Response.json({
       user: {

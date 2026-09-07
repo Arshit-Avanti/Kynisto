@@ -100,7 +100,11 @@ export async function POST(request: Request) {
     // 3. Re-issue current D1 session so new role is active immediately
     await createSession(request, userId, true);
 
-    const redirectTo = targetRole === "store_owner" ? "/owner" : "/";
+    const { resolveOwnerType } = await import("@/lib/auth");
+    const ownerType = await resolveOwnerType(userId, currentUser.email, targetRole);
+    const redirectTo = targetRole === "store_owner"
+      ? (ownerType === "healthcare" ? "/healthcare/dashboard" : "/owner")
+      : "/";
 
     return NextResponse.json({
       success: true,

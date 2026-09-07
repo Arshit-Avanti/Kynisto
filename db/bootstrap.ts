@@ -244,6 +244,10 @@ async function bootstrapDatabase(): Promise<void> {
     return;
   }
 
+  try {
+    await db.prepare("ALTER TABLE users ADD COLUMN owner_type text DEFAULT 'shop'").run();
+  } catch {}
+
   databaseFullyReady = true;
 }
 

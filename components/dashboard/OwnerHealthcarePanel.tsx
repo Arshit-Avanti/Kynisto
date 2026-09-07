@@ -50,7 +50,17 @@ function playNewPatientChime() {
   } catch {}
 }
 
-export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
+export function OwnerHealthcarePanel({
+  storeId,
+  isShopOwnerMode = false,
+  isHealthcareDashboard = false,
+  initialTab,
+}: {
+  storeId: string;
+  isShopOwnerMode?: boolean;
+  isHealthcareDashboard?: boolean;
+  initialTab?: string;
+}) {
   const [data, setData] = useState<Data>({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState("");
@@ -59,7 +69,17 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
   const [doctorForm, setDoctorForm] = useState<DoctorFormState>({ open: false, editing: null });
   const [activeTab, setActiveTab] = useState<
     "queue" | "patients" | "prescriptions" | "followups" | "designer" | "settings" | "appointments" | "doctors"
-  >("queue");
+  >(isShopOwnerMode ? "queue" : ((initialTab as any) || "queue"));
+
+  useEffect(() => {
+    if (isShopOwnerMode) {
+      setActiveTab((curr) => (curr === "settings" ? "settings" : "queue"));
+      return;
+    }
+    if (initialTab && ["queue", "patients", "prescriptions", "followups", "designer", "settings", "appointments", "doctors"].includes(initialTab)) {
+      setActiveTab(initialTab as any);
+    }
+  }, [initialTab, isShopOwnerMode]);
   const [prescriptionModal, setPrescriptionModal] = useState<{
     open: boolean;
     patientName?: string;
@@ -92,12 +112,12 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
     if (prevWaitingCountRef.current !== -1) {
       if (waitingCount > prevWaitingCountRef.current) {
         playNewPatientChime();
-        showToast("🔔 New patient joined the queue!");
+        showToast(isShopOwnerMode ? "🔔 New customer joined the queue!" : "🔔 New patient joined the queue!");
       } else if (currentSignature !== prevEntriesSignatureRef.current && prevEntriesSignatureRef.current !== "") {
         // Status changed (e.g. running late, arrived, etc.)
         const runningLate = entries.find((e) => e.arrivalStatus === "running_late");
         if (runningLate) {
-          showToast(`⚠️ Patient #${runningLate.tokenNumber ?? ""} reported running late`);
+          showToast(`⚠️ ${isShopOwnerMode ? "Customer" : "Patient"} #${runningLate.tokenNumber ?? ""} reported running late`);
         }
       }
     }
@@ -259,11 +279,13 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
   }, [action]);
 
   const addPatient = useCallback((kind: "add_walk_in" | "add_emergency") => {
-    const patientName = window.prompt(kind === "add_emergency" ? "Emergency patient name" : "Walk-in patient name");
+    const defaultEmergencyTitle = isShopOwnerMode ? "Priority customer name" : "Emergency patient name";
+    const defaultWalkInTitle = isShopOwnerMode ? "Walk-in customer name" : "Walk-in patient name";
+    const patientName = window.prompt(kind === "add_emergency" ? defaultEmergencyTitle : defaultWalkInTitle);
     if (!patientName) return;
-    const patientPhone = window.prompt("Patient contact details (optional)") ?? "";
+    const patientPhone = window.prompt(isShopOwnerMode ? "Customer contact details (optional)" : "Patient contact details (optional)") ?? "";
     void action(kind, { patientName, patientPhone });
-  }, [action]);
+  }, [action, isShopOwnerMode]);
 
   // --- Doctor CRUD ---
   const saveDoctor = useCallback(async (e: FormEvent<HTMLFormElement>) => {
@@ -368,79 +390,81 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
           <div className="flex flex-col flex-1 gap-2" style={{ flex: 1 }}>
             <span>
               <strong>
-                {entry.isEmergency ? "🚨 Emergency · " : entry.isWalkIn ? "Walk-in · " : ""}
-                {String(entry.patientName ?? "Patient")}
+                {entry.isEmergency ? (isShopOwnerMode ? "⚡ Priority · " : "🚨 Emergency · ") : entry.isWalkIn ? "Walk-in · " : ""}
+                {String(entry.patientName ?? (isShopOwnerMode ? "Customer" : "Patient"))}
               </strong>
               <small className="flex items-center gap-1.5 flex-wrap">
                 {renderStatusBadge(String(entry.status))}
                 {renderArrivalBadge(entry)}
-                {entry.doctorName && <span className="text-slate-400">Dr. {String(entry.doctorName)}</span>}
+                {!isShopOwnerMode && entry.doctorName && <span className="text-slate-400">Dr. {String(entry.doctorName)}</span>}
                 <span className="text-slate-500">{new Date(Number(entry.joinedAt) * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                 {entry.patientPhone && <span className="text-slate-500">{String(entry.patientPhone)}</span>}
               </small>
             </span>
             
             {/* PRESCRIPTION SECTION */}
-            <div className="mt-2 p-3 bg-slate-50 rounded border border-slate-200 text-sm">
-              {isWaiting || isCalling ? (
-                <div className="text-slate-500">Prescription: Not available yet</div>
-              ) : isInConsultation ? (
-                <div>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setPrescriptionModal({
-                        open: true,
-                        patientName: String(entry.patientName ?? "Patient"),
-                        patientPhone: String(entry.patientPhone ?? ""),
-                        userId: entry.userId ? String(entry.userId) : undefined,
-                        patientEmail: entry.patientEmail ? String(entry.patientEmail) : undefined,
-                        queueEntryId: String(entry.id),
-                        doctorName: String(entry.doctorName ?? ""),
-                        doctorId: String(entry.doctorId ?? ""),
-                      })
-                    }
-                    className="portalButtonSm primary"
-                    style={{ background: "#059669", color: "#ffffff", fontWeight: 800 }}
-                  >
-                    ℞ Issue Prescription
-                  </button>
-                </div>
-              ) : isCompleted ? (
-                entry.prescriptionStatus === 'issued' ? (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="healthcareBadge" style={{ background: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0' }}>
-                        🟢 Prescription Issued ✓ {entry.prescriptionNumber ? `(${entry.prescriptionNumber})` : ''}
-                      </span>
-                      {entry.prescriptionFollowUpDate && (
-                        <span className="healthcareBadge" style={{ background: '#f3f4f6', color: '#374151' }}>
-                          📅 Follow-up: {entry.prescriptionFollowUpDate} {entry.prescriptionFollowUpFee ? `· ₹${entry.prescriptionFollowUpFee}` : ''}
+            {!isShopOwnerMode && (
+              <div className="mt-2 p-3 bg-slate-50 rounded border border-slate-200 text-sm">
+                {isWaiting || isCalling ? (
+                  <div className="text-slate-500">Prescription: Not available yet</div>
+                ) : isInConsultation ? (
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPrescriptionModal({
+                          open: true,
+                          patientName: String(entry.patientName ?? "Patient"),
+                          patientPhone: String(entry.patientPhone ?? ""),
+                          userId: entry.userId ? String(entry.userId) : undefined,
+                          patientEmail: entry.patientEmail ? String(entry.patientEmail) : undefined,
+                          queueEntryId: String(entry.id),
+                          doctorName: String(entry.doctorName ?? ""),
+                          doctorId: String(entry.doctorId ?? ""),
+                        })
+                      }
+                      className="portalButtonSm primary"
+                      style={{ background: "#059669", color: "#ffffff", fontWeight: 800 }}
+                    >
+                      ℞ Issue Prescription
+                    </button>
+                  </div>
+                ) : isCompleted ? (
+                  entry.prescriptionStatus === 'issued' ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="healthcareBadge" style={{ background: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0' }}>
+                          🟢 Prescription Issued ✓ {entry.prescriptionNumber ? `(${entry.prescriptionNumber})` : ''}
                         </span>
-                      )}
+                        {entry.prescriptionFollowUpDate && (
+                          <span className="healthcareBadge" style={{ background: '#f3f4f6', color: '#374151' }}>
+                            📅 Follow-up: {entry.prescriptionFollowUpDate} {entry.prescriptionFollowUpFee ? `· ₹${entry.prescriptionFollowUpFee}` : ''}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => setViewingPrescriptionId(String(entry.prescriptionId || entry.id))} className="portalButtonSm">👁️ View Prescription</button>
+                        <button onClick={() => setViewingPatientHistory({ id: String(entry.id), name: String(entry.patientName), phone: String(entry.patientPhone || "") })} className="portalButtonSm">📋 View Patient History</button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => setViewingPrescriptionId(String(entry.prescriptionId || entry.id))} className="portalButtonSm">👁️ View Prescription</button>
-                      <button onClick={() => setViewingPatientHistory({ id: String(entry.id), name: String(entry.patientName), phone: String(entry.patientPhone || "") })} className="portalButtonSm">📋 View Patient History</button>
+                  ) : entry.prescriptionStatus === 'draft' ? (
+                    <div className="flex flex-col gap-2">
+                      <div><span className="healthcareBadge" style={{ background: '#fef08a', color: '#854d0e', border: '1px solid #fde047' }}>🟡 Draft Saved</span></div>
+                      <div>
+                        <button onClick={() => setPrescriptionModal({ open: true, patientName: String(entry.patientName ?? "Patient"), patientPhone: String(entry.patientPhone ?? ""), userId: entry.userId ? String(entry.userId) : undefined, patientEmail: entry.patientEmail ? String(entry.patientEmail) : undefined, queueEntryId: String(entry.id), doctorName: String(entry.doctorName ?? ""), doctorId: String(entry.doctorId ?? "") })} className="portalButtonSm">✏️ Continue Prescription →</button>
+                      </div>
                     </div>
-                  </div>
-                ) : entry.prescriptionStatus === 'draft' ? (
-                  <div className="flex flex-col gap-2">
-                    <div><span className="healthcareBadge" style={{ background: '#fef08a', color: '#854d0e', border: '1px solid #fde047' }}>🟡 Draft Saved</span></div>
-                    <div>
-                      <button onClick={() => setPrescriptionModal({ open: true, patientName: String(entry.patientName ?? "Patient"), patientPhone: String(entry.patientPhone ?? ""), userId: entry.userId ? String(entry.userId) : undefined, patientEmail: entry.patientEmail ? String(entry.patientEmail) : undefined, queueEntryId: String(entry.id), doctorName: String(entry.doctorName ?? ""), doctorId: String(entry.doctorId ?? "") })} className="portalButtonSm">✏️ Continue Prescription →</button>
+                  ) : (
+                    <div className="flex flex-col gap-2 p-3 bg-red-50 border border-red-200 rounded">
+                      <div className="text-red-700 font-semibold">🔴 Prescription Not Issued</div>
+                      <div>
+                        <button onClick={() => setPrescriptionModal({ open: true, patientName: String(entry.patientName ?? "Patient"), patientPhone: String(entry.patientPhone ?? ""), userId: entry.userId ? String(entry.userId) : undefined, patientEmail: entry.patientEmail ? String(entry.patientEmail) : undefined, queueEntryId: String(entry.id), doctorName: String(entry.doctorName ?? ""), doctorId: String(entry.doctorId ?? ""), tokenNumber: entry.tokenNumber ? Number(entry.tokenNumber) : undefined })} className="portalButtonSm primary" style={{ background: '#10b981', color: 'white', padding: '8px 16px', fontSize: '14px' }}>Issue Prescription →</button>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-2 p-3 bg-red-50 border border-red-200 rounded">
-                    <div className="text-red-700 font-semibold">🔴 Prescription Not Issued</div>
-                    <div>
-                      <button onClick={() => setPrescriptionModal({ open: true, patientName: String(entry.patientName ?? "Patient"), patientPhone: String(entry.patientPhone ?? ""), userId: entry.userId ? String(entry.userId) : undefined, patientEmail: entry.patientEmail ? String(entry.patientEmail) : undefined, queueEntryId: String(entry.id), doctorName: String(entry.doctorName ?? ""), doctorId: String(entry.doctorId ?? ""), tokenNumber: entry.tokenNumber ? Number(entry.tokenNumber) : undefined })} className="portalButtonSm primary" style={{ background: '#10b981', color: 'white', padding: '8px 16px', fontSize: '14px' }}>Issue Prescription →</button>
-                    </div>
-                  </div>
-                )
-              ) : null}
-            </div>
+                  )
+                ) : null}
+              </div>
+            )}
           </div>
           <div className="tableActions">
             {/* Arrival management */}
@@ -449,7 +473,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
                 onClick={() => void action("mark_arrived", { entryId: entry.id })}
                 disabled={Boolean(busy)}
                 className="portalButtonSm success"
-                title="Mark patient as physically arrived"
+                title={isShopOwnerMode ? "Mark customer as physically arrived" : "Mark patient as physically arrived"}
               >✓ Arrived</button>
             )}
             {/* Call / Consultation flow */}
@@ -458,7 +482,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
                 onClick={() => void action("start_consultation", { entryId: entry.id })}
                 disabled={Boolean(busy)}
                 className="portalButtonSm primary"
-              >▶ Start Consult</button>
+              >{isShopOwnerMode ? "▶ Start Service" : "▶ Start Consult"}</button>
             )}
             {isCalling && (
               <button onClick={() => void action("recall", { entryId: entry.id })} disabled={Boolean(busy)}>Recall</button>
@@ -479,7 +503,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
                 disabled={Boolean(busy)}
                 className="portalButtonSm primary"
                 style={{ background: "#2563eb", color: "#ffffff", fontWeight: 700 }}
-                title="Call this patient to the counter"
+                title={isShopOwnerMode ? "Call this customer to the counter" : "Call this patient to the counter"}
               >Call</button>
             )}
             {/* No-show for called patients */}
@@ -488,7 +512,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
                 onClick={() => void action("mark_no_show", { entryId: entry.id })}
                 disabled={Boolean(busy)}
                 className="portalButtonSm warning"
-                title="Mark patient as no-show"
+                title={isShopOwnerMode ? "Mark customer as no-show" : "Mark patient as no-show"}
               >No-show</button>
             )}
             {/* Remove */}
@@ -500,7 +524,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
         </article>
       );
     });
-  }, [entries, action, busy]);
+  }, [entries, action, busy, isShopOwnerMode]);
 
   const renderedHistory = useMemo(() => {
     const list = data.history ?? [];
@@ -609,9 +633,9 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
   return <>
     <div className="portalTitleRow">
       <div>
-        <span className="portalEyebrow">Central Clinic & Doctor Management</span>
-        <h1>Healthcare</h1>
-        <p>Manage today&apos;s patient queue, consultation records, prescriptions, and follow-ups.</p>
+        <span className="portalEyebrow">{isShopOwnerMode ? "Live Customer Queue" : "Central Clinic & Doctor Management"}</span>
+        {isShopOwnerMode ? <h1>Live Queue</h1> : <h1>Healthcare</h1>}
+        <p>{isShopOwnerMode ? "Manage real-time customer tokens, arrivals, and counter queue." : "Manage today's patient queue, consultation records, prescriptions, and follow-ups."}</p>
       </div>
       <span className={`statusPill ${String(profile.status ?? "closed")}`}>{String(profile.status ?? "closed")}</span>
     </div>
@@ -622,12 +646,12 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
     <div className="statsGrid queueStatsGrid">
       <article className="statCard">
         <span>#</span>
-        <small>{inConsultation ? "In consultation" : "Now serving"}</small>
+        <small>{inConsultation ? (isShopOwnerMode ? "Now serving" : "In consultation") : "Now serving"}</small>
         <strong>{currentlyActive?.tokenNumber ?? "—"}</strong>
       </article>
       <article className="statCard">
         <span>→</span>
-        <small>Next patient</small>
+        <small>{isShopOwnerMode ? "Next customer" : "Next patient"}</small>
         <strong>{called && !inConsultation ? nextPatient?.tokenNumber ?? "—" : nextPatient?.tokenNumber ?? "—"}</strong>
       </article>
       <article className="statCard">
@@ -637,10 +661,10 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
       </article>
       <article className="statCard">
         <span>◷</span>
-        <small>Consultation</small>
+        <small>{isShopOwnerMode ? "Service time" : "Consultation"}</small>
         <strong>{profile.consultationMinutes}m</strong>
       </article>
-      {(data.appointments?.length ?? 0) > 0 && (
+      {!isShopOwnerMode && (data.appointments?.length ?? 0) > 0 && (
         <article className="statCard">
           <span>📅</span>
           <small>Appointments today</small>
@@ -660,11 +684,13 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
       </button>
       {called && !inConsultation && (
         <button onClick={() => void action("start_consultation")} className="primary" disabled={Boolean(busy)}>
-          ▶ Start Consult
+          {isShopOwnerMode ? "▶ Start Service" : "▶ Start Consult"}
         </button>
       )}
       <button onClick={() => addPatient("add_walk_in")} disabled={Boolean(busy) || (profile.status !== "open" && profile.status !== "paused")}>+ Walk-in</button>
-      <button onClick={() => addPatient("add_emergency")} disabled={Boolean(busy) || (profile.status !== "open" && profile.status !== "paused")}>+ Emergency</button>
+      <button onClick={() => addPatient("add_emergency")} disabled={Boolean(busy) || (profile.status !== "open" && profile.status !== "paused")}>
+        {isShopOwnerMode ? "+ Priority" : "+ Emergency"}
+      </button>
       <button onClick={() => void action("close")} disabled={Boolean(busy) || profile.status === "closed"}>End queue</button>
     </div>
 
@@ -672,14 +698,14 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
     {currentlyActive && (
       <div className={`calledPatientBanner ${inConsultation ? "inConsultation" : ""}`}>
         <div className="calledPatientHeader">
-          <span>{inConsultation ? "IN CONSULTATION" : "NOW SERVING"}</span>
+          <span>{isShopOwnerMode ? "NOW SERVING" : (inConsultation ? "IN CONSULTATION" : "NOW SERVING")}</span>
           <strong>{currentlyActive.tokenNumber}</strong>
         </div>
         <div className="calledPatientInfo">
-          <b>{String(currentlyActive.isEmergency ? "🚨 Emergency · " : currentlyActive.isWalkIn ? "Walk-in · " : "")}{String(currentlyActive.patientName ?? "Patient")}</b>
+          <b>{String(currentlyActive.isEmergency ? (isShopOwnerMode ? "⚡ Priority · " : "🚨 Emergency · ") : currentlyActive.isWalkIn ? "Walk-in · " : "")}{String(currentlyActive.patientName ?? (isShopOwnerMode ? "Customer" : "Patient"))}</b>
           <small className="flex items-center gap-2 flex-wrap">
             {renderArrivalBadge(currentlyActive)}
-            {currentlyActive.doctorName && <span>Dr. {String(currentlyActive.doctorName)}</span>}
+            {!isShopOwnerMode && currentlyActive.doctorName && <span>Dr. {String(currentlyActive.doctorName)}</span>}
             {currentlyActive.patientPhone && <span>{String(currentlyActive.patientPhone)}</span>}
           </small>
         </div>
@@ -687,30 +713,34 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
           {!inConsultation && (
             <>
               <button onClick={() => void action("mark_arrived", { entryId: currentlyActive.id })} disabled={Boolean(busy)} className="portalButtonSm success">✓ Arrived</button>
-              <button onClick={() => void action("start_consultation", { entryId: currentlyActive.id })} disabled={Boolean(busy)} className="portalButtonSm primary">▶ Start Consult</button>
+              <button onClick={() => void action("start_consultation", { entryId: currentlyActive.id })} disabled={Boolean(busy)} className="portalButtonSm primary">
+                {isShopOwnerMode ? "▶ Start Service" : "▶ Start Consult"}
+              </button>
               <button onClick={() => void action("recall", { entryId: currentlyActive.id })} disabled={Boolean(busy)}>Recall</button>
             </>
           )}
           <button onClick={() => void action("complete", { entryId: currentlyActive.id })} disabled={Boolean(busy)} className="portalButtonSm success">
             {inConsultation ? "✓ Done" : "Complete"}
           </button>
-          <button
-            type="button"
-            onClick={() =>
-              setPrescriptionModal({
-                open: true,
-                patientName: String(currentlyActive.patientName ?? "Patient"),
-                patientPhone: String(currentlyActive.patientPhone ?? ""),
-                userId: currentlyActive.userId ? String(currentlyActive.userId) : undefined,
-                patientEmail: currentlyActive.patientEmail ? String(currentlyActive.patientEmail) : undefined,
-                queueEntryId: String(currentlyActive.id),
-              })
-            }
-            className="portalButtonSm primary"
-            style={{ background: "#059669", color: "#ffffff", fontWeight: 800 }}
-          >
-            ℞ Prescribe & Complete
-          </button>
+          {!isShopOwnerMode && (
+            <button
+              type="button"
+              onClick={() =>
+                setPrescriptionModal({
+                  open: true,
+                  patientName: String(currentlyActive.patientName ?? "Patient"),
+                  patientPhone: String(currentlyActive.patientPhone ?? ""),
+                  userId: currentlyActive.userId ? String(currentlyActive.userId) : undefined,
+                  patientEmail: currentlyActive.patientEmail ? String(currentlyActive.patientEmail) : undefined,
+                  queueEntryId: String(currentlyActive.id),
+                })
+              }
+              className="portalButtonSm primary"
+              style={{ background: "#059669", color: "#ffffff", fontWeight: 800 }}
+            >
+              ℞ Prescribe & Complete
+            </button>
+          )}
           {!inConsultation && (
             <button onClick={() => void action("mark_no_show", { entryId: currentlyActive.id })} disabled={Boolean(busy)} className="portalButtonSm warning">No-show</button>
           )}
@@ -728,42 +758,46 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
       >
         Live Queue ({entries.length})
       </button>
-      <button
-        className={`healthcareTab ${activeTab === "patients" ? "active" : ""}`}
-        onClick={() => setActiveTab("patients")}
-      >
-        Patients
-      </button>
-      <button
-        className={`healthcareTab ${activeTab === "prescriptions" ? "active" : ""}`}
-        onClick={() => setActiveTab("prescriptions")}
-      >
-        Prescription History
-      </button>
-      <button
-        className={`healthcareTab ${activeTab === "followups" ? "active" : ""}`}
-        onClick={() => setActiveTab("followups")}
-      >
-        Follow-ups
-      </button>
-      <button
-        className={`healthcareTab ${activeTab === "designer" ? "active" : ""}`}
-        onClick={() => setActiveTab("designer")}
-      >
-        Prescription Design
-      </button>
-      <button
-        className={`healthcareTab ${activeTab === "appointments" ? "active" : ""}`}
-        onClick={() => setActiveTab("appointments")}
-      >
-        Appointments ({data.appointments?.length ?? 0})
-      </button>
-      <button
-        className={`healthcareTab ${activeTab === "doctors" ? "active" : ""}`}
-        onClick={() => setActiveTab("doctors")}
-      >
-        Doctors ({data.doctors?.length ?? 0})
-      </button>
+      {!isShopOwnerMode && (
+        <>
+          <button
+            className={`healthcareTab ${activeTab === "patients" ? "active" : ""}`}
+            onClick={() => setActiveTab("patients")}
+          >
+            Patients
+          </button>
+          <button
+            className={`healthcareTab ${activeTab === "prescriptions" ? "active" : ""}`}
+            onClick={() => setActiveTab("prescriptions")}
+          >
+            Prescription History
+          </button>
+          <button
+            className={`healthcareTab ${activeTab === "followups" ? "active" : ""}`}
+            onClick={() => setActiveTab("followups")}
+          >
+            Follow-ups
+          </button>
+          <button
+            className={`healthcareTab ${activeTab === "designer" ? "active" : ""}`}
+            onClick={() => setActiveTab("designer")}
+          >
+            Prescription Design
+          </button>
+          <button
+            className={`healthcareTab ${activeTab === "appointments" ? "active" : ""}`}
+            onClick={() => setActiveTab("appointments")}
+          >
+            Appointments ({data.appointments?.length ?? 0})
+          </button>
+          <button
+            className={`healthcareTab ${activeTab === "doctors" ? "active" : ""}`}
+            onClick={() => setActiveTab("doctors")}
+          >
+            Doctors ({data.doctors?.length ?? 0})
+          </button>
+        </>
+      )}
       <button
         className={`healthcareTab ${activeTab === "settings" ? "active" : ""}`}
         onClick={() => setActiveTab("settings")}
@@ -777,7 +811,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
       <div className="portalGrid healthcareQueueGrid">
         <section className="portalCard">
           <div className="portalCardHeader">
-            <h2>Today&apos;s waiting list</h2>
+            <h2>{isShopOwnerMode ? "Today's live queue" : "Today's waiting list"}</h2>
             <small>{entries.length} tokens issued</small>
           </div>
           <div className="queueTable">{renderedQueueTable}</div>
@@ -785,7 +819,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
       </div>
     )}
 
-    {activeTab === "appointments" && (
+    {activeTab === "appointments" && !isShopOwnerMode && (
       <div className="portalGrid">
         <section className="portalCard">
           <div className="portalCardHeader">
@@ -797,7 +831,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
       </div>
     )}
 
-    {activeTab === "doctors" && (
+    {activeTab === "doctors" && !isShopOwnerMode && (
       <div className="portalGrid">
         <section className="portalCard">
           <div className="portalCardHeader">
@@ -854,19 +888,21 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
               <input name="ownerQueueEnabled" type="checkbox" defaultChecked={Boolean(profile.ownerQueueEnabled)} disabled={!profile.adminQueueEnabled} />
             </label>
             <label>
-              <span><b>Accepting patients</b><small>Controls new online joins</small></span>
+              <span><b>{isShopOwnerMode ? "Accepting customers" : "Accepting patients"}</b><small>Controls new online joins</small></span>
               <input name="acceptingPatients" type="checkbox" defaultChecked={Boolean(profile.acceptingPatients)} />
             </label>
+            {!isShopOwnerMode && (
+              <label>
+                <span><b>Allow appointments</b><small>Controls online doctor appointment booking</small></span>
+                <input name="allowAppointments" type="checkbox" defaultChecked={Boolean(profile.allowAppointments ?? true)} />
+              </label>
+            )}
             <label>
-              <span><b>Allow appointments</b><small>Controls online doctor appointment booking</small></span>
-              <input name="allowAppointments" type="checkbox" defaultChecked={Boolean(profile.allowAppointments ?? true)} />
-            </label>
-            <label>
-              <span><b>Consultation time</b><small>Minutes used for wait estimates</small></span>
+              <span><b>{isShopOwnerMode ? "Service time" : "Consultation time"}</b><small>Minutes used for wait estimates</small></span>
               <input aria-label="Consultation minutes" name="consultationMinutes" type="number" min="5" max="180" defaultValue={Number(profile.consultationMinutes ?? 15)} />
             </label>
             <label>
-              <span><b>Grace period</b><small>Minutes a no-show patient is held before removal</small></span>
+              <span><b>Grace period</b><small>{isShopOwnerMode ? "Minutes a no-show customer is held before removal" : "Minutes a no-show patient is held before removal"}</small></span>
               <input aria-label="Grace period minutes" name="gracePeriodMinutes" type="number" min="5" max="120" defaultValue={Number(profile.gracePeriodMinutes ?? 30)} />
             </label>
             <label>
@@ -878,35 +914,37 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
               <input aria-label="Queue closing time" name="closingTime" type="time" defaultValue={String(profile.closingTime ?? "18:00")} />
             </label>
             <label>
-              <span><b>Maximum daily tokens</b><small>Includes online and walk-in patients</small></span>
+              <span><b>Maximum daily tokens</b><small>{isShopOwnerMode ? "Includes online and walk-in customers" : "Includes online and walk-in patients"}</small></span>
               <input aria-label="Maximum daily tokens" name="maximumDailyPatients" type="number" min="1" max="1000" defaultValue={Number(profile.maximumDailyPatients ?? 100)} />
             </label>
             <button className="portalButton" type="submit" disabled={Boolean(busy)}>
               {busy === "configure" ? "Saving…" : "Save queue settings"}
             </button>
           </form>
-          <div className="portalCard" style={{ marginTop: "1.5rem", padding: "1.5rem", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "16px" }}>
-            <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "#166534", marginBottom: "0.5rem" }}>
-              🎨 Prescription Design
-            </h3>
-            <p style={{ fontSize: "0.85rem", color: "#15803d", marginBottom: "1rem" }}>
-              Customize your clinic logo, doctor credentials, header, typography, colors, and margins with the live Canva-like designer.
-            </p>
-            <button
-              type="button"
-              onClick={() => setActiveTab("designer")}
-              className="portalButton"
-              style={{ background: "#059669", color: "#ffffff" }}
-            >
-              Open Prescription Designer →
-            </button>
-          </div>
+          {!isShopOwnerMode && (
+            <div className="portalCard" style={{ marginTop: "1.5rem", padding: "1.5rem", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "16px" }}>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "#166534", marginBottom: "0.5rem" }}>
+                🎨 Prescription Design
+              </h3>
+              <p style={{ fontSize: "0.85rem", color: "#15803d", marginBottom: "1rem" }}>
+                Customize your clinic logo, doctor credentials, header, typography, colors, and margins with the live Canva-like designer.
+              </p>
+              <button
+                type="button"
+                onClick={() => setActiveTab("designer")}
+                className="portalButton"
+                style={{ background: "#059669", color: "#ffffff" }}
+              >
+                Open Prescription Designer →
+              </button>
+            </div>
+          )}
           <div className="queueHistory"><h3>Daily history</h3>{renderedHistory}</div>
         </section>
       </div>
     )}
 
-    {activeTab === "patients" && (
+    {activeTab === "patients" && !isShopOwnerMode && (
       <ClinicPatientsTab
         storeId={storeId}
         onPrescribeForPatient={(name, phone) =>
@@ -918,7 +956,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
       />
     )}
 
-    {activeTab === "prescriptions" && (
+    {activeTab === "prescriptions" && !isShopOwnerMode && (
       <ClinicPrescriptionsTab
         storeId={storeId}
         storeName={String(profile.name || "Clinic")}
@@ -929,7 +967,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
       />
     )}
 
-    {activeTab === "followups" && (
+    {activeTab === "followups" && !isShopOwnerMode && (
       <ClinicFollowupsTab
         storeId={storeId}
         onToast={showToast}
@@ -939,7 +977,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
       />
     )}
 
-    {activeTab === "designer" && (
+    {activeTab === "designer" && !isShopOwnerMode && (
       <PrescriptionDesigner
         storeId={storeId}
         storeName={String(profile.name || "Clinic")}
@@ -947,7 +985,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
       />
     )}
 
-    {prescriptionModal.open && (
+    {prescriptionModal.open && !isShopOwnerMode && (
       <DoctorPrescriptionModal
         storeId={storeId}
         storeName={String(profile.name || "Clinic")}
@@ -989,7 +1027,7 @@ export function OwnerHealthcarePanel({ storeId }: { storeId: string }) {
       />
     )}
 
-    <OwnerHealthcareQRCard />
+    {!isShopOwnerMode && <OwnerHealthcareQRCard />}
     {toast && <div className="portalToast" role="status">✓ {toast}</div>}
   </>;
 }

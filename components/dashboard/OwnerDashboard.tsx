@@ -231,33 +231,33 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
     }
   }
 
-  async function handleQuickSetupClinic() {
+  async function handleQuickSetupStore() {
     try {
       setLoading(true);
       setError("");
-      const healthCat = categories.find(
+      const retailCat = categories.find(
         (c) =>
-          String(c.name).toLowerCase().includes("clinic") ||
-          String(c.name).toLowerCase().includes("health") ||
-          String(c.module) === "healthcare",
-      ) || categories[0] || { id: "category-05" };
+          String(c.module) !== "healthcare" &&
+          !String(c.name).toLowerCase().includes("clinic") &&
+          !String(c.name).toLowerCase().includes("doctor")
+      ) || categories[0] || { id: "category-01" };
 
       await apiFetch<{ storeId: string; ok: boolean }>("/api/owner/stores", {
         method: "POST",
         json: {
-          name: user.name ? `${user.name}'s Healthcare Clinic` : "City Health Clinic",
-          businessType: "Local Physical Store / Business",
-          categoryId: healthCat.id,
-          address: "Main Market, Sector 14",
+          name: user.name ? `${user.name}'s Retail Store` : "My Local Store",
+          businessType: "Local Physical Store / Retail",
+          categoryId: retailCat.id,
+          address: "Main Market, Shop #12",
           city: "Your Locality",
           state: "State",
           country: "India",
           postalCode: "110001",
           phone: "+91 98765 43210",
           whatsapp: "+91 98765 43210",
-          email: user.email || "clinic@kynisto.in",
-          description: "Verified community healthcare clinic providing OPD consultations, digital prescriptions, and live queue tracking.",
-          businessHours: '{"monday":{"open":"09:00","close":"20:00"}}',
+          email: user.email || "store@kynisto.in",
+          description: "Local retail store providing quality products, customer services, and live queue tracking.",
+          businessHours: '{"monday":{"open":"09:00","close":"21:00"}}',
         },
       });
 
@@ -266,10 +266,10 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
         localStorage.removeItem("kynisto_owner_dash_cache");
       } catch {}
 
-      setToast("🎉 Healthcare clinic created and activated!");
+      setToast("🎉 Store created and activated!");
       await loadOverview();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to set up clinic.");
+      setError(e instanceof Error ? e.message : "Failed to set up store.");
     } finally {
       setLoading(false);
     }
@@ -302,10 +302,10 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
   }
 
   if (loading) return <div className="portalSkeleton"><span /><span /><span /><span /></div>;
-  if (tabLoading && !["overview", "profile", "reviews", "subscription", "healthcare", "chat", "memberships", "loyalty"].includes(tab)) return <div className="tabSkeleton"><span /><span /><span /></div>;
+  if (tabLoading && !["overview", "profile", "reviews", "subscription", "healthcare", "queue", "chat", "memberships", "loyalty"].includes(tab)) return <div className="tabSkeleton"><span /><span /><span /></div>;
   if (tab === "chat") return <ChatCenter user={user} />;
   if (tab === "subscription") return <UserSubscriptionDashboard />;
-  const title = tab === "overview" ? "Business overview" : tab === "subscription" ? "Premium & Plans" : tab === "healthcare" ? "Healthcare" : tab.charAt(0).toUpperCase()+tab.slice(1);
+  const title = tab === "overview" ? "Business overview" : tab === "subscription" ? "Premium & Plans" : (tab === "healthcare" || tab === "queue") ? "Live Queue" : tab.charAt(0).toUpperCase()+tab.slice(1);
   return (
     <>
       <SubscriptionExpiryBanner />
@@ -370,13 +370,13 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
             <div className="portalCardHeader" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
               <div>
                 <h2>Create your first business listing</h2>
-                <small>Set up your shop or clinic to unlock Live Queue, Prescriptions, Orders, and Services.</small>
+                <small>Set up your retail shop to unlock Live Queue, Products, Orders, and Services.</small>
               </div>
               <button
                 type="button"
-                onClick={() => void handleQuickSetupClinic()}
+                onClick={() => void handleQuickSetupStore()}
                 style={{
-                  background: "linear-gradient(135deg, #059669 0%, #0d9488 100%)",
+                  background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
                   color: "#ffffff",
                   padding: "0.65rem 1.25rem",
                   borderRadius: "12px",
@@ -384,10 +384,10 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
                   fontSize: "0.9rem",
                   border: "none",
                   cursor: "pointer",
-                  boxShadow: "0 4px 14px rgba(5, 150, 105, 0.25)",
+                  boxShadow: "0 4px 14px rgba(37, 99, 235, 0.25)",
                 }}
               >
-                ⚡ 1-Click Quick Setup Clinic & Store
+                ⚡ 1-Click Quick Setup Store
               </button>
             </div>
             <OwnerStoreEditor categories={categories} onSubmit={(body, files) => mutate("/api/owner/stores", "POST", body, "Business submitted for approval", files)} />
@@ -467,8 +467,8 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
           )}
           {tab === "loyalty" && selected && <OwnerLoyaltyManager storeId={String(selected.id)} />}
           {tab === "reviews" && selected && <ReviewsPanel items={storeReviews} storeId={String(selected.id)} mutate={mutate} pagination={reviewPagination} onPageChange={setReviewPage} />}
-          {tab === "healthcare" && selected && (
-            <OwnerHealthcarePanel storeId={String(selected.id)} />
+          {(tab === "healthcare" || tab === "queue") && selected && (
+            <OwnerHealthcarePanel storeId={String(selected.id)} isShopOwnerMode={true} />
           )}
           {tab === "analytics" && (
             <SubscriptionGate

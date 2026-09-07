@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { OwnerDashboard } from "@/components/dashboard/OwnerDashboard";
 import { requirePageRole } from "@/lib/auth";
@@ -6,6 +7,9 @@ export const dynamic = "force-dynamic";
 
 export default async function OwnerPage() {
   const user = await requirePageRole(["store_owner", "admin", "customer"], "/owner");
+  if (user.ownerType === "healthcare" && user.role !== "admin") {
+    redirect("/healthcare/dashboard");
+  }
   return (
     <Suspense fallback={<div className="portalSkeleton"><span /><span /><span /><span /></div>}>
       <OwnerDashboard user={user} />
