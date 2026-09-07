@@ -1234,6 +1234,7 @@ export function HealthcareOwnerDashboard({ user }: { user: SessionUser }) {
 
           {/* DEDICATED HEALTHCARE TABS: Routed to OwnerHealthcarePanel with active initialTab */}
           {[
+            "tools",
             "queue",
             "healthcare",
             "doctors",
@@ -1248,7 +1249,7 @@ export function HealthcareOwnerDashboard({ user }: { user: SessionUser }) {
               <OwnerHealthcarePanel
                 key={`${selectedStore.id}-${tab}`}
                 storeId={String(selectedStore.id)}
-                initialTab={tab === "healthcare" ? "queue" : tab}
+                initialTab={tab === "healthcare" || tab === "tools" ? "queue" : tab}
                 isShopOwnerMode={false}
                 isHealthcareDashboard={true}
               />

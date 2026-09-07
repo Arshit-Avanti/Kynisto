@@ -148,7 +148,7 @@ test("doctor workflow, clinic prescription history, patients directory, and sett
   assert.match(doctorModal, /Patient Address/);
 
   // Clinic subtabs and rename
-  assert.match(portalShell, /\{ label: "Healthcare", icon: Stethoscope, tab: "healthcare" \}/);
+  assert.match(portalShell, /\{ label: "(?:Tools|Healthcare)", icon: (?:Wrench|Stethoscope), tab: "healthcare" \}/);
   assert.match(portalShell, /\{ label: "My Prescriptions", icon: FileText, tab: "prescriptions" \}/);
   assert.match(ownerPanel, /<h1>Healthcare<\/h1>/);
   assert.match(ownerPanel, /Prescription Design/);

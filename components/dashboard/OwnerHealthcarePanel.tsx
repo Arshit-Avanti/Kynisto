@@ -9,6 +9,18 @@ import { ClinicFollowupsTab } from "@/components/healthcare/ClinicFollowupsTab";
 import { PrescriptionDesigner } from "@/components/healthcare/PrescriptionDesigner";
 import { DoctorPrescriptionModal } from "@/components/healthcare/DoctorPrescriptionModal";
 import { PrescriptionView } from "@/components/healthcare/PrescriptionView";
+import {
+  Activity,
+  Users,
+  FileText,
+  Crown,
+  CalendarCheck,
+  Calendar,
+  Stethoscope,
+  Settings,
+  HeartPulse,
+  Wrench,
+} from "lucide-react";
 import type { PrescriptionRecord } from "@/lib/prescriptions";
 
 type Item = Record<string, string | number | null | undefined>;
@@ -68,7 +80,7 @@ export function OwnerHealthcarePanel({
   const [toast, setToast] = useState("");
   const [doctorForm, setDoctorForm] = useState<DoctorFormState>({ open: false, editing: null });
   const [activeTab, setActiveTab] = useState<
-    "queue" | "patients" | "prescriptions" | "followups" | "designer" | "settings" | "appointments" | "doctors"
+    "queue" | "patients" | "prescriptions" | "followups" | "designer" | "settings" | "appointments" | "doctors" | "clinical_tools"
   >(isShopOwnerMode ? "queue" : ((initialTab as any) || "queue"));
 
   useEffect(() => {
@@ -76,7 +88,7 @@ export function OwnerHealthcarePanel({
       setActiveTab((curr) => (curr === "settings" ? "settings" : "queue"));
       return;
     }
-    if (initialTab && ["queue", "patients", "prescriptions", "followups", "designer", "settings", "appointments", "doctors"].includes(initialTab)) {
+    if (initialTab && ["queue", "patients", "prescriptions", "followups", "designer", "settings", "appointments", "doctors", "clinical_tools"].includes(initialTab)) {
       setActiveTab(initialTab as any);
     }
   }, [initialTab, isShopOwnerMode]);
@@ -750,59 +762,108 @@ export function OwnerHealthcarePanel({
       </div>
     )}
 
-    {/* Tab navigation */}
-    <div className="healthcareTabs" style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
+    {/* Tab navigation / Unified Tools Suite Bar */}
+    <div
+      className="healthcareTabs toolsToolbar"
+      style={{
+        display: "flex",
+        gap: "0.5rem",
+        overflowX: "auto",
+        WebkitOverflowScrolling: "touch",
+        padding: "0.35rem",
+        borderRadius: "16px",
+        background: "rgba(15, 23, 42, 0.04)",
+        border: "1px solid rgba(15, 23, 42, 0.08)",
+        marginBottom: "1.5rem",
+        whiteSpace: "nowrap",
+        flexWrap: "nowrap",
+        scrollbarWidth: "none",
+      }}
+    >
       <button
         className={`healthcareTab ${activeTab === "queue" ? "active" : ""}`}
         onClick={() => setActiveTab("queue")}
+        type="button"
+        style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", flexShrink: 0 }}
       >
-        Live Queue ({entries.length})
+        <Activity size={15} />
+        <span>Live Queue ({entries.length})</span>
       </button>
       {!isShopOwnerMode && (
         <>
           <button
             className={`healthcareTab ${activeTab === "patients" ? "active" : ""}`}
             onClick={() => setActiveTab("patients")}
+            type="button"
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", flexShrink: 0 }}
           >
-            Patients
+            <Users size={15} />
+            <span>Patients</span>
           </button>
           <button
             className={`healthcareTab ${activeTab === "prescriptions" ? "active" : ""}`}
             onClick={() => setActiveTab("prescriptions")}
+            type="button"
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", flexShrink: 0 }}
           >
-            Prescription History
+            <FileText size={15} />
+            <span>Prescription History</span>
           </button>
           <button
             className={`healthcareTab ${activeTab === "followups" ? "active" : ""}`}
             onClick={() => setActiveTab("followups")}
+            type="button"
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", flexShrink: 0 }}
           >
-            Follow-ups
+            <CalendarCheck size={15} />
+            <span>Follow-ups</span>
           </button>
           <button
             className={`healthcareTab ${activeTab === "designer" ? "active" : ""}`}
             onClick={() => setActiveTab("designer")}
+            type="button"
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", flexShrink: 0 }}
           >
-            Prescription Design
+            <Crown size={15} />
+            <span>Prescription Design</span>
           </button>
           <button
             className={`healthcareTab ${activeTab === "appointments" ? "active" : ""}`}
             onClick={() => setActiveTab("appointments")}
+            type="button"
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", flexShrink: 0 }}
           >
-            Appointments ({data.appointments?.length ?? 0})
+            <Calendar size={15} />
+            <span>Appointments ({data.appointments?.length ?? 0})</span>
           </button>
           <button
             className={`healthcareTab ${activeTab === "doctors" ? "active" : ""}`}
             onClick={() => setActiveTab("doctors")}
+            type="button"
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", flexShrink: 0 }}
           >
-            Doctors ({data.doctors?.length ?? 0})
+            <Stethoscope size={15} />
+            <span>Doctors ({data.doctors?.length ?? 0})</span>
+          </button>
+          <button
+            className={`healthcareTab ${activeTab === "clinical_tools" ? "active" : ""}`}
+            onClick={() => setActiveTab("clinical_tools")}
+            type="button"
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", flexShrink: 0 }}
+          >
+            <HeartPulse size={15} />
+            <span>Clinical Tools & Vitals</span>
           </button>
         </>
       )}
       <button
         className={`healthcareTab ${activeTab === "settings" ? "active" : ""}`}
         onClick={() => setActiveTab("settings")}
+        type="button"
+        style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", flexShrink: 0 }}
       >
-        Settings
+        <Settings size={15} />
+        <span>Settings</span>
       </button>
     </div>
 
@@ -985,6 +1046,10 @@ export function OwnerHealthcarePanel({
       />
     )}
 
+    {activeTab === "clinical_tools" && !isShopOwnerMode && (
+      <ClinicVitalsIntakeSection onToast={showToast} />
+    )}
+
     {prescriptionModal.open && !isShopOwnerMode && (
       <DoctorPrescriptionModal
         storeId={storeId}
@@ -1069,6 +1134,274 @@ function QuickPrescriptionModal({ storeId, queueEntryId, onClose }: { storeId: s
            <div className="p-8 text-center text-slate-500 font-medium">Loading prescription details...</div>}
         </div>
       </div>
+    </div>
+  );
+}
+
+function ClinicVitalsIntakeSection({ onToast }: { onToast: (msg: string) => void }) {
+  const [patientName, setPatientName] = useState("");
+  const [tokenNumber, setTokenNumber] = useState("");
+  const [systolic, setSystolic] = useState("120");
+  const [diastolic, setDiastolic] = useState("80");
+  const [pulse, setPulse] = useState("72");
+  const [spo2, setSpo2] = useState("98");
+  const [temp, setTemp] = useState("98.6");
+  const [weight, setWeight] = useState("65");
+  const [height, setHeight] = useState("170");
+  const [sugar, setSugar] = useState("");
+  const [vitalsList, setVitalsList] = useState<Array<{
+    id: string;
+    patientName: string;
+    tokenNumber?: string;
+    bp: string;
+    pulse: string;
+    spo2: string;
+    temp: string;
+    bmi: string;
+    bmiCategory: string;
+    sugar?: string;
+    time: string;
+  }>>([]);
+
+  const bmiCalc = useMemo(() => {
+    const w = parseFloat(weight);
+    const h = parseFloat(height) / 100;
+    if (!w || !h || h <= 0) return { bmi: "—", category: "Normal", color: "#10b981" };
+    const val = (w / (h * h)).toFixed(1);
+    const num = parseFloat(val);
+    let cat = "Normal";
+    let col = "#10b981";
+    if (num < 18.5) { cat = "Underweight"; col = "#f59e0b"; }
+    else if (num >= 25 && num < 30) { cat = "Overweight"; col = "#f97316"; }
+    else if (num >= 30) { cat = "Obese"; col = "#ef4444"; }
+    return { bmi: val, category: cat, color: col };
+  }, [weight, height]);
+
+  const handleSave = (e: FormEvent) => {
+    e.preventDefault();
+    if (!patientName.trim()) {
+      onToast("Please enter patient name");
+      return;
+    }
+    const rec = {
+      id: "vit-" + Date.now(),
+      patientName: patientName.trim(),
+      tokenNumber: tokenNumber ? `#${tokenNumber}` : undefined,
+      bp: `${systolic}/${diastolic}`,
+      pulse: `${pulse} bpm`,
+      spo2: `${spo2}%`,
+      temp: `${temp}°F`,
+      bmi: bmiCalc.bmi,
+      bmiCategory: bmiCalc.category,
+      sugar: sugar ? `${sugar} mg/dL` : undefined,
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+    setVitalsList((prev) => [rec, ...prev]);
+    setPatientName("");
+    setTokenNumber("");
+    setSugar("");
+    onToast(`✓ Vitals logged for ${rec.patientName}`);
+  };
+
+  return (
+    <div className="portalGrid" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+      <section className="portalCard" style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "20px", padding: "1.75rem" }}>
+        <div style={{ marginBottom: "1.25rem" }}>
+          <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "#0f172a", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <HeartPulse className="w-5 h-5 text-rose-500" />
+            Clinical Tools & Vitals Intake Logger
+          </h2>
+          <p style={{ color: "#64748b", fontSize: "0.85rem", marginTop: "0.25rem" }}>
+            Record patient vital signs, BMI calculation, and preliminary triage measurements.
+          </p>
+        </div>
+
+        <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: "1.25rem", maxWidth: "700px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "1rem" }}>
+            <div>
+              <label style={{ fontWeight: 700, color: "#334155", fontSize: "0.85rem", display: "block", marginBottom: "0.35rem" }}>
+                Patient Name *
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Ramesh Kumar"
+                value={patientName}
+                onChange={(e) => setPatientName(e.target.value)}
+                required
+                style={{ width: "100%", padding: "0.7rem", borderRadius: "10px", border: "1px solid #cbd5e1" }}
+              />
+            </div>
+            <div>
+              <label style={{ fontWeight: 700, color: "#334155", fontSize: "0.85rem", display: "block", marginBottom: "0.35rem" }}>
+                Token # (Optional)
+              </label>
+              <input
+                type="number"
+                placeholder="e.g. 12"
+                value={tokenNumber}
+                onChange={(e) => setTokenNumber(e.target.value)}
+                style={{ width: "100%", padding: "0.7rem", borderRadius: "10px", border: "1px solid #cbd5e1" }}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ fontWeight: 700, color: "#334155", fontSize: "0.85rem", display: "block", marginBottom: "0.35rem" }}>
+                BP (mmHg)
+              </label>
+              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <input
+                  type="number"
+                  placeholder="120"
+                  value={systolic}
+                  onChange={(e) => setSystolic(e.target.value)}
+                  style={{ width: "50%", padding: "0.6rem", borderRadius: "8px", border: "1px solid #cbd5e1", textAlign: "center" }}
+                />
+                <span>/</span>
+                <input
+                  type="number"
+                  placeholder="80"
+                  value={diastolic}
+                  onChange={(e) => setDiastolic(e.target.value)}
+                  style={{ width: "50%", padding: "0.6rem", borderRadius: "8px", border: "1px solid #cbd5e1", textAlign: "center" }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ fontWeight: 700, color: "#334155", fontSize: "0.85rem", display: "block", marginBottom: "0.35rem" }}>
+                Pulse (bpm)
+              </label>
+              <input
+                type="number"
+                value={pulse}
+                onChange={(e) => setPulse(e.target.value)}
+                style={{ width: "100%", padding: "0.6rem", borderRadius: "8px", border: "1px solid #cbd5e1", textAlign: "center" }}
+              />
+            </div>
+
+            <div>
+              <label style={{ fontWeight: 700, color: "#334155", fontSize: "0.85rem", display: "block", marginBottom: "0.35rem" }}>
+                SpO2 (%)
+              </label>
+              <input
+                type="number"
+                value={spo2}
+                onChange={(e) => setSpo2(e.target.value)}
+                style={{ width: "100%", padding: "0.6rem", borderRadius: "8px", border: "1px solid #cbd5e1", textAlign: "center" }}
+              />
+            </div>
+
+            <div>
+              <label style={{ fontWeight: 700, color: "#334155", fontSize: "0.85rem", display: "block", marginBottom: "0.35rem" }}>
+                Temp (°F)
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                value={temp}
+                onChange={(e) => setTemp(e.target.value)}
+                style={{ width: "100%", padding: "0.6rem", borderRadius: "8px", border: "1px solid #cbd5e1", textAlign: "center" }}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "1rem" }}>
+            <div>
+              <label style={{ fontWeight: 700, color: "#334155", fontSize: "0.85rem", display: "block", marginBottom: "0.35rem" }}>
+                Weight (kg)
+              </label>
+              <input
+                type="number"
+                step="0.5"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                style={{ width: "100%", padding: "0.6rem", borderRadius: "8px", border: "1px solid #cbd5e1", textAlign: "center" }}
+              />
+            </div>
+            <div>
+              <label style={{ fontWeight: 700, color: "#334155", fontSize: "0.85rem", display: "block", marginBottom: "0.35rem" }}>
+                Height (cm)
+              </label>
+              <input
+                type="number"
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+                style={{ width: "100%", padding: "0.6rem", borderRadius: "8px", border: "1px solid #cbd5e1", textAlign: "center" }}
+              />
+            </div>
+            <div>
+              <label style={{ fontWeight: 700, color: "#334155", fontSize: "0.85rem", display: "block", marginBottom: "0.35rem" }}>
+                Computed BMI
+              </label>
+              <div style={{ padding: "0.6rem", borderRadius: "8px", background: "#f8fafc", border: "1px solid #e2e8f0", textAlign: "center", fontWeight: 800, color: bmiCalc.color }}>
+                {bmiCalc.bmi} <span style={{ fontSize: "0.75rem", fontWeight: 600 }}>({bmiCalc.category})</span>
+              </div>
+            </div>
+            <div>
+              <label style={{ fontWeight: 700, color: "#334155", fontSize: "0.85rem", display: "block", marginBottom: "0.35rem" }}>
+                Blood Sugar (mg/dL)
+              </label>
+              <input
+                type="number"
+                placeholder="Optional"
+                value={sugar}
+                onChange={(e) => setSugar(e.target.value)}
+                style={{ width: "100%", padding: "0.6rem", borderRadius: "8px", border: "1px solid #cbd5e1", textAlign: "center" }}
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="portalButton"
+            style={{ background: "#059669", color: "#ffffff", padding: "0.75rem", borderRadius: "12px", fontWeight: 800, width: "fit-content", cursor: "pointer" }}
+          >
+            Log Patient Vitals Intake
+          </button>
+        </form>
+
+        {vitalsList.length > 0 && (
+          <div style={{ marginTop: "1.75rem" }}>
+            <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.75rem" }}>
+              Today&apos;s Intake Log ({vitalsList.length})
+            </h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              {vitalsList.map((v) => (
+                <div
+                  key={v.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "0.75rem 1rem",
+                    borderRadius: "12px",
+                    background: "#f8fafc",
+                    border: "1px solid #e2e8f0",
+                    fontSize: "0.85rem",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    {v.tokenNumber && (
+                      <span style={{ padding: "0.2rem 0.5rem", borderRadius: "6px", background: "#e2e8f0", fontWeight: 800, fontSize: "0.75rem" }}>
+                        {v.tokenNumber}
+                      </span>
+                    )}
+                    <b style={{ color: "#0f172a" }}>{v.patientName}</b>
+                    <span style={{ color: "#64748b" }}>• BP: {v.bp}</span>
+                    <span style={{ color: "#64748b" }}>• Pulse: {v.pulse}</span>
+                    <span style={{ color: "#64748b" }}>• SpO2: {v.spo2}</span>
+                    <span style={{ color: "#64748b" }}>• Temp: {v.temp}</span>
+                    <span style={{ color: "#64748b" }}>• BMI: {v.bmi}</span>
+                  </div>
+                  <span style={{ color: "#94a3b8", fontSize: "0.75rem" }}>{v.time}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

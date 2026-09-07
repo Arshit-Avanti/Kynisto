@@ -59,19 +59,16 @@ test("Onboarding role API provisions healthcare owner with clinic store and tria
   assert.match(file, /redirectTo\s*=\s*isHealthcare\s*\?\s*"\/healthcare\/dashboard"/);
 });
 
-test("PortalShell renders 'Live Queue' for store_owner and full suite for healthcare_owner", async () => {
+test("PortalShell renders 'Live Queue' for store_owner and unified Tools suite for healthcare_owner", async () => {
   const file = await readFile(new URL("components/dashboard/PortalShell.tsx", root), "utf8");
 
   // In store_owner nav: changed from Healthcare to Live Queue
   assert.match(file, /\{ label: "Live Queue", icon: Activity, tab: "queue" \}/);
 
-  // Dedicated healthcareOwnerNav
+  // Dedicated healthcareOwnerNav with unified Tools suite
   assert.match(file, /healthcareOwnerNav/);
   assert.match(file, /Clinic Overview/);
-  assert.match(file, /Clinical Tools & Vitals/);
-  assert.match(file, /Prescription Designer/);
-  assert.match(file, /Patients Directory/);
-  assert.match(file, /Follow-ups/);
+  assert.match(file, /Tools/);
 
   // Active workspace role resolution
   assert.match(file, /user\?\.ownerType === "healthcare"\s*\?\s*"healthcare_owner"/);

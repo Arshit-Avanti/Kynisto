@@ -41,6 +41,7 @@ import {
   Wallet,
   Stethoscope,
   FileText,
+  Wrench,
 } from "lucide-react";
 
 type NavItem = {
@@ -119,15 +120,7 @@ const navByRole: Record<UserRole, NavItem[]> = {
 
 const healthcareOwnerNav: NavItem[] = [
   { label: "Clinic Overview", icon: LayoutDashboard, tab: "overview" },
-  { label: "Healthcare", icon: Stethoscope, tab: "healthcare" },
-  { label: "Live Queue", icon: Activity, tab: "queue" },
-  { label: "Doctors", icon: Stethoscope, tab: "doctors" },
-  { label: "Appointments", icon: Users, tab: "appointments" },
-  { label: "Prescriptions", icon: FileText, tab: "prescriptions" },
-  { label: "Prescription Designer", icon: Crown, tab: "designer" },
-  { label: "Patients Directory", icon: UserCheck, tab: "patients" },
-  { label: "Follow-ups", icon: AlertCircle, tab: "followups" },
-  { label: "Clinical Tools & Vitals", icon: Activity, tab: "clinical_tools" },
+  { label: "Tools", icon: Wrench, tab: "healthcare" },
   { label: "Clinic Profile", icon: Building2, tab: "profile" },
   { label: "Clinic Media", icon: ImageIcon, tab: "media" },
   { label: "OPD Analytics", icon: TrendingUp, tab: "analytics" },
@@ -256,7 +249,9 @@ export function PortalShell({
         <nav style={{ padding: "0 1rem" }}>
           {nav.map((item) => {
             const Icon = item.icon;
-            const isActive = active === item.tab;
+            const isToolsTab = (item.tab === "healthcare" || item.tab === "tools") &&
+              ["healthcare", "tools", "queue", "doctors", "appointments", "prescriptions", "designer", "patients", "followups", "clinical_tools"].includes(active);
+            const isActive = active === item.tab || isToolsTab;
             const isLocked = activeWorkspaceRole === "store_owner" && isOwnerTabLocked(item.tab);
             return (
               <Link key={item.tab} href={`${pathname}?tab=${item.tab}`} className={isActive ? "active" : ""} onClick={() => setOpen(false)} style={isActive ? { background: dark ? "rgba(59, 130, 246, 0.15)" : "rgba(59, 130, 246, 0.1)", color: dark ? "#60a5fa" : "#2563eb", borderRadius: "12px", border: dark ? "1px solid rgba(59, 130, 246, 0.3)" : "1px solid rgba(59, 130, 246, 0.2)", boxShadow: dark ? "0 0 15px rgba(59, 130, 246, 0.2), inset 0 0 10px rgba(59, 130, 246, 0.1)" : "none", textShadow: dark ? "0 0 8px rgba(96, 165, 250, 0.5)" : "none" } : { color: dark ? "#cbd5e1" : "#475569" }}>
