@@ -2371,11 +2371,7 @@ export default function Home() {
       <CredixInteractiveHeroFeatures query={query} setQuery={setQuery} />
 
       <section
-        className="categorySection w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 relative z-20 rounded-3xl"
-        style={{
-          background: "linear-gradient(to bottom, rgba(7, 14, 28, 0.45) 0%, rgba(7, 14, 28, 0.88) 15%, rgba(7, 14, 28, 0.98) 100%)",
-          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.5)",
-        }}
+        className="categorySection w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 relative z-20"
         aria-labelledby="category-heading"
       >
         <div className="sectionHeading compactHeading arise-on-scroll flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">

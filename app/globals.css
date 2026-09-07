@@ -1220,13 +1220,13 @@ textarea:focus {
   align-items: center;
   text-align: left;
   border-radius: 20px;
-  background: rgba(13, 22, 42, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(18, 34, 68, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: #ffffff;
   cursor: pointer;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.18);
   transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1),
               box-shadow 0.2s ease,
               border-color 0.2s ease,
@@ -1237,9 +1237,9 @@ textarea:focus {
 /* Smooth GPU Hover Lift */
 .categoryTile:hover {
   transform: translateY(-4px) scale(1.02);
-  border-color: rgba(249, 115, 22, 0.65);
-  background: rgba(18, 30, 58, 0.96);
-  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.75),
+  border-color: rgba(249, 115, 22, 0.7);
+  background: rgba(24, 44, 88, 0.85);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.6),
               0 0 24px rgba(249, 115, 22, 0.3),
               inset 0 1px 2px rgba(255, 255, 255, 0.25);
   z-index: 10;

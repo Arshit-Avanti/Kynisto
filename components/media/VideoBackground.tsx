@@ -60,8 +60,16 @@ export function VideoBackground({
     video.muted = true;
     video.playsInline = true;
 
+    const isPastHeroAndCategories = () => {
+      const placesEl = typeof document !== "undefined" ? document.getElementById("places") : null;
+      if (placesEl) {
+        return placesEl.getBoundingClientRect().top < 100;
+      }
+      return typeof window !== "undefined" ? window.scrollY > window.innerHeight * 1.8 : false;
+    };
+
     const playVideo = () => {
-      if (video.paused && window.scrollY <= window.innerHeight * 0.7) {
+      if (video.paused && !isPastHeroAndCategories()) {
         video.play().catch(() => {
           video.muted = true;
           video.play().catch(() => {});
@@ -74,7 +82,7 @@ export function VideoBackground({
 
     playVideo();
 
-    // Pause video when scrolled past hero to free GPU/CPU resources
+    // Pause video when scrolled past categories into places to free GPU/CPU resources
     let ticking = false;
     const handleScroll = () => {
       if (ticking) return;
@@ -82,8 +90,8 @@ export function VideoBackground({
       requestAnimationFrame(() => {
         ticking = false;
         if (!video) return;
-        const pastHero = window.scrollY > window.innerHeight * 0.7;
-        if (pastHero) {
+        const past = isPastHeroAndCategories();
+        if (past) {
           if (!video.paused) {
             video.pause();
           }
@@ -99,7 +107,7 @@ export function VideoBackground({
       if (!video) return;
       if (document.visibilityState === "hidden") {
         video.pause();
-      } else if (window.scrollY <= window.innerHeight * 0.7) {
+      } else if (!isPastHeroAndCategories()) {
         video.play().catch(() => {});
       }
     };
