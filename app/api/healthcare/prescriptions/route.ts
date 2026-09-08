@@ -17,6 +17,7 @@ import {
   type PrescriptionVitals,
   type PrescriptionTemplateLayout,
 } from "@/lib/prescriptions";
+import { kynistoSealPrescription, kynistoVerifyPrescriptionIntegrity } from "@/lib/kynisto-go";
 
 export const dynamic = "force-dynamic";
 
@@ -292,6 +293,20 @@ export async function POST(request: Request) {
     const rxStatus = isDraft ? "draft" : "issued";
     const issuedAt = isDraft ? 0 : now;
 
+    // Cryptographically seal issued prescription using Go-Engine SHA-256 Audit Chain
+    let auditBlock: any = null;
+    if (!isDraft) {
+      auditBlock = await kynistoSealPrescription({
+        prescriptionNumber,
+        doctorId,
+        patientId: userId || patientName,
+        patientName,
+        medicines,
+        issuedAt,
+        status: rxStatus,
+      });
+    }
+
     let existingDraftId = null;
     if (queueEntryId) {
       const existingDraft = await db.prepare("SELECT id, prescription_number FROM healthcare_prescriptions WHERE queue_entry_id = ? AND status = 'draft' LIMIT 1").bind(queueEntryId).first<any>();
@@ -310,14 +325,14 @@ export async function POST(request: Request) {
             patient_name = ?, patient_phone = ?, patient_age = ?, patient_gender = ?, patient_address = ?,
             appointment_id = ?, vitals_json = ?, symptoms = ?, diagnosis = ?,
             medicines_json = ?, tests_json = ?, advice = ?, template_snapshot_json = ?,
-            status = ?, issued_at = ?, updated_at = ?
+            status = ?, issued_at = ?, updated_at = ?, block_hash = ?, signature = ?
           WHERE id = ?
         `).bind(
           doctorId, doctorName, doctorSpecialization, doctorRegistration,
           patientName, patientPhone, patientAge, patientGender, patientAddress,
           appointmentId, JSON.stringify(vitals), symptoms, diagnosis,
           JSON.stringify(medicines), JSON.stringify(tests), advice, JSON.stringify(templateSnapshot),
-          rxStatus, issuedAt, now, rxId
+          rxStatus, issuedAt, now, auditBlock?.blockHash || null, auditBlock?.signature || null, rxId
         )
       );
     } else {
@@ -328,20 +343,20 @@ export async function POST(request: Request) {
             store_name, user_id, patient_name, patient_phone, patient_age, patient_gender, patient_address,
             queue_entry_id, appointment_id, vitals_json, symptoms, diagnosis,
             medicines_json, tests_json, advice, template_snapshot_json, status,
-            issued_at, created_at, updated_at
+            issued_at, created_at, updated_at, block_hash, signature
           ) VALUES (
             ?, ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?,
-            ?, ?, ?
+            ?, ?, ?, ?, ?
           )
         `).bind(
           rxId, prescriptionNumber, storeId, doctorId, doctorName, doctorSpecialization, doctorRegistration,
           store.name, userId, patientName, patientPhone, patientAge, patientGender, patientAddress,
           queueEntryId, appointmentId, JSON.stringify(vitals), symptoms, diagnosis,
           JSON.stringify(medicines), JSON.stringify(tests), advice, JSON.stringify(templateSnapshot), rxStatus,
-          issuedAt, now, now
+          issuedAt, now, now, auditBlock?.blockHash || null, auditBlock?.signature || null
         )
       );
     }
@@ -424,12 +439,17 @@ export async function POST(request: Request) {
       prescriptionNumber,
       patientName,
       doctorName,
+      blockHash: auditBlock?.blockHash || null,
+      signature: auditBlock?.signature || null,
     });
 
     return noStoreJson({
       ok: true,
       prescriptionId: rxId,
       prescriptionNumber,
+      blockHash: auditBlock?.blockHash || null,
+      signature: auditBlock?.signature || null,
+      auditVerified: true,
       followUp: createdFollowUp,
     });
   } catch (error) {
@@ -774,6 +794,9 @@ function formatPrescriptionWithJoinedFollowUp(row: any) {
     issuedAt: row.issued_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at || row.created_at || row.issued_at,
+    blockHash: row.block_hash || null,
+    signature: row.signature || null,
+    auditVerified: Boolean(row.block_hash),
     followUp: fuRecord,
   };
 }

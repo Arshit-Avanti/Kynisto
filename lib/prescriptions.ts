@@ -616,6 +616,8 @@ export async function ensurePrescriptionTables(database?: any): Promise<void> {
       "ALTER TABLE healthcare_queue_settings ADD COLUMN default_followup_fee real DEFAULT 0",
       "ALTER TABLE healthcare_prescriptions ADD COLUMN doctor_registration text",
       "ALTER TABLE healthcare_prescriptions ADD COLUMN patient_phone text",
+      "ALTER TABLE healthcare_prescriptions ADD COLUMN block_hash text",
+      "ALTER TABLE healthcare_prescriptions ADD COLUMN signature text",
     ];
 
     for (const sql of settingsAlters) {

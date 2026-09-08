@@ -1,6 +1,9 @@
 import { getD1 } from "@/db/runtime";
 import { sha256 } from "@/lib/crypto";
 import { ValidationError } from "@/lib/validation";
+import { kynistoRateLimitGuard, kynistoConstantTimeCompare } from "./kynisto-go";
+
+export { kynistoConstantTimeCompare, kynistoConstantTimeCompare as constantTimeCompare };
 
 export class HttpError extends Error {
   status: number;
@@ -45,8 +48,6 @@ export async function hashedClientIp(request: Request): Promise<string> {
   return sha256(clientIp(request));
 }
 
-const _memoryRateLimitMap = new Map<string, { count: number; windowStart: number }>();
-
 export async function enforceRateLimit(
   request: Request,
   scope: string,
@@ -56,27 +57,12 @@ export async function enforceRateLimit(
   const ip = clientIp(request);
   const now = Math.floor(Date.now() / 1000);
   const memKey = `${scope}:${ip}`;
+  const refillRate = Math.max(0.1, limit / windowSeconds);
 
-  // In-memory fast path (0ms latency, zero D1 writes)
-  const mem = _memoryRateLimitMap.get(memKey);
-  if (mem) {
-    if (now - mem.windowStart < windowSeconds) {
-      mem.count += 1;
-      if (mem.count > limit) {
-        throw new HttpError(429, "Too many requests. Please try again shortly.", "RATE_LIMITED");
-      }
-    } else {
-      mem.count = 1;
-      mem.windowStart = now;
-    }
-  } else {
-    // Keep memory map bounded (max 5000 entries)
-    if (_memoryRateLimitMap.size > 5000) {
-      for (const [k, v] of _memoryRateLimitMap) {
-        if (now - v.windowStart > windowSeconds * 2) _memoryRateLimitMap.delete(k);
-      }
-    }
-    _memoryRateLimitMap.set(memKey, { count: 1, windowStart: now });
+  // Go-Engine Token Bucket with Automatic Mark-Sweep Garbage Collection (0ms, zero leak)
+  const guard = kynistoRateLimitGuard(scope, ip, limit, refillRate);
+  if (!guard.allowed) {
+    throw new HttpError(429, `Too many requests. Please try again in ${guard.retryAfterSec || 1}s.`, "RATE_LIMITED");
   }
 
   // Only sample 1 in 10 requests to persistent D1 to prevent write bottleneck
