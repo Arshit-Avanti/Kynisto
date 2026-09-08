@@ -1,5 +1,7 @@
 "use client";
 
+import { kynistoFuzzyMatchScore } from "@/lib/kynisto-wasm";
+
 /**
  * ⚡ Kynisto TurboCore™ In-Memory Reactive Bus
  * Delivers sub-2ms local RAM search, instantaneous category filtering,
@@ -196,17 +198,20 @@ class TurboCoreEngine {
         }
       }
 
-      if (matchedIds) {
+      if (matchedIds && matchedIds.size > 0) {
         const validIds: Set<string | number> = matchedIds;
         candidates = candidates.filter((store) => {
           const key = store.id ?? store.slug;
           return key !== undefined && validIds.has(key);
         });
       } else {
-        // Fallback linear scan
+        // High-speed C++ typo-tolerant fallback scan
         candidates = candidates.filter((store) => {
           const haystack = `${store.name} ${store.category} ${store.address} ${(store.services || []).join(" ")}`.toLowerCase();
-          return haystack.includes(normalized);
+          if (haystack.includes(normalized)) return true;
+          // Check words with C++ fuzzy matching
+          const storeTokens = haystack.split(/\s+/);
+          return storeTokens.some((t) => kynistoFuzzyMatchScore(normalized, t) >= 0.82);
         });
       }
     }

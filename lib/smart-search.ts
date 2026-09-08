@@ -3,6 +3,8 @@
  * Understands conversational queries, Hinglish phrases, price constraints, distance limits, and ratings.
  */
 
+import { kynistoFuzzyMatchScore } from "@/lib/kynisto-wasm";
+
 export interface ParsedSearchIntent {
   rawQuery: string;
   cleanedTokens: string[];
@@ -129,13 +131,32 @@ export function parseSearchIntent(rawQuery: string): ParsedSearchIntent {
   const categoryHints: string[] = [];
 
   for (const token of rawTokens) {
-    // Check if token matches semantic dictionary
+    // Check if token matches semantic dictionary (exact or C++ fuzzy match)
+    let matchedIntent = false;
     for (const [intentKey, data] of Object.entries(SEMANTIC_INTENT_MAP)) {
-      if (data.synonyms.includes(token) || intentKey === token) {
+      let isMatch = data.synonyms.includes(token) || intentKey === token;
+      let matchedCanonical = token;
+
+      if (!isMatch && token.length >= 3) {
+        // Evaluate C++ fuzzy match against synonyms
+        for (const syn of data.synonyms) {
+          if (kynistoFuzzyMatchScore(token, syn) >= 0.85) {
+            isMatch = true;
+            matchedCanonical = syn;
+            break;
+          }
+        }
+      }
+
+      if (isMatch) {
+        matchedIntent = true;
         data.categories.forEach((cat) => {
           if (!categoryHints.includes(cat)) categoryHints.push(cat);
         });
         if (!cleanedTokens.includes(token)) cleanedTokens.push(token);
+        if (matchedCanonical !== token && !cleanedTokens.includes(matchedCanonical)) {
+          cleanedTokens.push(matchedCanonical);
+        }
       }
     }
 

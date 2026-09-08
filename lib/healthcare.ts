@@ -3,6 +3,7 @@ import { ensureSeeded } from "@/db/seed";
 import { HttpError } from "@/lib/security";
 import { ensurePrescriptionTables } from "@/lib/prescriptions";
 import { microCache } from "@/lib/micro-cache";
+import { kynistoEstimateQueueWait } from "@/lib/kynisto-wasm";
 
 export const HEALTHCARE_TYPES = [
   "hospital",
@@ -475,7 +476,7 @@ export async function patientQueueState(storeId: string, userId?: string) {
     ? currentMinutes >= openingMinutes && currentMinutes <= closingMinutes
     : currentMinutes >= openingMinutes || currentMinutes <= closingMinutes;
   const capacityAvailable = Number(settings.dailyPatientCount ?? 0) < Number(settings.maximumDailyPatients ?? 100);
-  const estimatedWaitMinutes = (entry?.status === "called" || entry?.status === "in_consultation") ? 0 : Math.max(0, position - 1) * Number(settings.consultationMinutes ?? 15);
+  const estimatedWaitMinutes = (entry?.status === "called" || entry?.status === "in_consultation") ? 0 : kynistoEstimateQueueWait(position, Number(settings.consultationMinutes ?? 15), 1.15, 1);
   const arrivalReminder = Boolean(entry && entry.status === "waiting" && estimatedWaitMinutes <= 5);
   if (userId && entry && arrivalReminder && !entry.reminderSentAt) {
     const now = Math.floor(Date.now() / 1000);

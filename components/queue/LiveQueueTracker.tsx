@@ -12,6 +12,7 @@ import { UniversalHealthcareQrScanner } from '@/components/queue/UniversalHealth
 import { Navbar3D } from '@/components/landing/Navbar3D';
 import { saveQueueSession, clearQueueSession } from '@/lib/queue-persistence';
 import { CustomerPrescriptionCenter } from '@/components/healthcare/CustomerPrescriptionCenter';
+import { kynistoEstimateQueueWait } from '@/lib/kynisto-wasm';
 
 
 
@@ -527,7 +528,7 @@ export default function LiveQueueTracker() {
             setMyTokenNumber(state.entry.tokenNumber);
             setTotalInQueue(Math.max(1, state.waitingCount || newPos));
             const ownerConsultationMins = state.consultationMinutes || 15;
-            setEstimatedWait(newPos > 1 ? (newPos - 1) * ownerConsultationMins : 0);
+            setEstimatedWait(kynistoEstimateQueueWait(newPos, ownerConsultationMins, 1.15, 1));
             setPrescriptionStatus(state.entry.prescriptionStatus);
             setPrescriptionId(state.entry.prescriptionId);
           } else if (state.entry.status === 'completed') {
@@ -555,7 +556,7 @@ export default function LiveQueueTracker() {
         } else if (selectedQueueRef.current) {
           const ownerConsultationMins = state.consultationMinutes || selectedQueueRef.current.consultationMinutes || 15;
           const pos = userPositionRef.current;
-          setEstimatedWait((pos > 1 ? pos - 1 : 0) * ownerConsultationMins);
+          setEstimatedWait(kynistoEstimateQueueWait(pos, ownerConsultationMins, 1.15, 1));
         }
       }
     } catch {
@@ -639,7 +640,7 @@ export default function LiveQueueTracker() {
         setMyTokenNumber(entry.tokenNumber || response.tokenNumber || optToken);
         setTotalInQueue(Math.max(1, response.state.waitingCount || pos));
         const mins = consultationMinutes || item.consultationMinutes || 15;
-        setEstimatedWait(pos > 1 ? (pos - 1) * mins : 0);
+        setEstimatedWait(kynistoEstimateQueueWait(pos, mins, 1.15, 1));
         setPrescriptionStatus(entry.prescriptionStatus);
         setPrescriptionId(entry.prescriptionId);
       } else if (response && (response.tokenNumber || response.position)) {
@@ -787,7 +788,7 @@ export default function LiveQueueTracker() {
               setTotalInQueue(Math.max(1, qs.waitingCount || qs.entry.position || 1));
               const mins = qs.consultationMinutes || 15;
               const pos = qs.entry.position || 1;
-              setEstimatedWait(pos > 1 ? (pos - 1) * mins : 0);
+              setEstimatedWait(kynistoEstimateQueueWait(pos, mins, 1.15, 1));
               setPrescriptionStatus(qs.entry.prescriptionStatus);
               setPrescriptionId(qs.entry.prescriptionId);
             }
