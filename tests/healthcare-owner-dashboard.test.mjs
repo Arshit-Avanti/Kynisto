@@ -200,3 +200,44 @@ test("Shop owner dashboard and live queue completely exclude healthcare pollutio
   assert.match(ownerPanel, /activeTab === "designer" && !isShopOwnerMode/);
   assert.match(ownerPanel, /prescriptionModal\.open && !isShopOwnerMode/);
 });
+
+test("Healthcare dashboard contains full commercial and management operations", async () => {
+  const [portalShell, healthcareDash] = await Promise.all([
+    readFile(new URL("components/dashboard/PortalShell.tsx", root), "utf8"),
+    readFile(new URL("components/dashboard/HealthcareOwnerDashboard.tsx", root), "utf8"),
+  ]);
+
+  // All 8 requested modules exist in healthcareOwnerNav
+  const requestedModules = [
+    "products",
+    "inventory",
+    "orders",
+    "services",
+    "offers",
+    "coupons",
+    "memberships",
+    "notifications",
+  ];
+
+  for (const mod of requestedModules) {
+    assert.match(portalShell, new RegExp(`tab:\\s*"${mod}"`));
+  }
+
+  // HealthcareOwnerDashboard renders CatalogPanel for products, services, offers
+  assert.match(healthcareDash, /CatalogPanel/);
+  assert.match(healthcareDash, /\["products",\s*"services",\s*"offers"\]\.includes\(tab\)/);
+  assert.match(healthcareDash, /mutateCatalog/);
+
+  // HealthcareOwnerDashboard renders OwnerMembershipEditor for memberships
+  assert.match(healthcareDash, /OwnerMembershipEditor/);
+  assert.match(healthcareDash, /tab === "memberships"/);
+
+  // HealthcareOwnerDashboard renders OwnerWorkspacePanel for inventory, orders, coupons, notifications
+  assert.match(healthcareDash, /isOwnerWorkspaceView\(tab\)/);
+
+  // HealthcareOwnerDashboard overview provides instant access to operations
+  for (const mod of requestedModules) {
+    assert.match(healthcareDash, new RegExp(`href="\\?tab=${mod}"`));
+  }
+});
+

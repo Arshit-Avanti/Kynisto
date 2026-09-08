@@ -13,12 +13,16 @@ import {
 import { ChatCenter } from "@/components/dashboard/ChatCenter";
 import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscriptionDashboard";
 import { RoleSwitcherButton } from "@/components/auth/RoleSwitcherButton";
+import { CatalogPanel } from "@/components/dashboard/CatalogPanel";
+import { OwnerMembershipEditor } from "@/components/dashboard/OwnerMembershipEditor";
 import {
   Activity,
   AlertCircle,
   AlertTriangle,
   Award,
   BarChart2,
+  Bell,
+  Briefcase,
   Calendar,
   CheckCircle2,
   Clock,
@@ -28,15 +32,21 @@ import {
   HelpCircle,
   ImageIcon,
   LayoutDashboard,
+  List,
   MapPin,
   MessageSquare,
+  Package,
+  Percent,
   Phone,
   Plus,
   Settings,
+  Shield,
   ShieldCheck,
+  ShoppingCart,
   Sparkles,
   Star,
   Stethoscope,
+  Tags,
   TrendingUp,
   UserCheck,
   Users,
@@ -83,6 +93,7 @@ export function HealthcareOwnerDashboard({ user }: { user: SessionUser }) {
   const [stores, setStores] = useState<Store[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
   const [categories, setCategories] = useState<Item[]>([]);
+  const [catalog, setCatalog] = useState<Item[]>([]);
   const [queueData, setQueueData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -121,6 +132,24 @@ export function HealthcareOwnerDashboard({ user }: { user: SessionUser }) {
     return stores.find((s) => String(s.id) === selectedId) ?? stores[0] ?? null;
   }, [stores, selectedId]);
 
+  const mutateCatalog = useCallback(
+    async (path: string, method: string, json: unknown, message: string) => {
+      try {
+        await apiFetch(path, { method, json });
+        showToast(message);
+        if (selectedStore && ["products", "services", "offers"].includes(tab)) {
+          const res = await apiFetch<{ items: Item[] }>(
+            `/api/owner/catalog?resource=${tab}&storeId=${encodeURIComponent(String(selectedStore.id))}`
+          );
+          setCatalog(res.items || []);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Action failed");
+      }
+    },
+    [selectedStore, tab, showToast]
+  );
+
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -156,7 +185,11 @@ export function HealthcareOwnerDashboard({ user }: { user: SessionUser }) {
   useEffect(() => {
     if (!selectedStore) return;
     const storeId = String(selectedStore.id);
-    if (tab === "media") {
+    if (["products", "services", "offers"].includes(tab)) {
+      apiFetch<{ items: Item[] }>(`/api/owner/catalog?resource=${tab}&storeId=${encodeURIComponent(storeId)}`)
+        .then((res) => setCatalog(res.items || []))
+        .catch((err) => setError(err instanceof Error ? err.message : "Failed to load items"));
+    } else if (tab === "media") {
       apiFetch<{ items: Item[] }>(`/api/media?storeId=${encodeURIComponent(storeId)}`)
         .then((res) => setMedia(res.items || []))
         .catch(() => undefined);
@@ -1175,6 +1208,190 @@ export function HealthcareOwnerDashboard({ user }: { user: SessionUser }) {
                           Medical records & history
                         </small>
                       </a>
+
+                      <a
+                        href="?tab=products"
+                        style={{
+                          padding: "1rem",
+                          borderRadius: "14px",
+                          background: "#f0fdfa",
+                          border: "1px solid #ccfbf1",
+                          textDecoration: "none",
+                          color: "#0f766e",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "0.3rem",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          <Package size={18} />
+                          <b style={{ fontSize: "0.95rem" }}>Products</b>
+                        </div>
+                        <small style={{ color: "#115e59" }}>
+                          Health items, medicine & OTC
+                        </small>
+                      </a>
+
+                      <a
+                        href="?tab=inventory"
+                        style={{
+                          padding: "1rem",
+                          borderRadius: "14px",
+                          background: "#f8fafc",
+                          border: "1px solid #e2e8f0",
+                          textDecoration: "none",
+                          color: "#334155",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "0.3rem",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          <List size={18} />
+                          <b style={{ fontSize: "0.95rem" }}>Inventory</b>
+                        </div>
+                        <small style={{ color: "#64748b" }}>
+                          Stock levels & SKUs
+                        </small>
+                      </a>
+
+                      <a
+                        href="?tab=orders"
+                        style={{
+                          padding: "1rem",
+                          borderRadius: "14px",
+                          background: "#eff6ff",
+                          border: "1px solid #bfdbfe",
+                          textDecoration: "none",
+                          color: "#1e40af",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "0.3rem",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          <ShoppingCart size={18} />
+                          <b style={{ fontSize: "0.95rem" }}>Orders</b>
+                        </div>
+                        <small style={{ color: "#2563eb" }}>
+                          Purchase orders & delivery
+                        </small>
+                      </a>
+
+                      <a
+                        href="?tab=services"
+                        style={{
+                          padding: "1rem",
+                          borderRadius: "14px",
+                          background: "#fdf4ff",
+                          border: "1px solid #f5d0fe",
+                          textDecoration: "none",
+                          color: "#86198f",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "0.3rem",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          <Briefcase size={18} />
+                          <b style={{ fontSize: "0.95rem" }}>Services</b>
+                        </div>
+                        <small style={{ color: "#a21caf" }}>
+                          Procedures & consultation fees
+                        </small>
+                      </a>
+
+                      <a
+                        href="?tab=offers"
+                        style={{
+                          padding: "1rem",
+                          borderRadius: "14px",
+                          background: "#fff1f2",
+                          border: "1px solid #fecdd3",
+                          textDecoration: "none",
+                          color: "#be123c",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "0.3rem",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          <Percent size={18} />
+                          <b style={{ fontSize: "0.95rem" }}>Offers</b>
+                        </div>
+                        <small style={{ color: "#e11d48" }}>
+                          Promotions & health packages
+                        </small>
+                      </a>
+
+                      <a
+                        href="?tab=coupons"
+                        style={{
+                          padding: "1rem",
+                          borderRadius: "14px",
+                          background: "#ecfeff",
+                          border: "1px solid #cffafe",
+                          textDecoration: "none",
+                          color: "#0e7490",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "0.3rem",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          <Tags size={18} />
+                          <b style={{ fontSize: "0.95rem" }}>Coupons</b>
+                        </div>
+                        <small style={{ color: "#0891b2" }}>
+                          Promo codes & discounts
+                        </small>
+                      </a>
+
+                      <a
+                        href="?tab=memberships"
+                        style={{
+                          padding: "1rem",
+                          borderRadius: "14px",
+                          background: "#f0fdf4",
+                          border: "1px solid #bbf7d0",
+                          textDecoration: "none",
+                          color: "#166534",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "0.3rem",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          <Shield size={18} />
+                          <b style={{ fontSize: "0.95rem" }}>Membership Plans</b>
+                        </div>
+                        <small style={{ color: "#15803d" }}>
+                          Loyalty passes & VIP care
+                        </small>
+                      </a>
+
+                      <a
+                        href="?tab=notifications"
+                        style={{
+                          padding: "1rem",
+                          borderRadius: "14px",
+                          background: "#fefce8",
+                          border: "1px solid #fef08a",
+                          textDecoration: "none",
+                          color: "#854d0e",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "0.3rem",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          <Bell size={18} />
+                          <b style={{ fontSize: "0.95rem" }}>Notifications</b>
+                        </div>
+                        <small style={{ color: "#a16207" }}>
+                          Clinic alerts & updates
+                        </small>
+                      </a>
                     </div>
                   </div>
 
@@ -1660,7 +1877,28 @@ export function HealthcareOwnerDashboard({ user }: { user: SessionUser }) {
 
           {tab === "chat" && <ChatCenter user={user} />}
           {tab === "subscription" && <UserSubscriptionDashboard />}
-          {isOwnerWorkspaceView(tab) && selectedStore && (
+          {["products", "services", "offers"].includes(tab) && selectedStore && (
+            <CatalogPanel
+              resource={tab as "products" | "services" | "offers"}
+              storeId={String(selectedStore.id)}
+              items={catalog}
+              mutate={mutateCatalog}
+              onChanged={async (message) => {
+                if (selectedStore) {
+                  const res = await apiFetch<{ items: Item[] }>(
+                    `/api/owner/catalog?resource=${tab}&storeId=${encodeURIComponent(String(selectedStore.id))}`
+                  );
+                  setCatalog(res.items || []);
+                }
+                showToast(message);
+              }}
+              onError={setError}
+            />
+          )}
+          {tab === "memberships" && selectedStore && (
+            <OwnerMembershipEditor storeId={String(selectedStore.id)} />
+          )}
+          {isOwnerWorkspaceView(tab) && tab !== "settings" && selectedStore && (
             <OwnerWorkspacePanel
               key={`${tab}-${selectedStore.id}`}
               view={tab as any}
