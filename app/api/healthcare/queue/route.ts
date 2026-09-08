@@ -5,6 +5,7 @@ import { apiError, enforceRateLimit, HttpError, noStoreJson } from "@/lib/securi
 import { isHealthcareQueueEnabled } from "@/lib/settings";
 import { requireFeaturePermission } from "@/lib/subscriptions";
 import { cleanText, safeJson } from "@/lib/validation";
+import { kynistoEvaluateQueuePriorityRule } from "@/lib/kynisto-lua";
 
 export async function GET(request: Request) {
   try {
@@ -88,6 +89,14 @@ export async function POST(request: Request) {
       const activeKey = `customer:${session.user.id}`;
       const expiresAt = now + QUEUE_ENTRY_TTL_SECONDS;
 
+      // 🌙 Lua Dynamic Priority Rule Evaluation (Geriatric, Pediatric, or Acute Emergency)
+      const priorityRule = kynistoEvaluateQueuePriorityRule({
+        patientAge: typeof body.patientAge === "number" ? body.patientAge : undefined,
+        isEmergency: Boolean(body.isEmergency),
+        symptoms: typeof body.symptoms === "string" ? body.symptoms : undefined,
+        hasSeverePain: Boolean(body.hasSeverePain),
+      });
+
       const results = await db.batch([
         db.prepare(`INSERT INTO healthcare_queue_entries
           (id, store_id, user_id, service_date, token_number, active_key, status, arrival_status, joined_at, expires_at, updated_at)
@@ -110,9 +119,9 @@ export async function POST(request: Request) {
           WHERE store_id = ? AND EXISTS (SELECT 1 FROM healthcare_queue_entries WHERE id = ?)`)
           .bind(now, storeId, id),
         db.prepare(`INSERT INTO healthcare_queue_events (id, store_id, entry_id, actor_id, event_type, metadata, created_at)
-          SELECT ?, store_id, id, ?, 'joined', json_object('tokenNumber', token_number, 'expiresAt', expires_at), ?
+          SELECT ?, store_id, id, ?, 'joined', json_object('tokenNumber', token_number, 'expiresAt', expires_at, 'priorityTier', ?, 'priorityLabel', ?), ?
           FROM healthcare_queue_entries WHERE id = ?`)
-          .bind(crypto.randomUUID(), session.user.id, now, id),
+          .bind(crypto.randomUUID(), session.user.id, priorityRule.priorityTier, priorityRule.label, now, id),
       ]);
 
       if (!results[0]?.results?.length) {
@@ -123,7 +132,7 @@ export async function POST(request: Request) {
         throw new HttpError(409, "The queue changed or reached its daily capacity. Please try again.", "QUEUE_CHANGED");
       }
       const { id: entryId, position, tokenNumber, waitingCount, status } = results[0].results[0] as { id: string, position: number, tokenNumber: number, waitingCount: number, status: string };
-      return noStoreJson({ entry: { id: entryId }, position, tokenNumber, waitingCount, status, state: await patientQueueState(storeId, session.user.id) }, { status: 201 });
+      return noStoreJson({ entry: { id: entryId }, position, tokenNumber, waitingCount, status, priority: priorityRule, state: await patientQueueState(storeId, session.user.id) }, { status: 201 });
     }
 
     if (action === "leave" || action === "cancel") {

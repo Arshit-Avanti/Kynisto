@@ -5,6 +5,7 @@ import { requireOwnedStore, writeAudit } from "@/lib/ownership";
 import { apiError, HttpError, noStoreJson } from "@/lib/security";
 import { cleanText, numberInput, safeJson } from "@/lib/validation";
 import { ensurePrescriptionTables } from "@/lib/prescriptions";
+import { kynistoCalculateGstSplit } from "@/lib/kynisto-zig";
 
 export const dynamic = "force-dynamic";
 
@@ -214,6 +215,8 @@ export async function PATCH(request: Request) {
 function formatFollowUpRow(row: any, todayStr: string) {
   const isBookedOrCompleted = row.booking_status === "booked" || row.booking_status === "completed";
   const isExp = Boolean(row.valid_until_date && todayStr > row.valid_until_date && !isBookedOrCompleted);
+  const fee = Number(row.follow_up_fee || 0);
+  const gst = fee > 0 ? kynistoCalculateGstSplit(fee) : null;
   return {
     id: row.id,
     storeId: row.store_id,
@@ -231,7 +234,17 @@ function formatFollowUpRow(row: any, todayStr: string) {
     validUntilDate: row.valid_until_date,
     validityDays: row.validity_days,
     followUpType: row.follow_up_type,
-    followUpFee: Number(row.follow_up_fee || 0),
+    followUpFee: fee,
+    gstBreakdown: gst
+      ? {
+          baseAmountRupees: gst.baseAmountRupees,
+          cgstRupees: gst.cgstRupees,
+          sgstRupees: gst.sgstRupees,
+          igstRupees: gst.igstRupees,
+          totalTaxRupees: gst.totalTaxRupees,
+          isBalanced: gst.isBalanced,
+        }
+      : null,
     paymentStatus: row.payment_status,
     bookingStatus: isExp ? "expired" : row.booking_status,
     isExpired: isExp,
