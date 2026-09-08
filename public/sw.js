@@ -1,6 +1,6 @@
 // Kynisto High-Performance PWA & Web Push Service Worker
-const CACHE_NAME = "kynisto-turbocore-2026.08.14.400";
-const API_CACHE = "kynisto-turbocore-api-2026.08.14.400";
+const CACHE_NAME = "kynisto-turbocore-2026.09.08.100";
+const API_CACHE = "kynisto-turbocore-api-2026.09.08.100";
 const PRECACHE_URLS = [
   "/",
   "/healthcare",

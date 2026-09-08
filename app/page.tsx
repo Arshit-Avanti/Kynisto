@@ -2055,7 +2055,7 @@ export default function Home() {
   };
 
   return (
-    <main className={`site theme-${accent} density-${density} mode-${themeMode} mode-dark dark-theme dark pb-0 min-h-screen`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
+    <main className={`site theme-${accent} density-${density} mode-${themeMode} mode-dark dark-theme dark pb-0 min-h-screen relative`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
       <VideoBackground videoSrc="/videos/hero-flow.mp4" mobileVideoSrc="/videos/hero-flow.mp4" />
       <SubscriptionExpiryBanner userId={userId} />
       <WelcomeRewardModal userRole={userRole} userId={userId} />

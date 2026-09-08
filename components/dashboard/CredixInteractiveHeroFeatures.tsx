@@ -25,7 +25,7 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
   };
 
   return (
-    <div className="w-full relative max-w-full">
+    <div className="w-full relative max-w-full z-10">
       {/* 1. HERO SECTION (Responsive Viewport Centering with zero JS listener overhead) */}
       <section
         className="hero"

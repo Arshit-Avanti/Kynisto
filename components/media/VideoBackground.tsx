@@ -135,7 +135,7 @@ export function VideoBackground({
 
   return (
     <div
-      className="fixed inset-0 w-full h-full min-h-[100dvh] overflow-hidden pointer-events-none z-[-1] mobile-9-16-video-container"
+      className="fixed inset-0 w-full h-full min-h-[100dvh] overflow-hidden pointer-events-none z-0 mobile-9-16-video-container"
       style={{
         position: "fixed",
         top: 0,
@@ -143,7 +143,7 @@ export function VideoBackground({
         width: "100vw",
         height: "100vh",
         minHeight: "100dvh",
-        zIndex: -1,
+        zIndex: 0,
         pointerEvents: "none",
         backgroundImage: isMobile
           ? "radial-gradient(ellipse at 50% 15%, rgba(14, 165, 233, 0.22) 0%, rgba(10, 16, 30, 0.95) 75%), url('/images/hero-flow-poster-mobile.webp')"
