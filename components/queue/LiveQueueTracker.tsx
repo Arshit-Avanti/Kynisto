@@ -13,6 +13,7 @@ import { Navbar3D } from '@/components/landing/Navbar3D';
 import { saveQueueSession, clearQueueSession } from '@/lib/queue-persistence';
 import { CustomerPrescriptionCenter } from '@/components/healthcare/CustomerPrescriptionCenter';
 import { kynistoEstimateQueueWait } from '@/lib/kynisto-wasm';
+import SymptomTriageCard from '@/components/healthcare/SymptomTriageCard';
 
 
 
@@ -1817,6 +1818,8 @@ export default function LiveQueueTracker() {
       )}
 
       <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pb-20 flex-1 relative z-10">
+        <SymptomTriageCard onSelectSpecialty={(spec) => { setSearchQuery(spec); setDebouncedSearchQuery(spec); }} />
+
         <div className="flex items-center justify-start sm:justify-center gap-2.5 overflow-x-auto pb-4 mb-8 no-scrollbar">
           {renderedCategoryFilters}
         </div>

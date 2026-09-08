@@ -1,6 +1,7 @@
 "use client";
 
 import { kynistoFuzzyMatchScore } from "@/lib/kynisto-wasm";
+import { kynistoPackCatalogBinary, kynistoBitmaskFilter, RUST_FLAG } from "@/lib/kynisto-rust";
 
 /**
  * ⚡ Kynisto TurboCore™ In-Memory Reactive Bus
@@ -42,6 +43,7 @@ class TurboCoreEngine {
   private categories: TurboCategory[] = [];
   private searchIndex = new Map<string, Set<string | number>>();
   private subscribers = new Set<TurboSubscriber>();
+  private packedRustBuffer: Uint8Array | null = null;
   private initialized = false;
   private syncing = false;
 
@@ -106,6 +108,18 @@ class TurboCoreEngine {
 
   public setStores(stores: TurboStore[]): void {
     this.stores = stores;
+    try {
+      this.packedRustBuffer = kynistoPackCatalogBinary(
+        stores.map((s) => ({
+          id: s.id ?? s.slug ?? 0,
+          isOpen: s.open,
+          rating: s.rating,
+          distanceKm: s.distance,
+        }))
+      );
+    } catch {
+      this.packedRustBuffer = null;
+    }
     this.rebuildSearchIndex();
     this.notify();
     this.saveSnapshot();
@@ -221,10 +235,23 @@ class TurboCoreEngine {
       candidates = candidates.filter((store) => store.category === category);
     }
 
-    // Sorting
+    // 🦀 Rust-accelerated bitmask fast filter for status flags and open/closed state
     if (sortMode === "open") {
-      candidates = candidates.filter((store) => store.open);
-    } else if (sortMode === "nearest") {
+      if (this.packedRustBuffer) {
+        const openIds = new Set(
+          kynistoBitmaskFilter(this.packedRustBuffer, {
+            requiredFlags: RUST_FLAG.IS_OPEN,
+          })
+        );
+        candidates = candidates.filter((store) => {
+          const numericId = typeof store.id === "number" ? store.id : null;
+          return numericId !== null ? openIds.has(numericId) : store.open;
+        });
+      } else {
+        candidates = candidates.filter((store) => store.open);
+      }
+    }
+    else if (sortMode === "nearest") {
       candidates = [...candidates].sort((a, b) => a.distance - b.distance);
     } else if (sortMode === "rated") {
       candidates = [...candidates].sort((a, b) => b.rating - a.rating);
