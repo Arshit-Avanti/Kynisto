@@ -110,22 +110,34 @@ export async function kynistoComputeMedsDigest(medicines: PrescriptionHashInput[
  * Modeled on Go's immutable blockchain ledger architecture.
  */
 export async function kynistoSealPrescription(
-  rxData: PrescriptionHashInput,
+  rxData: Partial<PrescriptionHashInput> & Record<string, any>,
   previousHash: string = GENESIS_HASH,
   secretKey: string = "kynisto-audit-secret-v1"
 ): Promise<PrescriptionAuditBlock> {
-  const medsDigest = await kynistoComputeMedsDigest(rxData.medicines);
+  let meds = rxData.medicines;
+  if (!meds && typeof rxData.medicinesJson === "string") {
+    try { meds = JSON.parse(rxData.medicinesJson); } catch { meds = []; }
+  } else if (!meds && typeof rxData.medicines === "string") {
+    try { meds = JSON.parse(rxData.medicines); } catch { meds = []; }
+  }
+  const medsDigest = await kynistoComputeMedsDigest(meds || []);
   const prev = previousHash || GENESIS_HASH;
+
+  const rxNumber = rxData.prescriptionNumber || rxData.prescription_number || "UNKNOWN_RX";
+  const docId = rxData.doctorId ?? rxData.doctor_id ?? "UNASSIGNED";
+  const patId = rxData.patientId ?? rxData.patient_id ?? rxData.patientName ?? rxData.patient_name ?? "ANONYMOUS";
+  const issued = rxData.issuedAt ?? rxData.issued_at ?? Math.floor(Date.now() / 1000);
+  const st = rxData.status || "issued";
 
   // Canonical block string
   const blockPayload = [
     prev,
-    rxData.prescriptionNumber,
-    rxData.doctorId || "UNASSIGNED",
-    rxData.patientId || rxData.patientName || "ANONYMOUS",
+    rxNumber,
+    docId,
+    patId,
     medsDigest,
-    String(rxData.issuedAt),
-    rxData.status,
+    String(issued),
+    st,
   ].join(":");
 
   const blockHash = await sha256Hex(blockPayload);
@@ -135,22 +147,24 @@ export async function kynistoSealPrescription(
     blockHash,
     signature,
     previousHash: prev,
-    timestamp: rxData.issuedAt || Math.floor(Date.now() / 1000),
+    timestamp: issued,
   };
 }
 
 /**
  * Verifies that a prescription has not been tampered with or altered in-place.
+ * Supports both standalone signature checks and DB row objects.
  */
 export async function kynistoVerifyPrescriptionIntegrity(
-  rxData: PrescriptionHashInput,
-  expectedBlockHash: string,
+  rxData: Partial<PrescriptionHashInput> & Record<string, any>,
+  expectedBlockHash?: string,
   previousHash: string = GENESIS_HASH
 ): Promise<boolean> {
-  if (!expectedBlockHash) return false;
+  const targetHash = expectedBlockHash || rxData.blockHash || rxData.block_hash;
+  if (!targetHash) return false;
 
   const sealed = await kynistoSealPrescription(rxData, previousHash);
-  return kynistoConstantTimeCompare(sealed.blockHash, expectedBlockHash);
+  return kynistoConstantTimeCompare(sealed.blockHash, targetHash);
 }
 
 // =============================================================================

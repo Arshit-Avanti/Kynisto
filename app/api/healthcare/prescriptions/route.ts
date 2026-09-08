@@ -727,6 +727,9 @@ function formatPrescriptionRow(rx: any, followUp?: any) {
     issuedAt: rx.issued_at,
     createdAt: rx.created_at,
     updatedAt: rx.updated_at,
+    blockHash: rx.block_hash || null,
+    signature: rx.signature || null,
+    auditVerified: Boolean(rx.block_hash),
     followUp: fuRecord,
   };
 }
