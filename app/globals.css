@@ -74,7 +74,7 @@ body {
     overflow-x: clip !important;
   }
 
-  /* Disable expensive backdrop-filter compositing in mobile webviews / APKs */
+  /* Cap expensive GPU backdrop-filters on mobile viewports per GEMINI.md */
   .backdrop-blur-sm,
   .backdrop-blur,
   .backdrop-blur-md,
@@ -82,8 +82,8 @@ body {
   .backdrop-blur-xl,
   .backdrop-blur-2xl,
   .backdrop-blur-3xl {
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    backdrop-filter: blur(6px) !important;
   }
 }
 
@@ -2208,7 +2208,7 @@ footer > p { color: var(--muted); font-size: 11px; }
 }
 
 /* LIGHT MODE: Enforce 100% Dark Slate Text */
-.light-theme, .mode-light, html:not(.dark) {
+.light-theme, .mode-light {
   --text-primary: #0F172A !important;
   --text-secondary: #0F172A !important;
   --ink: #0F172A !important;

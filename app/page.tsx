@@ -1779,17 +1779,25 @@ export default function Home() {
   }, [category, query, sortMode]);
 
   useEffect(() => {
+    // Enforce Dark Mode on homepage regardless of phone, Google, or system setting
+    const root = document.documentElement;
+    const body = document.body;
+    root.classList.remove("mode-light", "light-theme");
+    body.classList.remove("mode-light", "light-theme");
+    root.classList.add("dark", "dark-theme", "mode-dark");
+    body.classList.add("dark", "dark-theme", "mode-dark");
+    root.setAttribute("data-theme", "dark");
+    body.setAttribute("data-theme", "dark");
+
     const stored = window.localStorage.getItem("kynisto-preferences");
     if (!stored) return;
     try {
       const preferences = JSON.parse(stored) as {
         accent?: Accent;
         density?: Density;
-        themeMode?: ThemeMode;
       };
       if (preferences.accent) setAccent(preferences.accent);
       if (preferences.density) setDensity(preferences.density);
-      if (preferences.themeMode) setThemeMode(preferences.themeMode);
     } catch {
       window.localStorage.removeItem("kynisto-preferences");
     }
@@ -1909,9 +1917,9 @@ export default function Home() {
   useEffect(() => {
     window.localStorage.setItem(
       "kynisto-preferences",
-      JSON.stringify({ accent, density, themeMode }),
+      JSON.stringify({ accent, density, themeMode: "dark" }),
     );
-  }, [accent, density, themeMode]);
+  }, [accent, density]);
 
   useEffect(() => {
     if (!toast) return;
@@ -2047,7 +2055,7 @@ export default function Home() {
   };
 
   return (
-    <main className={`site theme-${accent} density-${density} mode-${themeMode} pb-0 min-h-screen`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
+    <main className={`site theme-${accent} density-${density} mode-${themeMode} mode-dark dark-theme dark pb-0 min-h-screen`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
       <VideoBackground videoSrc="/videos/hero-flow.mp4" mobileVideoSrc="/videos/hero-flow.mp4" />
       <SubscriptionExpiryBanner userId={userId} />
       <WelcomeRewardModal userRole={userRole} userId={userId} />
@@ -2662,16 +2670,11 @@ export default function Home() {
             <fieldset>
               <legend>Appearance</legend>
               <div className="densityRow themeModeRow">
-                {([
-                  ["light", "Light", "Warm cream and paper surfaces"],
-                  ["dark", "Dark", "Low-glare evening browsing"],
-                ] as [ThemeMode, string, string][]).map(([value, label, help]) => (
-                  <button key={value} type="button" aria-pressed={themeMode === value} onClick={() => setThemeMode(value)}>
-                    <span className={`themeModeIcon ${value}`} aria-hidden="true" />
-                    <span><b>{label}</b><small>{help}</small></span>
-                    <em aria-hidden="true">&#10003;</em>
-                  </button>
-                ))}
+                <button type="button" aria-pressed={true}>
+                  <span className="themeModeIcon dark" aria-hidden="true" />
+                  <span><b>Dark Mode (Default)</b><small>High contrast OLED and deep navy surfaces</small></span>
+                  <em aria-hidden="true">&#10003;</em>
+                </button>
               </div>
             </fieldset>
 

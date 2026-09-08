@@ -51,8 +51,6 @@ export function VideoBackground({
   }, []);
 
   useEffect(() => {
-    if (isMobile) return;
-
     const video = videoRef.current;
     if (!video) return;
 
@@ -69,11 +67,13 @@ export function VideoBackground({
     };
 
     const playVideo = () => {
-      if (video.paused && !isPastHeroAndCategories()) {
-        video.play().catch(() => {
-          video.muted = true;
-          video.play().catch(() => {});
-        });
+      if (video && !isPastHeroAndCategories()) {
+        video.muted = true;
+        video.defaultMuted = true;
+        const promise = video.play();
+        if (promise !== undefined) {
+          promise.catch(() => {});
+        }
       }
     };
 
@@ -97,7 +97,7 @@ export function VideoBackground({
           }
         } else {
           if (video.paused && document.visibilityState !== "hidden") {
-            video.play().catch(() => {});
+            playVideo();
           }
         }
       });
@@ -108,7 +108,7 @@ export function VideoBackground({
       if (document.visibilityState === "hidden") {
         video.pause();
       } else if (!isPastHeroAndCategories()) {
-        video.play().catch(() => {});
+        playVideo();
       }
     };
 
@@ -131,7 +131,7 @@ export function VideoBackground({
       window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [isMobile]);
+  }, []);
 
   return (
     <div
@@ -153,34 +153,37 @@ export function VideoBackground({
         backgroundColor: "#070e1c",
       }}
     >
-      {/* High Performance Native Video Player on Desktop Only: 0% CPU on mobile/APKs */}
-      {!isMobile && (
-        <video
-          ref={videoRef}
-          autoPlay
-          loop
-          muted
-          playsInline
-          poster="/images/hero-flow-poster.webp"
-          preload="auto"
-          className="absolute inset-0 w-full h-full object-cover opacity-100 scale-105 pointer-events-none mobile-9-16-video-player"
-          style={{
-            width: "100%",
-            height: "100%",
-            minWidth: "100vw",
-            minHeight: "100dvh",
-            objectFit: "cover",
-            objectPosition: "center center",
-            transform: "translateZ(0)",
-            backfaceVisibility: "hidden",
-            WebkitBackfaceVisibility: "hidden",
-          }}
-        >
-          <source src={videoSrc} type="video/mp4" />
-          <source src="/videos/hero-flow-fast.mp4" type="video/mp4" />
-          <source src="/videos/hero-flow.mp4" type="video/mp4" />
-        </video>
-      )}
+      {/* High Performance Video Player for Mobile & Desktop */}
+      <video
+        ref={videoRef}
+        autoPlay
+        loop
+        muted
+        playsInline
+        poster={isMobile ? "/images/hero-flow-poster-mobile.webp" : "/images/hero-flow-poster.webp"}
+        preload="auto"
+        {...({
+          "webkit-playsinline": "true",
+          "x5-playsinline": "true",
+          "x5-video-player-type": "h5",
+        } as any)}
+        className="absolute inset-0 w-full h-full object-cover opacity-100 scale-105 pointer-events-none mobile-9-16-video-player"
+        style={{
+          width: "100%",
+          height: "100%",
+          minWidth: "100vw",
+          minHeight: "100dvh",
+          objectFit: "cover",
+          objectPosition: "center center",
+          transform: "translateZ(0)",
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+        }}
+      >
+        <source src={isMobile ? mobileVideoSrc : videoSrc} type="video/mp4" />
+        <source src="/videos/hero-flow-fast.mp4" type="video/mp4" />
+        <source src="/videos/hero-flow.mp4" type="video/mp4" />
+      </video>
     </div>
   );
 }

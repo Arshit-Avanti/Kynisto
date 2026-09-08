@@ -170,9 +170,30 @@ export function PortalShell({
   }, [activeWorkspaceRole]);
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("kynisto_theme") || window.localStorage.getItem("theme");
-    const isDark = saved ? saved !== "light" : false;
+    // In Dashboard: LIGHT MODE is DEFAULT unless user explicitly chose dark
+    const saved = window.localStorage.getItem("kynisto_dashboard_theme");
+    const isDark = saved === "dark";
     setDark(isDark);
+
+    if (typeof document !== "undefined") {
+      const root = document.documentElement;
+      const body = document.body;
+      if (isDark) {
+        root.classList.remove("mode-light", "light-theme");
+        body.classList.remove("mode-light", "light-theme");
+        root.classList.add("dark", "dark-theme", "mode-dark");
+        body.classList.add("dark", "dark-theme", "mode-dark");
+        root.setAttribute("data-theme", "dark");
+        body.setAttribute("data-theme", "dark");
+      } else {
+        root.classList.remove("dark", "dark-theme", "mode-dark");
+        body.classList.remove("dark", "dark-theme", "mode-dark");
+        root.classList.add("light-theme", "mode-light");
+        body.classList.add("light-theme", "mode-light");
+        root.setAttribute("data-theme", "light");
+        body.setAttribute("data-theme", "light");
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -199,12 +220,25 @@ export function PortalShell({
   function toggleTheme() {
     setDark((current) => {
       const nextDark = !current;
-      const themeVal = nextDark ? "cyberpunk" : "light";
-      window.localStorage.setItem("kynisto_theme", themeVal);
-      window.localStorage.setItem("theme", nextDark ? "dark" : "light");
+      window.localStorage.setItem("kynisto_dashboard_theme", nextDark ? "dark" : "light");
       if (typeof document !== "undefined") {
-        document.documentElement.setAttribute("data-theme", themeVal);
-        document.body.setAttribute("data-theme", themeVal);
+        const root = document.documentElement;
+        const body = document.body;
+        if (nextDark) {
+          root.classList.remove("mode-light", "light-theme");
+          body.classList.remove("mode-light", "light-theme");
+          root.classList.add("dark", "dark-theme", "mode-dark");
+          body.classList.add("dark", "dark-theme", "mode-dark");
+          root.setAttribute("data-theme", "dark");
+          body.setAttribute("data-theme", "dark");
+        } else {
+          root.classList.remove("dark", "dark-theme", "mode-dark");
+          body.classList.remove("dark", "dark-theme", "mode-dark");
+          root.classList.add("light-theme", "mode-light");
+          body.classList.add("light-theme", "mode-light");
+          root.setAttribute("data-theme", "light");
+          body.setAttribute("data-theme", "light");
+        }
       }
       return nextDark;
     });

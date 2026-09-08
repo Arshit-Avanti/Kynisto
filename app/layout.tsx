@@ -56,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         {/* Google AdSense verification meta */}
         <meta name="google-adsense-account" content="ca-pub-9178031569606873" />
