@@ -82,12 +82,14 @@ This document defines critical architecture, platform invariants, and developmen
 ## 4. Native Release & Asset Deployment Process
 
 ### ❌ NEVER:
-- **NEVER** update native Android code (`android/app/src/...`) or deploy web fixes without updating and compiling the release APK.
-- **NEVER** ship an APK with the same `versionCode` when making changes.
+- **NEVER** compile or generate a new APK for web-only, styling, or dashboard changes.
+  - *Why*: The Android app is a lightweight native WebView shell that loads `https://kynisto.in`. Web and style updates take effect immediately over the air.
+- **NEVER** bump minor version numbers arbitrarily (e.g., jumping from `2.1` to `2.2` or `2.3`). Keep the base APK release version (e.g., `2.1`) and update that version in-place.
 
 ### ✅ ALWAYS:
-- Increment `versionCode` and update `versionName` in `android/app/build.gradle`.
-- Compile the signed release APK using Gradle:
+- Only compile the Android APK when **native Android files** (`android/app/src/...`, `AndroidManifest.xml`, `MainActivity.java`, etc.) are modified, or when explicitly requested by the user.
+- Maintain the user's release version (e.g., `2.1.0` in `android/app/build.gradle`) rather than incrementing minor versions.
+- When native compilation is required, compile with Gradle:
   ```powershell
   cd android; ./gradlew.bat assembleRelease; cd ..
   ```
