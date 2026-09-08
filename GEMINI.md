@@ -144,3 +144,17 @@ This document defines critical architecture, platform invariants, and developmen
 - **ALWAYS** apply `touch-action: manipulation` and `user-select: none` to mobile dock navigation bars to eliminate the 300ms double-tap delay.
 - **ALWAYS** serve cached navigation pages immediately from CacheStorage (<5ms) while revalidating in the background (Stale-While-Revalidate).
 
+---
+
+## 8. Background Video Stacking Context & Media Invariants
+
+### ❌ NEVER:
+- **NEVER** apply negative z-index (`z-index: -1`, `z-[-1]`) to full-screen or fixed background media elements (`<video>`, canvas wallpapers, animated meshes).
+  - *Why*: Under W3C CSS Stacking Context specifications, elements with negative z-index are drawn behind the canvas background of `<body>` and `<html>`. When dark mode or light mode applies an opaque `background-color` to `<body>` or `<html>`, the background color completely occludes the video, rendering it invisible.
+- **NEVER** leave `pointer-events: auto` on background video containers, as this captures mouse and touch gestures intended for foreground links, search inputs, or navigation elements.
+
+### ✅ ALWAYS:
+- **ALWAYS** use `position: fixed; z-index: 0; pointer-events: none` on full-screen background media wrappers (`VideoBackground`, `HeroVideoBackground`).
+- **ALWAYS** ensure foreground layout sections (`hero`, `navbar`, `categories`, `places`, `footer`) specify relative positioning with an explicit stacking context (`relative z-10`, `z-20`, `z-50`) and transparent section backgrounds where the video should shine through.
+- **ALWAYS** bump `APP_VERSION` in both `lib/app-version.ts` and `public/sw.js` when modifying core visual styling or background media to trigger automatic Service Worker cache invalidation on mobile devices.
+
