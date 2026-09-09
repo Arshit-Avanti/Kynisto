@@ -184,11 +184,11 @@ svg {
   --floating-nav-max-width: 1500px;
   --floating-nav-height: 72px;
   --floating-nav-radius: 24px;
-  --floating-nav-bg: rgba(12, 18, 30, 0.78);
-  --floating-nav-backdrop-blur: 10px;
-  --floating-nav-border-color: rgba(255, 255, 255, 0.08);
+  --floating-nav-bg: rgba(255, 255, 255, 0.95);
+  --floating-nav-backdrop-blur: 16px;
+  --floating-nav-border-color: rgba(226, 232, 240, 0.9);
   --floating-nav-border: 1px solid var(--floating-nav-border-color);
-  --floating-nav-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  --floating-nav-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
   --floating-nav-z-index: 1000;
 }
 
@@ -210,17 +210,18 @@ svg {
   height: var(--floating-nav-height, 72px);
   margin-top: var(--floating-nav-margin-top, 16px);
   border-radius: var(--floating-nav-radius, 24px);
-  background: var(--floating-nav-bg, rgba(12, 18, 30, 0.88));
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: var(--floating-nav-border, 1px solid rgba(255, 255, 255, 0.08));
-  box-shadow: var(--floating-nav-shadow, 0 8px 24px rgba(0, 0, 0, 0.25));
+  background: var(--floating-nav-bg, rgba(255, 255, 255, 0.95));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: var(--floating-nav-border, 1px solid rgba(226, 232, 240, 0.9));
+  box-shadow: var(--floating-nav-shadow, 0 8px 30px rgba(0, 0, 0, 0.06));
   z-index: var(--floating-nav-z-index, 1000);
   box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 28px;
+  color: #0F172A;
 }
 
 .floating-nav-inner {
@@ -2261,52 +2262,27 @@ footer > p { color: var(--muted); font-size: 11px; }
   -webkit-text-fill-color: #0F172A !important;
 }
 
-/* Mobile Navigation Drawer & Dark Drawer Cards High Contrast Text Enforcement for Light & Dark Modes */
-.mobileNavDrawer,
-.mobileNavDrawer *,
-.mobileNavDrawer a,
-.mobileNavDrawer button,
-.mobileNavDrawer span,
-.mobileNavDrawer div,
-.mobileNavDrawer p,
-.mobileNavDrawer b,
-.mobileNavDrawer label,
-.mobileNavDrawer nav,
-.mobileNavDrawer nav *,
-.drawerCard,
-.drawerCard *,
-.drawerLink,
-.drawerLink *,
+/* Mobile Navigation Drawer & Drawer Cards High Contrast Text Enforcement */
 .light-theme .mobileNavDrawer,
-.light-theme .mobileNavDrawer *,
-.light-theme .mobileNavDrawer a,
-.light-theme .mobileNavDrawer button,
-.light-theme .mobileNavDrawer span,
-.light-theme .mobileNavDrawer div,
-.light-theme .mobileNavDrawer p,
-.light-theme .mobileNavDrawer b,
-.light-theme .mobileNavDrawer label,
-.light-theme .mobileNavDrawer nav,
-.light-theme .mobileNavDrawer nav *,
-.light-theme .drawerCard,
-.light-theme .drawerCard *,
-.light-theme .drawerLink,
-.light-theme .drawerLink *,
-.mode-light .mobileNavDrawer,
-.mode-light .mobileNavDrawer *,
-.mode-light .mobileNavDrawer a,
-.mode-light .mobileNavDrawer button,
-.mode-light .mobileNavDrawer span,
-.mode-light .mobileNavDrawer div,
-.mode-light .mobileNavDrawer p,
-.mode-light .mobileNavDrawer b,
-.mode-light .mobileNavDrawer label,
-.mode-light .mobileNavDrawer nav,
-.mode-light .mobileNavDrawer nav *,
-.mode-light .drawerCard,
-.mode-light .drawerCard *,
-.mode-light .drawerLink,
-.mode-light .drawerLink *,
+.mode-light .mobileNavDrawer {
+  color: #0F172A;
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.light-theme .mobileNavDrawer h1,
+.light-theme .mobileNavDrawer h2,
+.light-theme .mobileNavDrawer h3,
+.light-theme .mobileNavDrawer h4,
+.light-theme .mobileNavDrawer p:not([class*="text-"]),
+.mode-light .mobileNavDrawer h1,
+.mode-light .mobileNavDrawer h2,
+.mode-light .mobileNavDrawer h3,
+.mode-light .mobileNavDrawer h4,
+.mode-light .mobileNavDrawer p:not([class*="text-"]) {
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
+}
+
 .dark-theme .mobileNavDrawer,
 .dark-theme .mobileNavDrawer *,
 .mode-dark .mobileNavDrawer,
@@ -2315,9 +2291,6 @@ footer > p { color: var(--muted); font-size: 11px; }
   -webkit-text-fill-color: #FFFFFF !important;
 }
 
-.mobileNavDrawer .kynistoLogo b,
-.light-theme .mobileNavDrawer .kynistoLogo b,
-.mode-light .mobileNavDrawer .kynistoLogo b,
 .dark-theme .mobileNavDrawer .kynistoLogo b,
 .mode-dark .mobileNavDrawer .kynistoLogo b {
   color: #FFFFFF !important;
@@ -3774,58 +3747,53 @@ footer.efferdFooterBlock {
    These rules must come LAST to win the specificity war.
    ========================================================================== */
 
-/* 0 ── Floating Navigation Bar — UNIFIED: SAME IN LIGHT AND DARK MODE */
+/* 0 ── Floating Navigation Bar — PERMANENT LIGHT MODE */
 .floating-nav-container,
 .mode-light .floating-nav-container,
 .light-theme .floating-nav-container,
 .mode-dark .floating-nav-container,
 .dark-theme .floating-nav-container {
-  background: rgba(10, 16, 30, 0.85) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06) !important;
 }
 
+.floating-nav-container a,
+.floating-nav-container button,
 .mode-light .floating-nav-container a,
 .mode-light .floating-nav-container button,
 .mode-light .floating-nav-container nav a,
-.mode-light .floating-nav-container nav button {
-  color: #FFFFFF !important;
-  -webkit-text-fill-color: #FFFFFF !important;
+.mode-light .floating-nav-container nav button,
+.light-theme .floating-nav-container a,
+.light-theme .floating-nav-container button,
+.light-theme .floating-nav-container nav a,
+.light-theme .floating-nav-container nav button {
+  color: #0F172A !important;
+  -webkit-text-fill-color: #0F172A !important;
 }
 
-.mode-light .floating-nav-container nav a[href="/pricing"] {
-  color: #FF7A00 !important;
-  -webkit-text-fill-color: #FF7A00 !important;
+.floating-nav-container nav a[href="/pricing"],
+.mode-light .floating-nav-container nav a[href="/pricing"],
+.light-theme .floating-nav-container nav a[href="/pricing"] {
+  color: #EA580C !important;
+  -webkit-text-fill-color: #EA580C !important;
 }
 
-/* 1 ── Mobile drawer always has a dark background → ALL text inside = WHITE */
+/* 1 ── Mobile drawer in light mode */
 .mode-light .mobileNavDrawer,
-.mode-light .mobileNavDrawer *,
-.mode-light .mobileNavDrawer a,
-.mode-light .mobileNavDrawer button,
-.mode-light .mobileNavDrawer span,
-.mode-light .mobileNavDrawer div,
-.mode-light .mobileNavDrawer p,
-.mode-light .mobileNavDrawer h1,
-.mode-light .mobileNavDrawer h2,
-.mode-light .mobileNavDrawer h3,
-.mode-light .mobileNavDrawer b,
-.mode-light .mobileNavDrawer nav,
-.mode-light .mobileNavDrawer nav *,
-.mode-light .drawerCard,
-.mode-light .drawerCard *,
-.mode-light .drawerLink,
-.mode-light .drawerLink * {
-  color: #FFFFFF !important;
-  -webkit-text-fill-color: #FFFFFF !important;
+.light-theme .mobileNavDrawer {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  color: #0F172A !important;
 }
 
-/* Drawer card items — readable contrast on dark drawer bg */
-.mode-light .mobileNavDrawer nav .drawerCard {
-  background: rgba(255, 255, 255, 0.09) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+.mode-light .mobileNavDrawer nav .drawerCard,
+.light-theme .mobileNavDrawer nav .drawerCard {
+  background: rgba(248, 250, 252, 0.95) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  color: #0F172A !important;
 }
 
 /* 2 ── Feature cards (Universal Discovery etc.) — light frosted glass in light mode */

@@ -11,9 +11,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Forbidden. Admin access required." }, { status: 403 });
   }
 
-  await ensureSubscriptionTables();
-  const db = getD1();
-  const { searchParams } = new URL(request.url);
+  try {
+    await ensureSubscriptionTables();
+    const db = getD1();
+    const { searchParams } = new URL(request.url);
 
   const query = (searchParams.get("q") || "").trim().toLowerCase();
   const planFilter = searchParams.get("plan") || "all";
@@ -48,7 +49,7 @@ export async function GET(request: Request) {
   // Fetch all subscriptions with user details
   const subsResult = await db
     .prepare(
-      `SELECT s.id, s.user_id AS userId, u.name AS userName, u.email AS userEmail, u.role AS userRole, s.plan_id AS planId, s.billing_cycle AS billingCycle, s.amount, s.status, s.auto_renew AS autoRenew, s.starts_at AS startsAt, s.expires_at AS expiresAt, s.cancelled_at AS cancelledAt, s.payment_method AS paymentMethod, s.utr, s.receipt_number AS receiptNumber, s.created_at AS createdAt
+      `SELECT s.id, s.user_id AS userId, COALESCE(u.name, s.user_id, 'User') AS userName, COALESCE(u.email, '') AS userEmail, COALESCE(u.role, s.user_role, 'customer') AS userRole, s.plan_id AS planId, s.billing_cycle AS billingCycle, s.amount, s.status, s.auto_renew AS autoRenew, s.starts_at AS startsAt, s.expires_at AS expiresAt, s.cancelled_at AS cancelledAt, s.payment_method AS paymentMethod, s.utr, s.receipt_number AS receiptNumber, s.created_at AS createdAt
        FROM subscriptions s
        LEFT JOIN users u ON u.id = s.user_id
        ORDER BY s.created_at DESC`
@@ -77,16 +78,22 @@ export async function GET(request: Request) {
 
   // Filter subscriptions
   const filteredSubs = allSubs.filter((sub) => {
+    const role = sub.userRole || "customer";
+    const userName = sub.userName || "";
+    const userEmail = sub.userEmail || "";
+    const utr = sub.utr || "";
+    const receipt = sub.receiptNumber || "";
+
     const matchesQuery =
       !query ||
-      (sub.userName && sub.userName.toLowerCase().includes(query)) ||
-      (sub.userEmail && sub.userEmail.toLowerCase().includes(query)) ||
-      (sub.utr && sub.utr.toLowerCase().includes(query)) ||
-      (sub.receiptNumber && sub.receiptNumber.toLowerCase().includes(query));
+      userName.toLowerCase().includes(query) ||
+      userEmail.toLowerCase().includes(query) ||
+      utr.toLowerCase().includes(query) ||
+      receipt.toLowerCase().includes(query);
 
     const matchesPlan = planFilter === "all" || sub.planId === planFilter;
     const matchesStatus = statusFilter === "all" || sub.status === statusFilter;
-    const matchesRole = roleFilter === "all" || sub.userRole === roleFilter;
+    const matchesRole = roleFilter === "all" || role === roleFilter;
 
     return matchesQuery && matchesPlan && matchesStatus && matchesRole;
   });
@@ -111,23 +118,31 @@ export async function GET(request: Request) {
       if (sub.userRole === "store_owner") activeShopOwnerSubsCount++;
       else activeCustomerSubsCount++;
 
-      if (planBreakdown[sub.planId]) {
-        planBreakdown[sub.planId].count++;
-        planBreakdown[sub.planId].revenue += sub.amount;
+      if (!planBreakdown[sub.planId]) {
+        planBreakdown[sub.planId] = { count: 0, revenue: 0 };
       }
+      planBreakdown[sub.planId].count++;
+      planBreakdown[sub.planId].revenue += sub.amount;
     }
   });
 
-  return NextResponse.json({
-    pendingMessages,
-    subscriptions: filteredSubs,
-    analytics: {
-      mrr: Math.round(mrr),
-      totalRevenue: Math.round(totalRevenue),
-      activeSubscribersTotal: activeCustomerSubsCount + activeShopOwnerSubsCount,
-      activeCustomerCount: activeCustomerSubsCount,
-      activeShopOwnerCount: activeShopOwnerSubsCount,
-      planBreakdown,
-    },
-  });
+    return NextResponse.json({
+      pendingMessages,
+      subscriptions: filteredSubs,
+      analytics: {
+        mrr: Math.round(mrr),
+        totalRevenue: Math.round(totalRevenue),
+        activeSubscribersTotal: activeCustomerSubsCount + activeShopOwnerSubsCount,
+        activeCustomerCount: activeCustomerSubsCount,
+        activeShopOwnerCount: activeShopOwnerSubsCount,
+        planBreakdown,
+      },
+    });
+  } catch (err: any) {
+    console.error("Admin subscriptions GET error:", err);
+    return NextResponse.json(
+      { error: err?.message || "Internal server error fetching admin subscriptions." },
+      { status: 500 }
+    );
+  }
 }

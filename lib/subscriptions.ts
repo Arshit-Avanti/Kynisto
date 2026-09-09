@@ -267,6 +267,21 @@ export async function ensureSubscriptionTables() {
       )
     `).run();
 
+    const subColAlters = [
+      "ALTER TABLE subscriptions ADD COLUMN store_id TEXT",
+      "ALTER TABLE subscriptions ADD COLUMN user_role TEXT NOT NULL DEFAULT 'customer'",
+      "ALTER TABLE subscriptions ADD COLUMN utr TEXT",
+      "ALTER TABLE subscriptions ADD COLUMN receipt_number TEXT",
+      "ALTER TABLE subscriptions ADD COLUMN updated_at INTEGER NOT NULL DEFAULT (unixepoch())",
+      "ALTER TABLE subscription_messages ADD COLUMN billing_cycle TEXT NOT NULL DEFAULT 'monthly'",
+      "ALTER TABLE subscription_messages ADD COLUMN admin_notes TEXT",
+    ];
+    for (const statement of subColAlters) {
+      try {
+        await db.prepare(statement).run();
+      } catch {}
+    }
+
     // 14. Subscription Transactions (Legacy unified table for API compatibility)
     await db.prepare(`
       CREATE TABLE IF NOT EXISTS subscription_transactions (

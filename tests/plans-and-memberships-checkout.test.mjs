@@ -117,9 +117,9 @@ test("HomePlansAndMembershipsSection is unmounted from homepage to keep hero and
 test("Homepage hero features clean action pills without clutter", () => {
   const heroPath = path.resolve("components/dashboard/CredixInteractiveHeroFeatures.tsx");
   const heroContent = fs.readFileSync(heroPath, "utf-8");
-  assert.ok(heroContent.includes("Live OPD Queues"), "Hero must keep Live OPD Queues");
-  assert.ok(heroContent.includes("Home Services"), "Hero must keep Home Services");
-  assert.ok(heroContent.includes("Local Stores"), "Hero must keep Local Stores");
+  assert.equal(heroContent.includes("Live OPD Queues"), false, "Hero must remove Live OPD Queues pill per Image 2");
+  assert.equal(heroContent.includes("Home Services"), false, "Hero must remove Home Services pill per Image 2");
+  assert.equal(heroContent.includes("Local Stores"), false, "Hero must remove Local Stores pill per Image 2");
   assert.ok(!heroContent.includes("VIP Plans & Store Passes"), "Hero must not render VIP pill per user request");
 
   const navPath = path.resolve("components/landing/Navbar3D.tsx");
@@ -137,5 +137,23 @@ test("Wallet and CustomerDashboard provide seamless Store VIP Passes browsing", 
   const custDashContent = fs.readFileSync(custDashPath, "utf-8");
   assert.ok(custDashContent.includes("CustomerSubscriptionTab"), "Must use CustomerSubscriptionTab");
   assert.ok(custDashContent.includes("StoreMembershipsBrowser"), "Must support StoreMembershipsBrowser");
+});
+
+test("Permanent light mode navbar, drawer contrast, and admin premium plans integrity", () => {
+  const cssPath = path.resolve("app/globals.css");
+  const cssContent = fs.readFileSync(cssPath, "utf-8");
+  assert.ok(cssContent.includes("--floating-nav-bg: rgba(255, 255, 255, 0.95);"), "Floating nav CSS var must be light mode");
+  assert.ok(!cssContent.includes(".mode-light .mobileNavDrawer *\n{\n  color: #FFFFFF !important;"), "Drawer text must not be forced white in light mode");
+
+  const adminSubPath = path.resolve("components/dashboard/AdminSubscriptionsPanel.tsx");
+  const adminSubContent = fs.readFileSync(adminSubPath, "utf-8");
+  assert.ok(adminSubContent.includes("AdminMembershipsPanel"), "AdminSubscriptionsPanel must embed AdminMembershipsPanel");
+  assert.ok(adminSubContent.includes("Store VIP Passes"), "Must have dedicated Store VIP Passes tab");
+  assert.ok(adminSubContent.includes("Lifetime / Never"), "Must safely format expiresAt without crashing on 0 or NaN");
+
+  const adminMembPath = path.resolve("components/dashboard/AdminMembershipsPanel.tsx");
+  const adminMembContent = fs.readFileSync(adminMembPath, "utf-8");
+  assert.ok(!adminMembContent.includes("rgba(15,23,42,0.9)"), "AdminMembershipsPanel must be converted from dark mode to light mode");
+  assert.ok(adminMembContent.includes("#FFFFFF"), "AdminMembershipsPanel must use clean light card styling");
 });
 

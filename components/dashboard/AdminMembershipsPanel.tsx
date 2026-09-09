@@ -141,27 +141,27 @@ export function AdminMembershipsPanel() {
   function DaysLeftPill({ expiresAt }: { expiresAt: number | null }) {
     if (!expiresAt) return <span style={{ color: "#94A3B8", fontSize: "11px" }}>—</span>;
     const days = Math.ceil((expiresAt - now) / 86400);
-    if (days < 0) return <span style={{ background: "rgba(239,68,68,0.2)", color: "#F87171", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 800 }}>EXPIRED</span>;
-    if (days <= 7) return <span style={{ background: "rgba(234,179,8,0.2)", color: "#FACC15", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 800 }}>{days}d left</span>;
-    return <span style={{ background: "rgba(16,185,129,0.2)", color: "#4ADE80", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 800 }}>{days}d left</span>;
+    if (days < 0) return <span style={{ background: "#FEE2E2", color: "#DC2626", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 800 }}>EXPIRED</span>;
+    if (days <= 7) return <span style={{ background: "#FEF3C7", color: "#D97706", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 800 }}>{days}d left</span>;
+    return <span style={{ background: "#DCFCE7", color: "#16A34A", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 800 }}>{days}d left</span>;
   }
 
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
       {toast && (
-        <div style={{ background: "rgba(16,185,129,0.2)", border: "1px solid #10B981", color: "#4ADE80", padding: "12px 16px", borderRadius: "10px", fontWeight: 800, fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
+        <div style={{ background: "#ECFDF5", border: "1px solid #10B981", color: "#065F46", padding: "12px 16px", borderRadius: "10px", fontWeight: 800, fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
           <CheckCircle2 size={18} /> {toast}
         </div>
       )}
       {error && (
-        <div style={{ background: "rgba(239,68,68,0.2)", border: "1px solid #EF4444", color: "#F87171", padding: "12px 16px", borderRadius: "10px", fontWeight: 800, fontSize: "14px" }}>
+        <div style={{ background: "#FEF2F2", border: "1px solid #EF4444", color: "#991B1B", padding: "12px 16px", borderRadius: "10px", fontWeight: 800, fontSize: "14px" }}>
           {error}
         </div>
       )}
 
       {/* TAB SWITCHER */}
-      <div style={{ display: "flex", gap: "8px", background: "rgba(15,23,42,0.9)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "14px", padding: "6px" }}>
+      <div style={{ display: "flex", gap: "8px", background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "14px", padding: "6px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
         {(["all", "store"] as const).map((t) => (
           <button
             key={t}
@@ -169,8 +169,8 @@ export function AdminMembershipsPanel() {
             onClick={() => setActiveTab(t)}
             style={{
               flex: 1, padding: "10px", borderRadius: "10px", fontWeight: 800, fontSize: "13px", cursor: "pointer", border: "none",
-              background: activeTab === t ? "rgba(99,102,241,0.25)" : "transparent",
-              color: activeTab === t ? "#818CF8" : "#94A3B8",
+              background: activeTab === t ? "#EEF2FF" : "transparent",
+              color: activeTab === t ? "#4F46E5" : "#64748B",
               transition: "all 0.2s"
             }}
           >
@@ -186,39 +186,39 @@ export function AdminMembershipsPanel() {
 
       {/* METRICS STATS */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px" }}>
-        <div style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(99,102,241,0.3)", borderRadius: "14px", padding: "16px" }}>
-          <div style={{ fontSize: "11px", color: "#94A3B8", textTransform: "uppercase", fontWeight: 800 }}>Total Platform Membership Sales</div>
-          <div style={{ fontSize: "24px", fontWeight: 900, color: "#818CF8", marginTop: "4px" }}>{stats.totalPurchases || 0}</div>
+        <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "14px", padding: "16px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+          <div style={{ fontSize: "11px", color: "#64748B", textTransform: "uppercase", fontWeight: 800 }}>Total Platform Membership Sales</div>
+          <div style={{ fontSize: "24px", fontWeight: 900, color: "#4F46E5", marginTop: "4px" }}>{stats.totalPurchases || 0}</div>
         </div>
-        <div style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: "14px", padding: "16px" }}>
-          <div style={{ fontSize: "11px", color: "#94A3B8", textTransform: "uppercase", fontWeight: 800 }}>Active Platform VIP Members</div>
-          <div style={{ fontSize: "24px", fontWeight: 900, color: "#4ADE80", marginTop: "4px" }}>{stats.activeMembers || 0}</div>
+        <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "14px", padding: "16px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+          <div style={{ fontSize: "11px", color: "#64748B", textTransform: "uppercase", fontWeight: 800 }}>Active Platform VIP Members</div>
+          <div style={{ fontSize: "24px", fontWeight: 900, color: "#16A34A", marginTop: "4px" }}>{stats.activeMembers || 0}</div>
         </div>
-        <div style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: "14px", padding: "16px" }}>
-          <div style={{ fontSize: "11px", color: "#94A3B8", textTransform: "uppercase", fontWeight: 800 }}>Pending Verification Requests</div>
-          <div style={{ fontSize: "24px", fontWeight: 900, color: "#FBBF24", marginTop: "4px" }}>{stats.pendingVerifications || 0}</div>
+        <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "14px", padding: "16px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+          <div style={{ fontSize: "11px", color: "#64748B", textTransform: "uppercase", fontWeight: 800 }}>Pending Verification Requests</div>
+          <div style={{ fontSize: "24px", fontWeight: 900, color: "#D97706", marginTop: "4px" }}>{stats.pendingVerifications || 0}</div>
         </div>
-        <div style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(236,72,153,0.3)", borderRadius: "14px", padding: "16px" }}>
-          <div style={{ fontSize: "11px", color: "#94A3B8", textTransform: "uppercase", fontWeight: 800 }}>Gross Membership GMV</div>
-          <div style={{ fontSize: "24px", fontWeight: 900, color: "#F472B6", marginTop: "4px" }}>₹{stats.totalVolume || 0}</div>
+        <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "14px", padding: "16px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+          <div style={{ fontSize: "11px", color: "#64748B", textTransform: "uppercase", fontWeight: 800 }}>Gross Membership GMV</div>
+          <div style={{ fontSize: "24px", fontWeight: 900, color: "#DB2777", marginTop: "4px" }}>₹{stats.totalVolume || 0}</div>
         </div>
       </div>
 
       {/* SEARCH TOOLBAR */}
-      <div style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(255,255,255,0.1)", padding: "14px 18px", borderRadius: "14px", display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center" }}>
+      <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", padding: "14px 18px", borderRadius: "14px", display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
         <div style={{ flex: 1, minWidth: "220px", position: "relative" }}>
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search customer name, email, plan name, store, or UTR..."
-            style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "10px 12px", borderRadius: "8px", fontSize: "13px" }}
+            style={{ width: "100%", background: "#F8FAFC", border: "1px solid #CBD5E1", color: "#0F172A", padding: "10px 12px", borderRadius: "8px", fontSize: "13px" }}
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          style={{ background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "10px", borderRadius: "8px", fontSize: "13px" }}
+          style={{ background: "#F8FAFC", border: "1px solid #CBD5E1", color: "#0F172A", padding: "10px", borderRadius: "8px", fontSize: "13px" }}
         >
           <option value="">All Statuses</option>
           <option value="active">Active VIP Members</option>
@@ -233,18 +233,18 @@ export function AdminMembershipsPanel() {
       </div>
 
       {/* CROSS-STORE CUSTOMER MEMBERSHIPS TABLE */}
-      <div style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "18px", padding: "20px" }}>
-        <h3 style={{ fontSize: "18px", fontWeight: 800, color: "#FFF", margin: "0 0 14px 0", display: "flex", alignItems: "center", gap: "8px" }}>
-          <Crown size={20} style={{ color: "#FBBF24" }} /> All Store Customer Memberships ({purchases.length})
+      <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "18px", padding: "20px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+        <h3 style={{ fontSize: "18px", fontWeight: 800, color: "#0F172A", margin: "0 0 14px 0", display: "flex", alignItems: "center", gap: "8px" }}>
+          <Crown size={20} style={{ color: "#D97706" }} /> All Store Customer Memberships ({purchases.length})
         </h3>
 
         {purchases.length === 0 ? (
-          <div style={{ padding: "24px", color: "#94A3B8", textAlign: "center", fontSize: "14px" }}>No customer store memberships found matching your search.</div>
+          <div style={{ padding: "24px", color: "#64748B", textAlign: "center", fontSize: "14px" }}>No customer store memberships found matching your search.</div>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", color: "#FFF" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", color: "#0F172A" }}>
               <thead>
-                <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", textAlign: "left", color: "#94A3B8" }}>
+                <tr style={{ borderBottom: "1px solid #E2E8F0", textAlign: "left", color: "#64748B", background: "#F8FAFC" }}>
                   <th style={{ padding: "10px" }}>Store Name</th>
                   <th style={{ padding: "10px" }}>Customer</th>
                   <th style={{ padding: "10px" }}>Plan Purchased</th>
@@ -257,20 +257,20 @@ export function AdminMembershipsPanel() {
               </thead>
               <tbody>
                 {purchases.map((p) => (
-                  <tr key={p.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                    <td style={{ padding: "10px", fontWeight: 800, color: "#818CF8" }}>{p.storeName}</td>
+                  <tr key={p.id} style={{ borderBottom: "1px solid #F1F5F9" }}>
+                    <td style={{ padding: "10px", fontWeight: 800, color: "#4F46E5" }}>{p.storeName}</td>
                     <td style={{ padding: "10px" }}>
-                      <b style={{ color: "#FFF" }}>{p.customerName}</b><br />
-                      <span style={{ fontSize: "11px", color: "#94A3B8" }}>{p.customerEmail || "No Email"}</span>
+                      <b style={{ color: "#0F172A" }}>{p.customerName}</b><br />
+                      <span style={{ fontSize: "11px", color: "#64748B" }}>{p.customerEmail || "No Email"}</span>
                     </td>
-                    <td style={{ padding: "10px", fontWeight: 800, color: "#FBBF24" }}>{p.planName}</td>
-                    <td style={{ padding: "10px", fontWeight: 900, color: "#4ADE80" }}>₹{p.amountPaid}</td>
-                    <td style={{ padding: "10px" }}><code style={{ color: "#CBD5E1" }}>{p.utr || "N/A"}</code></td>
-                    <td style={{ padding: "10px", color: "#94A3B8" }}>{p.createdAt ? new Date(p.createdAt * 1000).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" }) : "N/A"}</td>
+                    <td style={{ padding: "10px", fontWeight: 800, color: "#D97706" }}>{p.planName}</td>
+                    <td style={{ padding: "10px", fontWeight: 900, color: "#16A34A" }}>₹{p.amountPaid}</td>
+                    <td style={{ padding: "10px" }}><code style={{ color: "#475569", background: "#F1F5F9", padding: "2px 6px", borderRadius: "4px" }}>{p.utr || "N/A"}</code></td>
+                    <td style={{ padding: "10px", color: "#64748B" }}>{p.createdAt ? new Date(p.createdAt * 1000).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" }) : "N/A"}</td>
                     <td style={{ padding: "10px" }}>
                       <span style={{
-                        background: p.status === "active" ? "rgba(16,185,129,0.2)" : p.status === "pending_verification" ? "rgba(245,158,11,0.2)" : "rgba(239,68,68,0.2)",
-                        color: p.status === "active" ? "#4ADE80" : p.status === "pending_verification" ? "#FBBF24" : "#F87171",
+                        background: p.status === "active" ? "#DCFCE7" : p.status === "pending_verification" ? "#FEF3C7" : "#FEE2E2",
+                        color: p.status === "active" ? "#16A34A" : p.status === "pending_verification" ? "#D97706" : "#DC2626",
                         padding: "3px 8px", borderRadius: "6px", fontWeight: 800, fontSize: "10px", textTransform: "uppercase"
                       }}>
                         {p.status}
@@ -293,7 +293,7 @@ export function AdminMembershipsPanel() {
                             type="button"
                             disabled={actionId === p.id}
                             onClick={() => handleAction(p.id, "revoke")}
-                            style={{ background: "rgba(239,68,68,0.2)", color: "#F87171", border: "1px solid rgba(239,68,68,0.4)", padding: "4px 8px", borderRadius: "6px", fontWeight: 800, fontSize: "11px", cursor: "pointer" }}
+                            style={{ background: "#FEE2E2", color: "#DC2626", border: "1px solid #FCA5A5", padding: "4px 8px", borderRadius: "6px", fontWeight: 800, fontSize: "11px", cursor: "pointer" }}
                           >
                             Revoke
                           </button>
@@ -302,7 +302,7 @@ export function AdminMembershipsPanel() {
                           type="button"
                           disabled={actionId === p.id}
                           onClick={() => handleAction(p.id, "delete")}
-                          style={{ background: "rgba(255,255,255,0.1)", color: "#CBD5E1", border: "1px solid rgba(255,255,255,0.2)", padding: "4px 8px", borderRadius: "6px", fontWeight: 700, fontSize: "11px", cursor: "pointer" }}
+                          style={{ background: "#F1F5F9", color: "#64748B", border: "1px solid #CBD5E1", padding: "4px 8px", borderRadius: "6px", fontWeight: 700, fontSize: "11px", cursor: "pointer" }}
                         >
                           Delete
                         </button>
@@ -317,14 +317,14 @@ export function AdminMembershipsPanel() {
       </div>
 
       {/* PLATFORM STORE MEMBERSHIP PLANS LIST */}
-      <div style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "18px", padding: "20px" }}>
-        <h3 style={{ fontSize: "18px", fontWeight: 800, color: "#FFF", margin: "0 0 14px 0", display: "flex", alignItems: "center", gap: "8px" }}>
-          <Store size={20} style={{ color: "#818CF8" }} /> Published Store Membership Plans ({plans.length})
+      <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "18px", padding: "20px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+        <h3 style={{ fontSize: "18px", fontWeight: 800, color: "#0F172A", margin: "0 0 14px 0", display: "flex", alignItems: "center", gap: "8px" }}>
+          <Store size={20} style={{ color: "#4F46E5" }} /> Published Store Membership Plans ({plans.length})
         </h3>
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", color: "#FFF" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", color: "#0F172A" }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", textAlign: "left", color: "#94A3B8" }}>
+              <tr style={{ borderBottom: "1px solid #E2E8F0", textAlign: "left", color: "#64748B", background: "#F8FAFC" }}>
                 <th style={{ padding: "8px" }}>Store</th>
                 <th style={{ padding: "8px" }}>Plan Name</th>
                 <th style={{ padding: "8px" }}>Price & Duration</th>
@@ -334,13 +334,13 @@ export function AdminMembershipsPanel() {
             </thead>
             <tbody>
               {plans.map((pl) => (
-                <tr key={pl.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                  <td style={{ padding: "8px", fontWeight: 800, color: "#818CF8" }}>{pl.store_name || pl.store_id}</td>
+                <tr key={pl.id} style={{ borderBottom: "1px solid #F1F5F9" }}>
+                  <td style={{ padding: "8px", fontWeight: 800, color: "#4F46E5" }}>{pl.store_name || pl.store_id}</td>
                   <td style={{ padding: "8px", fontWeight: 800 }}>{pl.name}</td>
-                  <td style={{ padding: "8px", color: "#4ADE80", fontWeight: 800 }}>₹{pl.price} / {pl.duration_days} days</td>
-                  <td style={{ padding: "8px" }}>{pl.has_free_trial ? <span style={{ color: "#818CF8", fontWeight: 800 }}>⚡ {pl.free_trial_days || 7} Days Free</span> : "No"}</td>
+                  <td style={{ padding: "8px", color: "#16A34A", fontWeight: 800 }}>₹{pl.price} / {pl.duration_days} days</td>
+                  <td style={{ padding: "8px" }}>{pl.has_free_trial ? <span style={{ color: "#4F46E5", fontWeight: 800 }}>⚡ {pl.free_trial_days || 7} Days Free</span> : "No"}</td>
                   <td style={{ padding: "8px" }}>
-                    <span style={{ background: pl.is_active ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)", color: pl.is_active ? "#4ADE80" : "#F87171", padding: "2px 6px", borderRadius: "4px", fontSize: "10px", fontWeight: 800 }}>
+                    <span style={{ background: pl.is_active ? "#DCFCE7" : "#FEE2E2", color: pl.is_active ? "#16A34A" : "#DC2626", padding: "2px 6px", borderRadius: "4px", fontSize: "10px", fontWeight: 800 }}>
                       {pl.is_active ? "PUBLISHED" : "DRAFT"}
                     </span>
                   </td>
@@ -358,12 +358,12 @@ export function AdminMembershipsPanel() {
       {activeTab === "store" && (
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {/* Store selector */}
-          <div style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(255,255,255,0.1)", padding: "16px 20px", borderRadius: "14px", display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center" }}>
-            <Store size={18} style={{ color: "#818CF8", flexShrink: 0 }} />
+          <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", padding: "16px 20px", borderRadius: "14px", display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+            <Store size={18} style={{ color: "#4F46E5", flexShrink: 0 }} />
             <select
               value={selectedStoreId}
               onChange={(e) => { setSelectedStoreId(e.target.value); void loadStoreMembers(e.target.value); }}
-              style={{ flex: 1, minWidth: "220px", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "10px 12px", borderRadius: "8px", fontSize: "13px" }}
+              style={{ flex: 1, minWidth: "220px", background: "#F8FAFC", border: "1px solid #CBD5E1", color: "#0F172A", padding: "10px 12px", borderRadius: "8px", fontSize: "13px" }}
             >
               <option value="">— Select a Store —</option>
               {storeList.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -375,12 +375,12 @@ export function AdminMembershipsPanel() {
                   value={storeMemberSearch}
                   onChange={(e) => setStoreMemberSearch(e.target.value)}
                   placeholder="Search member name, email, plan..."
-                  style={{ flex: 2, minWidth: "200px", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "10px 12px", borderRadius: "8px", fontSize: "13px" }}
+                  style={{ flex: 2, minWidth: "200px", background: "#F8FAFC", border: "1px solid #CBD5E1", color: "#0F172A", padding: "10px 12px", borderRadius: "8px", fontSize: "13px" }}
                 />
                 <button
                   type="button"
                   onClick={exportStoreCsv}
-                  style={{ background: "rgba(16,185,129,0.15)", color: "#4ADE80", border: "1px solid rgba(16,185,129,0.4)", padding: "10px 16px", borderRadius: "8px", fontWeight: 800, fontSize: "12px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}
+                  style={{ background: "#ECFDF5", color: "#065F46", border: "1px solid #A7F3D0", padding: "10px 16px", borderRadius: "8px", fontWeight: 800, fontSize: "12px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}
                 >
                   <Download size={14} /> Export CSV
                 </button>
@@ -393,30 +393,30 @@ export function AdminMembershipsPanel() {
               {/* Store stats row */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "12px" }}>
                 {[
-                  { label: "Total Members", value: storeMembers.length, color: "#818CF8" },
-                  { label: "Active VIP", value: storeActiveCount, color: "#4ADE80" },
-                  { label: "Gross Revenue", value: `₹${storeRevenue.toLocaleString("en-IN")}`, color: "#F472B6" },
-                  { label: "Avg. Paid", value: `₹${storeAvgPaid}`, color: "#FBBF24" },
+                  { label: "Total Members", value: storeMembers.length, color: "#4F46E5" },
+                  { label: "Active VIP", value: storeActiveCount, color: "#16A34A" },
+                  { label: "Gross Revenue", value: `₹${storeRevenue.toLocaleString("en-IN")}`, color: "#DB2777" },
+                  { label: "Avg. Paid", value: `₹${storeAvgPaid}`, color: "#D97706" },
                 ].map((stat) => (
-                  <div key={stat.label} style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", padding: "14px" }}>
-                    <div style={{ fontSize: "11px", color: "#94A3B8", textTransform: "uppercase", fontWeight: 800 }}>{stat.label}</div>
+                  <div key={stat.label} style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "12px", padding: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+                    <div style={{ fontSize: "11px", color: "#64748B", textTransform: "uppercase", fontWeight: 800 }}>{stat.label}</div>
                     <div style={{ fontSize: "22px", fontWeight: 900, color: stat.color, marginTop: "4px" }}>{stat.value}</div>
                   </div>
                 ))}
               </div>
 
               {/* Member table */}
-              <div style={{ background: "rgba(15,23,42,0.9)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "18px", padding: "20px" }}>
-                <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#FFF", margin: "0 0 14px 0", display: "flex", alignItems: "center", gap: "8px" }}>
-                  <BarChart3 size={18} style={{ color: "#818CF8" }} /> Members of {selectedStoreName} ({filteredStoreMembers.length})
+              <div style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "18px", padding: "20px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+                <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#0F172A", margin: "0 0 14px 0", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <BarChart3 size={18} style={{ color: "#4F46E5" }} /> Members of {selectedStoreName} ({filteredStoreMembers.length})
                 </h3>
                 {filteredStoreMembers.length === 0 ? (
-                  <div style={{ padding: "24px", color: "#94A3B8", textAlign: "center" }}>No members found.</div>
+                  <div style={{ padding: "24px", color: "#64748B", textAlign: "center" }}>No members found.</div>
                 ) : (
                   <div style={{ overflowX: "auto" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", color: "#FFF" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", color: "#0F172A" }}>
                       <thead>
-                        <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", textAlign: "left", color: "#94A3B8" }}>
+                        <tr style={{ borderBottom: "1px solid #E2E8F0", textAlign: "left", color: "#64748B", background: "#F8FAFC" }}>
                           <th style={{ padding: "10px" }}>Customer</th>
                           <th style={{ padding: "10px" }}>Plan</th>
                           <th style={{ padding: "10px" }}>Paid</th>
@@ -430,25 +430,25 @@ export function AdminMembershipsPanel() {
                       </thead>
                       <tbody>
                         {filteredStoreMembers.map((m) => (
-                          <tr key={m.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                          <tr key={m.id} style={{ borderBottom: "1px solid #F1F5F9" }}>
                             <td style={{ padding: "10px" }}>
-                              <b style={{ color: "#FFF" }}>{m.customerName}</b><br />
-                              <span style={{ fontSize: "11px", color: "#94A3B8" }}>{m.customerEmail || "No email"}</span>
+                              <b style={{ color: "#0F172A" }}>{m.customerName}</b><br />
+                              <span style={{ fontSize: "11px", color: "#64748B" }}>{m.customerEmail || "No email"}</span>
                             </td>
-                            <td style={{ padding: "10px", fontWeight: 800, color: "#FBBF24" }}>{m.planName}</td>
-                            <td style={{ padding: "10px", fontWeight: 900, color: "#4ADE80" }}>₹{m.amountPaid}</td>
-                            <td style={{ padding: "10px" }}><code style={{ color: "#CBD5E1" }}>{m.utr || "N/A"}</code></td>
-                            <td style={{ padding: "10px", color: "#94A3B8", fontSize: "11px" }}>
+                            <td style={{ padding: "10px", fontWeight: 800, color: "#D97706" }}>{m.planName}</td>
+                            <td style={{ padding: "10px", fontWeight: 900, color: "#16A34A" }}>₹{m.amountPaid}</td>
+                            <td style={{ padding: "10px" }}><code style={{ color: "#475569", background: "#F1F5F9", padding: "2px 6px", borderRadius: "4px" }}>{m.utr || "N/A"}</code></td>
+                            <td style={{ padding: "10px", color: "#64748B", fontSize: "11px" }}>
                               {m.startsAt ? new Date(m.startsAt * 1000).toLocaleDateString("en-IN") : "—"}
                             </td>
-                            <td style={{ padding: "10px", color: "#94A3B8", fontSize: "11px" }}>
+                            <td style={{ padding: "10px", color: "#64748B", fontSize: "11px" }}>
                               {m.expiresAt ? new Date(m.expiresAt * 1000).toLocaleDateString("en-IN") : "—"}
                             </td>
                             <td style={{ padding: "10px" }}><DaysLeftPill expiresAt={m.expiresAt} /></td>
                             <td style={{ padding: "10px" }}>
                               <span style={{
-                                background: m.status === "active" ? "rgba(16,185,129,0.2)" : m.status === "pending_verification" ? "rgba(245,158,11,0.2)" : "rgba(239,68,68,0.2)",
-                                color: m.status === "active" ? "#4ADE80" : m.status === "pending_verification" ? "#FBBF24" : "#F87171",
+                                background: m.status === "active" ? "#DCFCE7" : m.status === "pending_verification" ? "#FEF3C7" : "#FEE2E2",
+                                color: m.status === "active" ? "#16A34A" : m.status === "pending_verification" ? "#D97706" : "#DC2626",
                                 padding: "3px 8px", borderRadius: "6px", fontWeight: 800, fontSize: "10px", textTransform: "uppercase"
                               }}>
                                 {m.status}
@@ -461,7 +461,7 @@ export function AdminMembershipsPanel() {
                                     type="button"
                                     disabled={actionId === m.id}
                                     onClick={() => void handleAction(m.id, "revoke")}
-                                    style={{ background: "rgba(239,68,68,0.2)", color: "#F87171", border: "1px solid rgba(239,68,68,0.4)", padding: "4px 8px", borderRadius: "6px", fontWeight: 800, fontSize: "11px", cursor: "pointer" }}
+                                    style={{ background: "#FEE2E2", color: "#DC2626", border: "1px solid #FCA5A5", padding: "4px 8px", borderRadius: "6px", fontWeight: 800, fontSize: "11px", cursor: "pointer" }}
                                   >
                                     Revoke
                                   </button>
@@ -470,7 +470,7 @@ export function AdminMembershipsPanel() {
                                   type="button"
                                   disabled={actionId === m.id}
                                   onClick={() => void handleAction(m.id, "delete")}
-                                  style={{ background: "rgba(255,255,255,0.1)", color: "#CBD5E1", border: "1px solid rgba(255,255,255,0.2)", padding: "4px 8px", borderRadius: "6px", fontWeight: 700, fontSize: "11px", cursor: "pointer" }}
+                                  style={{ background: "#F1F5F9", color: "#64748B", border: "1px solid #CBD5E1", padding: "4px 8px", borderRadius: "6px", fontWeight: 700, fontSize: "11px", cursor: "pointer" }}
                                 >
                                   Delete
                                 </button>
@@ -487,11 +487,11 @@ export function AdminMembershipsPanel() {
           )}
 
           {storeMembersLoading && (
-            <div style={{ padding: "30px", color: "#94A3B8", textAlign: "center" }}>Loading store members...</div>
+            <div style={{ padding: "30px", color: "#64748B", textAlign: "center" }}>Loading store members...</div>
           )}
 
           {!selectedStoreId && (
-            <div style={{ padding: "40px", color: "#64748B", textAlign: "center", background: "rgba(15,23,42,0.5)", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <div style={{ padding: "40px", color: "#64748B", textAlign: "center", background: "#F8FAFC", borderRadius: "16px", border: "1px dashed #CBD5E1" }}>
               <Store size={40} style={{ opacity: 0.4, marginBottom: "12px" }} />
               <p style={{ margin: 0 }}>Select a store above to see its VIP members, expiry countdown, and revenue stats.</p>
             </div>

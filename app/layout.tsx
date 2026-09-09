@@ -56,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="light light-theme mode-light">
       <head>
         {/* Google AdSense verification meta */}
         <meta name="google-adsense-account" content="ca-pub-9178031569606873" />
@@ -68,10 +68,10 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://tpc.googlesyndication.com" />
 
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
-        <meta name="theme-color" content="#0B0F17" />
+        <meta name="theme-color" content="#FFFFFF" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
         {/* TurboCore Inline Hardware Profiler: Zero-FOUC TurboLite mode engagement */}
         <script

@@ -84,7 +84,7 @@ const modernCleanTechStyles = `
     background-color: transparent !important;
     background-image: none !important;
     background: transparent !important;
-    color: #f8fafc !important;
+    color: #0f172a !important;
   }
   
   /* Mode Dark Styles */
@@ -151,43 +151,49 @@ const modernCleanTechStyles = `
     -webkit-text-fill-color: #0f172a !important;
     text-shadow: none !important;
   }
-  /* Popular Near You specified 5 texts -> pure white in all modes */
+  /* Popular Near You specified texts with high contrast readability */
   .mode-light .placesSection .kicker,
   .mode-light .placesSection h2,
-  .mode-light .placesSection #places-heading,
-  .mode-light .emptyState h3,
-  .mode-light .emptyState p {
+  .mode-light .placesSection #places-heading {
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF !important;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9) !important;
   }
-  /* FLOATING NAVIGATION BAR — UNIFIED (SAME IN LIGHT AND DARK MODE) */
+  .mode-light .emptyState h3 {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+  }
+  .mode-light .emptyState p {
+    color: #475569 !important;
+    -webkit-text-fill-color: #475569 !important;
+  }
+  /* FLOATING NAVIGATION BAR — PERMANENT LIGHT MODE */
   .floating-nav-container,
   .mode-light .floating-nav-container,
   .light-theme .floating-nav-container,
   .mode-dark .floating-nav-container,
   .dark-theme .floating-nav-container {
-    background: rgba(10, 16, 30, 0.85) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(226, 232, 240, 0.9) !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06) !important;
   }
 
   .floating-nav-container a,
   .floating-nav-container button,
   .mode-light .floating-nav-container a,
   .mode-light .floating-nav-container button {
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
     font-weight: 700 !important;
     font-size: 14px !important;
   }
 
   .floating-nav-container nav a[href="/pricing"],
   .mode-light .floating-nav-container nav a[href="/pricing"] {
-    color: #FF7A00 !important;
-    -webkit-text-fill-color: #FF7A00 !important;
+    color: #EA580C !important;
+    -webkit-text-fill-color: #EA580C !important;
   }
   .mode-light .sectionHeading h2, .mode-light .sectionHeading h3, .mode-light .hero h1, .mode-light .hero p, .mode-light h2, .mode-light h3 {
     color: #0f172a !important;
@@ -1721,7 +1727,7 @@ export default function Home() {
   const [userName, setUserName] = useState<string | null>(null);
   const [accent, setAccent] = useState<Accent>("royal");
   const [density, setDensity] = useState<Density>("comfortable");
-  const [themeMode, setThemeMode] = useState<ThemeMode>("dark");
+  const [themeMode, setThemeMode] = useState<ThemeMode>("light");
   const [areaFilter, setAreaFilter] = useState("");
   const [pinFilter, setPinFilter] = useState("");
   const [businessTypeFilter, setBusinessTypeFilter] = useState("");
@@ -1779,15 +1785,15 @@ export default function Home() {
   }, [category, query, sortMode]);
 
   useEffect(() => {
-    // Enforce Dark Mode on homepage regardless of phone, Google, or system setting
+    // Enforce Permanent Light Mode per user instruction
     const root = document.documentElement;
     const body = document.body;
-    root.classList.remove("mode-light", "light-theme");
-    body.classList.remove("mode-light", "light-theme");
-    root.classList.add("dark", "dark-theme", "mode-dark");
-    body.classList.add("dark", "dark-theme", "mode-dark");
-    root.setAttribute("data-theme", "dark");
-    body.setAttribute("data-theme", "dark");
+    root.classList.remove("dark", "dark-theme", "mode-dark");
+    body.classList.remove("dark", "dark-theme", "mode-dark");
+    root.classList.add("light", "light-theme", "mode-light");
+    body.classList.add("light", "light-theme", "mode-light");
+    root.setAttribute("data-theme", "light");
+    body.setAttribute("data-theme", "light");
 
     const stored = window.localStorage.getItem("kynisto-preferences");
     if (!stored) return;
@@ -2055,7 +2061,7 @@ export default function Home() {
   };
 
   return (
-    <main className={`site theme-${accent} density-${density} mode-${themeMode} mode-dark dark-theme dark pb-0 min-h-screen relative`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
+    <main className={`site theme-${accent} density-${density} mode-${themeMode} mode-light light-theme light pb-0 min-h-screen relative`}><style dangerouslySetInnerHTML={{ __html: modernCleanTechStyles }} />
       <VideoBackground videoSrc="/videos/hero-flow.mp4" mobileVideoSrc="/videos/hero-flow.mp4" />
       <SubscriptionExpiryBanner userId={userId} />
       <WelcomeRewardModal userRole={userRole} userId={userId} />

@@ -147,7 +147,7 @@ const PREMIUM_COMBOS: ComboPack[] = [
     id: "starter_bundle",
     name: "Starter Store Bundle",
     badge: "BEST SELLER",
-    badgeColor: "bg-blue-500/20 text-blue-300 border-blue-500/40",
+    badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
     discountBadge: "Save ₹97/mo",
     monthlyPrice: 299,
     yearlyPrice: 2999,
@@ -168,7 +168,7 @@ const PREMIUM_COMBOS: ComboPack[] = [
     id: "growth_bundle",
     name: "Growth & Scale Bundle",
     badge: "BEST VALUE",
-    badgeColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+    badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
     discountBadge: "Save ₹344/mo",
     isPopular: true,
     monthlyPrice: 699,
@@ -196,7 +196,7 @@ const PREMIUM_COMBOS: ComboPack[] = [
     id: "enterprise_suite",
     name: "Enterprise Dominance Suite",
     badge: "MOST POPULAR",
-    badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+    badgeColor: "bg-amber-50 text-amber-800 border-amber-200",
     discountBadge: "Save ₹500/mo",
     monthlyPrice: 999,
     yearlyPrice: 9999,
@@ -298,7 +298,7 @@ export function BusinessMarketplaceUI({
                 id: String(c.id || c.slug || ""),
                 name: String(c.name || "Combo Pack"),
                 badge: String(c.badge || "RECOMMENDED"),
-                badgeColor: c.isPopular ? "bg-amber-500/20 text-amber-300 border-amber-400/40" : "bg-blue-500/20 text-blue-300 border-blue-500/40",
+                badgeColor: c.isPopular ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-blue-50 text-blue-700 border-blue-200",
                 discountBadge: String(c.discountBadge || `Save ₹${savings}/mo`),
                 isPopular: Boolean(c.isPopular),
                 monthlyPrice: comboPrice,
@@ -506,20 +506,20 @@ export function BusinessMarketplaceUI({
     : 0;
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-8 text-white font-sans">
+    <div className="w-full max-w-7xl mx-auto px-4 py-8 text-slate-900 font-sans">
       {/* Unrestricted Admin Platform Banner */}
       {isUnrestrictedByAdmin && (
-        <div className="mb-8 p-5 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-indigo-500/20 border-2 border-cyan-500/40 flex items-center justify-between gap-4 backdrop-blur-md shadow-xl shadow-cyan-500/10">
+        <div className="mb-8 p-5 rounded-2xl bg-emerald-50 border-2 border-emerald-300 flex items-center justify-between gap-4 shadow-md shadow-emerald-100">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-cyan-500/30 text-cyan-300">
+            <div className="p-3 rounded-xl bg-emerald-100 text-emerald-700">
               <Sparkles className="w-7 h-7" />
             </div>
             <div>
-              <h3 className="font-bold text-cyan-300 text-lg">Platform Courtesy: All Business Features &amp; Add-Ons Unlocked!</h3>
-              <p className="text-xs text-cyan-200/80">The platform administrator has removed all membership restrictions for business owners. You have full access to unlimited stores, live queues, advanced analytics, staff accounts, and custom branding at zero cost.</p>
+              <h3 className="font-bold text-emerald-950 text-lg">Platform Courtesy: All Business Features &amp; Add-Ons Unlocked!</h3>
+              <p className="text-xs text-emerald-800">The platform administrator has removed all membership restrictions for business owners. You have full access to unlimited stores, live queues, advanced analytics, staff accounts, and custom branding at zero cost.</p>
             </div>
           </div>
-          <span className="px-3.5 py-1.5 text-xs font-black rounded-full bg-cyan-500 text-slate-950 uppercase tracking-wider">
+          <span className="px-3.5 py-1.5 text-xs font-black rounded-full bg-emerald-600 text-white uppercase tracking-wider shrink-0">
             UNRESTRICTED
           </span>
         </div>
@@ -527,26 +527,26 @@ export function BusinessMarketplaceUI({
 
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto mb-12">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-semibold tracking-wide uppercase mb-4 shadow-lg shadow-cyan-500/5">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold tracking-wide uppercase mb-4 shadow-sm">
           <Building2 className="w-3.5 h-3.5" />
           <span>Business Owner Portal</span>
         </div>
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-100 via-cyan-200 to-indigo-400 mb-4">
+        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 mb-4">
           Business Marketplace &amp; Modular Plans
         </h1>
-        <p className="text-slate-400 text-base md:text-lg leading-relaxed">
+        <p className="text-slate-600 text-base md:text-lg leading-relaxed">
           Pay only for what your store needs. Build your custom plan with modular add-ons or pick an all-in-one value combo.
         </p>
 
         {/* Global Billing Cycle Toggle */}
-        <div className="inline-flex items-center p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 mt-8 backdrop-blur-md shadow-inner">
+        <div className="inline-flex items-center p-1.5 rounded-2xl bg-slate-100 border border-slate-200 mt-8 shadow-inner">
           <button
             type="button"
             onClick={() => setBillingCycle("monthly")}
-            className={`px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+            className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
               billingCycle === "monthly"
-                ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-md shadow-cyan-500/20"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-white text-slate-900 shadow-sm border border-slate-200/80 font-bold"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
             Monthly Billing
@@ -554,14 +554,14 @@ export function BusinessMarketplaceUI({
           <button
             type="button"
             onClick={() => setBillingCycle("yearly")}
-            className={`relative px-5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+            className={`relative px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
               billingCycle === "yearly"
-                ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow-md shadow-cyan-500/20"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-white text-slate-900 shadow-sm border border-slate-200/80 font-bold"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
             Yearly Billing
-            <span className="ml-2 px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-400 text-slate-950 uppercase tracking-wider">
+            <span className="ml-2 px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase tracking-wider">
               20% OFF
             </span>
           </button>
@@ -571,12 +571,12 @@ export function BusinessMarketplaceUI({
       {/* SECTION 1: BUILD YOUR OWN PLAN (MODULAR BUILDER WITH LIVE STICKY SUMMARY) */}
       <section className="mb-20">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+          <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200">
             <Layers className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-white">Build Your Own Plan</h2>
-            <p className="text-xs text-slate-400">Configure custom capacity and modular feature add-ons live.</p>
+            <h2 className="text-2xl font-bold text-slate-900">Build Your Own Plan</h2>
+            <p className="text-xs text-slate-500">Configure custom capacity and modular feature add-ons live.</p>
           </div>
         </div>
 
@@ -584,23 +584,23 @@ export function BusinessMarketplaceUI({
           {/* Left Column: Add-ons Catalog (8 Columns) */}
           <div className="lg:col-span-8 space-y-6">
             {/* Required Base Core Card */}
-            <div className="p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 border border-cyan-500/30 shadow-xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 px-4 py-1 bg-cyan-500/20 text-cyan-300 text-[10px] font-bold uppercase rounded-bl-xl border-l border-b border-cyan-500/30">
+            <div className="p-6 rounded-2xl bg-gradient-to-r from-indigo-50/40 via-white to-sky-50/30 border-2 border-indigo-200/90 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 right-0 px-4 py-1 bg-indigo-100 text-indigo-800 text-[10px] font-bold uppercase rounded-bl-xl border-l border-b border-indigo-200">
                 INCLUDED FOUNDATION
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <CheckCircle2 className="w-5 h-5 text-cyan-400" />
-                    <h3 className="text-lg font-bold text-white">Base Core Platform</h3>
+                    <CheckCircle2 className="w-5 h-5 text-indigo-600" />
+                    <h3 className="text-lg font-bold text-slate-900">Base Core Platform</h3>
                   </div>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-600">
                     Includes 1 Store Outlet, 50 Daily Bookings, QR Queue Management, and Standard Dashboard.
                   </p>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-2xl font-black text-white">₹{BASE_PRICE_MONTHLY}</div>
-                  <div className="text-[11px] text-slate-400">/ month base</div>
+                  <div className="text-2xl font-black text-slate-900">₹{BASE_PRICE_MONTHLY}</div>
+                  <div className="text-[11px] text-slate-500">/ month base</div>
                 </div>
               </div>
             </div>
@@ -620,8 +620,8 @@ export function BusinessMarketplaceUI({
                     key={addon.id}
                     className={`p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between ${
                       isSelected
-                        ? "bg-slate-900/90 border-cyan-500/50 shadow-lg shadow-cyan-500/5"
-                        : "bg-slate-900/40 border-slate-800 hover:border-slate-700"
+                        ? "bg-indigo-50/30 border-2 border-indigo-600 shadow-md shadow-indigo-100"
+                        : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-sm"
                     }`}
                   >
                     <div>
@@ -629,28 +629,28 @@ export function BusinessMarketplaceUI({
                         <div className="flex items-center gap-2.5">
                           <div
                             className={`p-2 rounded-xl transition-colors ${
-                              isSelected ? "bg-cyan-500/20 text-cyan-300" : "bg-slate-800 text-slate-400"
+                              isSelected ? "bg-indigo-100 text-indigo-700" : "bg-slate-100 text-slate-600"
                             }`}
                           >
                             <IconComponent className="w-4 h-4" />
                           </div>
-                          <h4 className="text-sm font-semibold text-white leading-tight">{addon.name}</h4>
+                          <h4 className="text-sm font-semibold text-slate-900 leading-tight">{addon.name}</h4>
                         </div>
-                        <span className="text-xs font-bold text-cyan-400 shrink-0">+₹{addon.monthlyPrice}/mo</span>
+                        <span className="text-xs font-bold text-indigo-600 shrink-0">+₹{addon.monthlyPrice}/mo</span>
                       </div>
-                      <p className="text-xs text-slate-400 leading-relaxed mb-4">{addon.description}</p>
+                      <p className="text-xs text-slate-600 leading-relaxed mb-4">{addon.description}</p>
                     </div>
 
                     {/* Controller: Toggle vs Quantity Counter */}
-                    <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                    <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
                       {addon.type === "toggle" ? (
                         <button
                           type="button"
                           onClick={() => handleToggleAddon(addon.id)}
                           className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
                             isSelected
-                              ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
-                              : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                              ? "bg-indigo-600 text-white font-bold shadow-sm hover:bg-indigo-700"
+                              : "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
                           }`}
                         >
                           {isSelected ? (
@@ -667,26 +667,26 @@ export function BusinessMarketplaceUI({
                         </button>
                       ) : (
                         <div className="flex items-center justify-between w-full">
-                          <span className="text-xs text-slate-400 font-medium">
+                          <span className="text-xs text-slate-600 font-medium">
                             {quantity > 0 ? `${quantity} ${addon.unitName}(s)` : `Add ${addon.unitName}s`}
                           </span>
-                          <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                          <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
                             <button
                               type="button"
                               onClick={() => handleUpdateQuantity(addon.id, -1)}
                               disabled={quantity <= 0}
-                              className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30"
+                              className="p-1 rounded-lg hover:bg-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-30"
                             >
                               <Minus className="w-3.5 h-3.5" />
                             </button>
-                            <span className="px-2 text-xs font-bold text-white min-w-[20px] text-center">
+                            <span className="px-2 text-xs font-bold text-slate-900 min-w-[20px] text-center">
                               {quantity}
                             </span>
                             <button
                               type="button"
                               onClick={() => handleUpdateQuantity(addon.id, 1)}
                               disabled={addon.maxQuantity ? quantity >= addon.maxQuantity : false}
-                              className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30"
+                              className="p-1 rounded-lg hover:bg-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-30"
                             >
                               <Plus className="w-3.5 h-3.5" />
                             </button>
@@ -702,20 +702,20 @@ export function BusinessMarketplaceUI({
 
           {/* Right Column: Live Sticky Checkout Summary (4 Columns) */}
           <div className="lg:col-span-4 sticky top-24">
-            <div className="rounded-3xl p-6 bg-slate-900 border border-slate-800 shadow-2xl backdrop-blur-xl space-y-6">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div className="rounded-3xl p-6 bg-white border border-slate-200 shadow-xl space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                 <div>
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-cyan-400" />
+                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-indigo-600" />
                     Live Plan Summary
                   </h3>
-                  <p className="text-[11px] text-slate-400">Updates dynamically as you customize</p>
+                  <p className="text-[11px] text-slate-500">Updates dynamically as you customize</p>
                 </div>
                 {activeAddonsCount > 0 && (
                   <button
                     type="button"
                     onClick={handleResetAddons}
-                    className="text-[11px] font-medium text-rose-400 hover:underline"
+                    className="text-[11px] font-medium text-rose-600 hover:underline"
                   >
                     Reset
                   </button>
@@ -724,31 +724,31 @@ export function BusinessMarketplaceUI({
 
               {/* Itemized Price Breakdown */}
               <div className="space-y-3 max-h-56 overflow-y-auto pr-1 text-xs">
-                <div className="flex justify-between items-center text-slate-300">
+                <div className="flex justify-between items-center text-slate-700">
                   <span className="flex items-center gap-1.5">
-                    <Check className="w-3.5 h-3.5 text-cyan-400" />
+                    <Check className="w-3.5 h-3.5 text-indigo-600" />
                     Base Core Platform
                   </span>
-                  <span className="font-semibold text-white">₹{BASE_PRICE_MONTHLY}/mo</span>
+                  <span className="font-bold text-slate-900">₹{BASE_PRICE_MONTHLY}/mo</span>
                 </div>
 
                 {addonCatalog.map((addon) => {
                   const val = selectedAddons[addon.id];
                   if (addon.type === "toggle" && val === true) {
                     return (
-                      <div key={addon.id} className="flex justify-between items-center text-slate-400">
+                      <div key={addon.id} className="flex justify-between items-center text-slate-600">
                         <span className="truncate pr-2">+ {addon.name}</span>
-                        <span className="font-medium text-cyan-300 shrink-0">₹{addon.monthlyPrice}/mo</span>
+                        <span className="font-semibold text-indigo-600 shrink-0">₹{addon.monthlyPrice}/mo</span>
                       </div>
                     );
                   }
                   if (addon.type === "quantity" && typeof val === "number" && val > 0) {
                     return (
-                      <div key={addon.id} className="flex justify-between items-center text-slate-400">
+                      <div key={addon.id} className="flex justify-between items-center text-slate-600">
                         <span className="truncate pr-2">
                           + {val}x {addon.name}
                         </span>
-                        <span className="font-medium text-cyan-300 shrink-0">
+                        <span className="font-semibold text-indigo-600 shrink-0">
                           ₹{addon.monthlyPrice * val}/mo
                         </span>
                       </div>
@@ -759,21 +759,21 @@ export function BusinessMarketplaceUI({
               </div>
 
               {/* Price Calculation Display */}
-              <div className="pt-4 border-t border-slate-800 space-y-3">
+              <div className="pt-4 border-t border-slate-200 space-y-3">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-sm font-semibold text-slate-300">Total Price:</span>
+                  <span className="text-sm font-semibold text-slate-700">Total Price:</span>
                   <div className="text-right">
-                    <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400">
+                    <span className="text-3xl font-black text-slate-900">
                       ₹{billingCycle === "yearly" ? customCalculatedYearly : customCalculatedMonthly}
                     </span>
-                    <span className="text-slate-400 text-xs font-medium">
+                    <span className="text-slate-500 text-xs font-medium">
                       / {billingCycle === "yearly" ? "year" : "month"}
                     </span>
                   </div>
                 </div>
 
                 {billingCycle === "yearly" && (
-                  <p className="text-[11px] text-emerald-400 text-right">
+                  <p className="text-[11px] text-emerald-600 font-semibold text-right">
                     Includes 20% annual discount (Billed ₹{customCalculatedYearly}/yr)
                   </p>
                 )}
@@ -781,7 +781,7 @@ export function BusinessMarketplaceUI({
                 <button
                   type="button"
                   onClick={handleOpenCustomCheckout}
-                  className="w-full py-3.5 px-5 rounded-2xl font-bold text-sm bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 text-slate-950 hover:brightness-110 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20"
+                  className="w-full py-3.5 px-5 rounded-2xl font-bold text-sm bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20"
                 >
                   <ShieldCheck className="w-4 h-4" />
                   <span>Subscribe to Custom Plan</span>
@@ -794,14 +794,14 @@ export function BusinessMarketplaceUI({
       </section>
 
       {/* SECTION 2: PRE-PACKAGED PREMIUM COMBOS (WITH BADGES) */}
-      <section className="mt-16 pt-12 border-t border-slate-800/80">
+      <section className="mt-16 pt-12 border-t border-slate-200">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-3">
-            <Flame className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold uppercase tracking-wider mb-3">
+            <Flame className="w-3.5 h-3.5 text-amber-600" />
             <span>Curated Value Packages</span>
           </div>
-          <h2 className="text-3xl font-extrabold text-white">Premium Combos</h2>
-          <p className="text-slate-400 text-sm mt-2">
+          <h2 className="text-3xl font-extrabold text-slate-900">Premium Combos</h2>
+          <p className="text-slate-600 text-sm mt-2">
             Ready-made business bundles configured for high savings and zero setup friction.
           </p>
         </div>
@@ -810,14 +810,14 @@ export function BusinessMarketplaceUI({
           {combosCatalog.map((combo) => (
             <div
               key={combo.id}
-              className={`relative rounded-3xl p-7 bg-slate-900/90 border backdrop-blur-xl flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 ${
+              className={`relative rounded-3xl p-7 bg-white border flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 ${
                 combo.isPopular
-                  ? "border-emerald-500/50 shadow-2xl shadow-emerald-500/10"
-                  : "border-slate-800 hover:border-slate-700"
+                  ? "border-2 border-indigo-600 shadow-xl shadow-indigo-600/10"
+                  : "border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md"
               }`}
             >
               {combo.isPopular && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 font-black text-[11px] tracking-wider uppercase shadow-md">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-indigo-600 text-white font-bold text-[11px] tracking-wider uppercase shadow-md">
                   ⭐ {combo.badge}
                 </div>
               )}
@@ -828,39 +828,39 @@ export function BusinessMarketplaceUI({
                   <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${combo.badgeColor}`}>
                     {combo.badge}
                   </span>
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-400/10 text-amber-300 border border-amber-400/30">
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200">
                     {combo.discountBadge}
                   </span>
                 </div>
 
-                <h3 className="text-xl font-bold text-white mb-2">{combo.name}</h3>
-                <p className="text-xs text-slate-400 mb-6 min-h-[36px]">{combo.description}</p>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">{combo.name}</h3>
+                <p className="text-xs text-slate-600 mb-6 min-h-[36px]">{combo.description}</p>
 
                 {/* Price Box */}
-                <div className="mb-6 pb-6 border-b border-slate-800">
+                <div className="mb-6 pb-6 border-b border-slate-200">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-black text-white">
+                    <span className="text-4xl font-black text-slate-900">
                       ₹{billingCycle === "yearly" ? combo.yearlyPrice : combo.monthlyPrice}
                     </span>
-                    <span className="text-slate-400 text-xs">
+                    <span className="text-slate-500 text-xs">
                       / {billingCycle === "yearly" ? "year" : "month"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs text-slate-500 line-through">
+                    <span className="text-xs text-slate-400 line-through">
                       ₹{combo.originalPriceMonthly}/mo standard
                     </span>
-                    <span className="text-xs font-semibold text-emerald-400">
+                    <span className="text-xs font-semibold text-emerald-700">
                       Bundled Discount
                     </span>
                   </div>
                 </div>
 
                 {/* Features List */}
-                <ul className="space-y-3 text-xs text-slate-300 mb-8">
+                <ul className="space-y-3 text-xs text-slate-700 mb-8">
                   {combo.features.map((feat, idx) => (
                     <li key={idx} className="flex items-start gap-2.5">
-                      <Check className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                       <span>{feat}</span>
                     </li>
                   ))}
@@ -872,8 +872,8 @@ export function BusinessMarketplaceUI({
                 onClick={() => handleSelectCombo(combo)}
                 className={`w-full py-3.5 px-4 rounded-2xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
                   combo.isPopular
-                    ? "bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-950 hover:brightness-110 shadow-lg shadow-emerald-500/20"
-                    : "bg-slate-800 hover:bg-slate-700 text-white"
+                    ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20"
+                    : "bg-slate-900 hover:bg-slate-800 text-white"
                 }`}
               >
                 <span>Choose {combo.name}</span>
