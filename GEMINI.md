@@ -160,3 +160,18 @@ This document defines critical architecture, platform invariants, and developmen
 - **ALWAYS** ensure foreground layout sections (`hero`, `navbar`, `categories`, `places`, `footer`) specify relative positioning with an explicit stacking context (`relative z-10`, `z-20`, `z-50`) and transparent section backgrounds where the video should shine through.
 - **ALWAYS** bump `APP_VERSION` in both `lib/app-version.ts` and `public/sw.js` when modifying core visual styling or background media to trigger automatic Service Worker cache invalidation on mobile devices.
 
+---
+
+## 9. Permanent Light Mode, Text Contrast & Responsive Scaling Invariants
+
+### ❌ NEVER:
+- **NEVER** apply dark background classes (`bg-slate-950`, `bg-[#0A101E]`, `rgba(10, 16, 30, 0.85)`) to the top navigation header (`Navbar3D`), drawer menus, or admin panels. Kynisto uses a permanent, high-contrast light mode.
+- **NEVER** apply broad CSS `!important` text-color overrides (such as `* { color: #FFFFFF !important; }`) that bleed into child containers and cause invisible white-on-white text in light mode.
+- **NEVER** use hardcoded fixed pixel widths that clip or overflow on small phone screens (`<360px`) or fail to scale comfortably on large desktop monitors (`>1280px`).
+
+### ✅ ALWAYS:
+- **ALWAYS** enforce WCAG AA contrast standards (minimum 4.5:1 ratio) for all text across all components. Use high-contrast dark text (`text-slate-900`, `text-slate-800`, `#0F172A`) on white/light backgrounds (`bg-white`, `bg-slate-50`).
+- **ALWAYS** verify responsive scaling on both mobile viewports (`375px - 430px`) and PC desktops (`1280px - 1920px`) using flexible Tailwind containers (`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`) and `overflow-x: clip`.
+- **ALWAYS** ensure admin and customer dashboard data models include nullish guards (e.g., graceful fallback to "Lifetime / Never" when `expiresAt` is null or 0) to prevent `RangeError` crashes.
+
+
