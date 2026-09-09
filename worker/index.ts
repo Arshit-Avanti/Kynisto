@@ -21,11 +21,13 @@ interface ExecutionContext {
 }
 
 /** Applies industry-standard security headers fully compatible with Google AdSense auto-ads & site preview. */
-function applySecurityHeaders(res: Response): Response {
+function applySecurityHeaders(res: Response, isLocal = false): Response {
   const headers = new Headers(res.headers);
   headers.delete("X-Frame-Options");
   headers.delete("x-frame-options");
-  headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  if (!isLocal) {
+    headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  }
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("X-XSS-Protection", "1; mode=block");
@@ -56,14 +58,28 @@ const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
-    // Enforce canonical apex domain (https://kynisto.in) and HTTPS 301 redirection
-    const host = url.hostname.toLowerCase();
-    const isHttp = url.protocol === "http:" || request.headers.get("x-forwarded-proto") === "http";
-    const isWww = host === "www.kynisto.in";
+    // Enforce canonical apex domain (https://kynisto.in) and HTTPS 301 redirection (skip on local dev)
+    const host = (url.hostname || "").toLowerCase();
+    const isLocalhost =
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host === "::1" ||
+      host.endsWith(".localhost") ||
+      url.port === "3000" ||
+      url.port === "8787" ||
+      Boolean(request.headers.get("mf-original-hostname")) ||
+      !request.headers.get("cf-ray");
 
-    if (isHttp || isWww) {
-      const canonicalHost = isWww ? "kynisto.in" : url.host;
-      return Response.redirect(`https://${canonicalHost}${url.pathname}${url.search}`, 301);
+    const secure = (r: Response) => applySecurityHeaders(r, isLocalhost);
+
+    if (!isLocalhost) {
+      const isHttp = url.protocol === "http:" || request.headers.get("x-forwarded-proto") === "http";
+      const isWww = host === "www.kynisto.in";
+
+      if (isHttp || isWww) {
+        const canonicalHost = isWww ? "kynisto.in" : url.host;
+        return Response.redirect(`https://${canonicalHost}${url.pathname}${url.search}`, 301);
+      }
     }
 
     // Handle legacy schema.org templated search URLs (e.g. /?q={search_term_string})
@@ -100,7 +116,7 @@ const worker = {
     }
 
     if (url.pathname === "/ads.txt") {
-      return applySecurityHeaders(
+      return secure(
         new Response("google.com, pub-9178031569606873, DIRECT, f08c47fec0942fa0\n", {
           headers: {
             "Content-Type": "text/plain; charset=utf-8",
@@ -111,7 +127,7 @@ const worker = {
     }
 
     if (url.pathname === "/.well-known/assetlinks.json") {
-      return applySecurityHeaders(
+      return secure(
         Response.json(
           [
             {
@@ -188,14 +204,14 @@ const worker = {
 
     if (url.pathname.startsWith("/downloads/")) {
       const asset = await env.ASSETS.fetch(request);
-      if (!asset.ok) return applySecurityHeaders(asset);
+      if (!asset.ok) return secure(asset);
       const headers = new Headers(asset.headers);
       headers.set("Content-Type", "application/vnd.android.package-archive");
       const filename = url.pathname.split("/").pop() || "Kynisto-2.1.0-release.apk";
       headers.set("Content-Disposition", `attachment; filename="${filename}"`);
       headers.set("Cache-Control", "public, max-age=31536000, immutable");
       headers.set("Vary", "Accept-Encoding");
-      return applySecurityHeaders(new Response(asset.body, { status: asset.status, headers }));
+      return secure(new Response(asset.body, { status: asset.status, headers }));
     }
 
     if (
@@ -211,7 +227,7 @@ const worker = {
       if (method === "GET" && !url.searchParams.has("manage") && !url.pathname.includes("queue/active")) {
         try {
           const appRes = await handler.fetch(request, env, ctx);
-          const resWithCache = applySecurityHeaders(appRes);
+          const resWithCache = secure(appRes);
           if (resWithCache.status === 200) {
             resWithCache.headers.set("Cache-Control", "public, max-age=30, s-maxage=60, stale-while-revalidate=86400");
             resWithCache.headers.set("Vary", "Accept-Encoding");
@@ -241,7 +257,7 @@ const worker = {
     if (method === "GET" && isPublicPage) {
       try {
         const pageRes = await handler.fetch(request, env, ctx);
-        const secured = applySecurityHeaders(pageRes);
+        const secured = secure(pageRes);
         if (secured.status === 200) {
           secured.headers.set("Cache-Control", "public, max-age=0, s-maxage=120, stale-while-revalidate=86400");
           secured.headers.set("CDN-Cache-Control", "max-age=120");
@@ -264,14 +280,14 @@ const worker = {
         },
       }, allowedWidths);
       imgRes.headers.set("Cache-Control", "public, max-age=31536000, immutable");
-      return applySecurityHeaders(imgRes);
+      return secure(imgRes);
     }
 
     try {
       const appRes = await handler.fetch(request, env, ctx);
-      return applySecurityHeaders(appRes);
+      return secure(appRes);
     } catch (err) {
-      return applySecurityHeaders(new Response(`Server error: ${(err as Error)?.message || err}`, { status: 500 }));
+      return secure(new Response(`Server error: ${(err as Error)?.message || err}`, { status: 500 }));
     }
   },
 };

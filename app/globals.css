@@ -2011,7 +2011,7 @@ footer > p { color: var(--muted); font-size: 11px; }
   }
   .mobileNav nav a:hover,
   .mobileNav nav button:hover { background: color-mix(in srgb, var(--accent) 9%, var(--paper)); }
-  .hero { width: calc(100% - 32px); min-height: 0; padding: 50px 0 62px; grid-template-columns: 1fr; }
+  .hero { width: 100%; min-height: 0; padding: 120px 16px 62px; grid-template-columns: 1fr; }
   .heroCopy,
   .mapScene { width: 100%; max-width: 100%; min-width: 0; }
   .hero h1 { font-size: clamp(48px, 14vw, 72px); }
@@ -2048,7 +2048,7 @@ footer > p { color: var(--muted); font-size: 11px; }
   .modalHeader h2 { font-size: 25px; }
   .panelIntro { margin-bottom: 22px; }
   .customizePanel fieldset { margin-bottom: 22px; }
-  .hero { padding-top: 34px; }
+  .hero { padding-top: 124px !important; }
   .eyebrow { max-width: 100%; margin-bottom: 18px; font-size: 9px; line-height: 1.5; }
   .heroText { margin: 22px 0 25px; line-height: 1.55; }
   .searchBox { min-height: 58px; padding: 6px 6px 6px 17px; gap: 10px; border-radius: 17px; }
@@ -3747,38 +3747,36 @@ footer.efferdFooterBlock {
    These rules must come LAST to win the specificity war.
    ========================================================================== */
 
-/* 0 ── Floating Navigation Bar — PERMANENT LIGHT MODE */
-.floating-nav-container,
-.mode-light .floating-nav-container,
-.light-theme .floating-nav-container,
-.mode-dark .floating-nav-container,
-.dark-theme .floating-nav-container {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border: 1px solid rgba(226, 232, 240, 0.9) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06) !important;
+/* 0 ── Floating Navigation Bar — Transparent when at top, glass when scrolled */
+.floating-nav-container {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.floating-nav-container.is-scrolled {
+  background: rgba(15, 23, 42, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35) !important;
 }
 
 .floating-nav-container a,
 .floating-nav-container button,
-.mode-light .floating-nav-container a,
-.mode-light .floating-nav-container button,
-.mode-light .floating-nav-container nav a,
-.mode-light .floating-nav-container nav button,
-.light-theme .floating-nav-container a,
-.light-theme .floating-nav-container button,
-.light-theme .floating-nav-container nav a,
-.light-theme .floating-nav-container nav button {
-  color: #0F172A !important;
-  -webkit-text-fill-color: #0F172A !important;
+.floating-nav-container nav a,
+.floating-nav-container nav button {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
 }
 
-.floating-nav-container nav a[href="/pricing"],
-.mode-light .floating-nav-container nav a[href="/pricing"],
-.light-theme .floating-nav-container nav a[href="/pricing"] {
-  color: #EA580C !important;
-  -webkit-text-fill-color: #EA580C !important;
+.floating-nav-container nav a[href="/pricing"] {
+  color: #FCD34D !important;
+  -webkit-text-fill-color: #FCD34D !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7) !important;
 }
 
 /* 1 ── Mobile drawer in light mode */

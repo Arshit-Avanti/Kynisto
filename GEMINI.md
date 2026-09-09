@@ -166,12 +166,29 @@ This document defines critical architecture, platform invariants, and developmen
 
 ### ❌ NEVER:
 - **NEVER** apply dark background classes (`bg-slate-950`, `bg-[#0A101E]`, `rgba(10, 16, 30, 0.85)`) to the top navigation header (`Navbar3D`), drawer menus, or admin panels. Kynisto uses a permanent, high-contrast light mode.
-- **NEVER** apply broad CSS `!important` text-color overrides (such as `* { color: #FFFFFF !important; }`) that bleed into child containers and cause invisible white-on-white text in light mode.
-- **NEVER** use hardcoded fixed pixel widths that clip or overflow on small phone screens (`<360px`) or fail to scale comfortably on large desktop monitors (`>1280px`).
+- **NEVER** apply broad CSS `!important` text-color overrides (such as `* { color: #FFFFFF !important; }` or broad blanket selectors) that bleed into child containers and cause invisible text (e.g., dark text on dark bottom docks, or white text on white cards).
+- **NEVER** leave mobile hero containers with less than 110px top padding when a fixed top floating navbar is present, causing heading text to overlap behind the navbar pill.
+- **NEVER** force `#0f172a` or dark ink onto text that renders directly over the fixed background sky video (`.hero h1`, `#category-heading`).
 
 ### ✅ ALWAYS:
 - **ALWAYS** enforce WCAG AA contrast standards (minimum 4.5:1 ratio) for all text across all components. Use high-contrast dark text (`text-slate-900`, `text-slate-800`, `#0F172A`) on white/light backgrounds (`bg-white`, `bg-slate-50`).
+- **ALWAYS** check every text element before deploy across desktop and mobile viewports:
+  1. Top Navbar: Transparent glassmorphic capsule with crisp white navigation links, amber pricing accent, and high-contrast status pills.
+  2. Hero Title & Category Header over Sky: Brilliant white text (`#FFFFFF`) with multi-layered text shadows (`0 2px 14px rgba(0,0,0,0.85)`).
+  3. Mobile Bottom Dock (`MobileBottomNav`): Explicit light colors (`#FFFFFF` active, `#F1F5F9` / `#E2E8F0` inactive) with crisp icons (`stroke-[2]`), completely immune to document-level ink overrides.
+  4. Mobile Top Clearance: Minimum `padding-top: max(124px, calc(env(safe-area-inset-top, 0px) + 96px))` on `.hero` / `.kynistoHeroTopSection` to guarantee zero overlap.
 - **ALWAYS** verify responsive scaling on both mobile viewports (`375px - 430px`) and PC desktops (`1280px - 1920px`) using flexible Tailwind containers (`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`) and `overflow-x: clip`.
 - **ALWAYS** ensure admin and customer dashboard data models include nullish guards (e.g., graceful fallback to "Lifetime / Never" when `expiresAt` is null or 0) to prevent `RangeError` crashes.
 
+---
 
+## 10. Production Domain (`kynisto.in`) vs. Localhost Operational Invariants
+
+### ❌ NEVER:
+- **NEVER** apply, test, or verify feature changes exclusively for localhost, or assume localhost is the operational environment.
+- **NEVER** instruct the user to verify or test on localhost URLs unless they explicitly command: "use localhost" or "test on localhost".
+
+### ✅ ALWAYS:
+- **ALWAYS** target, apply, build, and deploy all feature changes to the production domain **`https://kynisto.in`** (Cloudflare Workers production environment) so changes reflect live for the user immediately.
+- **ONLY** switch to localhost workflows when the user explicitly gives the command: "use localhost".
+- Every completed feature or bugfix must be ready for and deployed to **`kynisto.in`** so it reflects live in the user's browser and Android app.

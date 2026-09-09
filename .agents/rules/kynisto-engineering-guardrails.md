@@ -144,3 +144,43 @@ This document defines critical architecture, platform invariants, and developmen
 - **ALWAYS** apply `touch-action: manipulation` and `user-select: none` to mobile dock navigation bars to eliminate the 300ms double-tap delay.
 - **ALWAYS** serve cached navigation pages immediately from CacheStorage (<5ms) while revalidating in the background (Stale-While-Revalidate).
 
+---
+
+## 8. Background Video Stacking Context & Media Invariants
+
+### ❌ NEVER:
+- **NEVER** apply negative z-index (`z-index: -1`, `z-[-1]`) to full-screen or fixed background media elements (`<video>`, canvas wallpapers, animated meshes).
+- **NEVER** leave `pointer-events: auto` on background video containers, as this captures mouse and touch gestures intended for foreground links, search inputs, or navigation elements.
+
+### ✅ ALWAYS:
+- **ALWAYS** use `position: fixed; z-index: 0; pointer-events: none` on full-screen background media wrappers (`VideoBackground`, `HeroVideoBackground`).
+- **ALWAYS** ensure foreground layout sections (`hero`, `navbar`, `categories`, `places`, `footer`) specify relative positioning with an explicit stacking context (`relative z-10`, `z-20`, `z-50`) and transparent section backgrounds where the video should shine through.
+- **ALWAYS** bump `APP_VERSION` in both `lib/app-version.ts` and `public/sw.js` when modifying core visual styling or background media to trigger automatic Service Worker cache invalidation on mobile devices.
+
+---
+
+## 9. Permanent Light Mode, Text Contrast & Responsive Scaling Invariants
+
+### ❌ NEVER:
+- **NEVER** apply dark background classes (`bg-slate-950`, `bg-[#0A101E]`, `rgba(10, 16, 30, 0.85)`) to the top navigation header (`Navbar3D`), drawer menus, or admin panels. Kynisto uses a permanent, high-contrast light mode.
+- **NEVER** apply broad CSS `!important` text-color overrides that bleed into child containers and cause invisible text.
+- **NEVER** leave mobile hero containers with less than 110px top padding when a fixed top floating navbar is present.
+- **NEVER** force `#0f172a` or dark ink onto text that renders directly over the fixed background sky video (`.hero h1`, `#category-heading`).
+
+### ✅ ALWAYS:
+- **ALWAYS** enforce WCAG AA contrast standards (minimum 4.5:1 ratio) for all text across all components. Use high-contrast dark text (`text-slate-900`, `text-slate-800`, `#0F172A`) on white/light backgrounds (`bg-white`, `bg-slate-50`).
+- **ALWAYS** verify responsive scaling on both mobile viewports (`375px - 430px`) and PC desktops (`1280px - 1920px`) using flexible Tailwind containers (`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`) and `overflow-x: clip`.
+- **ALWAYS** ensure admin and customer dashboard data models include nullish guards to prevent `RangeError` crashes.
+
+---
+
+## 10. Production Domain (`kynisto.in`) vs. Localhost Operational Invariants
+
+### ❌ NEVER:
+- **NEVER** apply, test, or verify feature changes exclusively for localhost, or assume localhost is the operational environment.
+- **NEVER** instruct the user to verify or test on localhost URLs unless they explicitly command: "use localhost" or "test on localhost".
+
+### ✅ ALWAYS:
+- **ALWAYS** target, apply, build, and deploy all feature changes to the production domain **`https://kynisto.in`** (Cloudflare Workers production environment) so changes reflect live for the user immediately.
+- **ONLY** switch to localhost workflows when the user explicitly gives the command: "use localhost".
+- Every completed feature or bugfix must be ready for and deployed to **`kynisto.in`** so it reflects live in the user's browser and Android app.

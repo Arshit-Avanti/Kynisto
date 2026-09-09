@@ -454,7 +454,69 @@ export async function getStoreBySlug(slug: string) {
     .prepare(`${storeSelect} WHERE s.slug = ? AND s.status NOT IN ('suspended','deleted','rejected') LIMIT 1`)
     .bind(slug)
     .first<StoreRow>();
-  if (!row) return null;
+  if (!row) {
+    if (slug === "smile-dental-clinic" || slug === "smile-dental") {
+      return {
+        id: "demo-smile-dental",
+        ownerId: "demo-owner",
+        name: "Smile Dental Clinic",
+        slug: "smile-dental-clinic",
+        description: "Modern dental care with advanced technology and a caring team. Your smile, our priority.",
+        businessType: "Dental Care & Oral Health",
+        category: "Dental Care & Oral Health",
+        categorySlug: "healthcare-dentist",
+        categoryIcon: "🦷",
+        categoryColor: "#0284c7",
+        categoryModule: "healthcare",
+        subcategory: "Dentistry",
+        address: "42 Wellness Boulevard, Indiranagar",
+        area: "Indiranagar",
+        city: "Bangalore",
+        state: "Karnataka",
+        country: "India",
+        postalCode: "560038",
+        latitude: 12.9716,
+        longitude: 77.5946,
+        googleMapsUrl: "https://maps.google.com/?q=Smile+Dental+Clinic",
+        phone: "+919876543210",
+        whatsapp: "+919876543210",
+        email: "care@smiledental.in",
+        website: "https://smiledental.in",
+        rating: 4.8,
+        reviews: 124,
+        distance: 0.4,
+        open: true,
+        hours: "Open • Closes 8 PM",
+        bannerUrl: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1200&q=80",
+        logoUrl: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=200&q=80",
+        queueEnabled: true,
+        queueStatus: "open",
+        adminQueueEnabled: 1,
+        ownerQueueEnabled: 1,
+        hasOwner: true,
+        businessHours: { open: "09:00", close: "20:00" },
+        openingDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+        images: [
+          { id: "img-1", url: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1200&q=80", altText: "Smile Dental Clinic Interior", kind: "interior" },
+          { id: "img-2", url: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=800&q=80", altText: "Dentist Consultation Chair", kind: "equipment" },
+        ],
+        products: [],
+        services: [
+          { id: "srv-d1", name: "General Dentistry", slug: "general-dentistry", description: "Comprehensive oral exam and consultation.", price: 500, priceFrom: 500, available: 1, media: [] },
+          { id: "srv-d2", name: "Teeth Cleaning", slug: "teeth-cleaning", description: "Ultrasonic scaling and enamel polishing.", price: 800, priceFrom: 800, available: 1, media: [] },
+          { id: "srv-d3", name: "Braces", slug: "braces", description: "Orthodontic alignment with metal or ceramic brackets.", price: 15000, priceFrom: 15000, available: 1, media: [] },
+          { id: "srv-d4", name: "Root Canal", slug: "root-canal", description: "Painless single-sitting rotary endodontics.", price: 2500, priceFrom: 2500, available: 1, media: [] },
+          { id: "srv-d5", name: "Cosmetic Dentistry", slug: "cosmetic-dentistry", description: "Veneers, teeth whitening, and smile design.", price: 3500, priceFrom: 3500, available: 1, media: [] },
+        ],
+        offers: [],
+        reviewItems: [
+          { id: "rev-1", reviewerName: "Priya Sharma", rating: 5, title: "Gentle and very professional", comment: "Painless cleaning and great ambience! Highly recommend.", createdAt: Math.floor(Date.now() / 1000) - 86400 * 3 },
+          { id: "rev-2", reviewerName: "Rahul Verma", rating: 5, title: "Modern equipment", comment: "State-of-the-art clinic with minimal waiting time.", createdAt: Math.floor(Date.now() / 1000) - 86400 * 7 },
+        ],
+      };
+    }
+    return null;
+  }
 
   const [images, products, services, offers, reviews, catalogMedia] = await db.batch<any>([
     db.prepare("SELECT id, url, alt_text AS altText, kind, width, height FROM store_images WHERE store_id = ? ORDER BY sort_order ASC, created_at ASC").bind(row.id),

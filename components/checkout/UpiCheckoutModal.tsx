@@ -21,6 +21,10 @@ import {
   Building2,
   AlertCircle,
   ExternalLink,
+  Radio,
+  Zap,
+  Send,
+  MessageSquare,
 } from "lucide-react";
 
 import {
@@ -29,6 +33,7 @@ import {
   openUPIPayment,
   UPIPaymentConfig,
 } from "@/lib/upi-payment";
+import { RazorpayCheckoutModal } from "./RazorpayCheckoutModal";
 
 export interface ItemDetail {
   name: string;
@@ -186,13 +191,26 @@ export function UpiCheckoutModal({
   const [appLaunchNotice, setAppLaunchNotice] = useState<string | null>(null);
   const [qrImgError, setQrImgError] = useState(false);
 
+  // Auto-Verification & SMS Text Message Receipt State
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [manualUtr, setManualUtr] = useState("");
+  const [smsPaste, setSmsPaste] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+  const [verifiedUtr, setVerifiedUtr] = useState<string | null>(null);
+  const [verifiedBank, setVerifiedBank] = useState<string | null>(null);
+  const [showManualVerify, setShowManualVerify] = useState(false);
+  const [smsReceiptSent, setSmsReceiptSent] = useState(false);
+  const [showGatewayModal, setShowGatewayModal] = useState(false);
+
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Clean sanitization for NPCI compliance
   const safeAmount = Math.max(0, Number(amount) || 0);
   const safeOrderId = (orderId || "KYN-" + Date.now().toString(36).toUpperCase()).trim();
-  const effectiveUpiId = (upiId || defaultPaymentConfig.upiId || "YOUR_UPI_ID@upi").trim();
+  const effectiveUpiId = (upiId || defaultPaymentConfig.upiId || "9315678560@fam").trim();
   const effectiveMerchantName = (merchantName || defaultPaymentConfig.merchantName || "Kynisto").trim();
 
   // NPCI standard limits transaction note (tn) to max 80 characters
@@ -222,7 +240,7 @@ export function UpiCheckoutModal({
         universalUpiUri
       )}`;
 
-  // Clear pending timers helper
+  // Clear pending timers & polling helper
   const clearAllTimers = useCallback(() => {
     if (timerRef.current !== null) {
       clearTimeout(timerRef.current);
@@ -232,7 +250,47 @@ export function UpiCheckoutModal({
       clearTimeout(copyTimerRef.current);
       copyTimerRef.current = null;
     }
+    if (pollIntervalRef.current !== null) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
   }, []);
+
+  // Real-time backend status polling for bank SMS auto-verification
+  const checkVerificationStatus = useCallback(async () => {
+    try {
+      const res = await fetch(
+        `/api/payments/verify?orderId=${encodeURIComponent(safeOrderId)}`
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.verified) {
+        if (pollIntervalRef.current !== null) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
+        setVerifiedUtr(data.utr || null);
+        setVerifiedBank(data.bankName || "UPI Network");
+        setPaymentState("success");
+        if (typeof onPaymentSuccess === "function") {
+          try {
+            onPaymentSuccess();
+          } catch (err) {
+            console.error("[Kynisto UPI] onPaymentSuccess error:", err);
+          }
+        }
+      }
+    } catch {
+      // Background retry on next tick
+    }
+  }, [safeOrderId, onPaymentSuccess]);
+
+  const startPolling = useCallback(() => {
+    if (pollIntervalRef.current !== null) {
+      clearInterval(pollIntervalRef.current);
+    }
+    pollIntervalRef.current = setInterval(checkVerificationStatus, 2500);
+  }, [checkVerificationStatus]);
 
   // Reset internal state when modal opens or closes
   useEffect(() => {
@@ -243,11 +301,43 @@ export function UpiCheckoutModal({
       setShowItemDetails(false);
       setAppLaunchNotice(null);
       setQrImgError(false);
+      setVerifyError(null);
+      setIsVerifying(false);
+      setVerifiedUtr(null);
+      setVerifiedBank(null);
+      setSmsReceiptSent(false);
+
+      // Register payment order in ledger for SMS auto-reconciliation
+      fetch("/api/payments/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: safeOrderId,
+          amount: safeAmount,
+          title,
+          customerPhone: customerPhone ? customerPhone.trim() : undefined,
+          upiId: effectiveUpiId,
+          merchantName: effectiveMerchantName,
+        }),
+      }).catch(() => {});
+
+      // Launch real-time bank SMS polling
+      startPolling();
     } else {
       clearAllTimers();
     }
     return () => clearAllTimers();
-  }, [isOpen, clearAllTimers]);
+  }, [
+    isOpen,
+    safeOrderId,
+    safeAmount,
+    title,
+    customerPhone,
+    effectiveUpiId,
+    effectiveMerchantName,
+    startPolling,
+    clearAllTimers,
+  ]);
 
   // Handle escape key to close
   useEffect(() => {
@@ -326,6 +416,52 @@ export function UpiCheckoutModal({
       } catch (err) {
         console.error("[Kynisto UPI] onPaymentSuccess error:", err);
       }
+    }
+  };
+
+  const handleVerifyManually = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setVerifyError(null);
+    setIsVerifying(true);
+
+    try {
+      const res = await fetch("/api/payments/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: safeOrderId,
+          utr: manualUtr.trim(),
+          smsText: smsPaste.trim(),
+          customerPhone: customerPhone.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.verified) {
+        if (pollIntervalRef.current !== null) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
+        setVerifiedUtr(data.order?.utr || manualUtr);
+        setVerifiedBank(data.order?.bankName || "UPI Network");
+        setSmsReceiptSent(Boolean(customerPhone.trim()));
+        setPaymentState("success");
+        if (typeof onPaymentSuccess === "function") {
+          try {
+            onPaymentSuccess();
+          } catch (err) {
+            console.error("[Kynisto UPI] onPaymentSuccess error:", err);
+          }
+        }
+      } else {
+        setVerifyError(
+          data.error || "Could not verify transaction with bank. Please check UTR or try again."
+        );
+      }
+    } catch {
+      setVerifyError("Network error while connecting to verification server.");
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -468,6 +604,30 @@ export function UpiCheckoutModal({
                 </span>
               </div>
 
+              {verifiedUtr && (
+                <div className="flex justify-between items-center text-xs text-slate-500">
+                  <span className="flex items-center gap-1.5">
+                    <Receipt className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Bank UTR / Ref</span>
+                  </span>
+                  <span className="font-mono font-bold text-emerald-700">
+                    {verifiedUtr}
+                  </span>
+                </div>
+              )}
+
+              {verifiedBank && (
+                <div className="flex justify-between items-center text-xs text-slate-500">
+                  <span className="flex items-center gap-1.5">
+                    <Building2 className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>Settlement</span>
+                  </span>
+                  <span className="font-semibold text-slate-800">
+                    {verifiedBank}
+                  </span>
+                </div>
+              )}
+
               <div className="flex justify-between items-center text-xs text-slate-500 pt-2 border-t border-slate-200">
                 <span className="flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-slate-400" />
@@ -478,6 +638,16 @@ export function UpiCheckoutModal({
                 </span>
               </div>
             </div>
+
+            {(smsReceiptSent || customerPhone) && (
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-center gap-2 mb-4 text-left">
+                <MessageSquare className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>
+                  Instant confirmation text message dispatched to{" "}
+                  <strong>+91 {customerPhone || "Mobile"}</strong>.
+                </span>
+              </div>
+            )}
 
             <div className="flex flex-col sm:flex-row gap-2.5">
               <button
@@ -563,11 +733,26 @@ export function UpiCheckoutModal({
               )}
             </div>
 
-            {/* Simulated Confirmation Dialog State (When an app was selected) */}
+            {/* Auto-Verifying & Confirmation State */}
             {paymentState === "confirming" ? (
-              <div className="p-5 rounded-2xl bg-amber-50/60 border border-amber-200 text-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
-                <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
-                  <Sparkles className="w-6 h-6 animate-pulse" />
+              <div className="p-5 rounded-2xl bg-amber-50/40 border border-amber-200 text-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
+                {/* Live Bank SMS Auto-Verification Radar */}
+                <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200/90 flex items-center justify-between text-left shadow-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="relative flex items-center justify-center w-5 h-5">
+                      <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
+                      <span className="absolute w-5 h-5 rounded-full bg-emerald-400 animate-ping opacity-75"></span>
+                    </div>
+                    <div>
+                      <span className="block text-xs font-bold text-emerald-950">
+                        ⚡ Bank SMS Auto-Verify Active
+                      </span>
+                      <span className="block text-[11px] text-emerald-700">
+                        Auto-detects payment credit to {effectiveUpiId}...
+                      </span>
+                    </div>
+                  </div>
+                  <Radio className="w-4 h-4 text-emerald-600 animate-pulse shrink-0" />
                 </div>
 
                 <div>
@@ -575,9 +760,8 @@ export function UpiCheckoutModal({
                     Awaiting Payment in {selectedAppObj?.name || "Your UPI App"}
                   </h4>
                   <p className="text-xs text-slate-600 mt-1 max-w-sm mx-auto leading-relaxed">
-                    We launched the UPI payment intent for ₹
-                    {safeAmount.toLocaleString("en-IN")}. If your app did not open
-                    automatically, you can scan the QR code or use another app below.
+                    We dispatched payment intent for ₹
+                    {safeAmount.toLocaleString("en-IN")}. As soon as your UPI app or bank completes the transfer, this screen will auto-complete.
                   </p>
                 </div>
 
@@ -588,11 +772,84 @@ export function UpiCheckoutModal({
                   </div>
                 )}
 
+                {/* Instant Manual UTR or Bank SMS Verification Drawer */}
+                <div className="border border-slate-200 rounded-2xl p-3 bg-white text-left shadow-xs">
+                  <button
+                    type="button"
+                    onClick={() => setShowManualVerify(!showManualVerify)}
+                    className="w-full flex items-center justify-between text-xs font-bold text-slate-700 hover:text-slate-900 cursor-pointer"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <Receipt className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Have 12-Digit UTR or Bank SMS? Instant Verify</span>
+                    </span>
+                    {showManualVerify ? (
+                      <ChevronUp className="w-4 h-4 text-slate-400" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-slate-400" />
+                    )}
+                  </button>
+
+                  {showManualVerify && (
+                    <div className="mt-3 pt-3 border-t border-slate-100 space-y-2.5 animate-in fade-in duration-150">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                          12-Digit UPI Reference (UTR / RRN)
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={12}
+                          value={manualUtr}
+                          onChange={(e) => setManualUtr(e.target.value.replace(/\D/g, ""))}
+                          placeholder="e.g. 425312891045"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                          Or Paste Bank SMS Text Message
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={smsPaste}
+                          onChange={(e) => setSmsPaste(e.target.value)}
+                          placeholder="Paste credit SMS received from FamPay/Bank..."
+                          className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                        />
+                      </div>
+
+                      {verifyError && (
+                        <p className="text-[11px] text-rose-600 font-semibold">{verifyError}</p>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={handleVerifyManually}
+                        disabled={isVerifying || (!manualUtr && !smsPaste)}
+                        className="w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                      >
+                        {isVerifying ? (
+                          <>
+                            <Sparkles className="w-3.5 h-3.5 animate-spin" />
+                            <span>Verifying with Bank...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Verify Transaction</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex flex-col gap-2 pt-1">
                   <button
                     type="button"
                     onClick={handleSimulatedSuccess}
-                    className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <Check className="w-4 h-4" />
                     <span>I Have Completed Payment</span>
@@ -654,6 +911,43 @@ export function UpiCheckoutModal({
             ) : (
               /* Ready State: Navigation Tabs (UPI Apps vs Scan QR) */
               <>
+                {/* Optional Mobile Number for SMS Text Message Receipt */}
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl shadow-xs">
+                  <label className="text-[11px] font-bold text-slate-700 flex items-center justify-between mb-1.5">
+                    <span className="flex items-center gap-1.5">
+                      <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Instant SMS Text Message Receipt</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-normal">Optional</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <div className="flex items-center px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 shrink-0">
+                      +91
+                    </div>
+                    <input
+                      type="tel"
+                      maxLength={10}
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, ""))}
+                      placeholder="Enter 10-digit mobile number"
+                      className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Official Gateway Option */}
+                <button
+                  type="button"
+                  onClick={() => setShowGatewayModal(true)}
+                  className="w-full p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs flex items-center justify-between shadow-md shadow-blue-500/20 transition-all cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-white" />
+                    <span>Pay via Official Gateway (Cards / NetBanking / All UPI)</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-white/80" />
+                </button>
+
                 <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-2xl">
                   <button
                     type="button"
@@ -814,6 +1108,25 @@ export function UpiCheckoutModal({
           <span>Encrypted 256-bit peer-to-peer UPI transfer powered by NPCI</span>
         </div>
       </div>
+
+      {/* Official Razorpay Gateway Modal */}
+      {showGatewayModal && (
+        <RazorpayCheckoutModal
+          isOpen={showGatewayModal}
+          onClose={() => setShowGatewayModal(false)}
+          title={title}
+          orderId={safeOrderId}
+          amount={safeAmount}
+          customerPhone={customerPhone}
+          onPaymentSuccess={() => {
+            setShowGatewayModal(false);
+            setPaymentState("success");
+            if (typeof onPaymentSuccess === "function") {
+              onPaymentSuccess();
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

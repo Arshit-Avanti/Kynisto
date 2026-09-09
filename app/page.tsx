@@ -139,18 +139,69 @@ const modernCleanTechStyles = `
     -webkit-text-fill-color: #0f172a !important;
     text-shadow: none !important;
   }
-  /* Ensure ALL text is dark in light mode across the entire page, even after custom theme changes */
-  .mode-light h1, .mode-light h2, .mode-light h3, .mode-light h4, .mode-light p,
-  .mode-light span:not(.categoryArt):not(.brandMark span), .mode-light label,
+  /* Content card readability in light mode (applied to light surfaces) */
+  .mode-light .storeCard h3, .mode-light .storeCard b, .mode-light .storeCard p,
+  .mode-light .categoryTile strong, .mode-light .categoryTile b, .mode-light .categoryTile span,
   .mode-light .featureCard h3, .mode-light .featureCard p,
-  .mode-light .highContrastText, .mode-light .marqueeTrack span,
-  .mode-light .quickProof span, .mode-light .trustStrip p,
-  .mode-light .sectionHeading h2, .mode-light .sectionHeading span,
-  .mode-light .kicker, .mode-light .hero h1, .mode-light .hero p {
+  .mode-light .providerGrid h3, .mode-light .providerGrid p,
+  .mode-light .trustStrip p {
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
-    text-shadow: none !important;
   }
+
+  /* Sky video background foreground elements — Crisp white with clean, subtle shadows (no smoke scattering) */
+  .hero h1,
+  .hero h1 span,
+  .hero h1 b,
+  .hero h1 em,
+  .mode-light .hero h1,
+  .mode-light .hero h1 span,
+  .mode-light .hero h1 b,
+  .mode-light .hero h1 em {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+    filter: none !important;
+  }
+
+  /* Hero Section mobile top clearance to eliminate navbar overlap completely */
+  .kynistoHeroTopSection,
+  .hero {
+    padding-top: max(148px, calc(env(safe-area-inset-top, 0px) + 112px)) !important;
+  }
+
+  /* Category section heading over sky video — Brilliant white */
+  .categorySection #category-heading,
+  .mode-light .categorySection #category-heading {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7) !important;
+  }
+  .categorySection .sectionHeading p,
+  .mode-light .categorySection .sectionHeading p {
+    color: rgba(255, 255, 255, 0.92) !important;
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.92) !important;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  /* Recommended Stores Nearby Me & Places Section Headings over sky video — Brilliant white */
+  .recommendedStoresTitle,
+  .mode-light .recommendedStoresTitle,
+  .placesSection h2,
+  .placesSection #places-heading,
+  .mode-light .placesSection h2,
+  .mode-light .placesSection #places-heading {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55) !important;
+  }
+
+  /* Mobile Bottom Nav Dock — High contrast guarantee */
+  .mobileDockLabel,
+  .mode-light .mobileDockLabel {
+    color: inherit;
+  }
+
   /* Popular Near You specified texts with high contrast readability */
   .mode-light .placesSection .kicker,
   .mode-light .placesSection h2,
@@ -166,39 +217,6 @@ const modernCleanTechStyles = `
   .mode-light .emptyState p {
     color: #475569 !important;
     -webkit-text-fill-color: #475569 !important;
-  }
-  /* FLOATING NAVIGATION BAR — PERMANENT LIGHT MODE */
-  .floating-nav-container,
-  .mode-light .floating-nav-container,
-  .light-theme .floating-nav-container,
-  .mode-dark .floating-nav-container,
-  .dark-theme .floating-nav-container {
-    background: rgba(255, 255, 255, 0.95) !important;
-    border: 1px solid rgba(226, 232, 240, 0.9) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06) !important;
-  }
-
-  .floating-nav-container a,
-  .floating-nav-container button,
-  .mode-light .floating-nav-container a,
-  .mode-light .floating-nav-container button {
-    color: #0f172a !important;
-    -webkit-text-fill-color: #0f172a !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
-  }
-
-  .floating-nav-container nav a[href="/pricing"],
-  .mode-light .floating-nav-container nav a[href="/pricing"] {
-    color: #EA580C !important;
-    -webkit-text-fill-color: #EA580C !important;
-  }
-  .mode-light .sectionHeading h2, .mode-light .sectionHeading h3, .mode-light .hero h1, .mode-light .hero p, .mode-light h2, .mode-light h3 {
-    color: #0f172a !important;
-    -webkit-text-fill-color: #0f172a !important;
-    text-shadow: none !important;
   }
   /* Fix search input placeholder and text in light mode */
   .mode-light .searchBox input, .mode-light .healthSearch input, .mode-light .productIntro form input {
@@ -952,7 +970,7 @@ const modernCleanTechStyles = `
 
     /* Hero section responsiveness */
     .hero {
-      padding: 70px 14px 28px 14px !important;
+      padding: max(148px, calc(env(safe-area-inset-top, 0px) + 112px)) 14px 28px 14px !important;
       text-align: center !important;
       max-width: 100vw !important;
       overflow-x: clip !important;
@@ -2394,10 +2412,17 @@ export default function Home() {
               <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
               Browse by Need
             </div>
-            <h2 id="category-heading" className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+            <h2
+              id="category-heading"
+              className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight"
+              style={{ color: "#FFFFFF", textShadow: "0 2px 14px rgba(0, 0, 0, 0.85)" }}
+            >
               What are you looking for?
             </h2>
-            <p className="text-slate-300 text-xs sm:text-sm mt-1">
+            <p
+              className="text-xs sm:text-sm mt-1"
+              style={{ color: "rgba(255, 255, 255, 0.92)", textShadow: "0 1px 8px rgba(0, 0, 0, 0.75)" }}
+            >
               Explore trusted stores, clinics, technicians, and local essentials near you.
             </p>
           </div>
@@ -2488,7 +2513,7 @@ export default function Home() {
         <div className="sectionHeading arise-on-scroll" style={{ marginTop: "36px", marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <span className="kicker" style={{ color: "#FFFFFF", fontWeight: 700 }}>📍 Verified Local Services</span>
-            <h2 className="highContrastText" style={{ fontSize: "1.8rem", fontWeight: 800, margin: "4px 0 0 0", color: "#FFFFFF" }}>Recommended Stores Nearby Me</h2>
+            <h2 className="recommendedStoresTitle text-white font-extrabold tracking-tight" style={{ fontSize: "1.8rem", margin: "4px 0 0 0", color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF", textShadow: "0 2px 8px rgba(0, 0, 0, 0.55)" }}>Recommended Stores Nearby Me</h2>
           </div>
           <div className="resultsBar" style={{ margin: 0 }}>
             <span style={{ color: "#cbd5e1", fontSize: "0.85rem", fontWeight: 600 }}><b>{catalogTotal}</b> places found</span>

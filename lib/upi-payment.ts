@@ -27,7 +27,7 @@ export interface UPIPaymentConfig {
 }
 
 export const defaultPaymentConfig: UPIPaymentConfig = {
-  upiId: "YOUR_UPI_ID@upi",
+  upiId: "9315678560@fam",
   merchantName: "Kynisto",
   amount: 499,
   currency: "INR",

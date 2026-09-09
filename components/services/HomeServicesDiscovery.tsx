@@ -1,1322 +1,443 @@
 "use client";
 
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { KynistoLogo } from "@/components/brand/KynistoLogo";
-import { Navbar3D } from "@/components/landing/Navbar3D";
-import { VideoBackground } from "@/components/media/VideoBackground";
-import { ShaderCanvas } from "@/components/ui/ShaderCanvas";
-import { apiFetch } from "@/lib/client-api";
+import { useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  Search,
+  ChevronRight,
+  Sparkles,
+  Star,
+  MapPin,
+  Home,
+  Flower2,
+  Wrench,
+  GraduationCap,
+  MoreHorizontal,
+  ArrowRight,
+  X,
+  Phone,
+  Calendar,
+  CheckCircle2,
+} from "lucide-react";
+import { MobileBottomNav } from "@/components/landing/MobileBottomNav";
 
-import { generateWhatsAppBookingUrl } from "@/lib/whatsapp";
-import { PushNotificationManager } from "@/components/ui/PushNotificationManager";
-
-export interface HomeService {
+interface ServiceItem {
   id: string;
   name: string;
-  categoryName: string;
-  category?: string;
-  icon?: string;
-  slug: string;
-  description: string;
+  category: "home" | "beauty" | "repairs" | "education" | "more";
+  rating: number;
+  reviewCount: number;
+  distanceKm: number;
   startingPrice: number;
-  estimatedArrival: string;
+  imageUrl: string;
+  description: string;
   storeName: string;
-  storePhone?: string | null;
-  area?: string;
-  city?: string;
+  storePhone?: string;
+  estimatedArrival?: string;
 }
 
-const defaultHomeServices: HomeService[] = [
+const POPULAR_SERVICES: ServiceItem[] = [
   {
-    id: "srv-1",
-    name: "AC Deep Cleaning & Servicing",
-    categoryName: "AC & Appliances",
-    category: "AC & Appliances",
-    icon: "❄️",
-    slug: "ac-deep-cleaning",
-    description: "Complete jet pump wash, filter sanitization, gas check, and cooling coil maintenance.",
+    id: "srv-cleaning",
+    name: "Home Cleaning",
+    category: "home",
+    rating: 4.7,
+    reviewCount: 98,
+    distanceKm: 0.8,
     startingPrice: 499,
-    estimatedArrival: "45 mins",
-    storeName: "CoolBreeze Climate Services",
+    imageUrl: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=400&q=80",
+    description: "Full deep house cleaning, sanitization, floor scrubbing, and kitchen chimney degreasing.",
+    storeName: "PristinePro Cleaners",
     storePhone: "+919876543210",
-    area: "Indiranagar",
-    city: "Bangalore",
+    estimatedArrival: "45 mins",
   },
   {
-    id: "srv-2",
-    name: "Complete Home Electrical Health Check & Repair",
-    categoryName: "Electricians",
-    category: "Electricians",
-    icon: "⚡",
-    slug: "electrical-health-check",
-    description: "Inspection of wiring, MCB distribution board, socket replacement, earthing test.",
-    startingPrice: 299,
-    estimatedArrival: "30 mins",
-    storeName: "VoltsPro Electricals",
+    id: "srv-ac",
+    name: "AC Repair & Service",
+    category: "repairs",
+    rating: 4.6,
+    reviewCount: 76,
+    distanceKm: 1.2,
+    startingPrice: 399,
+    imageUrl: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=400&q=80",
+    description: "Jet pump cleaning, gas leakage detection, coil inspection, and cooling optimization.",
+    storeName: "CoolBreeze Climate Services",
     storePhone: "+919876543211",
-    area: "Koramangala",
-    city: "Bangalore",
+    estimatedArrival: "30 mins",
   },
   {
-    id: "srv-3",
-    name: "Kitchen & Bathroom Plumbing Diagnostics",
-    categoryName: "Plumbing",
-    category: "Plumbing",
-    icon: "🔧",
-    slug: "plumbing-diagnostics",
-    description: "Leak detection, pipeline blockage removal, tap and mixer fitting, low water pressure fix.",
-    startingPrice: 349,
-    estimatedArrival: "40 mins",
-    storeName: "AquaFix Master Plumbers",
+    id: "srv-beauty",
+    name: "Salon & Beauty",
+    category: "beauty",
+    rating: 4.8,
+    reviewCount: 120,
+    distanceKm: 0.6,
+    startingPrice: 599,
+    imageUrl: "https://images.unsplash.com/photo-1560750588-73207b1ef5b8?auto=format&fit=crop&w=400&q=80",
+    description: "Hydra facial, clean-up, hair spa, threading, and relaxing head massage at your doorstep.",
+    storeName: "Glow & Radiance Salon",
     storePhone: "+919876543212",
-    area: "HSR Layout",
-    city: "Bangalore",
+    estimatedArrival: "40 mins",
   },
   {
-    id: "srv-4",
-    name: "Intense Deep House Sanitization & Cleaning",
-    categoryName: "Cleaning & Hygiene",
-    category: "Cleaning & Hygiene",
-    icon: "✨",
-    slug: "house-sanitization",
-    description: "Floor buffing, tile scrubbing, stain removal, kitchen chimney degreasing, germ protection.",
-    startingPrice: 999,
-    estimatedArrival: "60 mins",
-    storeName: "PristinePro Home Cleaners",
+    id: "srv-electrician",
+    name: "Electrician",
+    category: "repairs",
+    rating: 4.5,
+    reviewCount: 62,
+    distanceKm: 1.4,
+    startingPrice: 249,
+    imageUrl: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=400&q=80",
+    description: "Switchboard fitting, fan installation, short circuit fix, MCB inspection, and earthing checks.",
+    storeName: "VoltsPro Electricals",
     storePhone: "+919876543213",
-    area: "Whitefield",
-    city: "Bangalore",
-  }
+    estimatedArrival: "25 mins",
+  },
+  {
+    id: "srv-education",
+    name: "Home Tutoring & Coding",
+    category: "education",
+    rating: 4.9,
+    reviewCount: 45,
+    distanceKm: 1.1,
+    startingPrice: 699,
+    imageUrl: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=400&q=80",
+    description: "One-on-one personalized tuition for STEM, Math, English, and Python programming.",
+    storeName: "Kynisto Learn Academy",
+    storePhone: "+919876543214",
+    estimatedArrival: "Flexible",
+  },
 ];
 
 export function HomeServicesDiscovery() {
-  const [services, setServices] = useState<HomeService[]>(() => defaultHomeServices);
-  const [loading, setLoading] = useState(false);
-  const [userRole, setUserRole] = useState<"admin" | "store_owner" | "customer" | null>(null);
-  const [savedCount, setSavedCount] = useState(0);
-  const [locationLabel, setLocationLabel] = useState("Your Locality");
+  const router = useRouter();
+  const [selectedCategory, setSelectedCategory] = useState<string>("home");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [selectedService, setSelectedService] = useState<HomeService | null>(null);
+  const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
   const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [customizing, setCustomizing] = useState(false);
 
-  // Booking Form State
-  const [bookingDate, setBookingDate] = useState("Today");
-  const [bookingSlot, setBookingSlot] = useState("10:00 AM - 12:00 PM");
-  const [userAddress, setUserAddress] = useState("Your Locality, Block A");
-  const [notes, setNotes] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const categories = [
+    { id: "home", label: "Home Services", icon: Home },
+    { id: "beauty", label: "Beauty & Wellness", icon: Flower2 },
+    { id: "repairs", label: "Repairs & Maintenance", icon: Wrench },
+    { id: "education", label: "Education", icon: GraduationCap },
+    { id: "more", label: "More ...", icon: MoreHorizontal },
+  ];
 
-  useEffect(() => {
-    async function loadServices() {
-      try {
-        setLoading(true);
-        const data = await apiFetch<{ ok: boolean; items: HomeService[] }>("/api/services");
-        setServices(data.items || []);
-      } catch {
-        setServices([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-    void loadServices();
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-    apiFetch<{ user: { role: "admin" | "store_owner" | "customer" } | null }>("/api/auth/me")
-      .then(async (sessionData) => {
-        if (!active) return;
-        setUserRole(sessionData.user?.role ?? null);
-        if (sessionData.user?.role === "customer" || sessionData.user?.role === "admin") {
-          const favoriteData = await apiFetch<{ items: Array<{ storeId: string }> }>("/api/favorites").catch(() => ({ items: [] }));
-          if (active && Array.isArray(favoriteData?.items)) setSavedCount(favoriteData.items.length);
-        }
-      })
-      .catch(() => undefined);
-    return () => { active = false; };
-  }, []);
-
-  const handleUseLocation = () => {
-    if (!navigator.geolocation) {
-      setToastMessage("Geolocation is not supported by your browser.");
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const label = `Your Locality (${position.coords.latitude.toFixed(2)}, ${position.coords.longitude.toFixed(2)})`;
-        setLocationLabel(label);
-        setUserAddress(label);
-        setToastMessage("Location updated to your GPS position!");
-      },
-      () => {
-        setToastMessage("Could not retrieve precise GPS location.");
-      }
-    );
-  };
-
-  const filteredServices = useMemo(() => {
-    return services.filter((service) => {
-      const query = searchQuery.toLowerCase();
+  const displayedServices = useMemo(() => {
+    return POPULAR_SERVICES.filter((item) => {
+      const matchesCategory =
+        selectedCategory === "all" ||
+        selectedCategory === "more" ||
+        item.category === selectedCategory;
+      const query = searchQuery.trim().toLowerCase();
       const matchesSearch =
         !query ||
-        service.name.toLowerCase().includes(query) ||
-        service.description.toLowerCase().includes(query) ||
-        (service.categoryName && service.categoryName.toLowerCase().includes(query)) ||
-        (service.storeName && service.storeName.toLowerCase().includes(query));
-      const matchesCategory =
-        selectedCategory === "All" || service.categoryName === selectedCategory;
-      return matchesSearch && matchesCategory;
+        item.name.toLowerCase().includes(query) ||
+        item.description.toLowerCase().includes(query) ||
+        item.storeName.toLowerCase().includes(query);
+      return matchesCategory && matchesSearch;
     });
-  }, [services, searchQuery, selectedCategory]);
-
-  const handleConfirmBooking = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedService) return;
-    setIsSubmitting(true);
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      const bookingId = `KS-SERV-${Math.floor(100000 + Math.random() * 900000)}`;
-      setBookingSuccess(bookingId);
-      setIsSubmitting(false);
-    } catch {
-      setToastMessage("Failed to process booking. Please try again.");
-      setIsSubmitting(false);
-    }
-  };
+  }, [selectedCategory, searchQuery]);
 
   return (
-    <main className="services-page-shell pb-32">
-      <style dangerouslySetInnerHTML={{ __html: servicesCustomCss }} />
-      <VideoBackground />
-      <ShaderCanvas />
+    <div className="min-h-screen bg-slate-100/70 text-slate-900 font-sans pb-32 relative overflow-x-clip">
+      {/* Mobile-Centered Container */}
+      <div className="max-w-md mx-auto relative bg-white min-h-screen shadow-2xl border-x border-slate-200/40">
+        {/* Royal Blue Organic Hero Header */}
+        <div className="relative bg-gradient-to-b from-[#1C5EB8] via-[#2170D4] to-[#2563EB] px-5 pt-5 pb-12 overflow-hidden">
+          {/* Subtle Abstract Wave Glows */}
+          <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-sky-300/15 rounded-full blur-2xl pointer-events-none -ml-16 -mb-16" />
 
-      <Navbar3D />
-
-      {toastMessage && (
-        <div className="services-toast-banner" role="alert">
-          <span>{toastMessage}</span>
-          <button type="button" onClick={() => setToastMessage(null)}>×</button>
-        </div>
-      )}
-
-      {/* Hero Header */}
-      <section className="services-hero">
-        <div className="services-hero-kicker" style={{ background: "rgba(255, 138, 0, 0.2)", color: "#FF8A00", WebkitTextFillColor: "#FF8A00", border: "1px solid rgba(255, 138, 0, 0.45)", borderRadius: "9999px", padding: "8px 24px", fontSize: "14px", fontWeight: 800, letterSpacing: "0.08em", display: "inline-block", marginBottom: "24px", textTransform: "uppercase", boxShadow: "0 4px 20px rgba(255, 138, 0, 0.3)" }}>
-          ⚡ services are faster with kynisto
-        </div>
-
-        {/* Search Bar */}
-        <div className="services-search-wrapper">
-          <span className="search-icon">🔍</span>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search plumber, electrician, AC repair, cleaning..."
-            aria-label="Search home services"
-            className="services-search-input"
-          />
-          {searchQuery && (
+          {/* Top Bar: Back, Title, Search */}
+          <div className="relative z-10 flex items-center justify-between">
+            {/* Back Button */}
             <button
               type="button"
-              className="clear-search-btn"
-              onClick={() => setSearchQuery("")}
+              onClick={() => router.back()}
+              aria-label="Go back"
+              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md flex items-center justify-center text-white active:scale-95 transition-all cursor-pointer"
             >
-              Clear
+              <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
             </button>
-          )}
-        </div>
 
-        {/* Category Filters */}
-        <div className="services-category-bar">
-          {[
-            "All",
-            "Emergency",
-            "Appliance",
-            "Cleaning",
-            "Maintenance",
-            "Tech",
-            "Shifting",
-          ].map((cat) => (
+            {/* Title */}
+            <h1 className="text-lg font-bold text-white tracking-wide">
+              Services
+            </h1>
+
+            {/* Search Toggle Button */}
             <button
-              key={cat}
               type="button"
-              className={`category-pill ${selectedCategory === cat ? "active" : ""}`}
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => setSearchOpen(!searchOpen)}
+              aria-label="Search services"
+              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md flex items-center justify-center text-white active:scale-95 transition-all cursor-pointer"
             >
-              {cat === "All" ? "All Services (23)" : cat}
+              <Search className="w-5 h-5 stroke-[2.2]" />
             </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Services Grid Section */}
-      <section className="services-grid-container">
-        <div className="section-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-          <div>
-            <h2>
-              {selectedCategory === "All"
-                ? "All Available Home Services"
-                : `${selectedCategory} Services`}
-              <span className="count-badge">{filteredServices.length}</span>
-            </h2>
-            <span className="sub-note">Instant Dispatch in {locationLabel}</span>
           </div>
-          <PushNotificationManager />
+
+          {/* Collapsible Search Input */}
+          {searchOpen && (
+            <div className="relative z-10 mt-4 animate-in fade-in slide-in-from-top-2">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search cleaning, AC repair, salon, electrician..."
+                  className="w-full bg-white/95 text-slate-900 placeholder:text-slate-400 px-4 py-2.5 pl-10 rounded-full text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-white shadow-lg"
+                  autoFocus
+                />
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Hero Typography */}
+          <div className="relative z-10 mt-6 mb-2">
+            <h2 className="text-2xl sm:text-[28px] font-black text-white leading-tight tracking-tight">
+              Professional Services
+              <br />
+              for Everyday Needs
+            </h2>
+            <p className="text-blue-100/90 text-xs sm:text-sm mt-2 font-medium">
+              Trusted services, at your convenience.
+            </p>
+          </div>
         </div>
 
-        {filteredServices.length > 0 ? (
-          <div className="services-grid">
-            {filteredServices.map((service) => {
-              const waUrl = generateWhatsAppBookingUrl({
-                storeOrServiceName: service.storeName || service.name,
-                whatsappNumber: service.storePhone || "919876543210",
-                serviceOrProductName: service.name,
-                price: service.startingPrice,
-                customerAddress: userAddress,
-              });
-
+        {/* Curved White Sheet Overlapping Blue Hero */}
+        <div className="relative -mt-6 rounded-t-[32px] bg-white z-10 px-5 pt-6 pb-8 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] min-h-[calc(100vh-230px)]">
+          {/* 5-Item Category Selector */}
+          <div className="grid grid-cols-5 gap-1.5 sm:gap-2 text-center pb-2">
+            {categories.map((cat) => {
+              const Icon = cat.icon;
+              const isActive = selectedCategory === cat.id;
               return (
-                <article key={service.id} className="service-card">
-                  <div className="service-card-top">
-                    <div
-                      className="service-icon-box"
-                      style={{ borderColor: "#FF5722" }}
-                    >
-                      <span>🛠️</span>
-                    </div>
-                    <span className="arrival-badge">⏱️ {service.estimatedArrival || "30–60 min"}</span>
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className="flex flex-col items-center group cursor-pointer active:scale-95 transition-transform"
+                >
+                  <div
+                    className={`w-13 h-13 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center transition-all ${
+                      isActive
+                        ? "bg-[#1E62C6] text-white shadow-md shadow-blue-500/30"
+                        : "bg-slate-50 border border-slate-100/80 text-slate-700 hover:bg-slate-100"
+                    }`}
+                  >
+                    <Icon className={`w-6 h-6 ${isActive ? "text-white stroke-[2.2]" : "stroke-[1.8]"}`} />
                   </div>
-
-                  <div className="service-card-body">
-                    <span className="category-meta" style={{ color: "#FF8A00", fontWeight: 700 }}>
-                      {service.categoryName || "General Service"}
-                    </span>
-                    <h3 className="service-name">{service.name}</h3>
-                    <p className="service-desc">{service.description || "Professional service provided by local verified business."}</p>
-                    {service.storeName && (
-                      <div style={{ marginTop: "8px", fontSize: "0.85rem", color: "var(--text-secondary, #94a3b8)" }}>
-                        🏪 Provided by: <strong style={{ color: "#f8fafc" }}>{service.storeName}</strong>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="service-card-meta">
-                    <div className="rating-box">
-                      <span className="star">⭐ 4.9</span>
-                      <span className="reviews">(Verified)</span>
-                    </div>
-                    <div className="price-box">
-                      <small>Starting from</small>
-                      <strong>₹{Number(service.startingPrice || 0).toLocaleString("en-IN")}</strong>
-                    </div>
-                  </div>
-
-                  <div className="service-card-actions" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "8px", marginTop: "16px" }}>
-                    <button
-                      type="button"
-                      className="book-now-btn prominent-book-btn"
-                      style={{ margin: 0 }}
-                      onClick={() => setSelectedService(service)}
-                    >
-                      Book Service ➔
-                    </button>
-                    <a
-                      href={waUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="book-now-btn whatsapp-action-btn"
-                      style={{
-                        margin: 0,
-                        background: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)",
-                        color: "#FFFFFF",
-                        textDecoration: "none",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "6px",
-                        fontWeight: 700,
-                        fontSize: "13px",
-                      }}
-                    >
-                      💬 WhatsApp
-                    </a>
-                  </div>
-                </article>
+                  <span
+                    className={`text-[10px] sm:text-[11px] mt-1.5 leading-tight text-center ${
+                      isActive
+                        ? "text-blue-600 font-bold underline decoration-2 underline-offset-4"
+                        : "text-slate-600 font-medium"
+                    }`}
+                  >
+                    {cat.label}
+                  </span>
+                </button>
               );
             })}
           </div>
-        ) : (
-          <div className="services-empty-state" style={{ padding: "48px 24px", textAlign: "center", background: "rgba(255,255,255,0.03)", borderRadius: "20px", border: "1px solid rgba(255,255,255,0.1)" }}>
-            <span className="empty-icon" style={{ fontSize: "3rem" }}>🛠️</span>
-            <h3 style={{ fontSize: "1.3rem", marginTop: "12px", color: "#f8fafc" }}>No active services listed in this category yet</h3>
-            <p style={{ color: "#94a3b8", maxWidth: "500px", margin: "8px auto 20px" }}>
-              Are you a service professional, electrician, plumber, or technician? Register your business on Kynisto and start accepting bookings today!
-            </p>
-            <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-              <Link href="/onboarding" className="portalButton" style={{ padding: "10px 24px", textDecoration: "none", display: "inline-block" }}>
-                + List Your Business Now
-              </Link>
-              {(searchQuery || selectedCategory !== "All") && (
-                <button
-                  type="button"
-                  className="reset-search-btn"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSelectedCategory("All");
-                  }}
-                  style={{ background: "rgba(255,255,255,0.1)", color: "#fff", border: "none", padding: "10px 20px", borderRadius: "10px", cursor: "pointer" }}
+
+          {/* Popular Services Section */}
+          <div className="mt-7">
+            {/* Header Row */}
+            <div className="flex items-center justify-between mb-3.5">
+              <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                Popular Services
+              </h3>
+              <button
+                type="button"
+                onClick={() => setSelectedCategory("all")}
+                className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-0.5 cursor-pointer"
+              >
+                <span>See all</span>
+                <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
+              </button>
+            </div>
+
+            {/* List of 4 Sleek Horizontal Service Cards */}
+            <div className="space-y-3">
+              {displayedServices.map((service) => (
+                <div
+                  key={service.id}
+                  onClick={() => setSelectedService(service)}
+                  className="w-full flex items-center justify-between p-3 rounded-2xl bg-white border border-slate-100/90 shadow-xs hover:shadow-md hover:border-blue-100 transition-all cursor-pointer active:scale-[0.99] group"
                 >
-                  Reset Filters
-                </button>
+                  {/* Left: Thumbnail and Info */}
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <img
+                      src={service.imageUrl}
+                      alt={service.name}
+                      className="w-16 h-16 rounded-xl object-cover shadow-xs shrink-0 border border-slate-100"
+                    />
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-slate-900 text-sm sm:text-base tracking-tight truncate group-hover:text-blue-600 transition-colors">
+                        {service.name}
+                      </h4>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
+                        <Star className="w-3.5 h-3.5 fill-blue-600 text-blue-600 shrink-0" />
+                        <span className="font-bold text-slate-700">{service.rating}</span>
+                        <span className="text-slate-400 font-normal">({service.reviewCount})</span>
+                        <span className="text-slate-300">•</span>
+                        <span>{service.distanceKm} km</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Chevron */}
+                  <div className="pl-2">
+                    <ChevronRight className="w-5 h-5 text-blue-600 stroke-[2.2] group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom Promo Banner: "Need something else?" */}
+          <div className="bg-gradient-to-r from-[#103975] to-[#1C5FB9] text-white p-4 rounded-2xl mt-6 relative overflow-hidden shadow-lg shadow-blue-950/20 flex items-center justify-between">
+            {/* Background Light Glow */}
+            <div className="absolute -right-6 -bottom-6 w-28 h-28 bg-blue-300/20 rounded-full blur-xl pointer-events-none" />
+
+            <div className="flex items-center gap-3 relative z-10">
+              <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-xs flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 text-blue-100" />
+              </div>
+              <div>
+                <h4 className="font-bold text-white text-sm tracking-tight leading-tight">
+                  Need something else?
+                </h4>
+                <p className="text-[11px] text-blue-200 mt-0.5 font-medium">
+                  Explore more services near you.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCategory("all");
+                setSearchOpen(true);
+              }}
+              aria-label="Explore more services"
+              className="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 transition-all text-white flex items-center justify-center relative z-10 shrink-0 cursor-pointer"
+            >
+              <ArrowRight className="w-4 h-4 stroke-[2.2]" />
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Booking Modal if Service is Clicked */}
+        {selectedService && (
+          <div className="fixed inset-0 z-[99999] bg-black/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
+            <div className="bg-white rounded-t-[28px] sm:rounded-2xl max-w-md w-full p-5 shadow-2xl relative max-h-[85vh] overflow-y-auto">
+              <button
+                type="button"
+                onClick={() => setSelectedService(null)}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="flex items-center gap-3.5 mb-4">
+                <img
+                  src={selectedService.imageUrl}
+                  alt={selectedService.name}
+                  className="w-16 h-16 rounded-xl object-cover shadow-xs border border-slate-100"
+                />
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">
+                    {selectedService.name}
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    By {selectedService.storeName}
+                  </p>
+                  <div className="flex items-center gap-1.5 text-xs text-slate-600 mt-1">
+                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                    <span className="font-bold">{selectedService.rating}</span>
+                    <span className="text-slate-400">({selectedService.reviewCount} reviews)</span>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100 mb-4">
+                {selectedService.description}
+              </p>
+
+              <div className="flex items-center justify-between p-3 rounded-xl bg-blue-50/60 border border-blue-100 mb-5">
+                <div>
+                  <span className="text-[11px] text-slate-500 font-medium block">Starting from</span>
+                  <span className="text-xl font-black text-blue-700">₹{selectedService.startingPrice}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[11px] text-slate-500 font-medium block">Est. Arrival</span>
+                  <span className="text-xs font-bold text-slate-800">{selectedService.estimatedArrival || "30 mins"}</span>
+                </div>
+              </div>
+
+              {bookingSuccess ? (
+                <div className="text-center py-4">
+                  <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-2" />
+                  <h4 className="font-bold text-slate-900 text-base">Booking Confirmed!</h4>
+                  <p className="text-xs text-slate-500 mt-1">Booking ID: {bookingSuccess}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBookingSuccess(null);
+                      setSelectedService(null);
+                    }}
+                    className="mt-4 px-6 py-2.5 rounded-full bg-slate-900 text-white font-bold text-xs"
+                  >
+                    Done
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2.5">
+                  <a
+                    href={`tel:${selectedService.storePhone || "+919876543210"}`}
+                    className="flex-1 py-3 px-4 rounded-full border border-slate-200 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-slate-50"
+                  >
+                    <Phone className="w-4 h-4" />
+                    <span>Call Professional</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const id = `KS-SERV-${Math.floor(100000 + Math.random() * 900000)}`;
+                      setBookingSuccess(id);
+                    }}
+                    className="flex-1 py-3 px-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/25"
+                  >
+                    <Calendar className="w-4 h-4" />
+                    <span>Book Service</span>
+                  </button>
+                </div>
               )}
             </div>
           </div>
         )}
-      </section>
+      </div>
 
-      {/* Booking Modal */}
-      {selectedService && (
-        <div
-          className="services-modal-overlay"
-          role="presentation"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setSelectedService(null);
-              setBookingSuccess(null);
-            }
-          }}
-        >
-          <div className="services-modal-content" role="dialog" aria-modal="true">
-            <button
-              type="button"
-              className="modal-close-btn"
-              onClick={() => {
-                setSelectedService(null);
-                setBookingSuccess(null);
-              }}
-            >
-              ×
-            </button>
-
-            {bookingSuccess ? (
-              <div className="booking-success-box">
-                <div className="success-icon">🎉</div>
-                <h2>Booking Confirmed!</h2>
-                <p>
-                  Your booking for <strong>{selectedService.name}</strong> has been received.
-                </p>
-                <div className="booking-ticket">
-                  <div className="ticket-row">
-                    <span>Booking Reference:</span>
-                    <strong>{bookingSuccess}</strong>
-                  </div>
-                  <div className="ticket-row">
-                    <span>Estimated Arrival:</span>
-                    <strong>{selectedService.estimatedArrival}</strong>
-                  </div>
-                  <div className="ticket-row">
-                    <span>Assigned Professional:</span>
-                    <strong>Nearest Kynisto Partner</strong>
-                  </div>
-                  <div className="ticket-row">
-                    <span>Service Location:</span>
-                    <strong>{userAddress}</strong>
-                  </div>
-                  <div className="ticket-row">
-                    <span>Estimated Fee:</span>
-                    <strong style={{ color: "#10B981" }}>₹{selectedService.startingPrice} (Pay After Job)</strong>
-                  </div>
-                </div>
-                
-                <a
-                  href={generateWhatsAppBookingUrl({
-                    storeOrServiceName: selectedService.storeName || selectedService.name,
-                    whatsappNumber: selectedService.storePhone || "919876543210",
-                    serviceOrProductName: selectedService.name,
-                    price: selectedService.startingPrice,
-                    customerAddress: userAddress,
-                    bookingDate: bookingDate,
-                    bookingSlot: bookingSlot,
-                    bookingId: bookingSuccess,
-                  })}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                    width: "100%",
-                    padding: "14px",
-                    background: "linear-gradient(135deg, #25D366 0%, #128C7E 100%)",
-                    color: "#FFFFFF",
-                    fontWeight: 800,
-                    fontSize: "14px",
-                    textDecoration: "none",
-                    borderRadius: "14px",
-                    marginBottom: "12px",
-                    boxShadow: "0 4px 20px rgba(37, 211, 102, 0.4)",
-                  }}
-                >
-                  💬 Send Invoice &amp; Details to WhatsApp ➔
-                </a>
-
-                <p className="ticket-note" style={{ marginBottom: "16px" }}>
-                  You can also click above to send this invoice directly to WhatsApp.
-                </p>
-                <button
-                  type="button"
-                  className="done-btn"
-                  onClick={() => {
-                    setSelectedService(null);
-                    setBookingSuccess(null);
-                  }}
-                >
-                  Done &amp; Close
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleConfirmBooking} className="booking-form">
-                <div className="modal-header-banner">
-                  <span className="modal-icon">{selectedService.icon}</span>
-                  <div>
-                    <span className="modal-kicker">{selectedService.category} Service</span>
-                    <h2 className="modal-service-title">{selectedService.name}</h2>
-                    <span className="modal-price">Starting from ₹{selectedService.startingPrice}</span>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="service-date">Select Preferred Date</label>
-                  <div className="option-pills">
-                    {["Today", "Tomorrow", "Pick Later"].map((d) => (
-                      <button
-                        key={d}
-                        type="button"
-                        className={`pill-option ${bookingDate === d ? "selected" : ""}`}
-                        onClick={() => setBookingDate(d)}
-                      >
-                        {d}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="service-slot">Select Preferred Time Slot</label>
-                  <div className="option-pills">
-                    {[
-                      "8:00 AM - 10:00 AM",
-                      "10:00 AM - 12:00 PM",
-                      "2:00 PM - 4:00 PM",
-                      "4:00 PM - 6:00 PM",
-                    ].map((slot) => (
-                      <button
-                        key={slot}
-                        type="button"
-                        className={`pill-option ${bookingSlot === slot ? "selected" : ""}`}
-                        onClick={() => setBookingSlot(slot)}
-                      >
-                        {slot}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="service-address">Service Address / Locality</label>
-                  <input
-                    id="service-address"
-                    type="text"
-                    value={userAddress}
-                    onChange={(e) => setUserAddress(e.target.value)}
-                    required
-                    placeholder="Enter complete address & landmark"
-                    className="modal-text-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="service-notes">Instructions for Professional (Optional)</label>
-                  <textarea
-                    id="service-notes"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="e.g. Bring extra long wire, call before arrival..."
-                    rows={2}
-                    className="modal-text-input"
-                  />
-                </div>
-
-                <div className="booking-summary-strip">
-                  <div>
-                    <small>Payment Method</small>
-                    <strong>Pay After Service (Cash / UPI)</strong>
-                  </div>
-                  <button type="submit" className="confirm-booking-btn" disabled={isSubmitting}>
-                    {isSubmitting ? "Dispatching Expert..." : `Confirm Booking · ₹${selectedService.startingPrice}`}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Footer */}
-      <footer className="services-footer">
-        <Link className="brand footerBrand" href="/">
-          <KynistoLogo />
-        </Link>
-        <p className="demoNote">
-          Kynisto Home Services · {locationLabel} · © 2026 Kynisto
-        </p>
-      </footer>
-    </main>
+      {/* Floating Bottom Navigation Dock */}
+      <MobileBottomNav />
+    </div>
   );
 }
-
-const servicesCustomCss = `
-.services-page-shell {
-  min-height: 100vh;
-  position: relative;
-  color: #FFFFFF !important;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif !important;
-}
-
-.services-toast-banner {
-  position: fixed;
-  top: 90px;
-  right: 20px;
-  z-index: 999;
-  background: rgba(16, 185, 129, 0.95);
-  backdrop-filter: blur(16px);
-  color: #FFFFFF;
-  padding: 12px 20px;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.services-hero {
-  position: relative;
-  text-align: center;
-  padding: 140px 20px 60px 20px;
-  max-width: 1100px;
-  margin: 0 auto;
-  z-index: 2;
-}
-
-.services-hero-kicker {
-  display: inline-block;
-  padding: 6px 16px;
-  border-radius: 9999px;
-  background: rgba(255, 87, 34, 0.15);
-  border: 1px solid rgba(255, 87, 34, 0.4);
-  color: #FF7A00 !important;
-  -webkit-text-fill-color: #FF7A00 !important;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  margin-bottom: 16px;
-}
-
-.services-page-shell.mode-light h1,
-.services-page-shell.mode-light h2,
-.services-page-shell.mode-light h3,
-.services-page-shell.mode-light p,
-.mode-light .services-hero-title,
-.mode-light .services-hero-subtitle,
-.mode-light .section-header h2,
-.mode-light .sub-note,
-h1.services-hero-title,
-p.services-hero-subtitle,
-.section-header h2 {
-  color: #FFFFFF !important;
-  -webkit-text-fill-color: #FFFFFF !important;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.95), 0 0 30px rgba(0, 0, 0, 0.9) !important;
-}
-
-.mode-light .services-hero-subtitle,
-.mode-light .sub-note,
-p.services-hero-subtitle,
-.sub-note {
-  color: #E2E8F0 !important;
-  -webkit-text-fill-color: #E2E8F0 !important;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9) !important;
-}
-
-.services-hero-title {
-  font-size: clamp(2.4rem, 6vw, 4.2rem);
-  font-weight: 900;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-  color: #FFFFFF !important;
-  -webkit-text-fill-color: #FFFFFF !important;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.95), 0 0 30px rgba(0, 0, 0, 0.9) !important;
-  margin-bottom: 16px;
-}
-
-.services-hero-subtitle {
-  font-size: 1.15rem;
-  color: #E2E8F0 !important;
-  -webkit-text-fill-color: #E2E8F0 !important;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9) !important;
-  max-width: 750px;
-  margin: 0 auto 28px auto;
-  line-height: 1.6;
-  font-weight: 500;
-}
-
-.services-proof-badges {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 32px;
-}
-
-.proof-chip {
-  padding: 8px 18px;
-  border-radius: 9999px;
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(16px);
-  color: #F8FAFC;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.services-search-wrapper {
-  position: relative;
-  max-width: 680px;
-  margin: 0 auto 28px auto;
-  display: flex;
-  align-items: center;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 24px;
-  padding: 8px 16px;
-  box-shadow: 0 12px 35px rgba(0,0,0,0.5);
-  backdrop-filter: blur(25px);
-}
-
-.services-search-wrapper .search-icon {
-  font-size: 18px;
-  margin-right: 12px;
-  opacity: 0.8;
-}
-
-.services-search-input {
-  width: 100%;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: #FFFFFF !important;
-  font-size: 1.05rem;
-  font-weight: 500;
-}
-
-.services-search-input::placeholder {
-  color: #94A3B8 !important;
-}
-
-.clear-search-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  color: #CBD5E1;
-  padding: 6px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.services-category-bar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.category-pill {
-  padding: 10px 20px;
-  border-radius: 9999px;
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #94A3B8;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.category-pill:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #FFFFFF;
-  border-color: rgba(255, 87, 34, 0.4);
-}
-
-.category-pill.active {
-  background: linear-gradient(135deg, #FF5722 0%, #E53935 100%);
-  color: #FFFFFF !important;
-  border-color: transparent;
-  box-shadow: 0 4px 16px rgba(255, 87, 34, 0.4);
-}
-
-.services-grid-container {
-  max-width: 1350px;
-  margin: 0 auto 80px auto;
-  padding: 0 20px;
-}
-
-.services-grid-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 16px;
-}
-
-.services-grid-header h2 {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: #FFFFFF !important;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.count-badge {
-  background: rgba(255, 87, 34, 0.25);
-  color: #FF8A00;
-  border: 1px solid rgba(255, 138, 0, 0.4);
-  padding: 2px 10px;
-  border-radius: 9999px;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.sub-note {
-  font-size: 13px;
-  color: #94A3B8;
-  font-weight: 600;
-}
-
-.services-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 22px;
-}
-
-.service-card {
-  position: relative;
-  background: rgba(12, 18, 30, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 24px;
-  padding: 24px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
-}
-
-.service-card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(255, 87, 34, 0.5);
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 87, 34, 0.2);
-}
-
-.popular-tag {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  background: linear-gradient(135deg, #FF5722 0%, #F59E0B 100%);
-  color: #FFFFFF;
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  padding: 4px 8px;
-  border-radius: 6px;
-}
-
-.service-card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.service-icon-box {
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  display: grid;
-  place-items: center;
-  font-size: 22px;
-}
-
-.arrival-badge {
-  font-size: 11px;
-  font-weight: 700;
-  color: #10B981;
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  padding: 4px 10px;
-  border-radius: 9999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.category-meta {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #FF8A00;
-  display: block;
-  margin-bottom: 4px;
-}
-
-.service-name {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #FFFFFF !important;
-  margin-bottom: 8px;
-  letter-spacing: -0.02em;
-}
-
-.service-desc {
-  font-size: 0.9rem;
-  color: #CBD5E1 !important;
-  line-height: 1.5;
-  margin-bottom: 20px;
-  min-height: 40px;
-}
-
-.service-card-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  gap: 8px;
-}
-
-.rating-box {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  padding: 4px 10px;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.rating-box .star {
-  font-size: 12.5px;
-  font-weight: 800;
-  color: #F59E0B;
-}
-
-.rating-box .reviews {
-  font-size: 11px;
-  color: #94A3B8;
-  font-weight: 600;
-}
-
-.price-box {
-  text-align: right;
-}
-
-.price-box small {
-  display: block;
-  font-size: 9.5px;
-  color: #94A3B8;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.price-box strong {
-  font-size: 1.15rem;
-  font-weight: 900;
-  color: #FFFFFF;
-}
-
-.book-now-btn {
-  width: 100%;
-  min-height: 44px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: #FFFFFF;
-  font-size: 13.5px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.prominent-book-btn {
-  background: linear-gradient(135deg, #FF5722 0%, #E53935 100%);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: #FFFFFF;
-  box-shadow: 0 4px 16px rgba(255, 87, 34, 0.35);
-  font-weight: 800;
-}
-
-.prominent-book-btn:hover {
-  background: linear-gradient(135deg, #FF7043 0%, #F44336 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(255, 87, 34, 0.5);
-}
-
-.prominent-book-btn:active {
-  transform: scale(0.98);
-}
-
-.services-empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  background: rgba(12, 18, 30, 0.6);
-  border: 1px dashed rgba(255, 255, 255, 0.2);
-  border-radius: 24px;
-}
-
-.services-empty-state .empty-icon {
-  font-size: 40px;
-  display: block;
-  margin-bottom: 12px;
-}
-
-.reset-search-btn {
-  margin-top: 16px;
-  padding: 10px 24px;
-  border-radius: 12px;
-  background: #FF5722;
-  color: white;
-  border: none;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-/* Modal Styling */
-.services-modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(12px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-}
-
-.services-modal-content {
-  position: relative;
-  width: 100%;
-  max-width: 540px;
-  background: #0F172A;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 28px;
-  padding: 32px;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
-}
-
-.modal-close-btn {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  color: #FFFFFF;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.modal-header-banner {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.modal-icon {
-  font-size: 36px;
-}
-
-.modal-kicker {
-  font-size: 10px;
-  color: #FF8A00;
-  font-weight: 800;
-  text-transform: uppercase;
-  display: block;
-}
-
-.modal-service-title {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: #FFFFFF;
-  margin: 2px 0;
-}
-
-.modal-price {
-  font-size: 13px;
-  color: #10B981;
-  font-weight: 700;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  font-size: 12px;
-  font-weight: 700;
-  color: #CBD5E1;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.option-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.pill-option {
-  padding: 8px 14px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #CBD5E1;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.pill-option.selected {
-  background: rgba(255, 87, 34, 0.25);
-  border-color: #FF5722;
-  color: #FF8A00;
-  font-weight: 700;
-}
-
-.modal-text-input {
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #FFFFFF;
-  outline: none;
-  font-size: 14px;
-}
-
-.booking-summary-strip {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  gap: 16px;
-}
-
-.booking-summary-strip small {
-  font-size: 10px;
-  color: #94A3B8;
-  display: block;
-}
-
-.booking-summary-strip strong {
-  font-size: 12px;
-  color: #10B981;
-}
-
-.confirm-booking-btn {
-  padding: 14px 24px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #FF5722 0%, #E53935 100%);
-  border: none;
-  color: #FFFFFF;
-  font-weight: 800;
-  font-size: 14px;
-  cursor: pointer;
-  box-shadow: 0 4px 20px rgba(255, 87, 34, 0.4);
-}
-
-.booking-success-box {
-  text-align: center;
-  padding: 20px 0;
-}
-
-.success-icon {
-  font-size: 50px;
-  margin-bottom: 12px;
-}
-
-.booking-ticket {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 18px;
-  padding: 16px;
-  margin: 20px 0;
-  text-align: left;
-}
-
-.ticket-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 6px 0;
-  font-size: 13px;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
-}
-
-.ticket-row:last-child {
-  border-bottom: none;
-}
-
-.ticket-row span {
-  color: #94A3B8;
-}
-
-.ticket-row strong {
-  color: #FFFFFF;
-}
-
-.ticket-note {
-  font-size: 12px;
-  color: #94A3B8;
-  margin-bottom: 20px;
-}
-
-.done-btn {
-  width: 100%;
-  padding: 14px;
-  border-radius: 16px;
-  background: #10B981;
-  border: none;
-  color: #FFFFFF;
-  font-weight: 800;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-.services-footer {
-  text-align: center;
-  padding: 40px 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-@media (max-width: 768px) {
-  .services-page-shell {
-    padding-bottom: 7rem;
-  }
-  .services-hero {
-    padding: 110px 16px 32px 16px;
-  }
-  .services-hero-title {
-    font-size: 2rem !important;
-  }
-  .services-category-bar {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    justify-content: flex-start;
-    padding: 6px 16px 14px 16px;
-    margin: 0 -16px;
-    gap: 8px;
-    scroll-snap-type: x mandatory;
-  }
-  .services-category-bar::-webkit-scrollbar {
-    display: none;
-  }
-  .category-pill {
-    flex-shrink: 0;
-    white-space: nowrap;
-    padding: 9px 16px;
-    font-size: 12.5px;
-    scroll-snap-align: start;
-  }
-  .services-grid-container {
-    padding: 0 16px;
-    margin-bottom: 40px;
-  }
-  .services-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-  .service-card {
-    padding: 18px 16px;
-    border-radius: 20px;
-  }
-  .service-name {
-    font-size: 1.15rem;
-  }
-  .service-desc {
-    font-size: 0.85rem;
-    min-height: auto;
-    margin-bottom: 14px;
-  }
-  .service-card-meta {
-    padding-top: 10px;
-    margin-bottom: 14px;
-  }
-  .book-now-btn {
-    min-height: 44px;
-    font-size: 12.5px;
-    padding: 10px 12px;
-  }
-  .services-modal-content {
-    padding: 20px 16px;
-    border-radius: 24px;
-    max-height: 88vh;
-  }
-  .booking-summary-strip {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-  .confirm-booking-btn {
-    width: 100%;
-    min-height: 48px;
-  }
-}
-`;

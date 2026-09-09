@@ -140,15 +140,15 @@ export function MobileBottomNav() {
                 }}
                 className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-full transition-all duration-150 group focus:outline-none ${
                   isActive
-                    ? "bg-gradient-to-tr from-orange-500/25 to-amber-500/15 border border-orange-500/40 text-orange-400 shadow-sm shadow-orange-500/10 scale-105"
-                    : "text-slate-400 hover:text-slate-200 active:scale-95"
+                    ? "bg-gradient-to-tr from-orange-500/30 to-amber-500/20 border border-orange-500/50 text-orange-400 shadow-sm shadow-orange-500/10 scale-105"
+                    : "text-slate-200 hover:text-white active:scale-95"
                 }`}
                 aria-label={item.ariaLabel}
               >
                 <div className="relative flex items-center justify-center">
                   <Icon
                     className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 ${
-                      isActive ? "text-orange-400 stroke-[2.4]" : "text-slate-400 group-hover:text-white stroke-[1.8]"
+                      isActive ? "text-orange-400 stroke-[2.5]" : "text-slate-200 group-hover:text-white stroke-[2]"
                     }`}
                   />
                   {item.id === "healthcare" && (
@@ -157,8 +157,9 @@ export function MobileBottomNav() {
                 </div>
 
                 <span
-                  className={`text-[9.5px] sm:text-[10px] tracking-tight mt-0.5 select-none transition-colors duration-200 leading-none ${
-                    isActive ? "text-white font-black" : "text-slate-400 font-medium"
+                  style={{ color: isActive ? "#FFFFFF" : "#F1F5F9" }}
+                  className={`mobileDockLabel text-[10px] sm:text-[10.5px] tracking-tight mt-0.5 select-none transition-colors duration-200 leading-none ${
+                    isActive ? "font-black text-white drop-shadow-xs" : "font-bold text-slate-100"
                   }`}
                 >
                   {item.label}

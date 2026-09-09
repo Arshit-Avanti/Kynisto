@@ -29,11 +29,12 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
     <div className="w-full relative max-w-full z-10">
       {/* 1. HERO SECTION (Responsive Viewport Centering with zero JS listener overhead) */}
       <section
-        className="hero"
+        className="hero kynistoHeroTopSection"
         id="top"
         style={{
           textAlign: "center",
           padding: "148px 16px 36px 16px",
+          paddingTop: "max(148px, calc(env(safe-area-inset-top, 0px) + 112px))",
           minHeight: "auto",
           display: "flex",
           flexDirection: "column",
@@ -63,10 +64,16 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
         >
           {/* Elegant 2-Line Hero Heading */}
           <h1 className="arise-on-scroll arise-delay-1 text-center mb-4 sm:mb-7 select-none px-2 max-w-full">
-            <span className="block text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-tight leading-tight drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] break-words sm:whitespace-nowrap">
-              Life is <span className="italic font-light">Smarter</span>
+            <span
+              className="block text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-tight leading-tight break-words sm:whitespace-nowrap"
+              style={{ color: "#FFFFFF", textShadow: "0 1px 3px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.35)" }}
+            >
+              Life is <span className="italic font-light" style={{ color: "#FFFFFF" }}>Smarter</span>
             </span>
-            <span className="block text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-tight leading-tight mt-0.5 sm:mt-1.5 drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] break-words sm:whitespace-nowrap">
+            <span
+              className="block text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-tight leading-tight mt-0.5 sm:mt-1.5 break-words sm:whitespace-nowrap"
+              style={{ color: "#FFFFFF", textShadow: "0 1px 3px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.35)" }}
+            >
               with Kynisto
             </span>
           </h1>

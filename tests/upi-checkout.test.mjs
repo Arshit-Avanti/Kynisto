@@ -16,7 +16,7 @@ import {
 } from "../lib/upi-payment.ts";
 
 test("1. Kynisto UPI Payment Configuration", () => {
-  assert.equal(paymentConfig.upiId, "YOUR_UPI_ID@upi");
+  assert.equal(paymentConfig.upiId, "9315678560@fam");
   assert.equal(paymentConfig.merchantName, "Kynisto");
   assert.equal(paymentConfig.amount, 499);
   assert.equal(paymentConfig.currency, "INR");
@@ -26,7 +26,7 @@ test("1. Kynisto UPI Payment Configuration", () => {
 test("2. Generic UPI Payment Deep Link Construction", () => {
   const link = createUPILink("generic");
   assert.ok(link.startsWith("upi://pay?"), `Expected upi://pay? prefix, got: ${link}`);
-  assert.ok(link.includes("pa=YOUR_UPI_ID%40upi"), "Missing encoded Payee VPA");
+  assert.ok(link.includes("pa=9315678560%40fam"), "Missing encoded Payee VPA");
   assert.ok(link.includes("pn=Kynisto"), "Missing Payee Name");
   assert.ok(link.includes("am=499.00"), "Missing formatted Amount");
   assert.ok(link.includes("cu=INR"), "Missing INR currency");
@@ -53,7 +53,7 @@ test("4. Android Package Intent Formats for Indian UPI Apps", () => {
   const phonePeIntent = createAndroidUPIIntent("phonepe");
   assert.ok(phonePeIntent.startsWith("intent://pay?"), "PhonePe intent must start with intent://pay?");
   assert.ok(phonePeIntent.includes("#Intent;scheme=upi;package=com.phonepe.app;end"), "PhonePe package intent mismatch");
-  assert.ok(phonePeIntent.includes("pa=YOUR_UPI_ID%40upi"), "PhonePe payee VPA missing");
+  assert.ok(phonePeIntent.includes("pa=9315678560%40fam"), "PhonePe payee VPA missing");
   assert.ok(phonePeIntent.includes("am=499.00"), "PhonePe formatted amount missing");
 
   // Google Pay Intent Verification (gpay and googlepay aliases)
@@ -89,7 +89,7 @@ test("5. Standard upi://pay Fallback Resolution", () => {
   for (const app of apps) {
     const fallbackLink = resolveUPIFallback(app);
     assert.ok(fallbackLink.startsWith("upi://pay?"), `Expected upi://pay? fallback for app "${app}"`);
-    assert.ok(fallbackLink.includes("pa=YOUR_UPI_ID%40upi"), "Fallback must contain payee VPA");
+    assert.ok(fallbackLink.includes("pa=9315678560%40fam"), "Fallback must contain payee VPA");
     assert.ok(fallbackLink.includes("am=499.00"), "Fallback must contain amount");
     assert.ok(fallbackLink.includes("cu=INR"), "Fallback must contain INR currency");
   }
@@ -236,7 +236,7 @@ test("8. Light-Mode Compatible Configurations", () => {
   assert.equal(lightModeThemeConfig.borderColor, "#e2e8f0", "Border should be slate-200");
 
   // Verify lightModePaymentConfig integrity
-  assert.equal(lightModePaymentConfig.upiId, "YOUR_UPI_ID@upi");
+  assert.equal(lightModePaymentConfig.upiId, "9315678560@fam");
   assert.equal(lightModePaymentConfig.merchantName, "Kynisto");
   assert.equal(lightModePaymentConfig.amount, 499);
   assert.equal(lightModePaymentConfig.currency, "INR");
