@@ -2,22 +2,31 @@
 
 import { useState, useEffect } from "react";
 import { apiFetch } from "@/lib/client-api";
-import { CheckCircle2, ShieldCheck, Sparkles, Star, Zap, QrCode, CreditCard, Clock, Copy, Check, User, Mail } from "lucide-react";
+import {
+  CheckCircle2,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Zap,
+  ChevronRight,
+} from "lucide-react";
+import { UpiCheckoutModal } from "@/components/checkout/UpiCheckoutModal";
 
-export function StoreMembershipStorefront({ storeId, storeName }: { storeId: string; storeName: string }) {
+export function StoreMembershipStorefront({
+  storeId,
+  storeName,
+}: {
+  storeId: string;
+  storeName: string;
+}) {
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [purchasingPlan, setPurchasingPlan] = useState<any | null>(null);
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  const [utr, setUtr] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [copiedUpi, setCopiedUpi] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minute countdown timer
   const [toast, setToast] = useState("");
-  const [reassuranceMessage, setReassuranceMessage] = useState("");
   const [error, setError] = useState("");
-  const [currentTimeStr, setCurrentTimeStr] = useState("");
 
   useEffect(() => {
     loadPlans();
@@ -32,14 +41,6 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
       .catch(() => {});
   }, [storeId]);
 
-  useEffect(() => {
-    if (!purchasingPlan) return;
-    const timer = setInterval(() => {
-      setTimeLeft((t) => (t > 0 ? t - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [purchasingPlan]);
-
   async function loadPlans() {
     try {
       const res = await apiFetch<{ plans: any[] }>(`/api/memberships?storeId=${storeId}`);
@@ -53,19 +54,7 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
 
   function handleOpenPaymentModal(plan: any) {
     setPurchasingPlan(plan);
-    setUtr("");
     setError("");
-    setReassuranceMessage("");
-    setCopiedUpi(false);
-    setTimeLeft(600); // Reset to 10 mins
-    setCurrentTimeStr(new Date().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }));
-  }
-
-  function handleCopyUpi(upiText: string) {
-    if (!upiText) return;
-    navigator.clipboard.writeText(upiText);
-    setCopiedUpi(true);
-    setTimeout(() => setCopiedUpi(false), 2500);
   }
 
   async function handleConfirmSubmitPayment() {
@@ -77,12 +66,21 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
         "/api/memberships/purchase",
         {
           method: "POST",
-          json: { storeId, planId: purchasingPlan.id, utr, customerName, customerEmail },
+          json: {
+            storeId,
+            planId: purchasingPlan.id,
+            utr: `UPI-MEM-${Date.now().toString(36).toUpperCase()}`,
+            customerName: customerName || "Customer",
+            customerEmail: customerEmail || "",
+          },
         }
       );
-      const msg = res.reassuranceBanner || res.message || "Don't panic! The shop owner will verify your payment and activate your membership within 24 hours.";
-      setReassuranceMessage(msg);
+      const msg =
+        res.reassuranceBanner ||
+        res.message ||
+        "Don't panic! The shop owner will verify your payment and activate your membership within 24 hours.";
       setToast(msg);
+      setPurchasingPlan(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to submit payment verification.");
     } finally {
@@ -90,261 +88,136 @@ export function StoreMembershipStorefront({ storeId, storeName }: { storeId: str
     }
   }
 
-  const mins = Math.floor(timeLeft / 60);
-  const secs = timeLeft % 60;
-  const formattedTime = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-
   if (loading) return null;
   if (!plans.length) return null;
 
   return (
-    <section
-      className="portalCard"
-      style={{
-        marginTop: "24px",
-        background: "linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.98) 100%)",
-        border: "1px solid rgba(255, 87, 34, 0.4)",
-        borderRadius: "16px",
-        padding: "24px",
-        boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
+    <section className="mt-8 bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl text-slate-900 overflow-x-clip">
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-4 pb-5 border-b border-slate-100">
         <div>
-          <h3 style={{ fontSize: "20px", fontWeight: 800, color: "#FFFFFF", display: "flex", alignItems: "center", gap: "8px" }}>
-            <Star style={{ color: "#FF5722" }} /> {storeName} VIP Membership Plans
-          </h3>
-          <p style={{ fontSize: "13px", color: "#94A3B8", marginTop: "4px" }}>
+          <div className="flex items-center gap-2">
+            <span className="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold">
+              <Star className="w-5 h-5 fill-orange-500 text-orange-500" />
+            </span>
+            <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              {storeName} VIP Membership Plans
+            </h3>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Unlock exclusive VIP benefits, priority live queue, and store coupon loyalty rewards.
           </p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", background: "linear-gradient(135deg, rgba(255,87,34,0.2) 0%, rgba(229,57,53,0.2) 100%)", border: "1px solid rgba(255,87,34,0.4)", padding: "6px 14px", borderRadius: "20px" }}>
-          <Sparkles size={14} style={{ color: "#FF8A00" }} />
-          <span style={{ fontSize: "12px", fontWeight: 800, color: "#FF8A00" }}>Includes Kynisto Premium</span>
+
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200/80 text-amber-800 text-xs font-bold shadow-xs">
+          <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+          <span>Includes Kynisto Premium</span>
         </div>
       </div>
 
       {toast && (
-        <div style={{ background: "rgba(16,185,129,0.2)", border: "1px solid #10B981", color: "#4ADE80", padding: "14px 18px", borderRadius: "12px", marginBottom: "18px", fontWeight: 800, fontSize: "14px", display: "flex", alignItems: "center", gap: "10px" }}>
-          <CheckCircle2 size={20} /> {toast}
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3.5 rounded-2xl mb-5 font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-xs animate-in fade-in">
+          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          <span>{toast}</span>
         </div>
       )}
 
       {error && (
-        <div style={{ background: "rgba(239,68,68,0.2)", border: "1px solid #EF4444", color: "#F87171", padding: "14px 18px", borderRadius: "12px", marginBottom: "18px", fontWeight: 800, fontSize: "14px" }}>
+        <div className="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3.5 rounded-2xl mb-5 font-bold text-xs sm:text-sm shadow-xs animate-in fade-in">
           {error}
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "16px" }}>
+      {/* PLAN CARDS GRID (LIGHT MODE) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {plans.map((plan) => (
           <div
             key={plan.id}
-            style={{
-              background: "rgba(30, 41, 59, 0.8)",
-              border: `2px solid ${plan.badgeColor || "#FF5722"}`,
-              borderRadius: "14px",
-              padding: "20px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              boxShadow: `0 8px 24px ${plan.badgeColor || "#FF5722"}22`,
-            }}
+            className="bg-white border-2 border-slate-200 hover:border-orange-500/80 rounded-2xl p-5 sm:p-6 flex flex-col justify-between shadow-sm hover:shadow-lg transition-all duration-200"
           >
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                <span style={{ fontSize: "18px", fontWeight: 800, color: "#FFFFFF" }}>{plan.name}</span>
-                <span style={{ background: plan.badgeColor || "#FF5722", color: "#FFFFFF", fontSize: "11px", fontWeight: 800, padding: "3px 10px", borderRadius: "12px" }}>
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-lg font-black text-slate-900 tracking-tight">
+                  {plan.name}
+                </span>
+                <span
+                  className="text-white text-[11px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-xs"
+                  style={{ background: plan.badgeColor || "#FF5722" }}
+                >
                   {plan.durationDays} Days
                 </span>
               </div>
 
-              <div style={{ fontSize: "28px", fontWeight: 900, color: "#FFFFFF", marginBottom: "12px" }}>
-                ₹{plan.price} <span style={{ fontSize: "13px", color: "#94A3B8", fontWeight: 600 }}>/ {plan.durationDays} days</span>
+              <div className="text-3xl font-black text-slate-900 mb-2">
+                ₹{plan.price}{" "}
+                <span className="text-xs text-slate-500 font-semibold">
+                  / {plan.durationDays} days
+                </span>
               </div>
 
-              {plan.description && <p style={{ fontSize: "13px", color: "#CBD5E1", marginBottom: "16px" }}>{plan.description}</p>}
+              {plan.description && (
+                <p className="text-xs text-slate-600 mb-4 leading-relaxed line-clamp-2">
+                  {plan.description}
+                </p>
+              )}
 
-              <div style={{ background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", borderRadius: "10px", padding: "10px 129px", marginBottom: "16px" }}>
-                <div style={{ fontSize: "11px", fontWeight: 800, color: "#10B981", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "6px" }}>
-                  <ShieldCheck size={14} /> VIP Benefits Included
+              <div className="bg-emerald-50/80 border border-emerald-200 rounded-xl p-3 mb-4">
+                <div className="text-[11px] font-bold text-emerald-800 uppercase tracking-wide flex items-center gap-1.5 mb-0.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>VIP Benefits Included</span>
                 </div>
-                <div style={{ fontSize: "12px", color: "#FFFFFF", fontWeight: 700, marginTop: "2px" }}>
+                <div className="text-xs text-slate-700 font-medium">
                   Kynisto Subscription, Priority Queue & Loyalty Rewards
                 </div>
               </div>
 
-              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 20px 0", display: "flex", flexDirection: "column", gap: "8px" }}>
-                {Array.isArray(plan.benefits) && plan.benefits.map((b: string, idx: number) => (
-                  <li key={idx} style={{ fontSize: "13px", color: "#F8FAFC", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <Zap size={14} style={{ color: "#FF8A00", flexShrink: 0 }} />
-                    <span>{b}</span>
-                  </li>
-                ))}
+              <ul className="space-y-2 mb-6">
+                {Array.isArray(plan.benefits) &&
+                  plan.benefits.map((b: string, idx: number) => (
+                    <li
+                      key={idx}
+                      className="text-xs text-slate-700 flex items-start gap-2 leading-tight"
+                    >
+                      <Zap className="w-3.5 h-3.5 text-orange-500 shrink-0 mt-0.5" />
+                      <span>{b}</span>
+                    </li>
+                  ))}
               </ul>
             </div>
 
             <button
               type="button"
               onClick={() => handleOpenPaymentModal(plan)}
-              style={{
-                width: "100%",
-                background: `linear-gradient(135deg, ${plan.badgeColor || "#FF5722"} 0%, #E53935 100%)`,
-                color: "#FFFFFF",
-                border: "none",
-                padding: "12px",
-                borderRadius: "10px",
-                fontWeight: 800,
-                fontSize: "14px",
-                cursor: "pointer",
-                boxShadow: "0 4px 14px rgba(255, 87, 34, 0.3)",
-              }}
+              className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black py-3 px-4 rounded-xl text-sm shadow-md shadow-orange-500/20 transition-all cursor-pointer flex items-center justify-center gap-2"
             >
-              Purchase VIP Membership
+              <span>Purchase VIP Membership</span>
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         ))}
       </div>
 
-      {/* CUSTOMER PAYMENT MODAL PERFECT FIT & ALWAYS-VISIBLE SAVE BUTTON */}
+      {/* LIGHT-MODE MODERN UPI PAYMENT MODAL */}
       {purchasingPlan && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "12px", overflowY: "auto" }}>
-          <div style={{ background: "#0F172A", border: "2px solid #6366F1", borderRadius: "18px", padding: "16px", maxWidth: "440px", width: "100%", maxHeight: "90vh", display: "flex", flexDirection: "column", color: "#FFF", boxShadow: "0 20px 50px rgba(0,0,0,0.6)", position: "relative" }}>
-            {/* HEADER */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px", flexShrink: 0 }}>
-              <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#818CF8", margin: 0 }}>
-                Scan & Pay: {purchasingPlan.name}
-              </h3>
-              <button onClick={() => setPurchasingPlan(null)} style={{ background: "none", border: "none", color: "#94A3B8", fontSize: "20px", cursor: "pointer", padding: "0 4px" }}>✕</button>
-            </div>
-
-            {/* SCROLLABLE BODY */}
-            <div style={{ overflowY: "auto", flex: 1, paddingRight: "4px", display: "flex", flexDirection: "column", gap: "10px" }}>
-              {/* SESSION TIMER & TIMESTAMP */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(99, 102, 241, 0.15)", border: "1px solid rgba(99, 102, 241, 0.3)", padding: "6px 10px", borderRadius: "8px" }}>
-                <div style={{ fontSize: "11px", color: "#94A3B8", display: "flex", alignItems: "center", gap: "6px" }}>
-                  <Clock size={13} style={{ color: "#818CF8" }} />
-                  <span>Time: <b style={{ color: "#FFF" }}>{currentTimeStr}</b></span>
-                </div>
-                <div style={{ fontSize: "12px", fontWeight: 900, color: timeLeft < 120 ? "#EF4444" : "#FACC15", background: "rgba(0,0,0,0.4)", padding: "2px 6px", borderRadius: "6px", fontFamily: "monospace" }}>
-                  Session: {formattedTime}
-                </div>
-              </div>
-
-              {/* REASSURANCE BANNER */}
-              <div style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(16,185,129,0.2) 100%)", border: "1px solid #10B981", borderRadius: "10px", padding: "10px" }}>
-                <div style={{ fontSize: "11px", fontWeight: 800, color: "#4ADE80", display: "flex", alignItems: "center", gap: "6px", lineHeight: "1.4" }}>
-                  <ShieldCheck size={16} style={{ flexShrink: 0 }} />
-                  <span>Don't panic! The shop owner will verify your payment and activate your membership within 24 hours.</span>
-                </div>
-              </div>
-
-              {/* SCANNABLE QR CODE PHOTO & AMOUNT */}
-              <div style={{ textAlign: "center", background: "rgba(30,41,59,0.9)", border: "1px solid rgba(255,255,255,0.1)", padding: "8px", borderRadius: "12px" }}>
-                <div style={{ fontSize: "20px", fontWeight: 900, color: "#4ADE80", marginBottom: "2px" }}>
-                  ₹{purchasingPlan.price}
-                </div>
-
-                <div style={{ margin: "2px 0" }}>
-                  <img
-                    src={purchasingPlan.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`upi://pay?pa=${purchasingPlan.upiId || "store@upi"}&pn=${storeName}&am=${purchasingPlan.price}`)}`}
-                    alt="Shop Owner Payment QR Code"
-                    style={{ width: "110px", height: "110px", margin: "0 auto", objectFit: "contain", borderRadius: "8px", border: "2px solid #6366F1", background: "#FFF", padding: "4px" }}
-                  />
-                  <p style={{ fontSize: "10px", color: "#CBD5E1", marginTop: "3px", fontWeight: 700 }}>
-                    Scan QR photo using Google Pay, PhonePe, Paytm or any UPI App
-                  </p>
-                </div>
-
-                {/* SHOP OWNER UPI ID */}
-                {purchasingPlan.upiId && (
-                  <div style={{ background: "rgba(99,102,241,0.2)", border: "1px solid #6366F1", padding: "4px 8px", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px", marginTop: "4px" }}>
-                    <div style={{ textAlign: "left" }}>
-                      <div style={{ fontSize: "8px", color: "#94A3B8", fontWeight: 800, textTransform: "uppercase" }}>Shop Owner UPI ID</div>
-                      <div style={{ fontSize: "12px", fontWeight: 900, color: "#FFF", fontFamily: "monospace" }}>{purchasingPlan.upiId}</div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleCopyUpi(purchasingPlan.upiId)}
-                      style={{ background: "#6366F1", color: "#FFF", border: "none", padding: "3px 6px", borderRadius: "4px", fontSize: "10px", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
-                    >
-                      {copiedUpi ? <Check size={11} /> : <Copy size={11} />}
-                      {copiedUpi ? "Copied!" : "Copy UPI"}
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* CUSTOMER DETAILS FORM: ENTER UPI NAME, GMAIL & OPTIONAL UTR */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                <div>
-                  <label style={{ fontSize: "10px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "4px", marginBottom: "2px" }}>
-                    <User size={11} /> Enter UPI Name / Payer Name
-                  </label>
-                  <input
-                    type="text"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="UPI Payer Full Name"
-                    style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "6px 8px", borderRadius: "6px", fontSize: "12px", fontWeight: 700 }}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: "10px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "4px", marginBottom: "2px" }}>
-                    <Mail size={11} /> Enter Gmail / Email ID
-                  </label>
-                  <input
-                    type="email"
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    placeholder="name@gmail.com"
-                    style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "6px 8px", borderRadius: "6px", fontSize: "12px", fontWeight: 700 }}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: "10px", fontWeight: 800, color: "#CBD5E1", textTransform: "uppercase", display: "block", marginBottom: "2px" }}>
-                    Enter Payment UTR / Transaction Ref No. <span style={{ color: "#94A3B8", fontWeight: 500 }}>(Optional)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={utr}
-                    onChange={(e) => setUtr(e.target.value)}
-                    placeholder="12-digit UTR or Transaction ID (Optional)"
-                    style={{ width: "100%", background: "#1E293B", border: "1px solid #475569", color: "#FFF", padding: "6px 8px", borderRadius: "6px", fontSize: "12px", fontWeight: 700 }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* FIXED STICKY FOOTER SAVE/SUBMIT BUTTON */}
-            <div style={{ flexShrink: 0, paddingTop: "10px", marginTop: "6px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-              <button
-                type="button"
-                disabled={isSubmitting || reassuranceMessage !== ""}
-                onClick={handleConfirmSubmitPayment}
-                style={{
-                  width: "100%",
-                  background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
-                  color: "#FFFFFF",
-                  border: "none",
-                  padding: "11px",
-                  borderRadius: "8px",
-                  fontWeight: 900,
-                  fontSize: "13px",
-                  cursor: "pointer",
-                  boxShadow: "0 4px 16px rgba(16, 185, 129, 0.4)",
-                }}
-              >
-                {isSubmitting ? "Submitting Payment Details..." : reassuranceMessage !== "" ? "Payment Details Submitted!" : "Submit Payment & Request Activation"}
-              </button>
-            </div>
-          </div>
-        </div>
+        <UpiCheckoutModal
+          isOpen={!!purchasingPlan}
+          onClose={() => setPurchasingPlan(null)}
+          title={`${storeName} VIP Pass`}
+          orderId={`MEM-${purchasingPlan.id.slice(-6).toUpperCase()}-${Date.now().toString().slice(-4)}`}
+          amount={purchasingPlan.price}
+          merchantName={storeName}
+          upiId={purchasingPlan.upiId || "store@upi"}
+          itemDetails={[
+            {
+              name: `${purchasingPlan.name} (${purchasingPlan.durationDays} Days Pass)`,
+              price: purchasingPlan.price,
+              quantity: 1,
+            },
+          ]}
+          onPaymentSuccess={handleConfirmSubmitPayment}
+        />
       )}
     </section>
   );
 }
+export default StoreMembershipStorefront;

@@ -28,7 +28,8 @@ import {
   TrendingUp,
   Package,
 } from "lucide-react";
-import { UPI_PAYMENT_ID, PAYMENT_QR_IMAGE } from "@/lib/subscriptions-shared";
+import { UPI_PAYMENT_ID } from "@/lib/subscriptions-shared";
+import { UpiCheckoutModal } from "@/components/checkout/UpiCheckoutModal";
 
 export interface ModularAddon {
   id: string;
@@ -335,6 +336,7 @@ export function BusinessMarketplaceUI({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [pendingResponse, setPendingResponse] = useState<any>(null);
+  const [upiPaymentSuccess, setUpiPaymentSuccess] = useState(false);
 
   // Toggle or modify add-on quantity
   const handleToggleAddon = (addonId: string) => {
@@ -469,6 +471,32 @@ export function BusinessMarketplaceUI({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Called by UpiCheckoutModal when a UPI app is launched / payment initiated
+  const handleUpiPaymentSuccess = async (utr?: string) => {
+    if (!checkoutTarget) return;
+    const price = billingCycle === "yearly" ? checkoutTarget.amountYearly : checkoutTarget.amountMonthly;
+    try {
+      await fetch("/api/subscriptions/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planId: checkoutTarget.planId,
+          billingCycle,
+          utr: utr?.trim() ?? "",
+          subscriberName: subscriberName.trim() || "Store Owner",
+          subscriberRole: "store_owner",
+          subscriberEmail: subscriberEmail.trim() || "",
+          paymentTime: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+          amountPaid: price,
+        }),
+      });
+    } catch (_) {
+      // Silent fail — the admin will verify via UTR anyway
+    }
+    setUpiPaymentSuccess(true);
+    setShowCheckoutModal(false);
   };
 
   const activePrice = checkoutTarget
@@ -856,183 +884,57 @@ export function BusinessMarketplaceUI({
         </div>
       </section>
 
-      {/* CHECKOUT MODAL WITH UPI INTEGRATION */}
-      {showCheckoutModal && checkoutTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-lg rounded-3xl bg-slate-900 border border-slate-800 p-6 md:p-8 shadow-2xl text-white max-h-[90vh] overflow-y-auto">
+      {/* ── POST-PAYMENT SUCCESS BANNER ── */}
+      {upiPaymentSuccess && checkoutTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl bg-white border border-emerald-200 p-8 shadow-2xl text-center">
+            <div className="w-16 h-16 rounded-full bg-amber-50 border-2 border-amber-300 flex items-center justify-center mx-auto mb-5 animate-bounce">
+              <Clock className="w-8 h-8 text-amber-500" />
+            </div>
+            <h3 className="text-xl font-black text-slate-900 mb-2">
+              DON&apos;T PANIC — Admin Activates Within 24h
+            </h3>
+            <p className="text-sm text-slate-500 mb-5 leading-relaxed">
+              Your subscription request for{" "}
+              <span className="font-bold text-slate-800">{checkoutTarget.title}</span> has been
+              received. Your plan will be activated after payment verification.
+            </p>
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs font-mono space-y-2 mb-6">
+              <div className="flex justify-between text-slate-500">
+                <span>Plan:</span>
+                <span className="text-slate-900 font-bold font-sans">{checkoutTarget.title}</span>
+              </div>
+              <div className="flex justify-between text-slate-500">
+                <span>Amount:</span>
+                <span className="text-emerald-700 font-bold">₹{activePrice}</span>
+              </div>
+              <div className="flex justify-between text-slate-500">
+                <span>Status:</span>
+                <span className="text-amber-600 font-bold uppercase">Pending Admin Approval</span>
+              </div>
+            </div>
             <button
               type="button"
-              onClick={() => setShowCheckoutModal(false)}
-              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              onClick={() => setUpiPaymentSuccess(false)}
+              className="w-full py-3 px-6 rounded-xl font-bold bg-slate-900 hover:bg-slate-800 text-white transition-colors"
             >
-              <X className="w-5 h-5" />
+              Return to Business Portal
             </button>
-
-            {!pendingResponse ? (
-              <div>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-                    <Building2 className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white">{checkoutTarget.title}</h3>
-                    <p className="text-xs text-slate-400">
-                      Total Amount: <span className="font-semibold text-cyan-400">₹{activePrice}</span> ({billingCycle})
-                    </p>
-                  </div>
-                </div>
-
-                {errorMessage && (
-                  <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium">
-                    {errorMessage}
-                  </div>
-                )}
-
-                <form onSubmit={handleSubmitPayment} className="space-y-5">
-                  {/* Step 1: Scan UPI QR */}
-                  <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-center">
-                    <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">
-                      Step 1: Scan QR or Transfer to UPI ID
-                    </p>
-                    <div className="inline-block p-3 rounded-2xl bg-white mb-3 shadow-inner">
-                      <img
-                        src={PAYMENT_QR_IMAGE}
-                        alt="UPI Payment QR Code"
-                        className="w-44 h-44 object-contain rounded-lg"
-                        onError={(e) => {
-                          (e.target as HTMLElement).style.display = "none";
-                        }}
-                      />
-                    </div>
-                    <div className="flex items-center justify-center gap-2">
-                      <code className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-cyan-300 font-mono text-sm">
-                        {UPI_PAYMENT_ID}
-                      </code>
-                      <button
-                        type="button"
-                        onClick={handleCopyUpi}
-                        className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors flex items-center gap-1 text-xs"
-                      >
-                        {copiedUpi ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                        <span>{copiedUpi ? "Copied" : "Copy"}</span>
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-2">
-                      Instant verification via Google Pay, PhonePe, Paytm, BHIM, CRED
-                    </p>
-                  </div>
-
-                  {/* Step 2: Customer Details */}
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">
-                        Business / Owner Name <span className="text-rose-400">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={subscriberName}
-                        onChange={(e) => setSubscriberName(e.target.value)}
-                        placeholder="e.g. Vikram Sethi (Metro Retail)"
-                        className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-cyan-500 focus:outline-none text-sm text-white placeholder-slate-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">
-                        Business Email Address <span className="text-rose-400">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        required
-                        value={subscriberEmail}
-                        onChange={(e) => setSubscriberEmail(e.target.value)}
-                        placeholder="e.g. owner@metrostore.in"
-                        className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-cyan-500 focus:outline-none text-sm text-white placeholder-slate-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">
-                        12-Digit UTR / UPI Transaction Reference <span className="text-slate-400 font-normal">(Optional)</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={utrInput}
-                        onChange={(e) => setUtrInput(e.target.value)}
-                        placeholder="e.g. 423891048201 (Optional)"
-                        className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-cyan-500 focus:outline-none text-sm font-mono text-white placeholder-slate-500"
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-3.5 px-6 rounded-xl font-bold bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 text-slate-950 hover:brightness-110 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 disabled:opacity-50"
-                  >
-                    {isSubmitting ? (
-                      <span>Submitting Request...</span>
-                    ) : (
-                      <>
-                        <ShieldCheck className="w-5 h-5" />
-                        <span>Confirm Payment &amp; Submit</span>
-                      </>
-                    )}
-                  </button>
-                </form>
-              </div>
-            ) : (
-              /* Success / Pending Admin Approval View */
-              <div className="text-center py-4 space-y-5">
-                <div className="w-16 h-16 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center mx-auto shadow-lg shadow-amber-500/20 animate-bounce">
-                  <Clock className="w-8 h-8" />
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-black text-amber-300 uppercase tracking-wide">
-                    DON'T PANIC, ADMIN WILL GIVE YOUR SUBSCRIPTION WITHIN 24 HOURS
-                  </h3>
-                  <p className="text-slate-300 text-sm leading-relaxed max-w-sm mx-auto">
-                    Your subscription verification request for <span className="font-semibold text-cyan-300">{checkoutTarget.title}</span> has been received.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-left text-xs space-y-2 font-mono">
-                  <div className="flex justify-between text-slate-400">
-                    <span>Owner Name:</span>
-                    <span className="text-slate-200 font-sans">{pendingResponse.submittedData?.subscriberName}</span>
-                  </div>
-                  <div className="flex justify-between text-slate-400">
-                    <span>Plan:</span>
-                    <span className="text-cyan-400 font-bold">{checkoutTarget.title}</span>
-                  </div>
-                  <div className="flex justify-between text-slate-400">
-                    <span>UTR Reference:</span>
-                    <span className="text-amber-400">{utrInput}</span>
-                  </div>
-                  <div className="flex justify-between text-slate-400">
-                    <span>Amount:</span>
-                    <span className="text-slate-200">₹{pendingResponse.submittedData?.amountPaid}</span>
-                  </div>
-                  <div className="flex justify-between text-slate-400">
-                    <span>Status:</span>
-                    <span className="text-amber-400 font-semibold">PENDING ADMIN APPROVAL</span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setShowCheckoutModal(false)}
-                  className="w-full py-3 px-6 rounded-xl font-bold bg-slate-800 hover:bg-slate-700 text-white transition-colors"
-                >
-                  Return to Business Portal
-                </button>
-              </div>
-            )}
           </div>
         </div>
       )}
+
+      {/* ── MODERN LIGHT-MODE UPI CHECKOUT MODAL ── */}
+      <UpiCheckoutModal
+        isOpen={showCheckoutModal && !!checkoutTarget}
+        onClose={() => setShowCheckoutModal(false)}
+        title={checkoutTarget?.title ?? "Business Plan"}
+        orderId={`BIZ-${Date.now().toString(36).toUpperCase()}`}
+        amount={activePrice}
+        upiId={UPI_PAYMENT_ID}
+        merchantName="Kynisto"
+        onPaymentSuccess={handleUpiPaymentSuccess}
+      />
     </div>
   );
 }

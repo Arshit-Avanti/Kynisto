@@ -7,6 +7,7 @@ import { apiFetch } from "@/lib/client-api";
 import type { SessionUser } from "@/lib/auth";
 import { ChatCenter } from "@/components/dashboard/ChatCenter";
 import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscriptionDashboard";
+import { StoreMembershipsBrowser } from "@/components/store/StoreMembershipsBrowser";
 import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
 import KynistoWalletView from "@/components/wallet/KynistoWalletView";
 import { RoleSwitcherButton } from "@/components/auth/RoleSwitcherButton";
@@ -176,7 +177,7 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
   const hasExistingData = items.length > 0 || favorites.length > 0 || reviews.length > 0 || Boolean(data.user);
   if (loading && !hasExistingData) return <div className="portalSkeleton"><span /><span /><span /><span /></div>;
   if (tab === "chat") return <ChatCenter user={user} />;
-  if (tab === "subscription") return <UserSubscriptionDashboard />;
+  if (tab === "subscription") return <CustomerSubscriptionTab user={user} />;
   const titles: Record<string, string> = { overview: "My Kynisto", subscription: "Premium & Plans", profile: "Profile", addresses: "Saved addresses", favorites: "Favourite shops", wishlist: "Product wishlist", cart: "Shopping cart", orders: "Orders & tracking", reviews: "My reviews", notifications: "Notifications", settings: "Settings", support: "Support & complaints" };
 
   return <>
@@ -277,6 +278,45 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
     
     {toast && <div className="portalToast" role="status" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}><CheckCircle2 size={18} /> {toast}</div>}
   </>;
+}
+
+function CustomerSubscriptionTab({ user }: { user: SessionUser }) {
+  const [subTab, setSubTab] = useState<"kynisto" | "stores">("kynisto");
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-center sm:justify-start gap-2 p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-fit shadow-xs">
+        <button
+          type="button"
+          onClick={() => setSubTab("kynisto")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            subTab === "kynisto"
+              ? "bg-amber-500 text-slate-950 font-black shadow-sm"
+              : "text-slate-600 dark:text-slate-300 hover:text-slate-900"
+          }`}
+        >
+          👑 Kynisto VIP Plan
+        </button>
+        <button
+          type="button"
+          onClick={() => setSubTab("stores")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            subTab === "stores"
+              ? "bg-emerald-600 text-white font-black shadow-sm"
+              : "text-slate-600 dark:text-slate-300 hover:text-slate-900"
+          }`}
+        >
+          🏪 Local Store VIP Passes
+        </button>
+      </div>
+
+      {subTab === "kynisto" ? (
+        <UserSubscriptionDashboard />
+      ) : (
+        <StoreMembershipsBrowser userName={user.name} userEmail={user.email} />
+      )}
+    </div>
+  );
 }
 
 function CustomerOverview({ user, favorites, reviews, cart }: { user: SessionUser; favorites: Item[]; reviews: Item[]; cart: Item[] }) {

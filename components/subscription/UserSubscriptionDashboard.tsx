@@ -2,8 +2,47 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { PlanConfig, getPlanConfig } from "@/lib/subscriptions-shared";
+import {
+  PlanConfig,
+  getPlanConfig,
+  UPI_PAYMENT_ID,
+  CUSTOMER_PLANS,
+  SHOP_OWNER_PLANS,
+} from "@/lib/subscriptions-shared";
 import { MagneticButton } from "@/components/ui/MagneticButton";
+import { UpiCheckoutModal } from "@/components/checkout/UpiCheckoutModal";
+import {
+  ShieldCheck,
+  Zap,
+  Sparkles,
+  Clock,
+  QrCode,
+  Smartphone,
+  ChevronRight,
+  Copy,
+  Check,
+  User,
+  Mail,
+  X,
+  Receipt,
+  Building2,
+  CreditCard,
+  CheckCircle2,
+  RefreshCw,
+  Crown,
+} from "lucide-react";
+import {
+  openUPIPayment,
+  createUPILink,
+  UPIPaymentConfig,
+} from "@/lib/upi-payment";
+import {
+  FamPayLogo,
+  PhonePeLogo,
+  PaytmLogo,
+  GooglePayLogo,
+  UpiGenericLogo,
+} from "@/components/checkout/UpiCheckoutModal";
 
 interface SubscriptionData {
   id: string;
@@ -45,6 +84,23 @@ export function UserSubscriptionDashboard() {
   const [cancelling, setCancelling] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState<Transaction | null>(null);
 
+  // Upgrade & UPI Modal state
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [targetPlanId, setTargetPlanId] = useState<string>("premium");
+  const [targetCycle, setTargetCycle] = useState<"monthly" | "yearly">("monthly");
+  const [subscriberName, setSubscriberName] = useState("");
+  const [subscriberEmail, setSubscriberEmail] = useState("");
+  const [utrInput, setUtrInput] = useState("");
+  const [copiedUpi, setCopiedUpi] = useState(false);
+  const [activePaymentTab, setActivePaymentTab] = useState<"apps" | "qr">("apps");
+  const [appLaunchFeedback, setAppLaunchFeedback] = useState("");
+  const [selectedApp, setSelectedApp] = useState<string | null>(null);
+  const [isSubmittingUpi, setIsSubmittingUpi] = useState(false);
+  const [upiSubmitSuccessMsg, setUpiSubmitSuccessMsg] = useState("");
+  const [upiError, setUpiError] = useState("");
+  const [modalTimeLeft, setModalTimeLeft] = useState(600);
+  const [modalIstTime, setModalIstTime] = useState("");
+
   // Live countdown state
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
@@ -54,6 +110,14 @@ export function UserSubscriptionDashboard() {
       if (!res.ok) throw new Error("Failed to load subscription status.");
       const data = await res.json();
       setSubData(data);
+
+      // Pre-set default target plan based on role
+      const role = data?.subscription?.userRole || "customer";
+      if (role === "customer") {
+        setTargetPlanId("premium");
+      } else {
+        setTargetPlanId("starter");
+      }
     } catch (err: any) {
       setError(err.message || "Error loading subscription.");
     } finally {
@@ -63,6 +127,16 @@ export function UserSubscriptionDashboard() {
 
   useEffect(() => {
     fetchSubscription();
+    // Prefill user details from auth session
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.user) {
+          if (data.user.name) setSubscriberName(data.user.name);
+          if (data.user.email) setSubscriberEmail(data.user.email);
+        }
+      })
+      .catch(() => {});
   }, [fetchSubscription]);
 
   // Live countdown timer calculation
@@ -90,6 +164,15 @@ export function UserSubscriptionDashboard() {
     return () => clearInterval(interval);
   }, [subData]);
 
+  // Modal countdown timer
+  useEffect(() => {
+    if (!showUpgradeModal) return;
+    const timer = setInterval(() => {
+      setModalTimeLeft((t) => (t > 0 ? t - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [showUpgradeModal]);
+
   const handleToggleAutoRenew = async () => {
     setTogglingAutoRenew(true);
     try {
@@ -105,7 +188,12 @@ export function UserSubscriptionDashboard() {
   };
 
   const handleCancelSub = async () => {
-    if (!confirm("Are you sure you want to cancel your auto-renewing subscription? You will retain access until the current period expires.")) return;
+    if (
+      !confirm(
+        "Are you sure you want to cancel your auto-renewing subscription? You will retain access until the current period expires."
+      )
+    )
+      return;
     setCancelling(true);
     try {
       const res = await fetch("/api/subscriptions/cancel", { method: "POST" });
@@ -119,9 +207,129 @@ export function UserSubscriptionDashboard() {
     }
   };
 
+  function handleOpenUpgradeModal() {
+    setUtrInput("");
+    setUpiError("");
+    setUpiSubmitSuccessMsg("");
+    setCopiedUpi(false);
+    setSelectedApp(null);
+    setAppLaunchFeedback("");
+    setActivePaymentTab("apps");
+    setModalTimeLeft(600);
+
+    const istDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+    setModalIstTime(
+      istDate.toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })
+    );
+
+    setShowUpgradeModal(true);
+  }
+
+  function handleCopyUpiId(upiText: string = UPI_PAYMENT_ID) {
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(upiText);
+    }
+    setCopiedUpi(true);
+    setTimeout(() => setCopiedUpi(false), 2500);
+  }
+
+  function getSelectedUpgradePlanPrice(): number {
+    const p = getPlanConfig(targetPlanId);
+    if (!p) return 49;
+    return targetCycle === "yearly" ? p.priceYearly : p.priceMonthly;
+  }
+
+  function handleOpenAppPayment(appKey: string) {
+    setSelectedApp(appKey);
+    handleCopyUpiId(UPI_PAYMENT_ID);
+
+    const planObj = getPlanConfig(targetPlanId);
+    const amount = getSelectedUpgradePlanPrice();
+    const displayName =
+      appKey === "fampay"
+        ? "FamPay"
+        : appKey === "phonepe"
+        ? "PhonePe"
+        : appKey === "paytm"
+        ? "Paytm"
+        : appKey === "gpay"
+        ? "Google Pay"
+        : "UPI App";
+
+    setAppLaunchFeedback(`Opening ${displayName}... (UPI ID copied to clipboard)`);
+
+    const config: UPIPaymentConfig = {
+      upiId: UPI_PAYMENT_ID,
+      merchantName: "Kynisto",
+      amount,
+      currency: "INR",
+      orderId: `SUB-${Date.now().toString(36).toUpperCase()}`,
+      note: `Kynisto ${planObj.name} Subscription`,
+    };
+
+    openUPIPayment(appKey, config, () => {
+      setAppLaunchFeedback(`App did not open directly. Switched to standard UPI.`);
+    });
+  }
+
+  async function handleConfirmSubmitUpiPayment() {
+    if (!subscriberName.trim() || !subscriberEmail.trim()) {
+      setUpiError("User Name and Email Address are required fields.");
+      return;
+    }
+
+    setIsSubmittingUpi(true);
+    setUpiError("");
+
+    try {
+      const planObj = getPlanConfig(targetPlanId);
+      const amount = getSelectedUpgradePlanPrice();
+      const role = subData?.subscription?.userRole || "customer";
+
+      const res = await fetch("/api/subscriptions/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planId: targetPlanId,
+          billingCycle: targetCycle,
+          utr: utrInput.trim(),
+          subscriberName: subscriberName.trim(),
+          subscriberRole: role,
+          subscriberEmail: subscriberEmail.trim(),
+          paymentTime: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+          amountPaid: amount,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to submit subscription verification.");
+      }
+
+      setUpiSubmitSuccessMsg(
+        data.message || "DON'T PANIC, ADMIN WILL GIVE YOUR SUBSCRIPTION WITHIN 24 HOURS"
+      );
+      // Refresh subscription after small delay
+      setTimeout(() => {
+        fetchSubscription();
+      }, 1500);
+    } catch (e: any) {
+      setUpiError(e.message || "Failed to submit payment verification.");
+    } finally {
+      setIsSubmittingUpi(false);
+    }
+  }
+
   if (loading) {
     return (
-      <div style={{ padding: "40px 20px", textAlign: "center", color: "var(--muted, #94A3B8)" }}>
+      <div className="py-16 text-center text-slate-500 font-medium">
         Loading your subscription status...
       </div>
     );
@@ -129,73 +337,57 @@ export function UserSubscriptionDashboard() {
 
   if (error || !subData) {
     return (
-      <div style={{ padding: "40px 20px", textAlign: "center", color: "#EF4444" }}>
+      <div className="py-16 text-center text-rose-600 font-bold">
         ⚠️ {error || "Unable to load subscription information."}
       </div>
     );
   }
 
   const { subscription: sub, plan, transactions } = subData;
+  const isOwner = sub.userRole === "store_owner";
+  const planOptions = isOwner
+    ? [SHOP_OWNER_PLANS.starter, SHOP_OWNER_PLANS.pro]
+    : [CUSTOMER_PLANS.premium];
+
+  const modalMins = Math.floor(modalTimeLeft / 60);
+  const modalSecs = modalTimeLeft % 60;
+  const formattedModalTime = `${String(modalMins).padStart(2, "0")}:${String(modalSecs).padStart(2, "0")}`;
 
   return (
-    <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "20px 0" }}>
-      {/* Active Plan Card */}
-      <div
-        className="argusCard argusHoverGlow"
-        style={{
-          borderRadius: "24px",
-          padding: "32px",
-          background: "linear-gradient(135deg, rgba(34,197,94,0.1) 0%, rgba(10,10,10,0.95) 100%)",
-          border: "2px solid #22C55E",
-          marginBottom: "32px",
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
+    <div className="max-w-5xl mx-auto py-6 text-slate-900 overflow-x-clip">
+      {/* =========================================================================
+       * 1. ACTIVE PLAN CARD (MODERN LIGHT MODE)
+       * ========================================================================= */}
+      <div className="bg-white border-2 border-emerald-500/90 rounded-3xl p-6 sm:p-8 shadow-xl mb-8 relative overflow-x-clip">
+        <div className="flex justify-between items-start flex-wrap gap-4">
           <div>
-            <span style={{ fontSize: "12px", fontWeight: 800, color: "#22C55E", letterSpacing: "1.5px" }}>
-              CURRENT ACTIVE PLAN
+            <span className="text-[11px] font-black text-emerald-600 tracking-wider uppercase bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+              Current Active Plan
             </span>
-            <h2 style={{ fontSize: "36px", fontWeight: 900, margin: "6px 0" }}>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2 mb-1">
               Kynisto {plan.name}
             </h2>
-            <p style={{ color: "var(--muted, #94A3B8)", fontSize: "14px", margin: 0 }}>
+            <p className="text-xs sm:text-sm text-slate-500 max-w-md">
               {plan.description}
             </p>
           </div>
 
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: "28px", fontWeight: 900 }}>
+          <div className="text-right">
+            <div className="text-2xl sm:text-3xl font-black text-slate-900">
               ₹{sub.billingCycle === "yearly" ? plan.priceYearly : plan.priceMonthly}
-              <span style={{ fontSize: "14px", color: "var(--muted, #94A3B8)", fontWeight: 500 }}>
+              <span className="text-xs sm:text-sm text-slate-500 font-semibold">
                 /{sub.billingCycle === "yearly" ? "year" : "month"}
               </span>
             </div>
+
             <span
-              style={{
-                display: "inline-block",
-                marginTop: "6px",
-                padding: "4px 12px",
-                borderRadius: "12px",
-                fontSize: "12px",
-                fontWeight: 800,
-                background: (sub as any).isUnrestrictedByAdmin || (plan as any).isUnrestrictedByAdmin
-                  ? "rgba(245,158,11,0.2)"
+              className={`inline-block mt-1.5 px-3 py-1 rounded-full text-xs font-black uppercase ${
+                (sub as any).isUnrestrictedByAdmin || (plan as any).isUnrestrictedByAdmin
+                  ? "bg-amber-50 text-amber-800 border border-amber-200"
                   : sub.status === "active"
-                    ? "rgba(34,197,94,0.2)"
-                    : "rgba(239,68,68,0.2)",
-                color: (sub as any).isUnrestrictedByAdmin || (plan as any).isUnrestrictedByAdmin
-                  ? "#F59E0B"
-                  : sub.status === "active"
-                    ? "#22C55E"
-                    : "#EF4444",
-                border: `1px solid ${
-                  (sub as any).isUnrestrictedByAdmin || (plan as any).isUnrestrictedByAdmin
-                    ? "#F59E0B"
-                    : sub.status === "active"
-                      ? "#22C55E"
-                      : "#EF4444"
-                }`,
-              }}
+                  ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                  : "bg-rose-50 text-rose-800 border border-rose-200"
+              }`}
             >
               {(sub as any).isUnrestrictedByAdmin || (plan as any).isUnrestrictedByAdmin
                 ? "● ALL FEATURES UNLOCKED (FREE)"
@@ -206,91 +398,88 @@ export function UserSubscriptionDashboard() {
 
         {/* Live Expiration Countdown */}
         {sub.expiresAt && sub.planId !== "free" && sub.planId !== "starter" && (
-          <div
-            style={{
-              marginTop: "24px",
-              padding: "20px",
-              borderRadius: "16px",
-              background: "rgba(0,0,0,0.4)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: "16px",
-            }}
-          >
+          <div className="mt-6 p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between flex-wrap gap-4">
             <div>
-              <strong style={{ fontSize: "14px", color: "var(--primary-text, #FFF)" }}>
+              <strong className="text-xs sm:text-sm font-bold text-slate-900 block">
                 Subscription Expiry Countdown
               </strong>
-              <div style={{ fontSize: "12px", color: "var(--muted, #94A3B8)", marginTop: "2px" }}>
-                Valid until {new Date(sub.expiresAt * 1000).toLocaleDateString()}
-              </div>
+              <span className="text-xs text-slate-500">
+                Valid until {new Date(sub.expiresAt * 1000).toLocaleDateString("en-IN")}
+              </span>
             </div>
 
-            <div style={{ display: "flex", gap: "12px", textAlign: "center" }}>
+            <div className="flex gap-2.5 text-center">
               {[
                 { label: "DAYS", val: countdown.days },
                 { label: "HOURS", val: countdown.hours },
                 { label: "MINS", val: countdown.minutes },
                 { label: "SECS", val: countdown.seconds },
               ].map((item, i) => (
-                <div key={i} style={{ background: "rgba(255,255,255,0.06)", padding: "8px 12px", borderRadius: "10px", minWidth: "60px" }}>
-                  <div style={{ fontSize: "20px", fontWeight: 900, color: "#22C55E" }}>{item.val}</div>
-                  <div style={{ fontSize: "9px", color: "var(--muted, #94A3B8)", fontWeight: 700 }}>{item.label}</div>
+                <div
+                  key={i}
+                  className="bg-white border border-slate-200 px-3 py-2 rounded-xl min-w-[55px] shadow-2xs"
+                >
+                  <div className="text-lg sm:text-xl font-black text-emerald-600">
+                    {item.val}
+                  </div>
+                  <div className="text-[9px] font-bold text-slate-400">
+                    {item.label}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Auto Renew & Actions */}
-        <div style={{ marginTop: "28px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <span style={{ fontSize: "14px", fontWeight: 700 }}>Auto-Renew Subscription</span>
+        {/* Auto Renew & Action Buttons */}
+        <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <span className="text-xs sm:text-sm font-bold text-slate-700">
+              Auto-Renew Subscription
+            </span>
             <button
               type="button"
               onClick={handleToggleAutoRenew}
               disabled={togglingAutoRenew}
-              style={{
-                width: "48px",
-                height: "26px",
-                borderRadius: "16px",
-                background: sub.autoRenew ? "#22C55E" : "#334155",
-                border: "none",
-                padding: "3px",
-                cursor: "pointer",
-              }}
+              className={`w-12 h-6 rounded-full p-0.5 transition-colors cursor-pointer border ${
+                sub.autoRenew
+                  ? "bg-emerald-600 border-emerald-600"
+                  : "bg-slate-300 border-slate-300"
+              }`}
             >
               <div
-                style={{
-                  width: "20px",
-                  height: "20px",
-                  borderRadius: "50%",
-                  background: "#FFF",
-                  transform: sub.autoRenew ? "translateX(22px)" : "translateX(0)",
-                  transition: "transform 0.2s ease",
-                }}
+                className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${
+                  sub.autoRenew ? "translate-x-6" : "translate-x-0"
+                }`}
               />
             </button>
           </div>
 
-          <div style={{ display: "flex", gap: "12px" }}>
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* DIRECT UPI UPGRADE / RENEW BUTTON */}
+            <button
+              type="button"
+              onClick={handleOpenUpgradeModal}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <Smartphone className="w-4 h-4" />
+              <span>Renew / Upgrade with UPI</span>
+            </button>
+
             <Link href={`/pricing?role=${plan.role}`}>
               <MagneticButton
                 style={{
-                  padding: "10px 20px",
+                  padding: "9px 18px",
                   borderRadius: "12px",
-                  background: "#22C55E",
-                  color: "#000",
+                  background: "#0F172A",
+                  color: "#FFFFFF",
                   fontWeight: 800,
                   fontSize: "13px",
                   border: "none",
                   cursor: "pointer",
                 }}
               >
-                Change / Upgrade Plan →
+                Change Plan →
               </MagneticButton>
             </Link>
 
@@ -299,16 +488,7 @@ export function UserSubscriptionDashboard() {
                 type="button"
                 onClick={handleCancelSub}
                 disabled={cancelling}
-                style={{
-                  padding: "10px 16px",
-                  borderRadius: "12px",
-                  background: "transparent",
-                  border: "1px solid #EF4444",
-                  color: "#EF4444",
-                  fontWeight: 700,
-                  fontSize: "13px",
-                  cursor: "pointer",
-                }}
+                className="px-3.5 py-2 rounded-xl bg-transparent border border-rose-300 text-rose-600 font-bold text-xs hover:bg-rose-50 transition-colors cursor-pointer"
               >
                 Cancel Subscription
               </button>
@@ -317,79 +497,90 @@ export function UserSubscriptionDashboard() {
         </div>
       </div>
 
-      {/* Active Features Grid */}
-      <div style={{ marginBottom: "32px" }}>
-        <h3 style={{ fontSize: "20px", fontWeight: 800, marginBottom: "16px" }}>Active Features Included</h3>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "12px" }}>
+      {/* =========================================================================
+       * 2. ACTIVE FEATURES INCLUDED
+       * ========================================================================= */}
+      <div className="mb-8">
+        <h3 className="text-lg sm:text-xl font-black text-slate-900 mb-4 tracking-tight">
+          Active Features Included
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           {plan.features.map((feat, i) => (
             <div
               key={i}
-              style={{
-                background: "var(--argus-card, rgba(10,10,10,0.7))",
-                border: "1px solid rgba(255,255,255,0.08)",
-                borderRadius: "12px",
-                padding: "12px 16px",
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                fontSize: "14px",
-              }}
+              className="bg-white border border-slate-200 rounded-xl p-3.5 flex items-center gap-2.5 shadow-xs"
             >
-              <span style={{ color: "#22C55E", fontWeight: 900 }}>✓</span>
-              <span>{feat}</span>
+              <span className="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-xs shrink-0">
+                ✓
+              </span>
+              <span className="text-xs sm:text-sm font-semibold text-slate-700 truncate">
+                {feat}
+              </span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Subscription & Payment History Table */}
-      <div>
-        <h3 style={{ fontSize: "20px", fontWeight: 800, marginBottom: "16px" }}>Payment & Subscription History</h3>
+      {/* =========================================================================
+       * 3. PAYMENT & SUBSCRIPTION HISTORY TABLE
+       * ========================================================================= */}
+      <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-md mb-8">
+        <h3 className="text-lg sm:text-xl font-black text-slate-900 mb-4 tracking-tight">
+          Payment & Subscription History
+        </h3>
+
         {transactions.length === 0 ? (
-          <div style={{ color: "var(--muted, #94A3B8)", fontSize: "14px", padding: "20px 0" }}>
+          <div className="text-slate-400 text-xs sm:text-sm py-6 text-center font-medium">
             No payment transactions recorded yet.
           </div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", background: "var(--argus-card, rgba(10,10,10,0.85))", borderRadius: "16px" }}>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs sm:text-sm">
               <thead>
-                <tr style={{ background: "rgba(255,255,255,0.05)", textAlign: "left", fontSize: "13px", color: "var(--muted, #94A3B8)" }}>
-                  <th style={{ padding: "14px 16px" }}>Date</th>
-                  <th style={{ padding: "14px 16px" }}>Plan</th>
-                  <th style={{ padding: "14px 16px" }}>Amount</th>
-                  <th style={{ padding: "14px 16px" }}>Method</th>
-                  <th style={{ padding: "14px 16px" }}>Receipt #</th>
-                  <th style={{ padding: "14px 16px" }}>Status</th>
-                  <th style={{ padding: "14px 16px", textAlign: "right" }}>Receipt</th>
+                <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[11px] uppercase tracking-wider">
+                  <th className="py-3 px-4">Date</th>
+                  <th className="py-3 px-4">Plan</th>
+                  <th className="py-3 px-4">Amount</th>
+                  <th className="py-3 px-4">Method</th>
+                  <th className="py-3 px-4">Receipt #</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-right">Receipt</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-100">
                 {transactions.map((txn) => (
-                  <tr key={txn.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", fontSize: "14px" }}>
-                    <td style={{ padding: "14px 16px" }}>{new Date(txn.createdAt * 1000).toLocaleDateString()}</td>
-                    <td style={{ padding: "14px 16px", fontWeight: 700 }}>{getPlanConfig(txn.planId).name}</td>
-                    <td style={{ padding: "14px 16px" }}>₹{txn.amount}</td>
-                    <td style={{ padding: "14px 16px", textTransform: "uppercase" }}>{txn.paymentMethod}</td>
-                    <td style={{ padding: "14px 16px", fontFamily: "monospace" }}>{txn.receiptNumber}</td>
-                    <td style={{ padding: "14px 16px" }}>
-                      <span style={{ color: txn.status === "completed" ? "#22C55E" : "#EF4444", fontWeight: 700 }}>
-                        {txn.status.toUpperCase()}
+                  <tr key={txn.id} className="hover:bg-slate-50/60 transition-colors">
+                    <td className="py-3 px-4 text-slate-600">
+                      {new Date(txn.createdAt * 1000).toLocaleDateString("en-IN")}
+                    </td>
+                    <td className="py-3 px-4 font-bold text-slate-900">
+                      {getPlanConfig(txn.planId).name}
+                    </td>
+                    <td className="py-3 px-4 font-extrabold text-slate-900">
+                      ₹{txn.amount}
+                    </td>
+                    <td className="py-3 px-4 uppercase text-[11px] font-semibold text-slate-600">
+                      {txn.paymentMethod}
+                    </td>
+                    <td className="py-3 px-4 font-mono text-xs text-slate-500">
+                      {txn.receiptNumber}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                          txn.status === "completed"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            : "bg-rose-50 text-rose-700 border border-rose-200"
+                        }`}
+                      >
+                        {txn.status}
                       </span>
                     </td>
-                    <td style={{ padding: "14px 16px", textAlign: "right" }}>
+                    <td className="py-3 px-4 text-right">
                       <button
                         type="button"
                         onClick={() => setSelectedReceipt(txn)}
-                        style={{
-                          background: "rgba(34,197,94,0.15)",
-                          border: "1px solid #22C55E",
-                          color: "#22C55E",
-                          padding: "6px 12px",
-                          borderRadius: "8px",
-                          fontSize: "12px",
-                          fontWeight: 700,
-                          cursor: "pointer",
-                        }}
+                        className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-bold cursor-pointer transition-colors"
                       >
                         📄 Receipt
                       </button>
@@ -402,50 +593,519 @@ export function UserSubscriptionDashboard() {
         )}
       </div>
 
-      {/* Printable Receipt Modal */}
+      {/* =========================================================================
+       * 4. LIGHT-MODE UPI UPGRADE & PAYMENT MODAL
+       * ========================================================================= */}
+      {showUpgradeModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-2xl relative flex flex-col max-h-[92vh] overflow-y-auto overflow-x-clip text-slate-900 animate-in zoom-in-95 duration-200">
+            {/* MODAL HEADER */}
+            <div className="p-4 sm:p-5 border-b border-slate-100 flex items-start justify-between gap-3 sticky top-0 bg-white/95 backdrop-blur-md z-10">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <ShieldCheck className="w-3 h-3 mr-1 text-emerald-600" />
+                    Kynisto Official Subscription
+                  </span>
+                </div>
+                <h3 className="text-lg font-black text-slate-900 tracking-tight">
+                  UPI Subscription Payment
+                </h3>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowUpgradeModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* MODAL BODY */}
+            <div className="p-4 sm:p-6 space-y-4 flex-1">
+              {/* SESSION TIMER */}
+              <div className="flex items-center justify-between bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-xs">
+                <div className="flex items-center gap-1.5 text-slate-500 text-[11px]">
+                  <Clock className="w-3.5 h-3.5 text-blue-600" />
+                  <span>
+                    Time: <strong className="text-slate-800">{modalIstTime}</strong>
+                  </span>
+                </div>
+                <div
+                  className={`font-mono text-xs font-black px-2 py-0.5 rounded-md ${
+                    modalTimeLeft < 120
+                      ? "bg-rose-50 text-rose-700 border border-rose-200"
+                      : "bg-amber-50 text-amber-800 border border-amber-200"
+                  }`}
+                >
+                  Session: {formattedModalTime}
+                </div>
+              </div>
+
+              {/* REASSURANCE BANNER */}
+              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                <div className="text-xs font-bold text-emerald-800 flex items-center gap-2 leading-tight">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>
+                    DON'T PANIC, ADMIN WILL GIVE YOUR SUBSCRIPTION WITHIN 24 HOURS
+                  </span>
+                </div>
+              </div>
+
+              {/* PLAN SELECTION & BILLING CYCLE */}
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                    Select Upgrade Plan
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {planOptions.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setTargetPlanId(p.id)}
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                          targetPlanId === p.id
+                            ? "bg-emerald-50/70 border-emerald-500 text-slate-900 shadow-xs"
+                            : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="font-black text-xs uppercase">{p.name}</span>
+                          <span className="text-[10px] font-bold text-emerald-700">
+                            ₹{targetCycle === "yearly" ? p.priceYearly : p.priceMonthly}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 line-clamp-1 block">
+                          {p.description}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* BILLING CYCLE SELECTOR */}
+                <div>
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
+                    Billing Cycle
+                  </label>
+                  <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-xl">
+                    <button
+                      type="button"
+                      onClick={() => setTargetCycle("monthly")}
+                      className={`py-1.5 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        targetCycle === "monthly"
+                          ? "bg-white text-slate-900 shadow-xs"
+                          : "text-slate-500"
+                      }`}
+                    >
+                      Monthly
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTargetCycle("yearly")}
+                      className={`py-1.5 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                        targetCycle === "yearly"
+                          ? "bg-white text-slate-900 shadow-xs"
+                          : "text-slate-500"
+                      }`}
+                    >
+                      <span>Yearly</span>
+                      <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-black">
+                        Save ~15%
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* AMOUNT DUE BANNER */}
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Total Amount Due
+                  </span>
+                  <div className="text-2xl sm:text-3xl font-black text-slate-900">
+                    ₹{getSelectedUpgradePlanPrice()}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="inline-block px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold">
+                    Kynisto {getPlanConfig(targetPlanId).name}
+                  </span>
+                  <span className="block text-[10px] text-slate-400 mt-0.5 uppercase">
+                    {targetCycle} plan
+                  </span>
+                </div>
+              </div>
+
+              {/* TABS: INSTANT UPI APPS VS SCAN QR */}
+              <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-2xl">
+                <button
+                  type="button"
+                  onClick={() => setActivePaymentTab("apps")}
+                  className={`py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                    activePaymentTab === "apps"
+                      ? "bg-white text-slate-900 shadow-xs"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  <Smartphone className="w-3.5 h-3.5 text-blue-600" />
+                  <span>UPI Apps</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActivePaymentTab("qr")}
+                  className={`py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                    activePaymentTab === "qr"
+                      ? "bg-white text-slate-900 shadow-xs"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  <QrCode className="w-3.5 h-3.5 text-orange-600" />
+                  <span>Scan QR</span>
+                </button>
+              </div>
+
+              {/* TAB 1: 5 UPI APP BUTTONS */}
+              {activePaymentTab === "apps" && (
+                <div className="space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {/* FamPay */}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAppPayment("fampay")}
+                      className="p-3 rounded-2xl bg-white border border-slate-200 hover:border-amber-500 hover:bg-amber-50/40 text-left transition-all flex items-center justify-between group cursor-pointer shadow-xs"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <FamPayLogo className="w-9 h-9" />
+                        <div className="min-w-0">
+                          <span className="block font-bold text-xs sm:text-sm text-slate-900 truncate">
+                            FamPay (FamApp)
+                          </span>
+                          <span className="block text-[10px] text-slate-500 truncate">
+                            Teen & Gen-Z UPI
+                          </span>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 shrink-0" />
+                    </button>
+
+                    {/* PhonePe */}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAppPayment("phonepe")}
+                      className="p-3 rounded-2xl bg-white border border-slate-200 hover:border-[#5F259F] hover:bg-purple-50/40 text-left transition-all flex items-center justify-between group cursor-pointer shadow-xs"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <PhonePeLogo className="w-9 h-9" />
+                        <div className="min-w-0">
+                          <span className="block font-bold text-xs sm:text-sm text-slate-900 truncate">
+                            PhonePe
+                          </span>
+                          <span className="block text-[10px] text-slate-500 truncate">
+                            Direct Bank Pay
+                          </span>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 shrink-0" />
+                    </button>
+
+                    {/* Paytm */}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAppPayment("paytm")}
+                      className="p-3 rounded-2xl bg-white border border-slate-200 hover:border-[#00BAF2] hover:bg-sky-50/40 text-left transition-all flex items-center justify-between group cursor-pointer shadow-xs"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <PaytmLogo className="w-9 h-9" />
+                        <div className="min-w-0">
+                          <span className="block font-bold text-xs sm:text-sm text-slate-900 truncate">
+                            Paytm UPI
+                          </span>
+                          <span className="block text-[10px] text-slate-500 truncate">
+                            Wallet & Bank Pay
+                          </span>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 shrink-0" />
+                    </button>
+
+                    {/* Google Pay */}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAppPayment("gpay")}
+                      className="p-3 rounded-2xl bg-white border border-slate-200 hover:border-blue-500 hover:bg-blue-50/40 text-left transition-all flex items-center justify-between group cursor-pointer shadow-xs"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <GooglePayLogo className="w-9 h-9" />
+                        <div className="min-w-0">
+                          <span className="block font-bold text-xs sm:text-sm text-slate-900 truncate">
+                            Google Pay (GPay)
+                          </span>
+                          <span className="block text-[10px] text-slate-500 truncate">
+                            Official Google UPI
+                          </span>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 shrink-0" />
+                    </button>
+
+                    {/* Other UPI Apps */}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAppPayment("generic")}
+                      className="sm:col-span-2 p-3 rounded-2xl bg-white border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/40 text-left transition-all flex items-center justify-between group cursor-pointer shadow-xs"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <UpiGenericLogo className="w-9 h-9" />
+                        <div className="min-w-0">
+                          <span className="block font-bold text-xs sm:text-sm text-slate-900 truncate">
+                            Other UPI Apps
+                          </span>
+                          <span className="block text-[10px] text-slate-500 truncate">
+                            BHIM, CRED, Amazon Pay, Any Bank App
+                          </span>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 shrink-0" />
+                    </button>
+                  </div>
+
+                  {appLaunchFeedback && (
+                    <div className="p-2.5 bg-blue-50 border border-blue-200 text-blue-800 text-xs rounded-xl text-center font-bold flex items-center justify-center gap-1.5 animate-in fade-in">
+                      <Sparkles className="w-3.5 h-3.5 text-blue-600 animate-spin" />
+                      <span>{appLaunchFeedback}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 2: DYNAMIC QR CODE DISPLAY */}
+              {activePaymentTab === "qr" && (
+                <div className="flex flex-col items-center text-center p-2">
+                  <div className="p-3 bg-white border-2 border-slate-200 rounded-2xl shadow-sm mb-2 relative flex items-center justify-center">
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data=${encodeURIComponent(
+                        createUPILink("generic", {
+                          upiId: UPI_PAYMENT_ID,
+                          merchantName: "Kynisto",
+                          amount: getSelectedUpgradePlanPrice(),
+                          currency: "INR",
+                          orderId: `SUB-${Date.now().toString(36).toUpperCase()}`,
+                          note: `Kynisto ${getPlanConfig(targetPlanId).name} Subscription`,
+                        })
+                      )}`}
+                      alt="Kynisto Official Subscription QR Code"
+                      className="w-44 h-44 object-contain rounded-lg"
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    Scan with FamPay, PhonePe, Paytm, Google Pay, or any UPI app
+                  </p>
+                </div>
+              )}
+
+              {/* DIRECT UPI ID DISPLAY & COPY BUTTON */}
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs gap-2">
+                <div className="truncate min-w-0">
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Kynisto Official UPI ID
+                  </span>
+                  <span className="font-mono font-bold text-slate-800 text-xs sm:text-sm truncate select-all block">
+                    {UPI_PAYMENT_ID}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleCopyUpiId(UPI_PAYMENT_ID)}
+                  className="py-1.5 px-3 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs"
+                  title="Copy UPI ID"
+                >
+                  {copiedUpi ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-emerald-700">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Copy UPI</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* CUSTOMER DETAILS FORM */}
+              <div className="space-y-3 pt-2 border-t border-slate-100">
+                <div>
+                  <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5 mb-1">
+                    <User className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Enter UPI Payer Name</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={subscriberName}
+                    onChange={(e) => setSubscriberName(e.target.value)}
+                    placeholder="Full Name on UPI App"
+                    className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5 mb-1">
+                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Enter Gmail / Email ID</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={subscriberEmail}
+                    onChange={(e) => setSubscriberEmail(e.target.value)}
+                    placeholder="yourname@gmail.com"
+                    className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1">
+                    <span>Payment UTR / Transaction Ref No.</span>{" "}
+                    <span className="text-slate-400 font-normal lowercase">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={utrInput}
+                    onChange={(e) => setUtrInput(e.target.value)}
+                    placeholder="12-digit UTR from payment confirmation"
+                    className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-3 py-2 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                  />
+                </div>
+
+                {upiError && (
+                  <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-xl font-bold">
+                    {upiError}
+                  </div>
+                )}
+
+                {upiSubmitSuccessMsg && (
+                  <div className="p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl font-bold flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>{upiSubmitSuccessMsg}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* MODAL FOOTER */}
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex flex-col gap-2">
+              <button
+                type="button"
+                disabled={isSubmittingUpi || upiSubmitSuccessMsg !== ""}
+                onClick={handleConfirmSubmitUpiPayment}
+                className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-black text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+              >
+                {isSubmittingUpi ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Submitting Subscription Request...</span>
+                  </>
+                ) : upiSubmitSuccessMsg !== "" ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Payment Request Submitted!</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Submit Payment & Request Activation</span>
+                  </>
+                )}
+              </button>
+
+              <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 text-center">
+                <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
+                <span>Encrypted 256-bit peer-to-peer UPI transfer powered by NPCI</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+       * 5. PRINTABLE RECEIPT MODAL (LIGHT MODE)
+       * ========================================================================= */}
       {selectedReceipt && (
-        <div className="modalLayer" role="presentation" onMouseDown={(e) => e.currentTarget === e.target && setSelectedReceipt(null)}>
-          <div
-            style={{
-              maxWidth: "480px",
-              width: "90%",
-              background: "#FFFFFF",
-              color: "#000000",
-              borderRadius: "20px",
-              padding: "32px",
-              margin: "auto",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
-            }}
-          >
-            <div style={{ textAlign: "center", borderBottom: "2px dashed #CBD5E1", paddingBottom: "20px", marginBottom: "20px" }}>
-              <h2 style={{ margin: 0, fontSize: "24px", fontWeight: 900, color: "#0F172A" }}>KYNISTO</h2>
-              <div style={{ fontSize: "12px", color: "#64748B", marginTop: "4px" }}>Official Subscription Receipt</div>
-              <div style={{ fontSize: "14px", fontWeight: 800, color: "#22C55E", marginTop: "8px" }}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in"
+          role="presentation"
+          onMouseDown={(e) => e.currentTarget === e.target && setSelectedReceipt(null)}
+        >
+          <div className="max-w-md w-full bg-white text-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl animate-in zoom-in-95">
+            <div className="text-center border-b-2 border-dashed border-slate-200 pb-5 mb-5">
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight">KYNISTO</h2>
+              <div className="text-xs text-slate-500 mt-1">Official Subscription Receipt</div>
+              <div className="text-xs font-black text-emerald-600 mt-2 font-mono bg-emerald-50 px-3 py-1 rounded-full inline-block">
                 Receipt #{selectedReceipt.receiptNumber}
               </div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "14px", marginBottom: "24px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}><span>Date:</span><b>{new Date(selectedReceipt.createdAt * 1000).toLocaleString()}</b></div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}><span>Plan:</span><b>Kynisto {getPlanConfig(selectedReceipt.planId).name}</b></div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}><span>Billing Cycle:</span><b>{selectedReceipt.billingCycle.toUpperCase()}</b></div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}><span>Payment Method:</span><b>UPI ({selectedReceipt.upiId})</b></div>
-              {selectedReceipt.utr && <div style={{ display: "flex", justifyContent: "space-between" }}><span>UTR #:</span><b>{selectedReceipt.utr}</b></div>}
-              <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid #E2E8F0", paddingTop: "10px", fontSize: "16px" }}><span>Total Paid:</span><b style={{ color: "#22C55E" }}>₹{selectedReceipt.amount}</b></div>
+            <div className="space-y-2.5 text-xs sm:text-sm mb-6">
+              <div className="flex justify-between text-slate-600">
+                <span>Date:</span>
+                <strong className="text-slate-900">
+                  {new Date(selectedReceipt.createdAt * 1000).toLocaleString("en-IN")}
+                </strong>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Plan:</span>
+                <strong className="text-slate-900">
+                  Kynisto {getPlanConfig(selectedReceipt.planId).name}
+                </strong>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Billing Cycle:</span>
+                <strong className="text-slate-900 uppercase">
+                  {selectedReceipt.billingCycle}
+                </strong>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Payment Method:</span>
+                <strong className="text-slate-900 uppercase">
+                  UPI ({selectedReceipt.upiId})
+                </strong>
+              </div>
+              {selectedReceipt.utr && (
+                <div className="flex justify-between text-slate-600">
+                  <span>UTR #:</span>
+                  <strong className="font-mono text-slate-900">{selectedReceipt.utr}</strong>
+                </div>
+              )}
+              <div className="flex justify-between border-t border-slate-200 pt-3 text-base text-slate-900 font-black">
+                <span>Total Paid:</span>
+                <span className="text-emerald-600">₹{selectedReceipt.amount}</span>
+              </div>
             </div>
 
-            <div style={{ display: "flex", gap: "12px" }}>
+            <div className="flex gap-2.5">
               <button
                 type="button"
                 onClick={() => window.print()}
-                style={{ flex: 1, padding: "12px", borderRadius: "10px", background: "#0F172A", color: "#FFF", fontWeight: 700, border: "none", cursor: "pointer" }}
+                className="flex-1 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm cursor-pointer shadow-md transition-colors"
               >
                 🖨 Print / Download PDF
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedReceipt(null)}
-                style={{ padding: "12px 20px", borderRadius: "10px", background: "#E2E8F0", color: "#0F172A", fontWeight: 700, border: "none", cursor: "pointer" }}
+                className="py-3 px-5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm cursor-pointer transition-colors"
               >
                 Close
               </button>
@@ -456,3 +1116,5 @@ export function UserSubscriptionDashboard() {
     </div>
   );
 }
+
+export default UserSubscriptionDashboard;

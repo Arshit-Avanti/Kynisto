@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Search, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { Search, ArrowRight, Crown, Stethoscope, Briefcase, Store } from "lucide-react";
 
 interface CredixInteractiveHeroFeaturesProps {
   query: string;
@@ -107,6 +108,38 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
               <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-white stroke-[2.5]" />
             </button>
           </form>
+
+          {/* Quick Action Category & VIP Pills */}
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 mt-3 arise-on-scroll arise-delay-4 px-2">
+            <Link
+              href="/pricing"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 text-xs font-bold shadow-sm backdrop-blur-md transition-all hover:scale-105 active:scale-95"
+            >
+              <Crown className="w-3.5 h-3.5 text-amber-400" />
+              <span>VIP Plans &amp; Store Passes</span>
+            </Link>
+            <Link
+              href="/healthcare"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-400/40 text-xs font-bold shadow-sm backdrop-blur-md transition-all hover:scale-105 active:scale-95"
+            >
+              <Stethoscope className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Live OPD Queues</span>
+            </Link>
+            <Link
+              href="/services"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-400/40 text-xs font-bold shadow-sm backdrop-blur-md transition-all hover:scale-105 active:scale-95"
+            >
+              <Briefcase className="w-3.5 h-3.5 text-sky-400" />
+              <span>Home Services</span>
+            </Link>
+            <a
+              href="#places"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 border border-white/20 text-xs font-bold shadow-sm backdrop-blur-md transition-all hover:scale-105 active:scale-95"
+            >
+              <Store className="w-3.5 h-3.5 text-slate-300" />
+              <span>Local Stores</span>
+            </a>
+          </div>
         </div>
       </section>
     </div>

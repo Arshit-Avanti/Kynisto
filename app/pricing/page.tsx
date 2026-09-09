@@ -6,7 +6,8 @@ import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { Navbar3D } from "@/components/landing/Navbar3D";
 import { CustomerPlanUI } from "@/components/subscription/CustomerPlanUI";
 import { BusinessMarketplaceUI } from "@/components/subscription/BusinessMarketplaceUI";
-import { Crown, Building2 } from "lucide-react";
+import { StoreMembershipsBrowser } from "@/components/store/StoreMembershipsBrowser";
+import { Crown, Building2, Store } from "lucide-react";
 
 interface UserProfile {
   id?: string;
@@ -44,12 +45,24 @@ function PricingContent({ user }: { user: UserProfile | null }) {
     user?.role === "store_owner" ||
     user?.role === "admin";
 
-  const [activeTab, setActiveTab] = useState<"customer" | "business">(
-    isOwnerDefault ? "business" : "customer"
+  const isStoreMembershipDefault =
+    tabParam === "store_memberships" ||
+    tabParam === "stores" ||
+    tabParam === "memberships" ||
+    roleParam === "membership";
+
+  const [activeTab, setActiveTab] = useState<"customer" | "store_memberships" | "business">(
+    isStoreMembershipDefault
+      ? "store_memberships"
+      : isOwnerDefault
+      ? "business"
+      : "customer"
   );
 
   useEffect(() => {
-    if (roleParam === "store_owner" || roleParam === "business" || tabParam === "business") {
+    if (tabParam === "store_memberships" || tabParam === "stores" || tabParam === "memberships" || roleParam === "membership") {
+      setActiveTab("store_memberships");
+    } else if (roleParam === "store_owner" || roleParam === "business" || tabParam === "business") {
       setActiveTab("business");
     } else if (roleParam === "customer" || tabParam === "customer") {
       setActiveTab("customer");
@@ -65,33 +78,46 @@ function PricingContent({ user }: { user: UserProfile | null }) {
 
   return (
     <div className="w-full">
-      {/* Top Role Selector Header */}
+      {/* Top Role & Tier Selector Header */}
       <div className="flex justify-center mb-8 px-4">
-        <div className="inline-flex items-center p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-xl">
+        <div className="inline-flex items-center p-1.5 rounded-2xl bg-white border border-slate-200 shadow-md flex-wrap justify-center gap-1">
           <button
             type="button"
             onClick={() => setActiveTab("customer")}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
               activeTab === "customer"
-                ? "bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-lg shadow-amber-500/20"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md shadow-amber-500/20 font-black"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
             }`}
           >
             <Crown className="w-4 h-4" />
-            <span>For Customers</span>
+            <span>Kynisto VIP (Customer)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("store_memberships")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+              activeTab === "store_memberships"
+                ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/20 font-black"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+            }`}
+          >
+            <Store className="w-4 h-4" />
+            <span>Local Store Passes (Shop Owner)</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("business")}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
               activeTab === "business"
-                ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-lg shadow-cyan-500/20"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/20 font-black"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
             }`}
           >
             <Building2 className="w-4 h-4" />
-            <span>For Business Owners</span>
+            <span>Merchant Platform</span>
           </button>
         </div>
       </div>
@@ -103,6 +129,11 @@ function PricingContent({ user }: { user: UserProfile | null }) {
           userName={user?.name || ""}
           userEmail={user?.email || ""}
           isUnrestrictedByAdmin={isCustomerUnrestricted}
+        />
+      ) : activeTab === "store_memberships" ? (
+        <StoreMembershipsBrowser
+          userName={user?.name || ""}
+          userEmail={user?.email || ""}
         />
       ) : (
         <BusinessMarketplaceUI
@@ -131,14 +162,14 @@ export default function PricingPage() {
   }, []);
 
   return (
-    <main className="site min-h-screen transition-colors duration-200">
+    <main className="site min-h-screen bg-slate-50 text-slate-900 transition-colors duration-200 overflow-x-clip">
       <Navbar3D />
 
       <div style={{ paddingTop: "100px" }}>
         <Suspense
           fallback={
-            <div className="text-center py-20 color-white font-medium text-slate-400">
-              Loading Pricing &amp; Business Marketplace...
+            <div className="text-center py-20 font-medium text-slate-500">
+              Loading Pricing &amp; Memberships...
             </div>
           }
         >
@@ -146,12 +177,12 @@ export default function PricingPage() {
         </Suspense>
       </div>
 
-      <footer className="mt-20 py-10 px-4 border-t border-slate-800/80 text-center">
+      <footer className="mt-20 py-10 px-4 border-t border-slate-200 text-center bg-white">
         <a className="brand footerBrand inline-block mb-3" href="/">
           <KynistoLogo showTagline />
         </a>
-        <p className="text-xs text-slate-400">
-          Everything Around You, Smarter. · © 2026 Kynisto Subscriptions
+        <p className="text-xs text-slate-500">
+          Everything Around You, Smarter. · © 2026 Kynisto Subscriptions &amp; Store Memberships
         </p>
       </footer>
     </main>

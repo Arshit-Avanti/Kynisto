@@ -37,6 +37,11 @@ const EditorialGuidesSection = dynamic(
   { ssr: true }
 );
 
+const HomePlansAndMembershipsSection = dynamic(
+  () => import("@/components/landing/HomePlansAndMembershipsSection").then((mod) => mod.HomePlansAndMembershipsSection),
+  { ssr: true }
+);
+
 type Category = {
   name: string;
   icon: string;
@@ -2636,6 +2641,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Featured VIP Plans & Store Memberships Section */}
+      <HomePlansAndMembershipsSection />
 
       <EditorialGuidesSection />
 

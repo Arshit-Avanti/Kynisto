@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { 
   Gift, Wallet, Award, Download, Clock, Store, Crown, Loader2, 
   CheckCircle2, Star, Sparkles, QrCode, ShieldCheck, X, Camera, 
@@ -738,9 +739,18 @@ export default function KynistoWalletView() {
         {activeTab === 'memberships' && (
           <div className="space-y-6 animate-in fade-in duration-500">
             <div className="rounded-3xl bg-white dark:bg-black p-6 border border-gray-200 dark:border-gray-800 shadow-xl space-y-6">
-              <div>
-                <h2 className="text-xl font-extrabold text-black dark:text-white mb-1">My VIP Store Memberships</h2>
-                <p className="text-xs font-bold text-gray-500 dark:text-gray-400">View all your active memberships and pending store pass activation requests.</p>
+              <div className="flex items-center justify-between flex-wrap gap-3 mb-1">
+                <div>
+                  <h2 className="text-xl font-extrabold text-black dark:text-white mb-1">My VIP Store Memberships</h2>
+                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400">View all your active memberships and pending store pass activation requests.</p>
+                </div>
+                <Link
+                  href="/pricing?tab=store_memberships"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black text-xs shadow-md active:scale-95 transition-all"
+                >
+                  <Crown className="w-3.5 h-3.5" />
+                  <span>Browse Store VIP Passes →</span>
+                </Link>
               </div>
 
               {/* PENDING ACTIVATION MEMBERSHIPS */}
@@ -778,7 +788,16 @@ export default function KynistoWalletView() {
                   <CheckCircle2 className="h-4 w-4" /> Active VIP Store Passes ({memberships.active.length})
                 </h3>
                 {memberships.active.length === 0 && (!memberships.pending || memberships.pending.length === 0) ? (
-                  <p className="text-sm font-bold text-gray-500 text-center py-8">No active store memberships yet. Browse storefronts to purchase VIP passes!</p>
+                  <div className="text-center py-8 px-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800">
+                    <p className="text-sm font-bold text-gray-500 mb-3">No active store memberships yet. Browse neighborhood stores to purchase VIP passes!</p>
+                    <Link
+                      href="/pricing?tab=store_memberships"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-md transition-all active:scale-95"
+                    >
+                      <Crown className="w-3.5 h-3.5" />
+                      <span>Browse Store VIP Passes →</span>
+                    </Link>
+                  </div>
                 ) : memberships.active.length === 0 ? (
                   <p className="text-xs font-bold text-gray-500 py-2">No verified active passes yet. Your pending request above will be activated by the store owner soon!</p>
                 ) : (
