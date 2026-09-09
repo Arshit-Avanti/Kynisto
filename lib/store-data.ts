@@ -296,14 +296,20 @@ export async function listStores(options: {
       if (parsed.maxPrice !== undefined) serviceBindings.push(parsed.maxPrice);
       else if (parsed.minPrice !== undefined) serviceBindings.push(parsed.minPrice);
 
-      const [productRows, serviceRows] = await Promise.all([
-        productQueryParts.length > 0
-          ? db.prepare(`SELECT DISTINCT store_id FROM products p WHERE p.status = 'active' AND (${productQueryParts.join(" OR ")}) ${priceProductCondition} LIMIT 100`).bind(...productBindings).all<{ store_id: string }>().catch(() => ({ results: [] }))
-          : Promise.resolve({ results: [] }),
-        serviceQueryParts.length > 0
-          ? db.prepare(`SELECT DISTINCT store_id FROM services sv WHERE sv.status = 'active' AND (${serviceQueryParts.join(" OR ")}) ${priceServiceCondition} LIMIT 100`).bind(...serviceBindings).all<{ store_id: string }>().catch(() => ({ results: [] }))
-          : Promise.resolve({ results: [] }),
-      ]);
+      let productRows: { results?: { store_id: string }[] } = { results: [] };
+      let serviceRows: { results?: { store_id: string }[] } = { results: [] };
+
+      if (productQueryParts.length > 0 && serviceQueryParts.length > 0) {
+        const stmtP = db.prepare(`SELECT DISTINCT store_id FROM products p WHERE p.status = 'active' AND (${productQueryParts.join(" OR ")}) ${priceProductCondition} LIMIT 100`).bind(...productBindings);
+        const stmtS = db.prepare(`SELECT DISTINCT store_id FROM services sv WHERE sv.status = 'active' AND (${serviceQueryParts.join(" OR ")}) ${priceServiceCondition} LIMIT 100`).bind(...serviceBindings);
+        const batchRes = await db.batch<any>([stmtP, stmtS]).catch(() => [{ results: [] }, { results: [] }]);
+        productRows = batchRes[0] ?? { results: [] };
+        serviceRows = batchRes[1] ?? { results: [] };
+      } else if (productQueryParts.length > 0) {
+        productRows = await db.prepare(`SELECT DISTINCT store_id FROM products p WHERE p.status = 'active' AND (${productQueryParts.join(" OR ")}) ${priceProductCondition} LIMIT 100`).bind(...productBindings).all<{ store_id: string }>().catch(() => ({ results: [] }));
+      } else if (serviceQueryParts.length > 0) {
+        serviceRows = await db.prepare(`SELECT DISTINCT store_id FROM services sv WHERE sv.status = 'active' AND (${serviceQueryParts.join(" OR ")}) ${priceServiceCondition} LIMIT 100`).bind(...serviceBindings).all<{ store_id: string }>().catch(() => ({ results: [] }));
+      }
 
       const pIds = (productRows.results ?? []).map((r) => r.store_id);
       const sIds = (serviceRows.results ?? []).map((r) => r.store_id);
@@ -448,6 +454,10 @@ export async function listStores(options: {
 }
 
 export async function getStoreBySlug(slug: string) {
+  const cacheKey = `store_slug:${slug}`;
+  const cached = microCache.get<any>(cacheKey);
+  if (cached) return cached;
+
   await ensureSeeded();
   const db = getD1();
   const row = await db
@@ -487,7 +497,7 @@ export async function getStoreBySlug(slug: string) {
     };
   });
 
-  return {
+  const storeData = {
     ...toPublicStore(row, DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
     businessHours: parseJson(row.businessHours, {}),
     openingDays: parseJson(row.openingDays, []),
@@ -497,6 +507,8 @@ export async function getStoreBySlug(slug: string) {
     offers: offers.results ?? [],
     reviewItems: reviews.results ?? [],
   };
+  microCache.set(cacheKey, storeData, 15_000);
+  return storeData;
 }
 
 export async function recordAnalytics(
