@@ -96,36 +96,35 @@ test("Memberships API supports general catalog across stores without requiring s
   );
 });
 
-test("HomePlansAndMembershipsSection renders on homepage with instant UPI checkout", () => {
+test("HomePlansAndMembershipsSection is unmounted from homepage to keep hero and landing clean", () => {
   const compPath = path.resolve("components/landing/HomePlansAndMembershipsSection.tsx");
-  assert.ok(fs.existsSync(compPath), "HomePlansAndMembershipsSection.tsx must exist");
+  assert.ok(fs.existsSync(compPath), "HomePlansAndMembershipsSection.tsx must exist as a modular component");
 
   const compContent = fs.readFileSync(compPath, "utf-8");
   assert.ok(compContent.includes("UpiCheckoutModal"), "Must embed UpiCheckoutModal");
   assert.ok(compContent.includes("Kynisto VIP Pass"), "Must showcase Kynisto VIP Pass");
-  assert.ok(compContent.includes("featuredPasses"), "Must showcase featured store passes");
   assert.ok(compContent.includes("Pay with UPI · ₹49"), "Must offer instant UPI VIP checkout");
   assert.ok(compContent.includes("Join VIP Club"), "Must offer shop owner pass checkout");
-  assert.ok(compContent.includes("overflow-x-clip"), "Must enforce overflow-x: clip per GEMINI.md");
 
   const pagePath = path.resolve("app/page.tsx");
   const pageContent = fs.readFileSync(pagePath, "utf-8");
   assert.ok(
-    pageContent.includes("HomePlansAndMembershipsSection"),
-    "app/page.tsx must import and render HomePlansAndMembershipsSection"
+    !pageContent.includes("<HomePlansAndMembershipsSection"),
+    "app/page.tsx must NOT render HomePlansAndMembershipsSection per user design request"
   );
 });
 
-test("Navbar3D and CredixInteractiveHeroFeatures provide direct VIP Passes quick links", () => {
-  const navPath = path.resolve("components/landing/Navbar3D.tsx");
-  const navContent = fs.readFileSync(navPath, "utf-8");
-  assert.ok(navContent.includes('href="/pricing"'), "Navbar must link to /pricing");
-  assert.ok(navContent.includes("VIP Plans & Store Passes") || navContent.includes("VIP"), "Mobile navbar must feature VIP pill");
-
+test("Homepage hero features clean action pills without clutter", () => {
   const heroPath = path.resolve("components/dashboard/CredixInteractiveHeroFeatures.tsx");
   const heroContent = fs.readFileSync(heroPath, "utf-8");
-  assert.ok(heroContent.includes('href="/pricing"'), "Hero must provide quick action link to /pricing");
-  assert.ok(heroContent.includes("VIP Plans"), "Hero pill must highlight VIP Plans");
+  assert.ok(heroContent.includes("Live OPD Queues"), "Hero must keep Live OPD Queues");
+  assert.ok(heroContent.includes("Home Services"), "Hero must keep Home Services");
+  assert.ok(heroContent.includes("Local Stores"), "Hero must keep Local Stores");
+  assert.ok(!heroContent.includes("VIP Plans & Store Passes"), "Hero must not render VIP pill per user request");
+
+  const navPath = path.resolve("components/landing/Navbar3D.tsx");
+  const navContent = fs.readFileSync(navPath, "utf-8");
+  assert.ok(navContent.includes('href="/pricing"'), "Navbar must still provide pricing navigation");
 });
 
 test("Wallet and CustomerDashboard provide seamless Store VIP Passes browsing", () => {

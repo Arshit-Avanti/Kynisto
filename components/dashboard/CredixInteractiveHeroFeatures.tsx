@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Search, ArrowRight, Crown, Stethoscope, Briefcase, Store } from "lucide-react";
+import { Search, ArrowRight, Stethoscope, Briefcase, Store } from "lucide-react";
 
 interface CredixInteractiveHeroFeaturesProps {
   query: string;
@@ -109,15 +109,8 @@ export function CredixInteractiveHeroFeatures({ query, setQuery }: CredixInterac
             </button>
           </form>
 
-          {/* Quick Action Category & VIP Pills */}
+          {/* Quick Action Category Pills */}
           <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 mt-3 arise-on-scroll arise-delay-4 px-2">
-            <Link
-              href="/pricing"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 text-xs font-bold shadow-sm backdrop-blur-md transition-all hover:scale-105 active:scale-95"
-            >
-              <Crown className="w-3.5 h-3.5 text-amber-400" />
-              <span>VIP Plans &amp; Store Passes</span>
-            </Link>
             <Link
               href="/healthcare"
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-400/40 text-xs font-bold shadow-sm backdrop-blur-md transition-all hover:scale-105 active:scale-95"

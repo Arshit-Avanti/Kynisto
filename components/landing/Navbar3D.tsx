@@ -222,16 +222,6 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
             </Link>
           )}
 
-          {/* Quick VIP Pass button on Mobile */}
-          <Link
-            href="/pricing"
-            className="md:hidden inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-[11px] shadow-sm active:scale-95 transition-all"
-            title="VIP Plans & Store Passes"
-          >
-            <Crown className="w-3.5 h-3.5 text-slate-950" />
-            <span>VIP</span>
-          </Link>
-
           {/* Mobile 3-Dash Hamburger Menu Button */}
           <div className="md:hidden shrink-0">
             <button
