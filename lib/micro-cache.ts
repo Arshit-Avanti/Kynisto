@@ -17,16 +17,20 @@ class MicroCache {
   }
 
   set<T>(key: string, data: T, ttlMs: number): void {
-    if (this.cache.size > 1000) {
+    if (this.cache.size > 2000) {
       const now = Date.now();
       for (const [k, entry] of this.cache.entries()) {
         if (now > entry.expiresAt) {
           this.cache.delete(k);
         }
       }
-      if (this.cache.size > 1000) {
-        const keys = Array.from(this.cache.keys()).slice(0, 500);
-        for (const k of keys) this.cache.delete(k);
+      if (this.cache.size > 2000) {
+        const iterator = this.cache.keys();
+        for (let i = 0; i < 500; i++) {
+          const next = iterator.next();
+          if (next.done) break;
+          this.cache.delete(next.value);
+        }
       }
     }
     this.cache.set(key, {

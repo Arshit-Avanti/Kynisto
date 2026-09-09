@@ -67,9 +67,13 @@ class TurboCoreEngine {
     }
     this.initialized = true;
 
-    // Trigger non-blocking background sync
+    // Trigger non-blocking background sync using requestIdleCallback if available
     if (typeof window !== "undefined") {
-      window.setTimeout(() => this.backgroundSync(), 100);
+      if ("requestIdleCallback" in window) {
+        (window as any).requestIdleCallback(() => this.backgroundSync(), { timeout: 2000 });
+      } else {
+        window.setTimeout(() => this.backgroundSync(), 200);
+      }
     }
   }
 
