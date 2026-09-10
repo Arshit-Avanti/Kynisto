@@ -50,6 +50,7 @@ type StoreRow = {
   queueStatus: string | null;
   queueOpeningTime: string | null;
   queueClosingTime: string | null;
+  allowAppointments: number | null;
   locationVerified?: number | boolean | null;
   locationAccuracy?: number | null;
 };
@@ -186,6 +187,7 @@ function toPublicStore(row: StoreRow, latitude: number, longitude: number) {
     queueStatus: row.queueStatus,
     queueOpeningTime: row.queueOpeningTime,
     queueClosingTime: row.queueClosingTime,
+    allowAppointments: row.allowAppointments === null ? 1 : Number(row.allowAppointments),
   };
 }
 
@@ -203,6 +205,7 @@ const storeSelect = `SELECT
   c.icon AS categoryIcon, c.color AS categoryColor,
   sc.name AS subcategory, hp.queue_activation_status AS queueActivationStatus,
   hp.admin_queue_enabled AS adminQueueEnabled, hp.owner_queue_enabled AS ownerQueueEnabled,
+  COALESCE(hp.allow_appointments, 1) AS allowAppointments,
   hqs.status AS queueStatus, hqs.opening_time AS queueOpeningTime, hqs.closing_time AS queueClosingTime
  FROM stores s
  LEFT JOIN categories c ON c.id = s.category_id

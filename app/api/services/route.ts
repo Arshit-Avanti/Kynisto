@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
     let sql = `SELECT 
         sv.id, sv.name, sv.category_name AS categoryName, sv.slug, sv.description,
         sv.price_from AS startingPrice, sv.estimated_arrival AS estimatedArrival,
+        sv.image_url AS imageUrl,
         sv.status, sv.created_at AS createdAt,
         s.id AS storeId, s.name AS storeName, s.slug AS storeSlug, s.phone AS storePhone,
         s.address, s.area, s.city
@@ -60,6 +61,7 @@ export async function GET(request: NextRequest) {
       description: string;
       startingPrice: number | null;
       estimatedArrival: string;
+      imageUrl: string | null;
       status: string;
       createdAt: number;
       storeId: string;

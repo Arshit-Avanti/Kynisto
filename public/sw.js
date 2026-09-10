@@ -1,6 +1,6 @@
-// Kynisto High-Performance PWA & Web Push Service Worker
-const CACHE_NAME = "kynisto-turbocore-2026.09.09.110";
-const API_CACHE = "kynisto-turbocore-api-2026.09.09.110";
+﻿// Kynisto High-Performance PWA & Web Push Service Worker
+const CACHE_NAME = "kynisto-turbocore-2026.09.10.114";
+const API_CACHE = "kynisto-turbocore-api-2026.09.10.114";
 const PRECACHE_URLS = [
   "/",
   "/healthcare",
@@ -59,7 +59,7 @@ const OFFLINE_FALLBACK_HTML = `<!DOCTYPE html>
 </head>
 <body>
   <div class="card">
-    <div class="icon">⚡</div>
+    <div class="icon">âš¡</div>
     <h1>Reconnecting to Kynisto</h1>
     <p>Please check your internet connection or tap below to reload.</p>
     <button onclick="window.location.reload()">Retry Connection</button>
@@ -67,7 +67,7 @@ const OFFLINE_FALLBACK_HTML = `<!DOCTYPE html>
 </body>
 </html>`;
 
-// ⚡ Ultra-Fast Fetch Interceptor (Cache-First for Static Assets, SWR for Read APIs, Network-First with Safe Fallback for Navigations)
+// âš¡ Ultra-Fast Fetch Interceptor (Cache-First for Static Assets, SWR for Read APIs, Network-First with Safe Fallback for Navigations)
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET") return;
@@ -144,7 +144,7 @@ self.addEventListener("fetch", (event) => {
           headers: { "Content-Type": "text/html; charset=utf-8" },
         });
 
-        // ⚡ Sub-5ms delivery: if page is already cached, return immediately & update in background
+        // âš¡ Sub-5ms delivery: if page is already cached, return immediately & update in background
         if (cached) {
           fetch(request)
             .then((response) => {
@@ -179,7 +179,7 @@ self.addEventListener("fetch", (event) => {
   }
 });
 
-// 🔔 Listen for Web & App Push Notifications
+// ðŸ”” Listen for Web & App Push Notifications
 self.addEventListener("push", (event) => {
   let data = {
     title: "Kynisto Notification",
@@ -207,7 +207,7 @@ self.addEventListener("push", (event) => {
       timestamp: Date.now(),
     },
     actions: [
-      { action: "open", title: "View Details ➔" },
+      { action: "open", title: "View Details âž”" },
       { action: "dismiss", title: "Dismiss" },
     ],
   };
@@ -215,7 +215,7 @@ self.addEventListener("push", (event) => {
   event.waitUntil(self.registration.showNotification(data.title, options));
 });
 
-// 🖱️ Notification Click Handler
+// ðŸ–±ï¸ Notification Click Handler
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
