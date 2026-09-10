@@ -148,6 +148,9 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
         >
           <Link
             href="/services"
+            prefetch={true}
+            onTouchStart={() => { try { router.prefetch("/services"); } catch {} }}
+            onMouseEnter={() => { try { router.prefetch("/services"); } catch {} }}
             className={`px-3 py-1.5 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap font-bold ${
               pathname.startsWith("/services")
                 ? "bg-orange-50 text-orange-600 font-extrabold shadow-2xs"
@@ -158,6 +161,9 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
           </Link>
           <Link
             href="/healthcare"
+            prefetch={true}
+            onTouchStart={() => { try { router.prefetch("/healthcare"); } catch {} }}
+            onMouseEnter={() => { try { router.prefetch("/healthcare"); } catch {} }}
             className={`px-3 py-1.5 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5 whitespace-nowrap font-bold ${
               pathname.startsWith("/healthcare")
                 ? "bg-emerald-50 text-emerald-700 font-extrabold shadow-2xs"
@@ -169,6 +175,9 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
           </Link>
           <Link
             href="/blog"
+            prefetch={true}
+            onTouchStart={() => { try { router.prefetch("/blog"); } catch {} }}
+            onMouseEnter={() => { try { router.prefetch("/blog"); } catch {} }}
             className={`px-3 py-1.5 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap font-bold ${
               pathname.startsWith("/blog")
                 ? "bg-orange-50 text-orange-600 font-extrabold shadow-2xs"
@@ -179,6 +188,9 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
           </Link>
           <Link
             href={dashboardHref}
+            prefetch={true}
+            onTouchStart={() => { try { router.prefetch(dashboardHref); } catch {} }}
+            onMouseEnter={() => { try { router.prefetch(dashboardHref); } catch {} }}
             className={`px-3 py-1.5 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap font-bold ${
               pathname.startsWith("/admin") || pathname.startsWith("/owner") || pathname.startsWith("/account")
                 ? "bg-orange-50 text-orange-600 font-extrabold shadow-2xs"
@@ -189,6 +201,9 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
           </Link>
           <Link
             href="/wallet"
+            prefetch={true}
+            onTouchStart={() => { try { router.prefetch("/wallet"); } catch {} }}
+            onMouseEnter={() => { try { router.prefetch("/wallet"); } catch {} }}
             className={`px-3 py-1.5 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap font-bold ${
               pathname.startsWith("/wallet")
                 ? "bg-amber-50 text-amber-700 font-extrabold shadow-2xs"
@@ -199,6 +214,9 @@ export function Navbar3D({ user: initialUser }: Navbar3DProps) {
           </Link>
           <Link
             href="/pricing"
+            prefetch={true}
+            onTouchStart={() => { try { router.prefetch("/pricing"); } catch {} }}
+            onMouseEnter={() => { try { router.prefetch("/pricing"); } catch {} }}
             className={`px-3 py-1.5 rounded-full transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap font-bold ${
               pathname.startsWith("/pricing")
                 ? "bg-orange-500 text-white font-extrabold shadow-sm"
