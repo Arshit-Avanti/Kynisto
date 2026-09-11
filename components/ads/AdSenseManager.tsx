@@ -36,8 +36,12 @@ export function AdSenseManager() {
 
     const timer = setTimeout(() => {
       try {
-        window.adsbygoogle = window.adsbygoogle || [];
-        window.adsbygoogle.push({});
+        // Only push if there are unfilled ins ad units on the page to avoid TagError / duplicate slot exceptions
+        const unfilled = document.querySelectorAll("ins.adsbygoogle:not([data-adsbygoogle-status])");
+        if (unfilled.length > 0) {
+          window.adsbygoogle = window.adsbygoogle || [];
+          window.adsbygoogle.push({});
+        }
       } catch {
         // Gracefully ignore duplicate pushes
       }

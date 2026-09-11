@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import Script from "next/script";
 import "./globals.css";
 import "./kynisto-brand.css";
 import "./google-auth.css";
@@ -67,6 +66,13 @@ export default function RootLayout({
         <link rel="preconnect" href="https://tpc.googlesyndication.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://tpc.googlesyndication.com" />
 
+        {/* Google AdSense Auto Ads Script (Must be async in <head> for AdSense Site Preview & Auto Ads Crawler verification) */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9178031569606873"
+          crossOrigin="anonymous"
+        />
+
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
         <meta name="theme-color" content="#FFFFFF" />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -107,11 +113,6 @@ export default function RootLayout({
         <SupabaseAuthManager />
         <AppReturnBanner />
         <AdSenseManager />
-        <Script
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9178031569606873"
-          strategy="lazyOnload"
-          crossOrigin="anonymous"
-        />
         {children}
         <AppUpdateManager />
         <AudioPermissionModal />
