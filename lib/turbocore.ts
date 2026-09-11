@@ -27,6 +27,8 @@ export interface TurboStore {
   bannerUrl?: string;
   services: string[];
   createdAt?: number;
+  searchHaystack?: string;
+  searchTokens?: string[];
 }
 
 export interface TurboCategory {
@@ -107,10 +109,17 @@ class TurboCoreEngine {
   }
 
   public setStores(stores: TurboStore[]): void {
-    this.stores = stores;
+    this.stores = stores.map((store) => {
+      const haystack = `${store.name} ${store.category} ${store.address} ${store.shortAddress || ""} ${(store.services || []).join(" ")}`.toLowerCase();
+      return {
+        ...store,
+        searchHaystack: haystack,
+        searchTokens: haystack.split(/\s+/).filter(Boolean),
+      };
+    });
     try {
       this.packedRustBuffer = kynistoPackCatalogBinary(
-        stores.map((s) => ({
+        this.stores.map((s) => ({
           id: s.id ?? s.slug ?? 0,
           isOpen: s.open,
           rating: s.rating,
@@ -221,10 +230,10 @@ class TurboCoreEngine {
       } else {
         // High-speed C++ typo-tolerant fallback scan
         candidates = candidates.filter((store) => {
-          const haystack = `${store.name} ${store.category} ${store.address} ${(store.services || []).join(" ")}`.toLowerCase();
+          const haystack = store.searchHaystack ?? `${store.name} ${store.category} ${store.address} ${(store.services || []).join(" ")}`.toLowerCase();
           if (haystack.includes(normalized)) return true;
           // Check words with C++ fuzzy matching
-          const storeTokens = haystack.split(/\s+/);
+          const storeTokens = store.searchTokens ?? haystack.split(/\s+/);
           return storeTokens.some((t) => kynistoFuzzyMatchScore(normalized, t) >= 0.82);
         });
       }
