@@ -21,7 +21,8 @@ interface ExecutionContext {
 }
 
 /** Applies industry-standard security headers fully compatible with Google AdSense auto-ads & site preview. */
-function applySecurityHeaders(res: Response, isLocal = false): Response {
+/** Applies industry-standard security headers fully compatible with Google AdSense auto-ads & site preview. */
+function applySecurityHeaders(res: Response, request?: Request, isLocal = false): Response {
   const headers = new Headers(res.headers);
   headers.delete("X-Frame-Options");
   headers.delete("x-frame-options");
@@ -31,7 +32,16 @@ function applySecurityHeaders(res: Response, isLocal = false): Response {
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("X-XSS-Protection", "1; mode=block");
-  headers.set("Access-Control-Allow-Origin", "*");
+
+  const reqOrigin = request?.headers.get("origin");
+  if (reqOrigin) {
+    headers.set("Access-Control-Allow-Origin", reqOrigin);
+    headers.set("Access-Control-Allow-Credentials", "true");
+    headers.set("Vary", "Origin, Accept-Encoding");
+  } else {
+    headers.set("Access-Control-Allow-Origin", "*");
+  }
+
   headers.set(
     "Content-Security-Policy",
     "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; " +
@@ -44,7 +54,7 @@ function applySecurityHeaders(res: Response, isLocal = false): Response {
     "font-src 'self' data: https:; " +
     "connect-src 'self' https: wss: data: blob:; " +
     "frame-src 'self' https: data: blob:; " +
-    "frame-ancestors *; " +
+    "frame-ancestors 'self' https://*.google.com https://*.google.co.in https://*.doubleclick.net https://*.googlesyndication.com https: http: *; " +
     "object-src 'none';"
   );
   return new Response(res.body, {
@@ -57,6 +67,30 @@ function applySecurityHeaders(res: Response, isLocal = false): Response {
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+    const method = request.method.toUpperCase();
+
+    // Fast-path CORS preflight requests (Essential for Google AdSense auto-ads preview & cross-origin dashboards)
+    if (method === "OPTIONS") {
+      const corsHeaders = new Headers();
+      const reqOrigin = request.headers.get("origin");
+      if (reqOrigin) {
+        corsHeaders.set("Access-Control-Allow-Origin", reqOrigin);
+        corsHeaders.set("Access-Control-Allow-Credentials", "true");
+        corsHeaders.set("Vary", "Origin");
+      } else {
+        corsHeaders.set("Access-Control-Allow-Origin", "*");
+      }
+      corsHeaders.set("Access-Control-Allow-Methods", "GET, HEAD, POST, OPTIONS, PUT, DELETE");
+      corsHeaders.set(
+        "Access-Control-Allow-Headers",
+        request.headers.get("access-control-request-headers") || "Content-Type, Authorization, X-Requested-With, Range, Accept, Origin"
+      );
+      corsHeaders.set("Access-Control-Max-Age", "86400");
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders,
+      });
+    }
 
     // Enforce canonical apex domain (https://kynisto.in) and HTTPS 301 redirection (skip on local dev)
     const host = (url.hostname || "").toLowerCase();
@@ -70,7 +104,7 @@ const worker = {
       Boolean(request.headers.get("mf-original-hostname")) ||
       !request.headers.get("cf-ray");
 
-    const secure = (r: Response) => applySecurityHeaders(r, isLocalhost);
+    const secure = (r: Response) => applySecurityHeaders(r, request, isLocalhost);
 
     if (!isLocalhost) {
       const isHttp = url.protocol === "http:" || request.headers.get("x-forwarded-proto") === "http";
@@ -104,7 +138,7 @@ const worker = {
     if (url.pathname === "/robots.txt") {
       const origin = "https://kynisto.in";
       return new Response(
-        `User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /owner/\nDisallow: /account/\nDisallow: /api/\n\nUser-agent: Mediapartners-Google\nDisallow:\nAllow: /\n\nUser-agent: Google-AdSense-Infeed\nDisallow:\nAllow: /\n\nUser-agent: Google-AdSense-AutoAds\nDisallow:\nAllow: /\n\nUser-agent: Google-AdSense-AutoAds-Preflight\nDisallow:\nAllow: /\n\nUser-agent: Google-AdSense-AdsBot\nDisallow:\nAllow: /\n\nUser-agent: Googlebot\nAllow: /\nDisallow: /admin/\nDisallow: /owner/\nDisallow: /account/\nDisallow: /api/\n\nUser-agent: Googlebot-Image\nAllow: /\n\nUser-agent: bingbot\nAllow: /\n\nUser-agent: AdIdxBot\nAllow: /\n\nUser-agent: msnbot\nAllow: /\n\nUser-agent: BingPreview\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`,
+        `User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /owner/\nDisallow: /account/\nDisallow: /api/\n\nUser-agent: Mediapartners-Google\nDisallow:\nAllow: /\n\nUser-agent: Google-Display-Ads-Bot\nDisallow:\nAllow: /\n\nUser-agent: Google-AdSense-Infeed\nDisallow:\nAllow: /\n\nUser-agent: Google-AdSense-AutoAds\nDisallow:\nAllow: /\n\nUser-agent: Google-AdSense-AutoAds-Preflight\nDisallow:\nAllow: /\n\nUser-agent: Google-AdSense-AdsBot\nDisallow:\nAllow: /\n\nUser-agent: AdsBot-Google\nDisallow:\nAllow: /\n\nUser-agent: AdsBot-Google-Mobile\nDisallow:\nAllow: /\n\nUser-agent: Googlebot\nAllow: /\nDisallow: /admin/\nDisallow: /owner/\nDisallow: /account/\nDisallow: /api/\n\nUser-agent: Googlebot-Image\nAllow: /\n\nUser-agent: bingbot\nAllow: /\n\nUser-agent: AdIdxBot\nAllow: /\n\nUser-agent: msnbot\nAllow: /\n\nUser-agent: BingPreview\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`,
         {
           headers: {
             "Content-Type": "text/plain; charset=utf-8",
@@ -171,7 +205,6 @@ const worker = {
     }
 
     // Instant Edge Static Assets with 1-Year Immutable Caching & Range Support
-    const method = request.method.toUpperCase();
     const isStaticAsset =
       url.pathname.startsWith("/assets/") ||
       url.pathname.startsWith("/_next/") ||
@@ -195,7 +228,7 @@ const worker = {
           headers.set("Cache-Control", "public, max-age=31536000, immutable");
           headers.set("Vary", "Accept-Encoding");
           headers.set("Accept-Ranges", "bytes");
-          return applySecurityHeaders(new Response(assetResponse.body, { status: assetResponse.status, headers }));
+          return secure(new Response(assetResponse.body, { status: assetResponse.status, headers }));
         }
       } catch {
         // Ignore asset fetch error and fallback to SSR router

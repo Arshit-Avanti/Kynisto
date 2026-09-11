@@ -11,6 +11,10 @@ User-agent: Mediapartners-Google
 Disallow:
 Allow: /
 
+User-agent: Google-Display-Ads-Bot
+Disallow:
+Allow: /
+
 User-agent: Google-AdSense-Infeed
 Disallow:
 Allow: /
@@ -24,6 +28,14 @@ Disallow:
 Allow: /
 
 User-agent: Google-AdSense-AdsBot
+Disallow:
+Allow: /
+
+User-agent: AdsBot-Google
+Disallow:
+Allow: /
+
+User-agent: AdsBot-Google-Mobile
 Disallow:
 Allow: /
 
