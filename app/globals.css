@@ -1736,7 +1736,8 @@ textarea:focus {
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
 }
 
-footer:not(.efferdFooterBlock) {
+footer.legacyFooter,
+footer:not(.efferdFooterBlock):not(.footer3D):not([class*="w-full"]):not([class*="footer3D"]) {
   width: min(1344px, calc(100% - 96px));
   min-height: 160px;
   margin: 0 auto;
@@ -1925,7 +1926,7 @@ footer > p { color: var(--muted); font-size: 11px; }
 .storeGrid>*,.offerGrid>*{content-visibility:auto;contain-intrinsic-size:260px}
 
 @media (max-width: 1100px) {
-  .topbar, .hero, .categorySection, .trustStrip, footer { width: calc(100% - 56px); padding-left: 0; padding-right: 0; }
+  .topbar, .hero, .categorySection, .trustStrip, footer:not(.footer3D):not([class*="w-full"]):not([class*="footer3D"]) { width: calc(100% - 56px); padding-left: 0; padding-right: 0; }
   .topbar { grid-template-columns: 1fr auto; }
   .locationPill { display: none; }
   .hero { grid-template-columns: 1fr .9fr; gap: 35px; }
@@ -2032,7 +2033,7 @@ footer > p { color: var(--muted); font-size: 11px; }
   .trustStrip { width: calc(100% - 32px); grid-template-columns: 1fr; padding: 50px 0; }
   .trustStrip > div, .trustStrip > div:first-child { padding: 18px 0; border-left: 0; border-top: 1px solid var(--line); }
   .trustStrip > div:first-child { border-top: 0; }
-  footer { width: calc(100% - 32px); padding: 35px 0; grid-template-columns: 1fr; gap: 8px; }
+  footer:not(.footer3D):not([class*="w-full"]):not([class*="footer3D"]) { width: calc(100% - 32px); padding: 35px 0; grid-template-columns: 1fr; gap: 8px; }
   .demoNote { text-align: left; }
 }
 
@@ -2239,25 +2240,25 @@ footer > p { color: var(--muted); font-size: 11px; }
   -webkit-text-fill-color: #FFFFFF !important;
 }
 
-/* Force Light Mode High Contrast for Headings, Paragraphs, Labels, Table Headers/Cells */
-.light-theme h1:not([class*="text-"]):not(.mobileNavDrawer *),
-.light-theme h2:not([class*="text-"]):not(.mobileNavDrawer *),
-.light-theme h3:not([class*="text-"]):not(.mobileNavDrawer *),
-.light-theme h4:not([class*="text-"]):not(.mobileNavDrawer *),
-.light-theme h5:not([class*="text-"]):not(.mobileNavDrawer *),
-.light-theme h6:not([class*="text-"]):not(.mobileNavDrawer *),
-.light-theme p:not([class*="text-"]):not(.mobileNavDrawer *),
-.light-theme label:not([class*="text-"]):not(.mobileNavDrawer *),
-.light-theme li:not([class*="text-"]):not(.mobileNavDrawer *),
-.mode-light h1:not([class*="text-"]):not(.mobileNavDrawer *),
-.mode-light h2:not([class*="text-"]):not(.mobileNavDrawer *),
-.mode-light h3:not([class*="text-"]):not(.mobileNavDrawer *),
-.mode-light h4:not([class*="text-"]):not(.mobileNavDrawer *),
-.mode-light h5:not([class*="text-"]):not(.mobileNavDrawer *),
-.mode-light h6:not([class*="text-"]):not(.mobileNavDrawer *),
-.mode-light p:not([class*="text-"]):not(.mobileNavDrawer *),
-.mode-light label:not([class*="text-"]):not(.mobileNavDrawer *),
-.mode-light li:not([class*="text-"]):not(.mobileNavDrawer *) {
+/* Force Light Mode High Contrast for Headings, Paragraphs, Labels, Table Headers/Cells (excluding full-width dark media footers) */
+.light-theme h1:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.light-theme h2:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.light-theme h3:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.light-theme h4:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.light-theme h5:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.light-theme h6:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.light-theme p:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.light-theme label:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.light-theme li:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.mode-light h1:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.mode-light h2:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.mode-light h3:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.mode-light h4:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.mode-light h5:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.mode-light h6:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.mode-light p:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.mode-light label:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *),
+.mode-light li:not([class*="text-"]):not(.mobileNavDrawer *):not(.footer3D *):not(footer *) {
   color: #0F172A !important;
   -webkit-text-fill-color: #0F172A !important;
 }
@@ -4991,3 +4992,115 @@ html, body {
 .turbo-lite .animate-shimmer-sweep {
   animation: none !important;
 }
+
+/* ==========================================================================
+   KYNISTO FULL-WIDTH 3D FOOTER (EDGE-TO-EDGE & 100% TEXT VISIBILITY)
+   ========================================================================== */
+footer.footer3D,
+.footer3D {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  clear: both !important;
+  background-color: rgba(8, 14, 29, 0.95) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
+}
+
+/* Reset any global text-fill-color leak for footer elements */
+.footer3D,
+.footer3D *,
+.mode-light .footer3D,
+.mode-light .footer3D *,
+.light-theme .footer3D,
+.light-theme .footer3D * {
+  -webkit-text-fill-color: initial;
+}
+
+/* Footer Headings — Brilliant Crisp White */
+.footer3D h4,
+.mode-light .footer3D h4,
+.light-theme .footer3D h4 {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Footer Links — Crisp Light Slate with Hover Amber/Orange */
+.footer3D a,
+.footer3D li a,
+.mode-light .footer3D a,
+.mode-light .footer3D li a,
+.light-theme .footer3D a,
+.light-theme .footer3D li a {
+  color: #CBD5E1 !important;
+  -webkit-text-fill-color: #CBD5E1 !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.footer3D a:hover,
+.footer3D li a:hover,
+.mode-light .footer3D a:hover,
+.mode-light .footer3D li a:hover,
+.light-theme .footer3D a:hover,
+.light-theme .footer3D li a:hover {
+  color: #FB923C !important;
+  -webkit-text-fill-color: #FB923C !important;
+  text-shadow: 0 0 12px rgba(251, 146, 60, 0.5) !important;
+}
+
+/* Featured Knowledge Hub Link */
+.footer3D .footerFeatureLink,
+.footer3D .footerFeatureLink *,
+.mode-light .footer3D .footerFeatureLink,
+.mode-light .footer3D .footerFeatureLink *,
+.light-theme .footer3D .footerFeatureLink,
+.light-theme .footer3D .footerFeatureLink * {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+
+/* Footer Paragraphs & Spans */
+.footer3D p,
+.footer3D span:not([class*="bg-"]):not([class*="kynistoMark"]),
+.mode-light .footer3D p,
+.mode-light .footer3D span:not([class*="bg-"]):not([class*="kynistoMark"]),
+.light-theme .footer3D p,
+.light-theme .footer3D span:not([class*="bg-"]):not([class*="kynistoMark"]) {
+  color: #E2E8F0 !important;
+  -webkit-text-fill-color: #E2E8F0 !important;
+}
+
+/* Systems Active Badge */
+.footer3D .activeSystemBadge,
+.mode-light .footer3D .activeSystemBadge,
+.light-theme .footer3D .activeSystemBadge {
+  color: #6EE7B7 !important;
+  -webkit-text-fill-color: #6EE7B7 !important;
+  background-color: rgba(16, 185, 129, 0.2) !important;
+  border: 1px solid rgba(16, 185, 129, 0.45) !important;
+}
+
+/* Bottom Bar Copyright & Compliance Text */
+.footer3D .footerBottomText,
+.footer3D .footerBottomText *,
+.mode-light .footer3D .footerBottomText,
+.mode-light .footer3D .footerBottomText *,
+.light-theme .footer3D .footerBottomText,
+.light-theme .footer3D .footerBottomText * {
+  color: #94A3B8 !important;
+  -webkit-text-fill-color: #94A3B8 !important;
+}
+

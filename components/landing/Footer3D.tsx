@@ -6,8 +6,20 @@ import { Shield, Globe, Mail, MapPin, BookOpen, ArrowUpRight } from "lucide-reac
 
 export function Footer3D() {
   return (
-    <footer className="border-t border-white/15 bg-slate-950/70 backdrop-blur-2xl pt-16 pb-14 mt-16 text-slate-200 font-sans shadow-2xl relative z-10">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+    <footer
+      className="footer3D w-full border-t border-white/15 bg-slate-950/95 backdrop-blur-2xl pt-16 pb-14 mt-16 text-slate-200 font-sans shadow-2xl relative z-10"
+      style={{
+        width: "100%",
+        maxWidth: "100%",
+        marginLeft: 0,
+        marginRight: 0,
+        left: 0,
+        right: 0,
+        display: "block",
+        boxSizing: "border-box",
+      }}
+    >
+      <div className="w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         {/* Main Grid with Generous Spacing */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-14 mb-14">
           
@@ -16,19 +28,26 @@ export function Footer3D() {
             <Link href="/" className="inline-block">
               <KynistoLogo showTagline variant="light" />
             </Link>
-            <p className="text-slate-200 text-sm leading-relaxed max-w-md font-normal">
+            <p
+              className="text-slate-300 text-sm leading-relaxed max-w-md font-normal"
+              style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+            >
               The next-generation locality intelligence platform. Connecting residents with neighborhood
               stores, verified healthcare clinics, live virtual queues, and zero-commission local commerce.
             </p>
 
-            <div className="text-xs text-slate-200 space-y-2.5 pt-2">
+            <div className="text-xs text-slate-300 space-y-2.5 pt-2">
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
-                <span className="text-slate-200">B-5/13, DLF Ankur Vihar, Loni, Ghaziabad, UP, India – 201102</span>
+                <span style={{ color: "#E2E8F0", WebkitTextFillColor: "#E2E8F0" }}>
+                  B-5/13, DLF Ankur Vihar, Loni, Ghaziabad, UP, India – 201102
+                </span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-orange-400 shrink-0" />
-                <span className="text-slate-200">kynisto.in@gmail.com • nxt.arshit@gmail.com</span>
+                <span style={{ color: "#E2E8F0", WebkitTextFillColor: "#E2E8F0" }}>
+                  kynisto.in@gmail.com • nxt.arshit@gmail.com
+                </span>
               </div>
             </div>
 
@@ -64,36 +83,74 @@ export function Footer3D() {
 
           {/* Ecosystem Column (2 Cols) */}
           <div className="lg:col-span-2 space-y-4">
-            <h4 className="text-white text-xs font-bold uppercase tracking-wider drop-shadow-sm">Ecosystem</h4>
-            <ul className="space-y-3 text-sm text-slate-200">
-              <li>
-                <Link href="/services" className="hover:text-orange-300 transition-colors">
+            <h4
+              className="text-white text-xs font-bold uppercase tracking-wider drop-shadow-sm"
+              style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}
+            >
+              Ecosystem
+            </h4>
+            <ul className="space-y-3 text-sm">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/services"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   Local Services
                 </Link>
               </li>
-              <li>
-                <Link href="/healthcare" className="hover:text-emerald-300 transition-colors flex items-center gap-1.5">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/healthcare"
+                  className="hover:text-emerald-300 transition-colors flex items-center gap-1.5 font-medium"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   <span>Healthcare &amp; OPD</span>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 </Link>
               </li>
-              <li>
-                <Link href="/products" className="hover:text-orange-300 transition-colors">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/products"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   Product Catalogs
                 </Link>
               </li>
-              <li>
-                <Link href="/search" className="hover:text-orange-300 transition-colors">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/stores"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
+                  Store Directory
+                </Link>
+              </li>
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/search"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   Smart Discovery
                 </Link>
               </li>
-              <li>
-                <Link href="/pricing" className="hover:text-orange-300 transition-colors">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/pricing"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   Store Plans
                 </Link>
               </li>
-              <li>
-                <Link href="/wallet" className="hover:text-orange-300 transition-colors">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/wallet"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   Loyalty Wallet
                 </Link>
               </li>
@@ -102,56 +159,101 @@ export function Footer3D() {
 
           {/* Knowledge & Guides Column (3 Cols) */}
           <div className="lg:col-span-3 space-y-4">
-            <h4 className="text-white text-xs font-bold uppercase tracking-wider drop-shadow-sm">Knowledge &amp; Guides</h4>
-            <ul className="space-y-3 text-sm text-slate-200">
-              <li>
-                <Link href="/blog" className="text-white font-bold hover:text-orange-300 transition-colors flex items-center gap-1">
+            <h4
+              className="text-white text-xs font-bold uppercase tracking-wider drop-shadow-sm"
+              style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}
+            >
+              Knowledge &amp; Guides
+            </h4>
+            <ul className="space-y-3 text-sm">
+              <li style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}>
+                <Link
+                  href="/blog"
+                  className="footerFeatureLink text-white font-bold hover:text-orange-300 transition-colors flex items-center gap-1"
+                  style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}
+                >
                   <span>Knowledge Hub &amp; Blog</span>
                   <ArrowUpRight className="w-3.5 h-3.5 text-orange-400" />
                 </Link>
               </li>
-              <li>
-                <Link href="/blog/opd-virtual-queue-guide-delhi-ncr" className="hover:text-orange-300 transition-colors">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/blog/opd-virtual-queue-guide-delhi-ncr"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   OPD Virtual Queue Guide
                 </Link>
               </li>
-              <li>
-                <Link href="/blog/15-minute-city-hyperlocal-discovery" className="hover:text-orange-300 transition-colors">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/blog/15-minute-city-hyperlocal-discovery"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   15-Minute City Guide
                 </Link>
               </li>
-              <li>
-                <Link href="/blog/neighborhood-pharmacies-digital-prescriptions" className="hover:text-orange-300 transition-colors">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/blog/neighborhood-pharmacies-digital-prescriptions"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   Digital Prescriptions Guide
                 </Link>
               </li>
-              <li>
-                <Link href="/blog/choosing-family-physician-clinic-guide" className="hover:text-orange-300 transition-colors">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/blog/choosing-family-physician-clinic-guide"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   Family Physician Guide
                 </Link>
               </li>
-              <li>
-                <Link href="/blog/preventive-dental-care-family-clinic-guide" className="hover:text-orange-300 transition-colors">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/blog/preventive-dental-care-family-clinic-guide"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   Preventive Dental Care
                 </Link>
               </li>
-              <li>
-                <Link href="/guide" className="hover:text-orange-300 transition-colors">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/guide"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   User &amp; Merchant Manual
                 </Link>
               </li>
-              <li>
-                <Link href="/faq" className="hover:text-orange-300 transition-colors">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/faq"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   FAQ &amp; Help Center
                 </Link>
               </li>
-              <li>
-                <Link href="/about" className="hover:text-orange-300 transition-colors">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/about"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   About Kynisto
                 </Link>
               </li>
-              <li>
-                <Link href="/contact" className="hover:text-orange-300 transition-colors">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/contact"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   Contact Support
                 </Link>
               </li>
@@ -160,30 +262,54 @@ export function Footer3D() {
 
           {/* Security & Legal Column (2 Cols) */}
           <div className="lg:col-span-2 space-y-4">
-            <h4 className="text-white text-xs font-bold uppercase tracking-wider drop-shadow-sm">Security &amp; Legal</h4>
-            <ul className="space-y-3 text-sm text-slate-200">
-              <li>
-                <Link href="/privacy" className="hover:text-orange-300 transition-colors">
+            <h4
+              className="text-white text-xs font-bold uppercase tracking-wider drop-shadow-sm"
+              style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF" }}
+            >
+              Security &amp; Legal
+            </h4>
+            <ul className="space-y-3 text-sm">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/privacy"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   Privacy Policy
                 </Link>
               </li>
-              <li>
-                <Link href="/terms" className="hover:text-orange-300 transition-colors">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/terms"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   Terms of Service
                 </Link>
               </li>
-              <li>
-                <Link href="/owner" className="hover:text-orange-300 transition-colors">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/owner"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   Merchant Portal
                 </Link>
               </li>
-              <li>
-                <Link href="/admin" className="hover:text-orange-300 transition-colors">
+              <li style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}>
+                <Link
+                  href="/admin"
+                  className="text-slate-300 hover:text-orange-300 transition-colors font-medium block"
+                  style={{ color: "#CBD5E1", WebkitTextFillColor: "#CBD5E1" }}
+                >
                   Admin Gateway
                 </Link>
               </li>
               <li className="pt-2">
-                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold shadow-sm">
+                <span
+                  className="activeSystemBadge inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold shadow-sm"
+                  style={{ color: "#6EE7B7", WebkitTextFillColor: "#6EE7B7" }}
+                >
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   Systems Active
                 </span>
@@ -193,9 +319,17 @@ export function Footer3D() {
         </div>
 
         {/* Footer Bottom Bar */}
-        <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-300 gap-4">
-          <p>© {new Date().getFullYear()} Kynisto Technologies Inc. All rights reserved.</p>
-          <p className="flex items-center gap-1.5 text-slate-300">
+        <div
+          className="footerBottomText border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-4"
+          style={{ color: "#94A3B8", WebkitTextFillColor: "#94A3B8" }}
+        >
+          <p style={{ color: "#94A3B8", WebkitTextFillColor: "#94A3B8" }}>
+            © {new Date().getFullYear()} Kynisto Technologies Inc. All rights reserved.
+          </p>
+          <p
+            className="flex items-center gap-1.5 text-slate-400"
+            style={{ color: "#94A3B8", WebkitTextFillColor: "#94A3B8" }}
+          >
             <span>Verified Publisher Network</span>
             <span>•</span>
             <span>Google AdSense &amp; Privacy Compliant</span>
