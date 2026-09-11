@@ -1,6 +1,6 @@
 // Kynisto High-Performance PWA & Web Push Service Worker
-const CACHE_NAME = "kynisto-turbocore-2026.09.11.123";
-const API_CACHE = "kynisto-turbocore-api-2026.09.11.123";
+const CACHE_NAME = "kynisto-turbocore-2026.09.11.125";
+const API_CACHE = "kynisto-turbocore-api-2026.09.11.125";
 const PRECACHE_URLS = [
   "/",
   "/stores",

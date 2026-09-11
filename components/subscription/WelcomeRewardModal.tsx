@@ -25,19 +25,36 @@ export function WelcomeRewardModal({
   useEffect(() => {
     if (!userRole || userRole === "admin" || !userId) return;
 
-    const storageKey = "kynisto_welcome_reward_seen_" + userId;
-    const isSeen = localStorage.getItem(storageKey);
+    let isMounted = true;
+    async function checkSubscriptionStatus() {
+      try {
+        const res = await fetch("/api/subscriptions/status");
+        if (!res.ok) return;
+        const data = await res.json() as { enabled?: boolean };
+        if (!data?.enabled || !isMounted) return;
 
-    if (!isSeen) {
-      localStorage.setItem(storageKey, "true");
-      const isOwner = userRole === "store_owner";
-      setRewardData({
-        planName: isOwner ? "Pro" : "Premium",
-        worth: isOwner ? 499 : 49,
-        expiresInDays: 30,
-      });
-      setInternalOpen(true);
+        const storageKey = "kynisto_welcome_reward_seen_" + userId;
+        const isSeen = localStorage.getItem(storageKey);
+
+        if (!isSeen && isMounted) {
+          localStorage.setItem(storageKey, "true");
+          const isOwner = userRole === "store_owner";
+          setRewardData({
+            planName: isOwner ? "Pro" : "Premium",
+            worth: isOwner ? 499 : 49,
+            expiresInDays: 30,
+          });
+          setInternalOpen(true);
+        }
+      } catch {
+        // silent catch
+      }
     }
+
+    void checkSubscriptionStatus();
+    return () => {
+      isMounted = false;
+    };
   }, [userRole, userId]);
 
   const isOpen = externalIsOpen ?? internalOpen;
@@ -86,6 +103,10 @@ export function WelcomeRewardModal({
           50% { box-shadow: 0 0 45px rgba(255, 138, 0, 0.7); }
         }
 
+        .welcome-reward-overlay,
+        .welcome-reward-overlay *,
+        .welcome-reward-card,
+        .welcome-reward-card *,
         .welcome-reward-card h1,
         .welcome-reward-card h2,
         .welcome-reward-card h3,
@@ -94,6 +115,8 @@ export function WelcomeRewardModal({
         .welcome-reward-card h6,
         .welcome-reward-card p,
         .welcome-reward-card p *,
+        .welcome-reward-card strong,
+        .welcome-reward-card span,
         .welcome-reward-card ul,
         .welcome-reward-card ol,
         .welcome-reward-card li,
@@ -127,6 +150,8 @@ export function WelcomeRewardModal({
           .welcome-reward-card h6,
           .welcome-reward-card p,
           .welcome-reward-card p *,
+          .welcome-reward-card strong,
+          .welcome-reward-card span,
           .welcome-reward-card ul,
           .welcome-reward-card ol,
           .welcome-reward-card li,
@@ -145,7 +170,7 @@ export function WelcomeRewardModal({
       />
 
       <div
-        className="welcome-reward-card"
+        className="welcome-reward-card force-white-text text-white"
         style={{
           position: "relative",
           width: "100%",
@@ -201,6 +226,7 @@ export function WelcomeRewardModal({
 
         {/* Main Title */}
         <h2
+          className="welcome-reward-title force-white-text text-white font-extrabold"
           style={{
             fontSize: "clamp(2rem, 4vw, 2.8rem)",
             fontWeight: 900,
@@ -217,6 +243,7 @@ export function WelcomeRewardModal({
 
         {/* Subheading */}
         <p
+          className="welcome-reward-subtitle force-white-text text-white font-bold"
           style={{
             fontSize: "1.15rem",
             fontWeight: 700,
@@ -229,7 +256,7 @@ export function WelcomeRewardModal({
             lineHeight: 1.5,
           }}
         >
-          Your <strong style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF", textShadow: "0 2px 10px rgba(0,0,0,0.9)", fontWeight: 800 }}>{rewardData.planName}</strong> membership (worth ₹{rewardData.worth}) has been unlocked <span style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF", textShadow: "0 2px 10px rgba(0,0,0,0.9)", fontWeight: 800 }}>FREE</span> for 1 month.
+          Your <strong className="force-white-text text-white font-extrabold" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF", textShadow: "0 2px 10px rgba(0,0,0,0.9)", fontWeight: 800 }}>{rewardData.planName}</strong> membership (worth ₹{rewardData.worth}) has been unlocked <span className="force-white-text text-white font-extrabold" style={{ color: "#FFFFFF", WebkitTextFillColor: "#FFFFFF", textShadow: "0 2px 10px rgba(0,0,0,0.9)", fontWeight: 800 }}>FREE</span> for 1 month.
         </p>
 
         {/* Content Layout: Features List & Card Graphic */}

@@ -61,6 +61,8 @@ export function AdminSubscriptionsPanel() {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [modelEnabled, setModelEnabled] = useState<boolean>(false);
+  const [togglingModel, setTogglingModel] = useState(false);
 
   useEffect(() => {
     if (requestedView === "marketplace") {
@@ -94,7 +96,7 @@ export function AdminSubscriptionsPanel() {
 
   // Bulk Action modal state
   const [bulkActionModal, setBulkActionModal] = useState<{
-    action: "bulk_delete" | "bulk_deactivate" | "bulk_upgrade" | "bulk_trial";
+    action: "activate" | "upgrade" | "grant_trial" | "cancel" | "deactivate" | "delete";
     targetPlanId?: string;
     targetBillingCycle?: "monthly" | "yearly";
     days?: number;
@@ -111,7 +113,11 @@ export function AdminSubscriptionsPanel() {
       if (statusFilter !== "all") params.set("status", statusFilter);
       if (roleFilter !== "all") params.set("role", roleFilter);
 
-      const res = await fetch(`/api/admin/subscriptions?${params.toString()}`);
+      const [res, statusRes] = await Promise.all([
+        fetch(`/api/admin/subscriptions?${params.toString()}`),
+        fetch("/api/subscriptions/status").catch(() => null),
+      ]);
+
       if (!res.ok) {
         const errJson = await res.json().catch(() => ({}));
         throw new Error(errJson.error || "Failed to load admin subscriptions.");
@@ -120,6 +126,11 @@ export function AdminSubscriptionsPanel() {
       setSubscriptions(data.subscriptions || []);
       setPendingMessages(data.pendingMessages || []);
       setAnalytics(data.analytics || null);
+
+      if (statusRes && statusRes.ok) {
+        const sData = await statusRes.json().catch(() => null);
+        if (sData) setModelEnabled(Boolean(sData.enabled));
+      }
     } catch (err: any) {
       console.error("Admin subscriptions fetch error:", err);
       setError(err?.message || "Failed to load admin subscriptions.");
@@ -246,8 +257,82 @@ export function AdminSubscriptionsPanel() {
     }
   };
 
+  const toggleSubscriptionModel = async () => {
+    setTogglingModel(true);
+    try {
+      const nextValue = !modelEnabled;
+      const res = await fetch("/api/admin/workspace", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update_setting",
+          key: "subscription_model_enabled",
+          value: nextValue ? "true" : "false",
+        }),
+      });
+      if (res.ok) {
+        setModelEnabled(nextValue);
+      } else {
+        alert("Failed to update subscription setting.");
+      }
+    } catch {
+      alert("Failed to update subscription setting.");
+    } finally {
+      setTogglingModel(false);
+    }
+  };
+
   return (
     <div style={{ padding: "20px 0" }}>
+      {/* Platform Subscription Model Live Toggle Banner */}
+      <div
+        style={{
+          marginBottom: "20px",
+          padding: "16px 20px",
+          borderRadius: "16px",
+          background: modelEnabled ? "rgba(34, 197, 94, 0.08)" : "rgba(239, 68, 68, 0.08)",
+          border: `1px solid ${modelEnabled ? "rgba(34, 197, 94, 0.3)" : "rgba(239, 68, 68, 0.3)"}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "12px",
+        }}
+      >
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ fontSize: "16px" }}>{modelEnabled ? "🟢" : "🔴"}</span>
+            <b style={{ fontSize: "15px", color: "#0f172a" }}>
+              Subscription Model &amp; User Prompts: {modelEnabled ? "ENABLED" : "DISABLED"}
+            </b>
+          </div>
+          <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#64748b" }}>
+            {modelEnabled
+              ? "Welcome reward modal and subscription expiry alerts are currently visible to users."
+              : "All subscription modals and expiry messages are currently hidden from users. Enable when you want users to see subscription features."}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => void toggleSubscriptionModel()}
+          disabled={togglingModel}
+          style={{
+            padding: "8px 18px",
+            borderRadius: "10px",
+            fontWeight: 800,
+            fontSize: "13px",
+            border: "none",
+            cursor: "pointer",
+            background: modelEnabled ? "#ef4444" : "#22c55e",
+            color: "#ffffff",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            transition: "all 0.2s ease",
+          }}
+        >
+          {togglingModel ? "Updating..." : modelEnabled ? "Turn OFF Subscriptions" : "Turn ON Subscriptions"}
+        </button>
+      </div>
+
       {/* Top Panel Tab Switcher */}
       <div style={{ display: "flex", gap: "12px", marginBottom: "28px", background: "#FFFFFF", padding: "6px", borderRadius: "16px", border: "1px solid #E2E8F0", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
         <button

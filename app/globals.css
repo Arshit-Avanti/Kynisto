@@ -123,18 +123,18 @@ svg {
 
 /* Light mode: ensure readable dark text on content elements only.
    Exclude elements with explicit background colors (badges, status, buttons) and forced white text elements */
-.mode-light h1:not([class*="text-"]):not(.services-hero-title):not(.force-white-text),
-.mode-light h2:not([class*="text-"]):not(.force-white-text),
-.mode-light h3:not([class*="text-"]):not(.force-white-text),
-.mode-light h4:not([class*="text-"]):not(.force-white-text),
-.mode-light p:not([class*="text-"]):not(.services-hero-subtitle):not(.force-white-text),
-.mode-light label:not([class*="text-"]):not(.force-white-text),
-.light-theme h1:not([class*="text-"]):not(.services-hero-title):not(.force-white-text),
-.light-theme h2:not([class*="text-"]):not(.force-white-text),
-.light-theme h3:not([class*="text-"]):not(.force-white-text),
-.light-theme h4:not([class*="text-"]):not(.force-white-text),
-.light-theme p:not([class*="text-"]):not(.services-hero-subtitle):not(.force-white-text),
-.light-theme label:not([class*="text-"]):not(.force-white-text) {
+.mode-light h1:not([class*="text-"]):not(.services-hero-title):not(.force-white-text):not(.welcome-reward-card *):not(.welcome-reward-overlay *),
+.mode-light h2:not([class*="text-"]):not(.force-white-text):not(.welcome-reward-card *):not(.welcome-reward-overlay *),
+.mode-light h3:not([class*="text-"]):not(.force-white-text):not(.welcome-reward-card *):not(.welcome-reward-overlay *),
+.mode-light h4:not([class*="text-"]):not(.force-white-text):not(.welcome-reward-card *):not(.welcome-reward-overlay *),
+.mode-light p:not([class*="text-"]):not(.services-hero-subtitle):not(.force-white-text):not(.welcome-reward-card *):not(.welcome-reward-overlay *),
+.mode-light label:not([class*="text-"]):not(.force-white-text):not(.welcome-reward-card *):not(.welcome-reward-overlay *),
+.light-theme h1:not([class*="text-"]):not(.services-hero-title):not(.force-white-text):not(.welcome-reward-card *):not(.welcome-reward-overlay *),
+.light-theme h2:not([class*="text-"]):not(.force-white-text):not(.welcome-reward-card *):not(.welcome-reward-overlay *),
+.light-theme h3:not([class*="text-"]):not(.force-white-text):not(.welcome-reward-card *):not(.welcome-reward-overlay *),
+.light-theme h4:not([class*="text-"]):not(.force-white-text):not(.welcome-reward-card *):not(.welcome-reward-overlay *),
+.light-theme p:not([class*="text-"]):not(.services-hero-subtitle):not(.force-white-text):not(.welcome-reward-card *):not(.welcome-reward-overlay *),
+.light-theme label:not([class*="text-"]):not(.force-white-text):not(.welcome-reward-card *):not(.welcome-reward-overlay *) {
   color: #0f172a;
   -webkit-text-fill-color: #0f172a;
   text-shadow: none;
@@ -142,11 +142,17 @@ svg {
 
 /* Explicit reset for forced white text elements on dark media backdrops */
 .force-white-text,
+.force-white-text *,
+.welcome-reward-card,
+.welcome-reward-card *,
+.welcome-reward-overlay,
+.welcome-reward-overlay *,
 .services-hero-title,
 .services-hero-subtitle,
 .services-page-shell h1,
 .services-page-shell h2 {
-  -webkit-text-fill-color: initial !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
 }
 
 /* Dark mode: ensure readable white text on content elements only */
@@ -1899,19 +1905,28 @@ footer > p { color: var(--muted); font-size: 11px; }
 .toast {
   position: fixed;
   left: 50%;
-  bottom: 24px;
-  z-index: 200;
+  bottom: calc(max(18px, env(safe-area-inset-bottom)) + 74px);
+  z-index: 1000000;
   transform: translateX(-50%) translateZ(0);
   will-change: transform, opacity;
   contain: layout style paint;
-  padding: 12px 17px;
-  border-radius: 12px;
-  background: var(--ink);
-  color: #fff;
-  box-shadow: 0 8px 20px rgba(23, 35, 27, 0.18);
-  font-size: 11px;
+  padding: 12px 20px;
+  border-radius: 14px;
+  background: #0f172a;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.18);
+  font-size: 13px;
   font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
   animation: toastIn 190ms ease-out;
+}
+
+@media (min-width: 768px) {
+  .toast {
+    bottom: 32px;
+  }
 }
 
 @keyframes fadeIn { from { opacity: 0; } }

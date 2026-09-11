@@ -17,6 +17,7 @@ export async function GET(request: Request) {
       area: url.searchParams.get("area") ?? undefined,
       postalCode: url.searchParams.get("pin") ?? undefined,
       businessType: url.searchParams.get("type") ?? undefined,
+      module: url.searchParams.get("module") ?? undefined,
       sort,
       openNow: url.searchParams.get("openNow") === "true",
       page: number("page", 1),

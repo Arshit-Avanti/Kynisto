@@ -77,6 +77,11 @@ const SETTING_DEFINITIONS = {
     type: "boolean",
     defaultValue: "false",
   },
+  subscription_model_enabled: {
+    label: "Subscription model & messages enabled (Show welcome reward modal and expiry banners to users)",
+    type: "boolean",
+    defaultValue: "false",
+  },
   kynisto_customer_membership_enabled: {
     label: "Kynisto Customer Membership (Enforce plan tiers & restrictions for Customers)",
     type: "boolean",

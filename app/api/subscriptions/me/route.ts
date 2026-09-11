@@ -8,7 +8,7 @@ import {
   calculateDaysRemaining,
   isSubscriptionExpiringSoon,
 } from "@/lib/subscriptions";
-import { isCustomerMembershipEnabled, isOwnerMembershipEnabled } from "@/lib/settings";
+import { isCustomerMembershipEnabled, isOwnerMembershipEnabled, isSubscriptionModelEnabled } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +16,19 @@ export async function GET() {
   const session = await getSessionUser();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const subscriptionModelEnabled = await isSubscriptionModelEnabled();
+  if (!subscriptionModelEnabled) {
+    return NextResponse.json({
+      subscription: null,
+      subscriptionModelEnabled: false,
+      welcomeReward: null,
+      customerMembershipEnabled: false,
+      ownerMembershipEnabled: false,
+      isUnrestrictedByAdmin: true,
+      message: "Subscription model is disabled by administrator.",
+    });
   }
 
   await ensureSubscriptionTables();
@@ -111,6 +124,7 @@ export async function GET() {
   const expiringSoon = sub ? isSubscriptionExpiringSoon(sub.expiresAt, sub.status, now) : false;
 
   return NextResponse.json({
+    subscriptionModelEnabled: true,
     customerMembershipEnabled: customerEnabled,
     ownerMembershipEnabled: ownerEnabled,
     isUnrestrictedByAdmin: isRoleMembershipDisabled,

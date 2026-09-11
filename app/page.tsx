@@ -1709,7 +1709,13 @@ const stores: Store[] = [
   },
 ];
 
-const defaultFallbackStores: Store[] = stores.filter((s) => !["Clinic", "Pharmacy", "Pet care"].includes(s.category));
+const defaultFallbackStores: Store[] = stores.filter(
+  (s) =>
+    !["Clinic", "Pharmacy", "Pet care", "Clinics & Doctors"].includes(s.category) &&
+    !s.category.toLowerCase().includes("clinic") &&
+    !s.category.toLowerCase().includes("doctor") &&
+    !s.category.toLowerCase().includes("health")
+);
 
 // ⚡ TurboCore: Hydrate reactive client memory bus immediately
 if (typeof window !== "undefined") {
@@ -1898,6 +1904,7 @@ export default function Home() {
         page: "1",
         lat: String(currentCoords.latitude),
         lng: String(currentCoords.longitude),
+        module: "local",
       });
       if (query.trim()) parameters.set("q", query.trim());
       if (category !== "All") parameters.set("category", category);
@@ -1917,15 +1924,38 @@ export default function Home() {
         const uniqueItems = data.items.filter((store) => {
           const key = store.id ?? store.slug;
           if (!key || seen.has(key)) return false;
+          const cat = (store.category || "").toLowerCase();
+          const name = (store.name || "").toLowerCase();
+          if (
+            cat.includes("clinic") ||
+            cat.includes("doctor") ||
+            cat.includes("health") ||
+            cat.includes("hospital") ||
+            name.includes("clinic") ||
+            name.includes("hospital") ||
+            (store as any).categoryModule === "healthcare"
+          ) {
+            return false;
+          }
           seen.add(key);
           return true;
         });
         const mappedStores = uniqueItems.map((store) => ({ ...store, services: store.services ?? [] }));
-        turboCore.updateStores(mappedStores);
-        setCatalogStores(mappedStores);
-        setCatalogTotal(data.pagination.total);
-        setHasMore(data.pagination.hasMore);
-        setNextPage(2);
+        if (mappedStores.length > 0) {
+          turboCore.updateStores(mappedStores);
+          setCatalogStores(mappedStores);
+          setCatalogTotal(data.pagination.total || mappedStores.length);
+          setHasMore(data.pagination.hasMore);
+          setNextPage(2);
+        } else if (!query.trim() && category === "All" && !areaFilter.trim() && !pinFilter.trim() && !businessTypeFilter.trim()) {
+          setCatalogStores(defaultFallbackStores);
+          setCatalogTotal(defaultFallbackStores.length);
+          setHasMore(false);
+        } else {
+          setCatalogStores([]);
+          setCatalogTotal(0);
+          setHasMore(false);
+        }
       } catch (error) {
         if (!(error instanceof DOMException && error.name === "AbortError")) {
           setCatalogStores(defaultFallbackStores);
@@ -1966,6 +1996,19 @@ export default function Home() {
     const uniqueCatalog = catalogStores.filter((store) => {
       const key = store.id ?? store.slug;
       if (!key || seen.has(key)) return false;
+      const cat = (store.category || "").toLowerCase();
+      const name = (store.name || "").toLowerCase();
+      if (
+        cat.includes("clinic") ||
+        cat.includes("doctor") ||
+        cat.includes("health") ||
+        cat.includes("hospital") ||
+        name.includes("clinic") ||
+        name.includes("hospital") ||
+        (store as any).categoryModule === "healthcare"
+      ) {
+        return false;
+      }
       seen.add(key);
       return true;
     });
@@ -2021,6 +2064,7 @@ export default function Home() {
         page: String(nextPage),
         lat: String(currentCoords.latitude),
         lng: String(currentCoords.longitude),
+        module: "local",
       });
       if (query.trim()) parameters.set("q", query.trim());
       if (category !== "All") parameters.set("category", category);
@@ -2037,7 +2081,21 @@ export default function Home() {
         setCatalogStores((current) => {
           const existingKeys = new Set(current.map((s) => String(s.id ?? s.slug)));
           const newItems = data.items
-            .filter((s) => !existingKeys.has(String(s.id ?? s.slug)))
+            .filter((s) => {
+              const key = String(s.id ?? s.slug);
+              if (existingKeys.has(key)) return false;
+              const cat = (s.category || "").toLowerCase();
+              const name = (s.name || "").toLowerCase();
+              return !(
+                cat.includes("clinic") ||
+                cat.includes("doctor") ||
+                cat.includes("health") ||
+                cat.includes("hospital") ||
+                name.includes("clinic") ||
+                name.includes("hospital") ||
+                (s as any).categoryModule === "healthcare"
+              );
+            })
             .map((store) => ({ ...store, services: store.services ?? [] }));
           return [...current, ...newItems];
         });
@@ -2769,7 +2827,7 @@ export default function Home() {
         </div>
       )}
 
-      {toast && <div className="toast" role="status" aria-live="polite">✓ {toast}</div>}
+      {toast && <div className="toast force-white-text text-white font-bold" role="status" aria-live="polite">✓ {toast}</div>}
     </main>
   );
 }

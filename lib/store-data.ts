@@ -266,6 +266,7 @@ export async function listStores(options: {
   limit?: number;
   latitude?: number;
   longitude?: number;
+  module?: "local" | "healthcare" | "all" | string;
 }) {
   const cacheKey = `stores:${JSON.stringify(options)}`;
   const cached = microCache.get<any>(cacheKey);
@@ -274,11 +275,11 @@ export async function listStores(options: {
   await ensureSeeded();
   const db = getD1();
   const conditions = ["s.status NOT IN ('suspended','deleted','rejected')"];
-  if ((options as any).module && (options as any).module !== "all") {
-    conditions.push("c.module = ?");
-    bindings.push((options as any).module);
-  }
   const bindings: unknown[] = [];
+  if (options.module && options.module !== "all") {
+    conditions.push("c.module = ?");
+    bindings.push(options.module);
+  }
   const query = options.query?.trim();
 
   let matchedCatalogStoreIds: string[] = [];

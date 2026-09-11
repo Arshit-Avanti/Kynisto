@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AlertTriangle, ArrowRight } from "lucide-react";
+import { AlertTriangle, ArrowRight, X } from "lucide-react";
 
 import { apiFetch } from "@/lib/client-api";
 
@@ -17,17 +17,19 @@ export function SubscriptionExpiryBanner({
   daysRemaining: initialDaysRemaining,
   isExpiringSoon: initialIsExpiringSoon,
 }: SubscriptionExpiryBannerProps) {
-  const [shouldShow, setShouldShow] = useState<boolean>(
-    initialIsExpiringSoon ?? false
-  );
+  const [shouldShow, setShouldShow] = useState<boolean>(false);
   const [daysCount, setDaysCount] = useState<number | undefined>(
     initialDaysRemaining
   );
-  const [loaded, setLoaded] = useState<boolean>(
-    initialIsExpiringSoon !== undefined
-  );
+  const [loaded, setLoaded] = useState<boolean>(false);
 
   useEffect(() => {
+    // If user has dismissed this banner during this session, do not show
+    if (typeof window !== "undefined" && sessionStorage.getItem("kynisto_sub_expiry_banner_dismissed") === "true") {
+      setLoaded(true);
+      return;
+    }
+
     // Only check subscriptions if the user is authenticated or initial values were passed
     if (!userId && initialIsExpiringSoon === undefined) {
       setLoaded(true);
@@ -38,7 +40,24 @@ export function SubscriptionExpiryBanner({
 
     async function checkSubscription() {
       try {
-        const data = await apiFetch<{ subscription?: { expiresAt?: number; status?: string; isExpired?: boolean; isExpiringSoon?: boolean; daysRemaining?: number } }>("/api/subscriptions/me");
+        const data = await apiFetch<{
+          subscriptionModelEnabled?: boolean;
+          subscription?: {
+            expiresAt?: number;
+            status?: string;
+            isExpired?: boolean;
+            isExpiringSoon?: boolean;
+            daysRemaining?: number;
+          };
+        }>("/api/subscriptions/me");
+
+        if (!data || data.subscriptionModelEnabled === false) {
+          if (isMounted) {
+            setShouldShow(false);
+          }
+          return;
+        }
+
         const sub = data?.subscription;
         if (!sub) return;
 
@@ -72,6 +91,13 @@ export function SubscriptionExpiryBanner({
       isMounted = false;
     };
   }, [userId, initialIsExpiringSoon]);
+
+  const handleDismiss = () => {
+    setShouldShow(false);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("kynisto_sub_expiry_banner_dismissed", "true");
+    }
+  };
 
   if (!loaded || !shouldShow) {
     return null;
@@ -126,6 +152,27 @@ export function SubscriptionExpiryBanner({
       >
         Renew Now <ArrowRight size={14} />
       </Link>
+      <button
+        type="button"
+        onClick={handleDismiss}
+        aria-label="Close notification"
+        style={{
+          background: "rgba(255, 255, 255, 0.18)",
+          border: "1px solid rgba(255, 255, 255, 0.3)",
+          color: "#ffffff",
+          width: "28px",
+          height: "28px",
+          borderRadius: "50%",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          flexShrink: 0,
+          transition: "background 0.2s ease",
+        }}
+      >
+        <X size={16} />
+      </button>
     </div>
   );
 }
