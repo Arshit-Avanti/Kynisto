@@ -29,17 +29,36 @@ export function NotificationPermissionModal() {
     }
 
     if (!notifPermission && isNotificationSupported()) {
-      // First time user opens the app/website -> Show permission modal after 1.2s
-      const timer = setTimeout(() => {
-        setShowPrompt(true);
-      }, 1200);
-      return () => clearTimeout(timer);
+      const schedulePrompt = () => {
+        // If another modal (e.g. Audio prompt) is active, do not overlap
+        if (window.__kynisto_modal_active) {
+          const handleClosed = () => {
+            window.removeEventListener("kynisto:modal_closed", handleClosed);
+            setTimeout(() => {
+              window.__kynisto_modal_active = true;
+              setShowPrompt(true);
+            }, 1800);
+          };
+          window.addEventListener("kynisto:modal_closed", handleClosed);
+          return;
+        }
+
+        const timer = setTimeout(() => {
+          if (window.__kynisto_modal_active) return;
+          window.__kynisto_modal_active = true;
+          setShowPrompt(true);
+        }, 2200);
+        return () => clearTimeout(timer);
+      };
+
+      return schedulePrompt();
     }
   }, []);
 
   const handleAllowNotifications = async () => {
     if (typeof window !== "undefined") {
       localStorage.setItem("kynisto_notif_permission_v1", "granted");
+      window.__kynisto_modal_active = false;
 
       // Trigger Android native permission request if on Android APK
       if ((window as any).AndroidNotification?.requestPermission) {
@@ -54,6 +73,7 @@ export function NotificationPermissionModal() {
   const handleDismiss = () => {
     if (typeof window !== "undefined") {
       localStorage.setItem("kynisto_notif_permission_v1", "dismissed");
+      window.__kynisto_modal_active = false;
     }
     setShowPrompt(false);
   };
@@ -61,31 +81,29 @@ export function NotificationPermissionModal() {
   if (!showPrompt) return null;
 
   return (
-    <div
+    <aside
+      aria-label="Notification Permission Prompt"
       style={{
         position: "fixed",
-        bottom: "90px",
+        bottom: "82px",
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: 99998,
-        width: "min(460px, 92vw)",
-        background: "rgba(15, 23, 42, 0.96)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        border: "1px solid rgba(34, 197, 94, 0.4)",
+        width: "min(420px, 92vw)",
+        backgroundColor: "#FFFFFF",
+        border: "1px solid #E2E8F0",
         borderRadius: "20px",
-        padding: "20px 24px",
-        boxShadow: "0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(34, 197, 94, 0.25)",
-        color: "#FFFFFF",
+        padding: "18px 20px",
+        boxShadow: "0 20px 45px -10px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 23, 42, 0.06)",
         fontFamily: "system-ui, -apple-system, sans-serif",
-        animation: "slideUpNotifPrompt 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+        animation: "slideUpNotifPrompt 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
       <style jsx>{`
         @keyframes slideUpNotifPrompt {
           from {
             opacity: 0;
-            transform: translate(-50%, 30px);
+            transform: translate(-50%, 25px);
           }
           to {
             opacity: 1;
@@ -100,23 +118,42 @@ export function NotificationPermissionModal() {
             width: "42px",
             height: "42px",
             borderRadius: "12px",
-            background: "linear-gradient(135deg, #22C55E 0%, #16A34A 100%)",
+            background: "linear-gradient(135deg, #16A34A 0%, #22C55E 100%)",
             display: "grid",
             placeItems: "center",
             fontSize: "20px",
             flexShrink: 0,
-            boxShadow: "0 6px 16px rgba(34, 197, 94, 0.4)",
+            boxShadow: "0 4px 12px rgba(22, 163, 74, 0.25)",
           }}
         >
           🔔
         </div>
 
         <div style={{ flex: 1 }}>
-          <h4 style={{ margin: "0 0 4px", fontSize: "16px", fontWeight: 850, color: "#FFFFFF", letterSpacing: "-0.02em" }}>
+          <h4
+            style={{
+              margin: "0 0 4px",
+              fontSize: "15px",
+              fontWeight: 800,
+              color: "#0F172A",
+              WebkitTextFillColor: "#0F172A",
+              letterSpacing: "-0.01em",
+              lineHeight: 1.3,
+            }}
+          >
             Enable Push Notifications?
           </h4>
-          <p style={{ margin: 0, fontSize: "12px", color: "#94A3B8", lineHeight: 1.45 }}>
-            Get real-time order status updates, live healthcare queue alerts, & admin announcements on your device.
+          <p
+            style={{
+              margin: 0,
+              fontSize: "12px",
+              color: "#475569",
+              WebkitTextFillColor: "#475569",
+              lineHeight: 1.45,
+              fontWeight: 500,
+            }}
+          >
+            Get live queue turns, order confirmations, and clinic updates on your device.
           </p>
 
           <div style={{ display: "flex", gap: "10px", marginTop: "14px" }}>
@@ -125,41 +162,43 @@ export function NotificationPermissionModal() {
               onClick={handleAllowNotifications}
               style={{
                 flex: 1,
-                padding: "10px 16px",
-                borderRadius: "12px",
-                background: "linear-gradient(135deg, #22C55E 0%, #15803D 100%)",
+                padding: "9px 16px",
+                borderRadius: "10px",
+                background: "linear-gradient(135deg, #16A34A 0%, #15803D 100%)",
                 color: "#FFFFFF",
-                fontWeight: 800,
+                WebkitTextFillColor: "#FFFFFF",
+                fontWeight: 700,
                 fontSize: "12px",
                 border: "none",
                 cursor: "pointer",
-                boxShadow: "0 4px 14px rgba(34, 197, 94, 0.4)",
-                transition: "all 0.2s ease",
+                boxShadow: "0 3px 10px rgba(22, 163, 74, 0.3)",
+                transition: "all 0.15s ease",
               }}
             >
-              🔔 Allow Notifications
+              🔔 Allow
             </button>
 
             <button
               type="button"
               onClick={handleDismiss}
               style={{
-                padding: "10px 14px",
-                borderRadius: "12px",
-                background: "rgba(255, 255, 255, 0.08)",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
-                color: "#CBD5E1",
-                fontWeight: 700,
+                padding: "9px 14px",
+                borderRadius: "10px",
+                background: "#F1F5F9",
+                border: "1px solid #E2E8F0",
+                color: "#475569",
+                WebkitTextFillColor: "#475569",
+                fontWeight: 600,
                 fontSize: "12px",
                 cursor: "pointer",
-                transition: "all 0.2s ease",
+                transition: "all 0.15s ease",
               }}
             >
-              ✕ Not Now
+              Not Now
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </aside>
   );
 }

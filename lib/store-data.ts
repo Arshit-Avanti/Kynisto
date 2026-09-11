@@ -273,7 +273,11 @@ export async function listStores(options: {
 
   await ensureSeeded();
   const db = getD1();
-  const conditions = ["s.status NOT IN ('suspended','deleted','rejected')", "c.module = 'local'", "c.status = 'active'"];
+  const conditions = ["s.status NOT IN ('suspended','deleted','rejected')"];
+  if ((options as any).module && (options as any).module !== "all") {
+    conditions.push("c.module = ?");
+    bindings.push((options as any).module);
+  }
   const bindings: unknown[] = [];
   const query = options.query?.trim();
 

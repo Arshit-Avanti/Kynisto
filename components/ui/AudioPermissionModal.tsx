@@ -3,6 +3,12 @@
 import { useEffect, useState } from "react";
 import { audioEngine } from "@/lib/audio-engine";
 
+declare global {
+  interface Window {
+    __kynisto_modal_active?: boolean;
+  }
+}
+
 export function AudioPermissionModal() {
   const [showPrompt, setShowPrompt] = useState(false);
 
@@ -19,13 +25,13 @@ export function AudioPermissionModal() {
 
     const permission = localStorage.getItem("kynisto_audio_permission_v1");
     if (!permission) {
-      // First-time user on Windows or Android -> Show prompt after short delay
+      // First-time user -> Show prompt after short delay
       const timer = setTimeout(() => {
+        window.__kynisto_modal_active = true;
         setShowPrompt(true);
-      }, 600);
+      }, 700);
       return () => clearTimeout(timer);
     } else if (permission === "granted") {
-      // User previously granted permission -> Unlock audio engine
       void audioEngine.forceUnlockAndPlayAll();
     } else {
       audioEngine.setMuted(true);
@@ -35,6 +41,8 @@ export function AudioPermissionModal() {
   const handleAllowAudio = () => {
     if (typeof window !== "undefined") {
       localStorage.setItem("kynisto_audio_permission_v1", "granted");
+      window.__kynisto_modal_active = false;
+      window.dispatchEvent(new CustomEvent("kynisto:modal_closed", { detail: "audio" }));
     }
     void audioEngine.forceUnlockAndPlayAll();
     setShowPrompt(false);
@@ -43,6 +51,8 @@ export function AudioPermissionModal() {
   const handleMuteAudio = () => {
     if (typeof window !== "undefined") {
       localStorage.setItem("kynisto_audio_permission_v1", "denied");
+      window.__kynisto_modal_active = false;
+      window.dispatchEvent(new CustomEvent("kynisto:modal_closed", { detail: "audio" }));
     }
     audioEngine.setMuted(true);
     setShowPrompt(false);
@@ -51,31 +61,29 @@ export function AudioPermissionModal() {
   if (!showPrompt) return null;
 
   return (
-    <div
+    <aside
+      aria-label="Audio Experience Permission Prompt"
       style={{
         position: "fixed",
-        bottom: "24px",
+        bottom: "82px",
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: 99999,
-        width: "min(460px, 92vw)",
-        background: "rgba(11, 23, 54, 0.95)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        border: "1px solid rgba(36, 87, 255, 0.4)",
+        width: "min(420px, 92vw)",
+        backgroundColor: "#FFFFFF",
+        border: "1px solid #E2E8F0",
         borderRadius: "20px",
-        padding: "20px 24px",
-        boxShadow: "0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(36, 87, 255, 0.3)",
-        color: "#FFFFFF",
+        padding: "18px 20px",
+        boxShadow: "0 20px 45px -10px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 23, 42, 0.06)",
         fontFamily: "system-ui, -apple-system, sans-serif",
-        animation: "slideUpAudioPrompt 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+        animation: "slideUpAudioPrompt 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
       <style jsx>{`
         @keyframes slideUpAudioPrompt {
           from {
             opacity: 0;
-            transform: translate(-50%, 30px);
+            transform: translate(-50%, 25px);
           }
           to {
             opacity: 1;
@@ -90,23 +98,42 @@ export function AudioPermissionModal() {
             width: "42px",
             height: "42px",
             borderRadius: "12px",
-            background: "linear-gradient(135deg, #2457FF 0%, #00C6FF 100%)",
+            background: "linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)",
             display: "grid",
             placeItems: "center",
             fontSize: "20px",
             flexShrink: 0,
-            boxShadow: "0 6px 16px rgba(36, 87, 255, 0.4)",
+            boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
           }}
         >
           🔊
         </div>
 
         <div style={{ flex: 1 }}>
-          <h4 style={{ margin: "0 0 4px", fontSize: "16px", fontWeight: 850, color: "#FFFFFF", letterSpacing: "-0.02em" }}>
-            Enable Immersive Audio Access?
+          <h4
+            style={{
+              margin: "0 0 4px",
+              fontSize: "15px",
+              fontWeight: 800,
+              color: "#0F172A",
+              WebkitTextFillColor: "#0F172A",
+              letterSpacing: "-0.01em",
+              lineHeight: 1.3,
+            }}
+          >
+            Enable Immersive Audio?
           </h4>
-          <p style={{ margin: 0, fontSize: "12px", color: "#94A3B8", lineHeight: 1.45 }}>
-            Kynisto features background story audio & real-time queue chimes on Android & Windows.
+          <p
+            style={{
+              margin: 0,
+              fontSize: "12px",
+              color: "#475569",
+              WebkitTextFillColor: "#475569",
+              lineHeight: 1.45,
+              fontWeight: 500,
+            }}
+          >
+            Enjoy store ambiance sounds, voice guidance, and real-time clinic queue chimes.
           </p>
 
           <div style={{ display: "flex", gap: "10px", marginTop: "14px" }}>
@@ -115,16 +142,17 @@ export function AudioPermissionModal() {
               onClick={handleAllowAudio}
               style={{
                 flex: 1,
-                padding: "10px 16px",
-                borderRadius: "12px",
-                background: "linear-gradient(135deg, #2457FF 0%, #1640D6 100%)",
+                padding: "9px 16px",
+                borderRadius: "10px",
+                background: "linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)",
                 color: "#FFFFFF",
-                fontWeight: 800,
+                WebkitTextFillColor: "#FFFFFF",
+                fontWeight: 700,
                 fontSize: "12px",
                 border: "none",
                 cursor: "pointer",
-                boxShadow: "0 4px 14px rgba(36, 87, 255, 0.4)",
-                transition: "all 0.2s ease",
+                boxShadow: "0 3px 10px rgba(37, 99, 235, 0.3)",
+                transition: "all 0.15s ease",
               }}
             >
               🔊 Allow Audio
@@ -134,22 +162,23 @@ export function AudioPermissionModal() {
               type="button"
               onClick={handleMuteAudio}
               style={{
-                padding: "10px 14px",
-                borderRadius: "12px",
-                background: "rgba(255, 255, 255, 0.08)",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
-                color: "#CBD5E1",
-                fontWeight: 700,
+                padding: "9px 14px",
+                borderRadius: "10px",
+                background: "#F1F5F9",
+                border: "1px solid #E2E8F0",
+                color: "#475569",
+                WebkitTextFillColor: "#475569",
+                fontWeight: 600,
                 fontSize: "12px",
                 cursor: "pointer",
-                transition: "all 0.2s ease",
+                transition: "all 0.15s ease",
               }}
             >
-              🔇 Keep Muted
+              Keep Muted
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </aside>
   );
 }

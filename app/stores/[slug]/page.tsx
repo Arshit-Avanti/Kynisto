@@ -1,20 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getStoreBySlug } from "@/lib/store-data";
-import dynamic from "next/dynamic";
-
 import { cache } from "react";
+import { StoreProfileModernView } from "@/components/store/StoreProfileModernView";
 
 const getCachedStoreBySlug = cache(async (slug: string) => {
   return getStoreBySlug(slug);
 });
-
-// Lazy-load the heavy client component — prevents SSR of 900+ line component
-// which was causing Cloudflare Worker CPU limit (Error 1102)
-const StoreProfileModernView = dynamic(
-  () => import("@/components/store/StoreProfileModernView").then((m) => m.StoreProfileModernView),
-  { ssr: false, loading: () => null }
-);
 
 type RouteProps = { params: Promise<{ slug: string }> };
 

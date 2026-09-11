@@ -277,6 +277,10 @@ const worker = {
       (url.pathname === "/" ||
        url.pathname === "/search" ||
        url.pathname === "/healthcare" ||
+       url.pathname === "/stores" ||
+       url.pathname.startsWith("/stores/") ||
+       url.pathname === "/products" ||
+       url.pathname === "/services" ||
        url.pathname === "/blog" ||
        url.pathname.startsWith("/blog/") ||
        url.pathname === "/pricing" ||
@@ -287,7 +291,7 @@ const worker = {
        url.pathname === "/terms") &&
       !request.headers.get("cookie")?.includes("kynisto_session");
 
-    if (method === "GET" && isPublicPage) {
+    if ((method === "GET" || method === "HEAD") && isPublicPage) {
       try {
         const pageRes = await handler.fetch(request, env, ctx);
         const secured = secure(pageRes);

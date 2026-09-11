@@ -20,6 +20,7 @@ export async function GET() {
 
   const coreRoutes = [
     { path: "/", priority: "1.0", changefreq: "daily" },
+    { path: "/stores", priority: "0.9", changefreq: "daily" },
     { path: "/healthcare", priority: "0.9", changefreq: "daily" },
     { path: "/products", priority: "0.9", changefreq: "daily" },
     { path: "/services", priority: "0.8", changefreq: "daily" },
