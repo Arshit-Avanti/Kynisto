@@ -5,6 +5,7 @@ import { apiError, HttpError } from "@/lib/security";
 import { systemBoolean } from "@/lib/settings";
 import { parseStoreInput } from "@/lib/store-input";
 import { cleanText, safeJson, slugify } from "@/lib/validation";
+import { microCache } from "@/lib/micro-cache";
 
 async function verifyCategories(categoryId: string, subcategoryId: string | null) {
   const category = await getD1()
@@ -143,10 +144,13 @@ export async function PATCH(request: Request) {
     // Fast Shop Status Toggle (OPEN / CLOSED) for Shop Owners
     if (body.action === "toggle_status" || (typeof body.status === "string" && ["active", "closed", "approved", "inactive"].includes(body.status) && !body.name)) {
       const targetStatus = body.status ? (body.status === "closed" ? "closed" : "active") : (currentStore.status === "closed" ? "active" : "closed");
-      await getD1()
-        .prepare("UPDATE stores SET status = ?, updated_at = ? WHERE id = ? AND owner_id = ?")
-        .bind(targetStatus, Math.floor(Date.now() / 1000), storeId, session.user.id)
-        .run();
+      const queueStatus = targetStatus === "closed" ? "closed" : "open";
+      const now = Math.floor(Date.now() / 1000);
+      await getD1().batch([
+        getD1().prepare("UPDATE stores SET status = ?, updated_at = ? WHERE id = ? AND owner_id = ?").bind(targetStatus, now, storeId, session.user.id),
+        getD1().prepare("UPDATE healthcare_queue_settings SET status = ?, updated_at = ? WHERE store_id = ?").bind(queueStatus, now, storeId),
+      ]);
+      microCache.clear();
       await writeAudit(request, session.user.id, "store.status_toggled", "store", storeId, { status: targetStatus });
       return Response.json({ ok: true, status: targetStatus, storeId });
     }

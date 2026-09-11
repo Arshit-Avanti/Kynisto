@@ -58,9 +58,18 @@ export function ChatCenter({ user }: { user: SessionUser }) {
     setSelectedId((current) => current && result.items.some((item) => item.id === current) ? current : result.items.find((item) => item.id === initialConversation)?.id ?? result.items[0]?.id ?? "");
   }, [initialConversation, query, role, status]);
 
+  const isAbortError = (err: unknown) => {
+    const msg = err instanceof Error ? err.message : String(err ?? "");
+    return msg.toLowerCase().includes("abort") || msg.toLowerCase().includes("timed out");
+  };
+
   useEffect(() => {
     setLoading(true);
-    loadConversations().catch((loadError) => setError(loadError instanceof Error ? loadError.message : "Unable to load chats.")).finally(() => setLoading(false));
+    loadConversations().catch((loadError) => {
+      if (!isAbortError(loadError)) {
+        setError(loadError instanceof Error ? loadError.message : "Unable to load chats.");
+      }
+    }).finally(() => setLoading(false));
   }, [loadConversations]);
 
   useEffect(() => {
@@ -73,7 +82,11 @@ export function ChatCenter({ user }: { user: SessionUser }) {
         await apiFetch("/api/chat", { method: "PATCH", json: { action: "mark_read", conversationId: selectedId } });
         await loadConversations();
       })
-      .catch((loadError) => { if (active) setError(loadError instanceof Error ? loadError.message : "Unable to load messages."); });
+      .catch((loadError) => {
+        if (active && !isAbortError(loadError)) {
+          setError(loadError instanceof Error ? loadError.message : "Unable to load messages.");
+        }
+      });
     const source = new EventSource(`/api/chat/stream?conversationId=${encodeURIComponent(selectedId)}&after=0`);
     source.addEventListener("messages", (event) => {
       const payload = JSON.parse((event as MessageEvent).data) as { items: Message[] };

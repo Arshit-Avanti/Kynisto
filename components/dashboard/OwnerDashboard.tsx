@@ -21,8 +21,6 @@ import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscri
 import { FeatureGateNotice } from "@/components/subscription/FeatureGateNotice";
 import { SubscriptionGate } from "@/components/subscription/SubscriptionGate";
 import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
-import { RoleSwitcherButton } from "@/components/auth/RoleSwitcherButton";
-
 import { Eye, Star, Navigation, Phone, MessageCircle, BarChart2, CheckCircle2 } from "lucide-react";
 
 type Store = Record<string, string | number | null | undefined>;
@@ -317,7 +315,6 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
           <p style={{ color: "var(--muted, #64748b)", margin: 0 }}>Only businesses assigned to this account are available here.</p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-          <RoleSwitcherButton currentRole={user.role} />
           {selected && (
             <button
               type="button"
@@ -396,21 +393,95 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
         )
       ) : (
         <>
-          {tab === "overview" && <OwnerOverview store={selected} analytics={analytics} reviews={reviews} />}
-          {tab === "profile" && selected && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-              <OwnerStoreQRCard
-                store={{
-                  id: String(selected.id),
-                  name: String(selected.name ?? ""),
-                  slug: String(selected.slug ?? ""),
-                  address: String(selected.address ?? ""),
-                  city: String(selected.city ?? ""),
-                  category: String(selected.category ?? ""),
-                  logoUrl: selected.logoUrl ? String(selected.logoUrl) : null,
-                  viewCount: Number(selected.viewCount ?? 0)
+          {/* Mobile Horizontal Tabs Row — visible only on mobile (<md) */}
+          <div className="flex md:hidden overflow-x-auto gap-2 pb-2 mb-3 scrollbar-none" style={{ WebkitOverflowScrolling: "touch" }}>
+            {([
+              { id: "overview", label: "📊 Overview" },
+              { id: "profile", label: "🏪 Profile" },
+              { id: "media", label: "🖼️ Media" },
+              { id: "products", label: "🛒 Products" },
+              { id: "orders", label: "📦 Orders" },
+              { id: "offers", label: "🏷️ Offers" },
+              { id: "memberships", label: "🎁 Passes" },
+              { id: "loyalty", label: "⭐ Loyalty" },
+              { id: "analytics", label: "📈 Analytics" },
+              { id: "sales", label: "💰 Sales" },
+              { id: "reviews", label: "💬 Reviews" },
+              { id: "healthcare", label: "🏥 Clinic" },
+              { id: "chat", label: "📩 Messages" },
+              { id: "subscription", label: "👑 Plans" },
+              { id: "settings", label: "⚙️ Settings" },
+            ] as {id: string; label: string}[]).map((item) => (
+              <a
+                key={item.id}
+                href={`?tab=${item.id}`}
+                className={`shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  tab === item.id
+                    ? "bg-amber-600 text-white shadow-sm"
+                    : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
+
+          <div style={{ display: "flex", gap: "1.5rem", marginTop: "0.5rem" }}>
+          {/* Left Sidebar Nav — hidden on mobile */}
+          <aside style={{ display: "flex", flexDirection: "column", gap: "4px", width: "200px", flexShrink: 0, background: "white", border: "1px solid #e2e8f0", borderRadius: "16px", padding: "12px", alignSelf: "flex-start", position: "sticky", top: "96px", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }} className="hidden md:flex">
+            <p style={{ fontSize: "10px", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", color: "#94a3b8", padding: "0 8px", marginBottom: "4px" }}>Shop Owner Menu</p>
+            {([
+              { id: "overview", label: "📊 Overview" },
+              { id: "profile", label: "🏪 Business Profile" },
+              { id: "media", label: "🖼️ Photos & Media" },
+              { id: "products", label: "🛒 Products" },
+              { id: "orders", label: "📦 Orders" },
+              { id: "offers", label: "🏷️ Offers" },
+              { id: "memberships", label: "🎁 Memberships" },
+              { id: "loyalty", label: "⭐ Loyalty" },
+              { id: "analytics", label: "📈 Analytics" },
+              { id: "sales", label: "💰 Sales" },
+              { id: "reviews", label: "💬 Reviews" },
+              { id: "healthcare", label: "🏥 Healthcare" },
+              { id: "chat", label: "📩 Messages" },
+              { id: "subscription", label: "👑 Plans" },
+              { id: "settings", label: "⚙️ Settings" },
+            ] as {id: string; label: string}[]).map((item) => (
+              <a
+                key={item.id}
+                href={`?tab=${item.id}`}
+                style={{
+                  display: "flex", alignItems: "center", gap: "8px",
+                  padding: "8px 12px", borderRadius: "10px",
+                  fontSize: "13px", fontWeight: tab === item.id ? 800 : 600,
+                  textDecoration: "none",
+                  background: tab === item.id ? "#f97316" : "transparent",
+                  color: tab === item.id ? "white" : "#475569",
+                  transition: "all 0.15s",
                 }}
-              />
+              >
+                {item.label}
+              </a>
+            ))}
+          </aside>
+
+          {/* Main Content */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {tab === "overview" && <OwnerOverview store={selected} analytics={analytics} reviews={reviews} />}
+            {tab === "profile" && selected && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                <OwnerStoreQRCard
+                  store={{
+                    id: String(selected.id),
+                    name: String(selected.name ?? ""),
+                    slug: String(selected.slug ?? ""),
+                    address: String(selected.address ?? ""),
+                    city: String(selected.city ?? ""),
+                    category: String(selected.category ?? ""),
+                    logoUrl: selected.logoUrl ? String(selected.logoUrl) : null,
+                    viewCount: Number(selected.viewCount ?? 0)
+                  }}
+                />
               <section className="portalCard">
                 <div className="portalCardHeader">
                   <h2>Edit business profile</h2>
@@ -531,6 +602,8 @@ export function OwnerDashboard({ user }: { user: SessionUser }) {
               <OwnerWorkspacePanel key={tab + "-" + String(selected.id)} view={tab} storeId={String(selected.id)} onToast={setToast} onError={setError} />
             )
           )}
+          </div>
+        </div>
         </>
       )}
 

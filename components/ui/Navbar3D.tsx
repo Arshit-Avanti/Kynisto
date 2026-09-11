@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useRef, useState, useCallback, useMemo, startTransition } from "react";
 import { KynistoLogo } from "@/components/brand/KynistoLogo";
 import { BackButton } from "@/components/ui/BackButton";
-import { RoleSwitcherButton } from "@/components/auth/RoleSwitcherButton";
 
 export interface Navbar3DProps {
   userRole: "admin" | "store_owner" | "customer" | null;
@@ -237,9 +236,6 @@ function DesktopNavbar({
       </nav>
 
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        {userRole && (
-          <RoleSwitcherButton currentRole={userRole} />
-        )}
         <Link
           href={userRole ? (userRole === "admin" ? "/admin" : userRole === "store_owner" ? "/owner" : "/account") : "/login"}
           style={{
@@ -440,12 +436,6 @@ function MobileNavbar({
             </div>
             <span style={{ color: "#FFFFFF", fontSize: "16px" }}>→</span>
           </Link>
-
-          {userRole && (
-            <div style={{ margin: "10px 0" }}>
-              <RoleSwitcherButton currentRole={userRole} style={{ width: "100%", justifyContent: "center" }} />
-            </div>
-          )}
 
           {/* Navigation Links Grid */}
           <nav className="drawerNavList">

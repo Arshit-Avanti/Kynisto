@@ -310,12 +310,7 @@ export function StoreProfileModernView({ store }: StoreProfileProps) {
     if(isStartingChat)return;
     setIsStartingChat(true);
     try{
-      const authRes=await apiFetch<{user:{id:string;role:string}|null}>("/api/auth/me").catch(()=>null);
-      if(!authRes?.user){
-        window.location.assign(`/login?returnTo=${encodeURIComponent(`/stores/${store.slug}`)}`);
-        return;
-      }
-      const chatRes=await apiFetch<{id:string}>("/api/chat",{
+      const chatRes=await apiFetch<{id:string;error?:string}>("/api/chat",{
         method:"POST",json:{action:"start_store",storeId:store.id},
       });
       if(chatRes?.id){
@@ -324,7 +319,12 @@ export function StoreProfileModernView({ store }: StoreProfileProps) {
         window.location.assign("https://kynisto.in/account?tab=chat");
       }
     }catch(err:any){
-      window.location.assign("https://kynisto.in/account?tab=chat");
+      // 401 means not logged in — redirect to login
+      if(err?.status===401||err?.message?.includes("401")||err?.message?.includes("Unauthorized")){
+        window.location.assign(`/login?returnTo=${encodeURIComponent(`/stores/${store.slug}`)}`);
+      }else{
+        window.location.assign("https://kynisto.in/account?tab=chat");
+      }
     }finally{
       setIsStartingChat(false);
     }
@@ -498,7 +498,7 @@ export function StoreProfileModernView({ store }: StoreProfileProps) {
                   <span className="text-slate-300 font-bold">•</span>
                   <div className="flex items-center gap-1">
                     <span className={store.open!==false?"text-emerald-600 font-bold":"text-rose-600 font-bold"}>{store.open!==false?"Open":"Closed"}</span>
-                    {store.hours&&(<><span className="text-slate-300">•</span><span className="text-slate-500 font-medium">{store.hours}</span></>)}
+                    {store.hours&&store.hours!=="Closed"&&store.hours!=="Open"&&(<><span className="text-slate-300">•</span><span className="text-slate-500 font-medium">{store.hours}</span></>)}
                   </div>
                 </div>
               </div>

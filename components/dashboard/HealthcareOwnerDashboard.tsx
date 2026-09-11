@@ -12,7 +12,6 @@ import {
 } from "@/components/dashboard/OwnerWorkspacePanel";
 import { ChatCenter } from "@/components/dashboard/ChatCenter";
 import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscriptionDashboard";
-import { RoleSwitcherButton } from "@/components/auth/RoleSwitcherButton";
 import { CatalogPanel } from "@/components/dashboard/CatalogPanel";
 import { OwnerMembershipEditor } from "@/components/dashboard/OwnerMembershipEditor";
 import {
@@ -407,7 +406,6 @@ export function HealthcareOwnerDashboard({ user }: { user: SessionUser }) {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-          <RoleSwitcherButton currentRole={user.role} />
           {selectedStore && (
             <button
               type="button"

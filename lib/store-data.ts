@@ -53,6 +53,7 @@ type StoreRow = {
   allowAppointments: number | null;
   locationVerified?: number | boolean | null;
   locationAccuracy?: number | null;
+  status?: string | null;
 };
 
 export type PublicStore = ReturnType<typeof toPublicStore>;
@@ -109,26 +110,26 @@ function storeOpenStatus(hoursJson: string) {
   const inShift2 = mOpen2 >= 0 && mClose2 >= 0 && minutes >= mOpen2 && minutes < mClose2;
 
   if (inShift1) {
-    const eveningNote = mOpen2 >= 0 ? ` (Evening ${format(today.open2)}–${format(today.close2)})` : "";
-    return { open: true, hours: `Open (Morning) · Closes ${format(today.close)}${eveningNote}` };
+    const eveningNote = mOpen2 >= 0 ? ` · Reopens ${format(today.open2)}` : "";
+    return { open: true, hours: `Closes ${format(today.close)}${eveningNote}` };
   }
 
   if (inShift2) {
-    return { open: true, hours: `Open (Evening) · Closes ${format(today.close2)}` };
+    return { open: true, hours: `Closes ${format(today.close2)}` };
   }
 
   // Currently closed - calculate next shift
   if (mOpen1 >= 0 && minutes < mOpen1) {
-    return { open: false, hours: `Opens at ${format(today.open)} (Morning)` };
+    return { open: false, hours: `Opens at ${format(today.open)}` };
   } else if (mClose1 >= 0 && mOpen2 >= 0 && minutes >= mClose1 && minutes < mOpen2) {
-    return { open: false, hours: `Morning shift ended · Opens at ${format(today.open2)} (Evening)` };
-  } else if (mOpen2 >= 0 && minutes < mOpen2) {
     return { open: false, hours: `Opens at ${format(today.open2)} (Evening)` };
+  } else if (mOpen2 >= 0 && minutes < mOpen2) {
+    return { open: false, hours: `Opens at ${format(today.open2)}` };
   } else if (today.open && !today.open2) {
     const isOpen = mOpen1 >= 0 && mClose1 >= 0 && minutes >= mOpen1 && minutes < mClose1;
     return {
       open: isOpen,
-      hours: isOpen ? `Open until ${format(today.close)}` : `Opens at ${format(today.open)}`,
+      hours: isOpen ? `Closes ${format(today.close)}` : `Opens at ${format(today.open)}`,
     };
   }
 
@@ -140,7 +141,11 @@ const distanceKm = kynistoFastDistanceKm;
 
 function toPublicStore(row: StoreRow, latitude: number, longitude: number) {
   const distance = distanceKm(latitude, longitude, row.latitude, row.longitude);
-  const openStatus = storeOpenStatus(row.businessHours);
+  // If owner manually closed or deactivated the store, override hours-based calculation
+  const isManuallyClosed = row.status === "closed" || row.status === "inactive";
+  const openStatus = isManuallyClosed
+    ? { open: false, hours: "Closed" }
+    : storeOpenStatus(row.businessHours);
   const categoryNumber = Number(row.categoryId.replace(/\D/g, "")) || 1;
   return {
     id: row.id,
@@ -198,6 +203,7 @@ const storeSelect = `SELECT
   s.google_maps_url AS googleMapsUrl,
   s.phone, s.whatsapp, s.email, s.website,
   s.business_hours AS businessHours, s.opening_days AS openingDays,
+  s.status AS status,
   s.logo_url AS logoUrl, s.banner_url AS bannerUrl,
   s.rating_average AS ratingAverage, s.rating_count AS ratingCount,
   s.view_count AS viewCount, s.created_at AS createdAt,
@@ -451,6 +457,10 @@ export async function listStores(options: {
 }
 
 export async function getStoreBySlug(slug: string) {
+  const cacheKey = `store:slug:${slug}`;
+  const cached = microCache.get<any>(cacheKey);
+  if (cached) return cached;
+
   await ensureSeeded();
   const db = getD1();
   const row = await db
@@ -552,7 +562,7 @@ export async function getStoreBySlug(slug: string) {
     };
   });
 
-  return {
+  const storeDetails = {
     ...toPublicStore(row, DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
     businessHours: parseJson(row.businessHours, {}),
     openingDays: parseJson(row.openingDays, []),
@@ -562,6 +572,8 @@ export async function getStoreBySlug(slug: string) {
     offers: offers.results ?? [],
     reviewItems: reviews.results ?? [],
   };
+  microCache.set(cacheKey, storeDetails, 30_000);
+  return storeDetails;
 }
 
 export async function recordAnalytics(

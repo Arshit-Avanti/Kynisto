@@ -1,15 +1,26 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getStoreBySlug } from "@/lib/store-data";
-import { StoreProfileModernView } from "@/components/store/StoreProfileModernView";
+import dynamic from "next/dynamic";
 
-export const dynamic = "force-dynamic";
+import { cache } from "react";
+
+const getCachedStoreBySlug = cache(async (slug: string) => {
+  return getStoreBySlug(slug);
+});
+
+// Lazy-load the heavy client component — prevents SSR of 900+ line component
+// which was causing Cloudflare Worker CPU limit (Error 1102)
+const StoreProfileModernView = dynamic(
+  () => import("@/components/store/StoreProfileModernView").then((m) => m.StoreProfileModernView),
+  { ssr: false, loading: () => null }
+);
 
 type RouteProps = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: RouteProps): Promise<Metadata> {
   const { slug } = await params;
-  const store = await getStoreBySlug(slug);
+  const store = await getCachedStoreBySlug(slug);
   if (!store) return { title: "Business not found | Kynisto" };
   const title = `${store.name} in ${store.area || store.city || "locality"} | Kynisto`;
   const description = `${(store.description || "").slice(0, 145)} Find address, hours, reviews, services and directions.`;
@@ -29,7 +40,7 @@ export async function generateMetadata({ params }: RouteProps): Promise<Metadata
 
 export default async function StoreProfilePage({ params }: RouteProps) {
   const { slug } = await params;
-  const store = await getStoreBySlug(slug);
+  const store = await getCachedStoreBySlug(slug);
   if (!store) notFound();
 
   const jsonLd = {
@@ -65,13 +76,6 @@ export default async function StoreProfilePage({ params }: RouteProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
-      {/* R2 Catalog Media Invariant Card Templates */}
-      <div className="hidden" aria-hidden="true">
-        <article className="productOfferCard">
-          <video preload="none" controls />
-          <img loading="lazy" src={String(store.logoUrl || "")} alt={String(store.name || "")} />
-        </article>
-      </div>
       <StoreProfileModernView store={store as any} />
     </>
   );

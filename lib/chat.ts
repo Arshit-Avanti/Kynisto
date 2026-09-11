@@ -60,29 +60,29 @@ export async function listConversations(
   options: { query?: string; status?: string; targetRole?: string } = {},
 ) {
   const conditions: string[] = [];
-  const bindings: unknown[] = [user.id, user.id];
+  const whereBindings: unknown[] = [];
   if (user.role === "admin") {
     conditions.push("1 = 1");
   } else if (user.role === "store_owner") {
     conditions.push("((c.kind = 'store' AND s.owner_id = ?) OR (c.kind IN ('admin','support') AND me.user_id = ?))");
-    bindings.push(user.id, user.id);
+    whereBindings.push(user.id, user.id);
   } else {
     conditions.push("me.user_id = ?");
-    bindings.push(user.id);
+    whereBindings.push(user.id);
   }
   if (["open", "pending", "resolved"].includes(options.status ?? "")) {
     conditions.push("c.status = ?");
-    bindings.push(options.status);
+    whereBindings.push(options.status);
   }
   if (user.role === "admin" && ["customer", "store_owner"].includes(options.targetRole ?? "")) {
     conditions.push("EXISTS (SELECT 1 FROM conversation_participants rp JOIN users ru ON ru.id = rp.user_id WHERE rp.conversation_id = c.id AND ru.role = ?)");
-    bindings.push(options.targetRole);
+    whereBindings.push(options.targetRole);
   }
   const query = d1SearchText((options.query ?? "").replace(/[%_]/g, "").trim());
   if (query) {
     conditions.push("(c.subject LIKE ? OR s.name LIKE ? OR EXISTS (SELECT 1 FROM conversation_participants sp JOIN users su ON su.id = sp.user_id WHERE sp.conversation_id = c.id AND (su.name LIKE ? OR su.email LIKE ?)))");
     const pattern = `%${query}%`;
-    bindings.push(pattern, pattern, pattern, pattern);
+    whereBindings.push(pattern, pattern, pattern, pattern);
   }
 
   const result = await getD1()
@@ -99,7 +99,7 @@ export async function listConversations(
        WHERE ${conditions.join(" AND ")}
        ORDER BY c.last_message_at DESC LIMIT 150`,
     )
-    .bind(user.id, user.id, user.id, user.id, user.id, ...bindings.slice(2))
+    .bind(user.id, user.id, user.id, user.id, user.id, ...whereBindings)
     .all();
   return result.results ?? [];
 }

@@ -178,7 +178,11 @@ export async function apiFetch<T = unknown>(
     const promise = (async () => {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 7500); // 7.5s low-network timeout
+        const timeoutId = setTimeout(() => {
+          try {
+            controller.abort();
+          } catch {}
+        }, 25000); // 25s reliable timeout for mobile connections
 
         const response = await fetch(path, {
           ...options,
@@ -196,11 +200,14 @@ export async function apiFetch<T = unknown>(
         
         setCachedData(path, data as T);
         return data as T;
-      } catch (err) {
+      } catch (err: any) {
         // Low-network / Offline Fallback: If network failed but we have stale cache, return it!
         const stale = getCachedData<T>(path);
         if (stale && stale.data) {
           return stale.data;
+        }
+        if (err?.name === "AbortError" || String(err?.message || "").toLowerCase().includes("abort")) {
+          throw new Error("Network request timed out. Please check your connection.");
         }
         throw err;
       }

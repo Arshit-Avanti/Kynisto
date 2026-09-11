@@ -10,7 +10,6 @@ import { UserSubscriptionDashboard } from "@/components/subscription/UserSubscri
 import { StoreMembershipsBrowser } from "@/components/store/StoreMembershipsBrowser";
 import { SubscriptionExpiryBanner } from "@/components/subscription/SubscriptionExpiryBanner";
 import KynistoWalletView from "@/components/wallet/KynistoWalletView";
-import { RoleSwitcherButton } from "@/components/auth/RoleSwitcherButton";
 import { CustomerPrescriptionCenter } from "@/components/healthcare/CustomerPrescriptionCenter";
 import { Package, Heart, Star, ShoppingCart, MapPin, Store, Calendar, CheckCircle2, MessageSquare, Ticket, BellRing } from "lucide-react";
 
@@ -177,9 +176,8 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
   }
 
   const items = (data.items as Item[] | undefined) ?? [];
-  if (tab === "chat") return <ChatCenter user={user} />;
-  if (loading && !Object.keys(data).length) return <div className="portalSkeleton"><span /><span /><span /><span /></div>;
-  if (tab === "subscription") return <CustomerSubscriptionTab user={user} />;
+  const isStaticTab = tab === "chat" || tab === "subscription" || tab === "wallet" || tab === "prescriptions";
+  if (loading && !Object.keys(data).length && !isStaticTab) return <div className="portalSkeleton"><span /><span /><span /><span /></div>;
   const titles: Record<string, string> = { overview: "My Kynisto", subscription: "Premium & Plans", profile: "Profile", addresses: "Saved addresses", favorites: "Favourite shops", wishlist: "Product wishlist", cart: "Shopping cart", orders: "Orders & tracking", reviews: "My reviews", notifications: "Notifications", settings: "Settings", support: "Support & complaints" };
 
   return <>
@@ -191,7 +189,6 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Manage your profile, orders, wishlist and preferences. All your account information is secure and private.</p>
       </div>
       <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-        <RoleSwitcherButton currentRole={user.role} />
         <Link className="portalButton" href="/products" style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "#0ea5e9", color: "#fff", padding: "0.6rem 1rem", borderRadius: "12px", textDecoration: "none", fontWeight: 700, fontSize: "0.85rem" }}>
           Explore Local Products →
         </Link>
@@ -264,20 +261,95 @@ export function CustomerDashboard({ user }: { user: SessionUser }) {
       </div>
     )}
 
-    {tab === "overview" && <CustomerOverview user={user} favorites={favorites} reviews={[...reviews, ...productReviews]} cart={(data.items as Item[] | undefined) ?? []} />}
-    {tab === "wallet" && <KynistoWalletView />}
-    {tab === "profile" && <ProfilePanel profile={(data.profile as Item | undefined) ?? { name: user?.name || "", email: user?.email || "" }} mutate={mutate} />}
-    {tab === "addresses" && <AddressesPanel items={items} mutate={mutate} />}
-    {tab === "favorites" && <section className="portalCard"><FavoriteList items={favorites} remove={removeFavorite} /></section>}
-    {tab === "wishlist" && <WishlistPanel items={items} mutate={mutate} />}
-    {tab === "cart" && <CartPanel items={items} subtotal={Number(data.subtotal ?? 0)} addresses={addresses} mutate={mutate} />}
-    {tab === "orders" && <OrdersPanel items={items} mutate={mutate} />}
-    {tab === "prescriptions" && <CustomerPrescriptionCenter />}
-    {tab === "reviews" && <ReviewsPanel items={reviews} remove={deleteReview} productReviews={productReviews} deliveredOrders={items} mutateProduct={mutateProductReview} />}
-    {tab === "notifications" && <NotificationsPanel items={items} mutate={mutate} membershipNotifs={membershipNotifs.notifications} unreadCount={membershipNotifs.unreadCount} onMarkRead={markNotifRead} onMarkAllRead={markAllNotifsRead} />}
-    {tab === "settings" && <SettingsPanel preferences={(data.preferences as Item | undefined) ?? {}} mutate={mutate} />}
-    {tab === "support" && <SupportPanel items={items} mutate={mutate} />}
-    
+    {/* Mobile Horizontal Tabs Row — visible only on mobile (<md) */}
+    <div className="flex md:hidden overflow-x-auto gap-2 pb-2 mb-4 scrollbar-none" style={{ WebkitOverflowScrolling: "touch" }}>
+      {([
+        { id: "overview", label: "🏠 Overview" },
+        { id: "profile", label: "👤 Profile" },
+        { id: "orders", label: "📦 Orders" },
+        { id: "favorites", label: "❤️ Favorites" },
+        { id: "wishlist", label: "🛍 Wishlist" },
+        { id: "cart", label: "🛒 Cart" },
+        { id: "addresses", label: "📍 Addresses" },
+        { id: "prescriptions", label: "💊 Prescriptions" },
+        { id: "reviews", label: "⭐ Reviews" },
+        { id: "wallet", label: "💳 Wallet" },
+        { id: "subscription", label: "👑 Plans" },
+        { id: "chat", label: "💬 Messages" },
+        { id: "notifications", label: "🔔 Notifications" },
+        { id: "settings", label: "⚙️ Settings" },
+        { id: "support", label: "🆘 Support" },
+      ] as {id: string; label: string}[]).map((item) => (
+        <Link
+          key={item.id}
+          href={`?tab=${item.id}`}
+          className={`shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            tab === item.id
+              ? "bg-sky-500 text-white shadow-sm"
+              : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
+          }`}
+        >
+          {item.label}
+        </Link>
+      ))}
+    </div>
+
+    {/* Sidebar + Content layout */}
+    <div className="flex gap-6 mt-2">
+      {/* Left Sidebar Nav — hidden on mobile */}
+      <aside className="hidden md:flex flex-col gap-1 w-52 shrink-0 bg-white border border-slate-200 rounded-2xl p-3 self-start shadow-sm sticky top-24">
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2 mb-1">Customer Menu</p>
+        {([
+          { id: "overview", label: "🏠 Overview" },
+          { id: "profile", label: "👤 Profile" },
+          { id: "orders", label: "📦 Orders" },
+          { id: "favorites", label: "❤️ Favorites" },
+          { id: "wishlist", label: "🛍 Wishlist" },
+          { id: "cart", label: "🛒 Cart" },
+          { id: "addresses", label: "📍 Addresses" },
+          { id: "prescriptions", label: "💊 Prescriptions" },
+          { id: "reviews", label: "⭐ Reviews" },
+          { id: "wallet", label: "💳 Wallet" },
+          { id: "subscription", label: "👑 Plans" },
+          { id: "chat", label: "💬 Messages" },
+          { id: "notifications", label: "🔔 Notifications" },
+          { id: "settings", label: "⚙️ Settings" },
+          { id: "support", label: "🆘 Support" },
+        ] as {id: string; label: string}[]).map((item) => (
+          <Link
+            key={item.id}
+            href={`?tab=${item.id}`}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold transition-all ${
+              tab === item.id
+                ? "bg-sky-500 text-white shadow-sm shadow-sky-500/30"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            }`}
+          >
+            {item.label}
+          </Link>
+        ))}
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 min-w-0">
+        {tab === "overview" && <CustomerOverview user={user} favorites={favorites} reviews={[...reviews, ...productReviews]} cart={(data.items as Item[] | undefined) ?? []} />}
+        {tab === "chat" && <ChatCenter user={user} />}
+        {tab === "subscription" && <CustomerSubscriptionTab user={user} />}
+        {tab === "wallet" && <KynistoWalletView />}
+        {tab === "profile" && <ProfilePanel profile={(data.profile as Item | undefined) ?? { name: user?.name || "", email: user?.email || "" }} mutate={mutate} />}
+        {tab === "addresses" && <AddressesPanel items={items} mutate={mutate} />}
+        {tab === "favorites" && <section className="portalCard"><FavoriteList items={favorites} remove={removeFavorite} /></section>}
+        {tab === "wishlist" && <WishlistPanel items={items} mutate={mutate} />}
+        {tab === "cart" && <CartPanel items={items} subtotal={Number(data.subtotal ?? 0)} addresses={addresses} mutate={mutate} />}
+        {tab === "orders" && <OrdersPanel items={items} mutate={mutate} />}
+        {tab === "prescriptions" && <CustomerPrescriptionCenter />}
+        {tab === "reviews" && <ReviewsPanel items={reviews} remove={deleteReview} productReviews={productReviews} deliveredOrders={items} mutateProduct={mutateProductReview} />}
+        {tab === "notifications" && <NotificationsPanel items={items} mutate={mutate} membershipNotifs={membershipNotifs.notifications} unreadCount={membershipNotifs.unreadCount} onMarkRead={markNotifRead} onMarkAllRead={markAllNotifsRead} />}
+        {tab === "settings" && <SettingsPanel preferences={(data.preferences as Item | undefined) ?? {}} mutate={mutate} />}
+        {tab === "support" && <SupportPanel items={items} mutate={mutate} />}
+      </div>
+    </div>
+
     {toast && <div className="portalToast" role="status" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}><CheckCircle2 size={18} /> {toast}</div>}
   </>;
 }
