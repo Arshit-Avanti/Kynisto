@@ -24,7 +24,12 @@ export default function AboutPage() {
       {
         "@type": "Person",
         name: "Arshit Anand",
-        jobTitle: "Founder & Chief Architect",
+        jobTitle: "Founder & Co-CEO",
+      },
+      {
+        "@type": "Person",
+        name: "Anshuman Pandey",
+        jobTitle: "Co-Founder & Co-CEO",
       },
     ],
     address: {
@@ -154,6 +159,50 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* Executive Leadership */}
+        <section className="p-8 sm:p-12 rounded-3xl bg-white border border-slate-200 shadow-md mb-16">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+            <Users className="w-7 h-7 text-orange-600" /> Executive Leadership
+          </h2>
+          <div className="grid sm:grid-cols-2 gap-6 sm:gap-8">
+            <div className="p-6 sm:p-8 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+              <div>
+                <span className="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 border border-orange-200 text-orange-800 text-xs font-bold uppercase tracking-wider mb-3">
+                  Founder &amp; Co-CEO
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 mb-2">Arshit Anand</h3>
+                <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                  Directing core platform architecture, distributed edge infrastructure, zero-wait virtual queue systems, and engineering standards across Kynisto.
+                </p>
+              </div>
+              <div className="text-xs text-slate-500 pt-4 border-t border-slate-200">
+                <span className="font-semibold text-slate-700">Official Contact:</span>{" "}
+                <a href="mailto:nxt.arshit@gmail.com" className="text-orange-600 hover:underline font-medium">
+                  nxt.arshit@gmail.com
+                </a>
+              </div>
+            </div>
+
+            <div className="p-6 sm:p-8 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
+              <div>
+                <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 border border-blue-200 text-blue-800 text-xs font-bold uppercase tracking-wider mb-3">
+                  Co-Founder &amp; Co-CEO
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black text-slate-900 mb-2">Anshuman Pandey</h3>
+                <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                  Leading strategic expansion, merchant ecosystem acceleration, regional growth operations, and platform governance across urban centers.
+                </p>
+              </div>
+              <div className="text-xs text-slate-500 pt-4 border-t border-slate-200">
+                <span className="font-semibold text-slate-700">Executive Desk:</span>{" "}
+                <a href="mailto:kynisto.in@gmail.com" className="text-orange-600 hover:underline font-medium">
+                  kynisto.in@gmail.com
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Publisher Transparency Card */}
         <section className="p-8 sm:p-10 rounded-3xl bg-white border border-slate-200 shadow-sm">
           <h3 className="text-xl font-bold text-slate-900 mb-4">Official Publisher &amp; Governance Details</h3>
@@ -164,7 +213,8 @@ export default function AboutPage() {
               <p><strong>Registered HQ:</strong> B-5/13, DLF Ankur Vihar, Loni, Ghaziabad, Uttar Pradesh, India – 201102</p>
             </div>
             <div className="space-y-2">
-              <p><strong>Founder &amp; Chief Architect:</strong> Arshit Anand (nxt.arshit@gmail.com)</p>
+              <p><strong>Founder &amp; Co-CEO:</strong> Arshit Anand (nxt.arshit@gmail.com)</p>
+              <p><strong>Co-Founder &amp; Co-CEO:</strong> Anshuman Pandey</p>
               <p><strong>Customer Support:</strong> kynisto.in@gmail.com</p>
               <p><strong>Locality Coverage:</strong> Delhi-NCR, Ghaziabad, Noida, and expanding urban centers</p>
             </div>
