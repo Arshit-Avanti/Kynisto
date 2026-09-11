@@ -21,6 +21,10 @@ export function AppUpdateManager() {
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
+    if (typeof window === "undefined" || window.self !== window.top || Boolean((navigator as any).webdriver)) return;
+    const isPreview = window.location.search.includes("preview") || window.location.search.includes("google");
+    if (isPreview) return;
+
     let interval = 0;
     navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).then((registration) => {
       void registration.update();

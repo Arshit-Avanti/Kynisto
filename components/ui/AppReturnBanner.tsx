@@ -12,9 +12,12 @@ export function AppReturnBanner() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Ignore search engine and AdSense bots
-    const isBot = /bot|googlebot|crawler|spider|robot|crawling|mediapartners|adsbot|lighthouse/i.test(navigator.userAgent);
-    if (isBot) return;
+    // Strict guard: Never show in iframes, crawlers, or preview environments
+    if (window.self !== window.top || Boolean((navigator as any).webdriver)) return;
+
+    const isBot = /bot|googlebot|crawler|spider|robot|crawling|mediapartners|adsbot|lighthouse|headlesschrome/i.test(navigator.userAgent);
+    const isPreview = window.location.search.includes("preview") || window.location.search.includes("google") || window.location.search.includes("debug");
+    if (isBot || isPreview) return;
 
     // Check if running on Android device
     const isAndroid = /Android/i.test(navigator.userAgent);

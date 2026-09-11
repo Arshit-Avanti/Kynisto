@@ -112,7 +112,7 @@ const worker = {
 
       if (isHttp || isWww) {
         const canonicalHost = isWww ? "kynisto.in" : url.host;
-        return Response.redirect(`https://${canonicalHost}${url.pathname}${url.search}`, 301);
+        return secure(Response.redirect(`https://${canonicalHost}${url.pathname}${url.search}`, 301));
       }
     }
 
@@ -124,15 +124,15 @@ const worker = {
       url.pathname.includes("{search_term_string}") ||
       url.pathname.includes("%7Bsearch_term_string%7D")
     ) {
-      return Response.redirect("https://kynisto.in/", 301);
+      return secure(Response.redirect("https://kynisto.in/", 301));
     }
 
     if (url.pathname === "/" && url.searchParams.has("q")) {
       const q = url.searchParams.get("q")?.trim();
       if (q && !q.includes("{search_term_string}")) {
-        return Response.redirect(`https://kynisto.in/search?q=${encodeURIComponent(q)}`, 301);
+        return secure(Response.redirect(`https://kynisto.in/search?q=${encodeURIComponent(q)}`, 301));
       }
-      return Response.redirect("https://kynisto.in/", 301);
+      return secure(Response.redirect("https://kynisto.in/", 301));
     }
 
     if (url.pathname === "/robots.txt") {

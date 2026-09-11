@@ -71,6 +71,12 @@ export default function RootLayout({
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9178031569606873"
           crossOrigin="anonymous"
+          data-ad-client="ca-pub-9178031569606873"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.adsbygoogle = window.adsbygoogle || [];`,
+          }}
         />
 
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
