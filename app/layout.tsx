@@ -95,6 +95,8 @@ export default function RootLayout({
         />
         <link rel="preconnect" href="https://kynisto.in" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://kynisto.in" />
+        <link rel="preconnect" href="https://gdakvxqegfnxflaqijwf.supabase.co" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://gdakvxqegfnxflaqijwf.supabase.co" />
       </head>
       <body>
         <script

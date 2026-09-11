@@ -177,7 +177,7 @@ self.addEventListener("fetch", (event) => {
 
         return Promise.race([
           networkPromise,
-          new Promise((resolve) => setTimeout(() => resolve(fallback), 2000)),
+          new Promise((resolve) => setTimeout(() => resolve(fallback), 800)),
         ]).then((res) => res || fallback).catch(() => fallback);
       })()
     );

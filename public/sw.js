@@ -1,6 +1,6 @@
 ﻿// Kynisto High-Performance PWA & Web Push Service Worker
-const CACHE_NAME = "kynisto-turbocore-2026.09.10.114";
-const API_CACHE = "kynisto-turbocore-api-2026.09.10.114";
+const CACHE_NAME = "kynisto-turbocore-2026.09.10.115";
+const API_CACHE = "kynisto-turbocore-api-2026.09.10.115";
 const PRECACHE_URLS = [
   "/",
   "/healthcare",
@@ -171,7 +171,7 @@ self.addEventListener("fetch", (event) => {
 
         return Promise.race([
           networkPromise,
-          new Promise((resolve) => setTimeout(() => resolve(fallback), 2000)),
+          new Promise((resolve) => setTimeout(() => resolve(fallback), 800)),
         ]).then((res) => res || fallback).catch(() => fallback);
       })()
     );

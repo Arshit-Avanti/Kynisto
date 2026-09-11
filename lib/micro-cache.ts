@@ -48,7 +48,7 @@ export const microCache = new MicroCache();
 
 export function microCacheJson(
   data: unknown,
-  cacheControl = "public, max-age=15, s-maxage=60, stale-while-revalidate=300",
+  cacheControl = "public, max-age=30, s-maxage=120, stale-while-revalidate=600",
   init: ResponseInit = {},
 ): Response {
   const headers = new Headers(init.headers);
