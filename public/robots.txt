@@ -9,11 +9,27 @@ User-agent: Mediapartners-Google
 Disallow:
 Allow: /
 
+User-agent: Mediapartners-Google*
+Disallow:
+Allow: /
+
 User-agent: Google-Display-Ads-Bot
 Disallow:
 Allow: /
 
+User-agent: GoogleAdSenseInfeed
+Disallow:
+Allow: /
+
 User-agent: Google-AdSense-Infeed
+Disallow:
+Allow: /
+
+User-agent: GoogleAdSense
+Disallow:
+Allow: /
+
+User-agent: Google-AdSense
 Disallow:
 Allow: /
 
