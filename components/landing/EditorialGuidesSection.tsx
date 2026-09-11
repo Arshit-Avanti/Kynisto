@@ -1,42 +1,68 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, ArrowRight } from "lucide-react";
+import { BookOpen, ArrowRight, Clock, ShieldCheck, Sparkles } from "lucide-react";
+import { getAllArticles } from "@/lib/articles-data";
 
 export function EditorialGuidesSection() {
-  return (
-    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 my-6 sm:my-8 font-sans">
-      <Link
-        href="/blog"
-        className="block p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white/[0.07] hover:bg-white/[0.11] border border-white/15 hover:border-orange-500/40 backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden group"
-      >
-        {/* Subtle Glass Glow Highlight */}
-        <div className="pointer-events-none absolute -top-24 -left-24 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl group-hover:bg-orange-500/20 transition-all duration-500" />
+  const articles = getAllArticles().slice(0, 4);
 
-        <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6 text-left">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/10 transition-transform duration-300 group-hover:scale-110">
-              <BookOpen className="w-6 h-6" />
-            </div>
+  return (
+    <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 my-10 font-sans" aria-label="Locality Guides & Articles">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold uppercase tracking-wider mb-2">
+            <BookOpen className="w-3.5 h-3.5 text-orange-400" />
+            <span>Kynisto Knowledge Hub</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-sm">
+            Locality Guides &amp; Health Insights
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-200 mt-1 max-w-xl">
+            In-depth guides on outpatient virtual queues, neighborhood clinics, and local commerce.
+          </p>
+        </div>
+        <Link
+          href="/blog"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-orange-400 hover:text-orange-300 transition-colors shrink-0 group self-start sm:self-auto"
+        >
+          <span>View all 16 guides</span>
+          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {articles.map((article) => (
+          <Link
+            key={article.slug}
+            href={`/blog/${article.slug}`}
+            className="p-5 rounded-2xl bg-white/[0.08] hover:bg-white/[0.13] border border-white/15 hover:border-orange-500/40 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col justify-between group"
+          >
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-white mb-1 drop-shadow-sm group-hover:text-orange-300 transition-colors">
-                Kynisto Knowledge Hub &amp; Guides
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <span className="px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                  {article.category}
+                </span>
+                <span className="flex items-center gap-1 text-[11px] text-slate-300 font-medium">
+                  <Clock className="w-3 h-3 text-slate-400" />
+                  {article.readTime}
+                </span>
+              </div>
+              <h3 className="font-bold text-white text-sm sm:text-base leading-snug group-hover:text-orange-300 transition-colors line-clamp-2 mb-2">
+                {article.title}
               </h3>
-              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
-                Explore 16 in-depth guides on healthcare queues, local commerce, and urban living.
+              <p className="text-xs text-slate-300 line-clamp-3 leading-relaxed">
+                {article.summary}
               </p>
             </div>
-          </div>
-
-          <span
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 group-hover:from-orange-600 group-hover:to-amber-600 text-white font-bold text-xs sm:text-sm transition-all shadow-lg shadow-orange-500/25 shrink-0 group-hover:scale-105 active:scale-95 whitespace-nowrap"
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>Blog</span>
-            <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-          </span>
-        </div>
-      </Link>
-    </div>
+            <div className="pt-4 mt-4 border-t border-white/10 flex items-center justify-between text-xs text-orange-400 font-semibold group-hover:text-orange-300">
+              <span>Read Guide</span>
+              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
+

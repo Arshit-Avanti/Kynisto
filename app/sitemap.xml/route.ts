@@ -13,7 +13,7 @@ export async function GET() {
   const today = new Date().toISOString().split("T")[0] + "T00:00:00.000Z";
   
   const stores = await getD1()
-    .prepare("SELECT slug, updated_at AS updatedAt FROM stores WHERE status IN ('approved', 'active') ORDER BY updated_at DESC")
+    .prepare("SELECT slug, updated_at AS updatedAt FROM stores WHERE status IN ('approved', 'active') AND slug NOT LIKE 'test-%' ORDER BY updated_at DESC")
     .all<{ slug: string; updatedAt: number }>();
     
   const articles = getAllArticles();
@@ -21,7 +21,6 @@ export async function GET() {
   const coreRoutes = [
     { path: "/", priority: "1.0", changefreq: "daily" },
     { path: "/healthcare", priority: "0.9", changefreq: "daily" },
-    { path: "/search", priority: "0.9", changefreq: "daily" },
     { path: "/products", priority: "0.9", changefreq: "daily" },
     { path: "/services", priority: "0.8", changefreq: "daily" },
     { path: "/blog", priority: "0.9", changefreq: "daily" },

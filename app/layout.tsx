@@ -101,6 +101,12 @@ export default function RootLayout({
         />
         <link rel="preconnect" href="https://kynisto.in" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://kynisto.in" />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="Kynisto Knowledge Hub &amp; Locality Guides"
+          href="https://kynisto.in/feed.xml"
+        />
       </head>
       <body>
         <script

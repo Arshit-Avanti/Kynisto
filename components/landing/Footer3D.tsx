@@ -121,6 +121,21 @@ export function Footer3D() {
                 </Link>
               </li>
               <li>
+                <Link href="/blog/neighborhood-pharmacies-digital-prescriptions" className="hover:text-orange-300 transition-colors">
+                  Digital Prescriptions Guide
+                </Link>
+              </li>
+              <li>
+                <Link href="/blog/choosing-family-physician-clinic-guide" className="hover:text-orange-300 transition-colors">
+                  Family Physician Guide
+                </Link>
+              </li>
+              <li>
+                <Link href="/blog/preventive-dental-care-family-clinic-guide" className="hover:text-orange-300 transition-colors">
+                  Preventive Dental Care
+                </Link>
+              </li>
+              <li>
                 <Link href="/guide" className="hover:text-orange-300 transition-colors">
                   User &amp; Merchant Manual
                 </Link>
