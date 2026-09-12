@@ -64,6 +64,7 @@ export default async function StoreProfilePage({ params }: RouteProps) {
 
   return (
     <>
+      {/* productOfferCard preload="none" loading="lazy" */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}

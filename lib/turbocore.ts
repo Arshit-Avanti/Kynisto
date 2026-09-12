@@ -127,15 +127,24 @@ class TurboCoreEngine {
 
   public updateStores(newStores: TurboStore[]): void {
     const existing = new Map<string | number, TurboStore>();
+    let hasChanges = false;
     for (const s of this.stores) {
       const key = s.id ?? s.slug;
       if (key !== undefined) existing.set(key, s);
     }
     for (const s of newStores) {
       const key = s.id ?? s.slug;
-      if (key !== undefined) existing.set(key, s);
+      if (key !== undefined) {
+        const prev = existing.get(key);
+        if (!prev || prev.open !== s.open || prev.rating !== s.rating || prev.distance !== s.distance) {
+          hasChanges = true;
+        }
+        existing.set(key, s);
+      }
     }
-    this.setStores(Array.from(existing.values()));
+    if (hasChanges || existing.size !== this.stores.length) {
+      this.setStores(Array.from(existing.values()));
+    }
   }
 
   public setCategories(categories: TurboCategory[]): void {

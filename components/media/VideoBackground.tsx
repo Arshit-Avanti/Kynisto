@@ -161,7 +161,7 @@ export function VideoBackground({
         muted
         playsInline
         poster={isMobile ? "/images/hero-flow-poster-mobile.webp" : "/images/hero-flow-poster.webp"}
-        preload="auto"
+        preload={isMobile ? "none" : "metadata"}
         {...({
           "webkit-playsinline": "true",
           "x5-playsinline": "true",

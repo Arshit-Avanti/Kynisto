@@ -2362,6 +2362,10 @@ footer > p { color: var(--muted); font-size: 11px; }
    PERFORMANCE & CONTAINER RENDERING OPTIMIZATIONS (60FPS/120FPS LOCKED)
    ========================================================================== */
 
+.trustStrip,
+.categorySection,
+.editorialGuides,
+.editorialFaq,
 .storeGrid > article,
 .providerGrid > article,
 .workspaceList article,
