@@ -92,6 +92,10 @@ export default function RootLayout({
           }}
         />
 
+        {/* Unsplash Image CDN preconnect for high-speed image loading */}
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+
         {/* Non-blocking web fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
