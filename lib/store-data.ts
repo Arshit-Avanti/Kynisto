@@ -310,18 +310,31 @@ export async function listStores(options: {
       if (parsed.maxPrice !== undefined) serviceBindings.push(parsed.maxPrice);
       else if (parsed.minPrice !== undefined) serviceBindings.push(parsed.minPrice);
 
-      const [productRows, serviceRows] = await Promise.all([
-        productQueryParts.length > 0
-          ? db.prepare(`SELECT DISTINCT store_id FROM products p WHERE p.status = 'active' AND (${productQueryParts.join(" OR ")}) ${priceProductCondition} LIMIT 100`).bind(...productBindings).all<{ store_id: string }>().catch(() => ({ results: [] }))
-          : Promise.resolve({ results: [] }),
-        serviceQueryParts.length > 0
-          ? db.prepare(`SELECT DISTINCT store_id FROM services sv WHERE sv.status = 'active' AND (${serviceQueryParts.join(" OR ")}) ${priceServiceCondition} LIMIT 100`).bind(...serviceBindings).all<{ store_id: string }>().catch(() => ({ results: [] }))
-          : Promise.resolve({ results: [] }),
-      ]);
+      const batchStmts: any[] = [];
+      let pIdx = -1;
+      let sIdx = -1;
 
-      const pIds = (productRows.results ?? []).map((r) => r.store_id);
-      const sIds = (serviceRows.results ?? []).map((r) => r.store_id);
-      matchedCatalogStoreIds = Array.from(new Set([...pIds, ...sIds]));
+      if (productQueryParts.length > 0) {
+        pIdx = batchStmts.length;
+        batchStmts.push(
+          db.prepare(`SELECT DISTINCT store_id FROM products p WHERE p.status = 'active' AND (${productQueryParts.join(" OR ")}) ${priceProductCondition} LIMIT 100`).bind(...productBindings)
+        );
+      }
+      if (serviceQueryParts.length > 0) {
+        sIdx = batchStmts.length;
+        batchStmts.push(
+          db.prepare(`SELECT DISTINCT store_id FROM services sv WHERE sv.status = 'active' AND (${serviceQueryParts.join(" OR ")}) ${priceServiceCondition} LIMIT 100`).bind(...serviceBindings)
+        );
+      }
+
+      if (batchStmts.length > 0) {
+        const batchRes = await db.batch<any>(batchStmts);
+        const pRows = pIdx >= 0 ? (batchRes[pIdx]?.results ?? []) : [];
+        const sRows = sIdx >= 0 ? (batchRes[sIdx]?.results ?? []) : [];
+        const pIds = pRows.map((r: any) => r.store_id);
+        const sIds = sRows.map((r: any) => r.store_id);
+        matchedCatalogStoreIds = Array.from(new Set([...pIds, ...sIds]));
+      }
     } catch {
       // Ignore catalog search error
     }
